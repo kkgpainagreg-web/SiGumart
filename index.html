@@ -13,7 +13,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     
-    <!-- Custom Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
@@ -29,21 +28,17 @@
     </script>
     
     <style>
-        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
         
-        /* Tab transition */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        /* Sidebar transition */
         .sidebar { transition: transform 0.3s ease-in-out; }
         .sidebar.collapsed { transform: translateX(-100%); }
 
-        /* Animation classes */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -54,128 +49,18 @@
             to { opacity: 0; }
         }
 
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        .animate-fade-out { animation: fadeOut 0.3s ease-out; }
 
-        .animate-fade-out {
-            animation: fadeOut 0.3s ease-out;
-        }
-
-        /* Print Styles */
         @media print {
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            body {
-                font-family: 'Times New Roman', Times, serif;
-                font-size: 12pt;
-                line-height: 1.5;
-                color: #000;
-                background: #fff;
-            }
-
-            @page {
-                size: A4;
-                margin: 2cm 2.5cm;
-            }
-
-            .no-print,
-            nav,
-            .sidebar,
-            button:not(.print-show),
-            .tabs-navigation,
-            #loading-overlay,
-            .notification {
-                display: none !important;
-            }
-
-            .print-only {
-                display: block !important;
-            }
-
-            .doc-header {
-                text-align: center;
-                border-bottom: 3px double #000;
-                padding-bottom: 15px;
-                margin-bottom: 20px;
-            }
-
-            .doc-header h1 {
-                font-size: 14pt;
-                font-weight: bold;
-                margin: 5px 0;
-            }
-
-            .doc-title {
-                text-align: center;
-                font-size: 14pt;
-                font-weight: bold;
-                text-decoration: underline;
-                margin: 20px 0;
-            }
-
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 15px 0;
-                page-break-inside: avoid;
-            }
-
-            th, td {
-                border: 1px solid #000;
-                padding: 8px;
-                text-align: left;
-                font-size: 11pt;
-            }
-
-            th {
-                background-color: #f0f0f0 !important;
-                font-weight: bold;
-            }
-
-            .info-box {
-                display: grid;
-                grid-template-columns: 150px auto;
-                gap: 5px;
-                margin: 15px 0;
-            }
-
-            .info-box dt::after {
-                content: ':';
-                float: right;
-                margin-right: 10px;
-            }
-
-            .page-break {
-                page-break-before: always;
-            }
-
-            .signature-area {
-                margin-top: 50px;
-                page-break-inside: avoid;
-            }
-
-            .signature-box {
-                display: inline-block;
-                width: 45%;
-                text-align: center;
-                vertical-align: top;
-            }
-
-            .signature-box.right {
-                float: right;
-            }
-
-            .signature-line {
-                margin-top: 60px;
-                border-bottom: 1px solid #000;
-                width: 200px;
-                margin-left: auto;
-                margin-right: auto;
-            }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { font-family: 'Times New Roman', serif; font-size: 12pt; }
+            @page { size: A4; margin: 2cm; }
+            .no-print, nav, .sidebar, button:not(.print-show), #loading-overlay { display: none !important; }
+            .print-only { display: block !important; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #000; padding: 8px; }
+            th { background-color: #f0f0f0 !important; font-weight: bold; }
         }
     </style>
 </head>
@@ -191,12 +76,11 @@
         </div>
     </div>
 
-    <!-- Auth Container (Login/Register) -->
+    <!-- Auth Container -->
     <div id="auth-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700">
-        <!-- Will be populated by Auth module -->
     </div>
 
-    <!-- Main App Container (Hidden until logged in) -->
+    <!-- Main App Container -->
     <div id="app-container" class="hidden">
         <!-- Sidebar -->
         <aside id="sidebar" class="sidebar fixed left-0 top-0 h-full w-64 bg-gray-800 text-white z-40 overflow-y-auto">
@@ -208,56 +92,16 @@
             
             <nav class="p-4">
                 <ul class="space-y-2">
-                    <li>
-                        <button data-tab="dashboard" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
-                            <span class="mr-3">📊</span> Dashboard
-                        </button>
-                    </li>
-                    <li>
-                        <button data-tab="master-data" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
-                            <span class="mr-3">📝</span> Master Data & CP
-                        </button>
-                    </li>
-                    <li>
-                        <button data-tab="atp" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
-                            <span class="mr-3">🎯</span> ATP
-                        </button>
-                    </li>
-                    <li>
-                        <button data-tab="kktp" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
-                            <span class="mr-3">✅</span> KKTP
-                        </button>
-                    </li>
-                    <li>
-                        <button data-tab="calendar" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
-                            <span class="mr-3">📅</span> Kalender Pendidikan
-                        </button>
-                    </li>
-                    <li>
-                        <button data-tab="schedule" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
-                            <span class="mr-3">🕐</span> Jadwal Pelajaran
-                        </button>
-                    </li>
-                    <li>
-                        <button data-tab="prota" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
-                            <span class="mr-3">📋</span> Program Tahunan
-                        </button>
-                    </li>
-                    <li>
-                        <button data-tab="promes" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
-                            <span class="mr-3">📆</span> Program Semester
-                        </button>
-                    </li>
-                    <li>
-                        <button data-tab="modul" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
-                            <span class="mr-3">📚</span> Modul Ajar
-                        </button>
-                    </li>
-                    <li>
-                        <button data-tab="bank-soal" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
-                            <span class="mr-3">❓</span> Bank Soal
-                        </button>
-                    </li>
+                    <li><button data-tab="dashboard" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition"><span class="mr-3">📊</span> Dashboard</button></li>
+                    <li><button data-tab="master-data" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition"><span class="mr-3">📝</span> Master Data & CP</button></li>
+                    <li><button data-tab="atp" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition"><span class="mr-3">🎯</span> ATP</button></li>
+                    <li><button data-tab="kktp" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition"><span class="mr-3">✅</span> KKTP</button></li>
+                    <li><button data-tab="calendar" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition"><span class="mr-3">📅</span> Kalender Pendidikan</button></li>
+                    <li><button data-tab="schedule" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition"><span class="mr-3">🕐</span> Jadwal Pelajaran</button></li>
+                    <li><button data-tab="prota" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition"><span class="mr-3">📋</span> Program Tahunan</button></li>
+                    <li><button data-tab="promes" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition"><span class="mr-3">📆</span> Program Semester</button></li>
+                    <li><button data-tab="modul" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition"><span class="mr-3">📚</span> Modul Ajar</button></li>
+                    <li><button data-tab="bank-soal" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition"><span class="mr-3">❓</span> Bank Soal</button></li>
                 </ul>
             </nav>
 
@@ -270,7 +114,6 @@
 
         <!-- Main Content -->
         <main class="ml-64 min-h-screen">
-            <!-- Top Bar -->
             <header class="bg-white shadow-sm sticky top-0 z-30">
                 <div class="flex items-center justify-between px-6 py-4">
                     <div class="flex items-center">
@@ -290,16 +133,13 @@
                 </div>
             </header>
 
-            <!-- Tab Contents -->
             <div class="p-6">
                 <!-- Dashboard Tab -->
                 <div id="tab-dashboard" class="tab-content active">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         <div class="bg-white rounded-xl shadow p-6">
                             <div class="flex items-center">
-                                <div class="p-3 bg-blue-100 rounded-lg">
-                                    <span class="text-2xl">📝</span>
-                                </div>
+                                <div class="p-3 bg-blue-100 rounded-lg"><span class="text-2xl">📝</span></div>
                                 <div class="ml-4">
                                     <p class="text-gray-500 text-sm">Capaian Pembelajaran</p>
                                     <p id="stat-cp" class="text-2xl font-bold text-gray-800">0</p>
@@ -308,9 +148,7 @@
                         </div>
                         <div class="bg-white rounded-xl shadow p-6">
                             <div class="flex items-center">
-                                <div class="p-3 bg-green-100 rounded-lg">
-                                    <span class="text-2xl">🎯</span>
-                                </div>
+                                <div class="p-3 bg-green-100 rounded-lg"><span class="text-2xl">🎯</span></div>
                                 <div class="ml-4">
                                     <p class="text-gray-500 text-sm">ATP</p>
                                     <p id="stat-atp" class="text-2xl font-bold text-gray-800">0</p>
@@ -319,9 +157,7 @@
                         </div>
                         <div class="bg-white rounded-xl shadow p-6">
                             <div class="flex items-center">
-                                <div class="p-3 bg-yellow-100 rounded-lg">
-                                    <span class="text-2xl">📚</span>
-                                </div>
+                                <div class="p-3 bg-yellow-100 rounded-lg"><span class="text-2xl">📚</span></div>
                                 <div class="ml-4">
                                     <p class="text-gray-500 text-sm">Modul Ajar</p>
                                     <p id="stat-modul" class="text-2xl font-bold text-gray-800">0</p>
@@ -330,9 +166,7 @@
                         </div>
                         <div class="bg-white rounded-xl shadow p-6">
                             <div class="flex items-center">
-                                <div class="p-3 bg-purple-100 rounded-lg">
-                                    <span class="text-2xl">❓</span>
-                                </div>
+                                <div class="p-3 bg-purple-100 rounded-lg"><span class="text-2xl">❓</span></div>
                                 <div class="ml-4">
                                     <p class="text-gray-500 text-sm">Bank Soal</p>
                                     <p id="stat-soal" class="text-2xl font-bold text-gray-800">0</p>
@@ -341,7 +175,6 @@
                         </div>
                     </div>
 
-                    <!-- Quick Actions -->
                     <div class="bg-white rounded-xl shadow p-6 mb-8">
                         <h3 class="text-lg font-semibold mb-4">Aksi Cepat</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -364,58 +197,80 @@
                         </div>
                     </div>
 
-                    <!-- 8 Dimensi Profil Lulusan -->
                     <div class="bg-white rounded-xl shadow p-6">
                         <h3 class="text-lg font-semibold mb-4">8 Dimensi Profil Lulusan</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="profil-lulusan-grid">
-                            <!-- Will be populated by JS -->
-                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="profil-lulusan-grid"></div>
                     </div>
                 </div>
 
-                <!-- Master Data Tab -->
                 <div id="tab-master-data" class="tab-content"></div>
-
-                <!-- ATP Tab -->
                 <div id="tab-atp" class="tab-content"></div>
-
-                <!-- KKTP Tab -->
                 <div id="tab-kktp" class="tab-content"></div>
-
-                <!-- Calendar Tab -->
                 <div id="tab-calendar" class="tab-content"></div>
-
-                <!-- Schedule Tab -->
                 <div id="tab-schedule" class="tab-content"></div>
-
-                <!-- Prota Tab -->
                 <div id="tab-prota" class="tab-content"></div>
-
-                <!-- Promes Tab -->
                 <div id="tab-promes" class="tab-content"></div>
-
-                <!-- Modul Tab -->
                 <div id="tab-modul" class="tab-content"></div>
-
-                <!-- Bank Soal Tab -->
                 <div id="tab-bank-soal" class="tab-content"></div>
             </div>
         </main>
     </div>
 
-    <!-- ALL JAVASCRIPT IN ONE PLACE -->
+    <!-- Complete Profile Modal -->
+    <div id="complete-profile-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">📋 Lengkapi Profil Anda</h3>
+            <p class="text-gray-500 text-sm mb-4">Data profil Anda belum lengkap. Silakan lengkapi data berikut:</p>
+            
+            <form id="complete-profile-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
+                    <input type="text" id="profile-nama" required
+                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary"
+                        placeholder="Nama lengkap dengan gelar">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">NPSN Sekolah *</label>
+                    <input type="text" id="profile-npsn" required maxlength="8" pattern="[0-9]{8}"
+                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary"
+                        placeholder="8 digit NPSN">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jenjang *</label>
+                    <select id="profile-jenjang" required
+                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary">
+                        <option value="">Pilih Jenjang</option>
+                        <option value="SD">SD</option>
+                        <option value="SMP">SMP</option>
+                        <option value="SMA">SMA</option>
+                        <option value="SMK">SMK</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Sekolah *</label>
+                    <input type="text" id="profile-sekolah" required
+                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary"
+                        placeholder="Nama lengkap sekolah">
+                </div>
+                <button type="submit" 
+                    class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+                    💾 Simpan & Lanjutkan
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
 // =====================================================
 // FIREBASE CONFIG
 // =====================================================
 const firebaseConfig = {
-  apiKey: "AIzaSyCyRKvngA1EqlQmgxgxU4465qgRw8TdT08",
-  authDomain: "si-gumart.firebaseapp.com",
-  projectId: "si-gumart",
-  storageBucket: "si-gumart.firebasestorage.app",
-  messagingSenderId: "544375918988",
-  appId: "1:544375918988:web:3375b3025b7d51ea2546a9",
-  measurementId: "G-40ZGJFEWD1"
+    apiKey: "AIzaSyCyRKvngA1EqlQmgxgxU4465qgRw8TdT08",
+    authDomain: "sigumart-c977e.firebaseapp.com",
+    projectId: "sigumart-c977e",
+    storageBucket: "sigumart-c977e.firebasestorage.app",
+    messagingSenderId: "191aborongan492389029",
+    appId: "1:191492389029:web:cc7b6f9f2e4a8e8f8b8b8b"
 };
 
 // Initialize Firebase
@@ -427,7 +282,6 @@ const auth = firebase.auth();
 const COLLECTIONS = {
     USERS: 'users',
     SCHOOLS: 'schools',
-    MASTER_DATA: 'master_data',
     SUBJECTS: 'subjects',
     CP_DATA: 'cp_data',
     ATP: 'atp',
@@ -461,52 +315,18 @@ const JENJANG = {
     SMK: { nama: 'SMK', kelas: [10, 11, 12] }
 };
 
-// Template Mata Pelajaran dengan Elemen CP
+// Template Mata Pelajaran
 const SUBJECT_TEMPLATES = {
-    'PAI': {
-        nama: 'Pendidikan Agama Islam dan Budi Pekerti',
-        elemen: ['Al-Quran dan Hadis', 'Aqidah', 'Akhlak', 'Fikih', 'Sejarah Peradaban Islam']
-    },
-    'PKN': {
-        nama: 'Pendidikan Pancasila dan Kewarganegaraan',
-        elemen: ['Pancasila', 'UUD 1945', 'NKRI', 'Bhinneka Tunggal Ika']
-    },
-    'INDONESIA': {
-        nama: 'Bahasa Indonesia',
-        elemen: ['Menyimak', 'Membaca', 'Memirsa', 'Berbicara', 'Menulis']
-    },
-    'MATEMATIKA': {
-        nama: 'Matematika',
-        elemen: ['Bilangan', 'Aljabar', 'Geometri', 'Pengukuran', 'Analisis Data']
-    },
-    'IPA': {
-        nama: 'Ilmu Pengetahuan Alam',
-        elemen: ['Makhluk Hidup', 'Zat dan Perubahannya', 'Energi', 'Bumi dan Antariksa']
-    },
-    'IPS': {
-        nama: 'Ilmu Pengetahuan Sosial',
-        elemen: ['Geografi', 'Ekonomi', 'Sosiologi', 'Sejarah']
-    },
-    'INGGRIS': {
-        nama: 'Bahasa Inggris',
-        elemen: ['Listening', 'Speaking', 'Reading', 'Writing']
-    },
-    'SENI': {
-        nama: 'Seni Budaya',
-        elemen: ['Seni Rupa', 'Seni Musik', 'Seni Tari', 'Seni Teater']
-    },
-    'PJOK': {
-        nama: 'Pendidikan Jasmani, Olahraga dan Kesehatan',
-        elemen: ['Gerak Dasar', 'Aktivitas Fisik', 'Kesehatan', 'Kebugaran']
-    },
-    'PRAKARYA': {
-        nama: 'Prakarya dan Kewirausahaan',
-        elemen: ['Kerajinan', 'Rekayasa', 'Budidaya', 'Pengolahan']
-    },
-    'INFORMATIKA': {
-        nama: 'Informatika',
-        elemen: ['Berpikir Komputasional', 'Teknologi Informasi', 'Praktik Lintas Bidang', 'Dampak Sosial Informatika']
-    }
+    'PAI': { nama: 'Pendidikan Agama Islam dan Budi Pekerti', elemen: ['Al-Quran dan Hadis', 'Aqidah', 'Akhlak', 'Fikih', 'Sejarah Peradaban Islam'] },
+    'PKN': { nama: 'Pendidikan Pancasila dan Kewarganegaraan', elemen: ['Pancasila', 'UUD 1945', 'NKRI', 'Bhinneka Tunggal Ika'] },
+    'INDONESIA': { nama: 'Bahasa Indonesia', elemen: ['Menyimak', 'Membaca', 'Memirsa', 'Berbicara', 'Menulis'] },
+    'MATEMATIKA': { nama: 'Matematika', elemen: ['Bilangan', 'Aljabar', 'Geometri', 'Pengukuran', 'Analisis Data'] },
+    'IPA': { nama: 'Ilmu Pengetahuan Alam', elemen: ['Makhluk Hidup', 'Zat dan Perubahannya', 'Energi', 'Bumi dan Antariksa'] },
+    'IPS': { nama: 'Ilmu Pengetahuan Sosial', elemen: ['Geografi', 'Ekonomi', 'Sosiologi', 'Sejarah'] },
+    'INGGRIS': { nama: 'Bahasa Inggris', elemen: ['Listening', 'Speaking', 'Reading', 'Writing'] },
+    'SENI': { nama: 'Seni Budaya', elemen: ['Seni Rupa', 'Seni Musik', 'Seni Tari', 'Seni Teater'] },
+    'PJOK': { nama: 'Pendidikan Jasmani', elemen: ['Gerak Dasar', 'Aktivitas Fisik', 'Kesehatan', 'Kebugaran'] },
+    'INFORMATIKA': { nama: 'Informatika', elemen: ['Berpikir Komputasional', 'Teknologi Informasi', 'Praktik Lintas Bidang'] }
 };
 
 console.log('Firebase Config Loaded');
@@ -515,32 +335,15 @@ console.log('Firebase Config Loaded');
 // UTILITY FUNCTIONS
 // =====================================================
 const Utils = {
-    generateId: () => {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    },
-
-    formatDate: (date) => {
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        return new Date(date).toLocaleDateString('id-ID', options);
-    },
-
-    formatDateShort: (date) => {
-        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-        return new Date(date).toLocaleDateString('id-ID', options);
-    },
-
-    getDayName: (dayIndex) => {
-        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        return days[dayIndex];
-    },
-
-    getMonthName: (monthIndex) => {
-        const months = [
-            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-        ];
-        return months[monthIndex];
-    },
+    generateId: () => Date.now().toString(36) + Math.random().toString(36).substr(2),
+    
+    formatDate: (date) => new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+    
+    formatDateShort: (date) => new Date(date).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+    
+    getDayName: (dayIndex) => ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][dayIndex],
+    
+    getMonthName: (monthIndex) => ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][monthIndex],
 
     showLoading: (message = 'Memuat...') => {
         const loadingEl = document.getElementById('loading-overlay');
@@ -552,21 +355,15 @@ const Utils = {
 
     hideLoading: () => {
         const loadingEl = document.getElementById('loading-overlay');
-        if (loadingEl) {
-            loadingEl.classList.add('hidden');
-        }
+        if (loadingEl) loadingEl.classList.add('hidden');
     },
 
     showNotification: (message, type = 'success') => {
+        const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
         const notification = document.createElement('div');
-        const bgColor = type === 'success' ? 'bg-green-500' : 
-                       type === 'error' ? 'bg-red-500' : 
-                       type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
-        
         notification.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in`;
         notification.textContent = message;
         document.body.appendChild(notification);
-
         setTimeout(() => {
             notification.classList.add('animate-fade-out');
             setTimeout(() => notification.remove(), 300);
@@ -587,106 +384,45 @@ const Utils = {
                 </div>
             `;
             document.body.appendChild(modal);
-
-            modal.querySelector('.btn-cancel').onclick = () => {
-                modal.remove();
-                resolve(false);
-            };
-            modal.querySelector('.btn-confirm').onclick = () => {
-                modal.remove();
-                resolve(true);
-            };
+            modal.querySelector('.btn-cancel').onclick = () => { modal.remove(); resolve(false); };
+            modal.querySelector('.btn-confirm').onclick = () => { modal.remove(); resolve(true); };
         });
     },
 
-    validateNPSN: (npsn) => {
-        return /^\d{8}$/.test(npsn);
-    },
-
+    validateNPSN: (npsn) => /^\d{8}$/.test(npsn),
+    
     getTahunAjaran: () => {
         const now = new Date();
         const year = now.getFullYear();
-        const month = now.getMonth();
-        if (month >= 6) {
-            return `${year}/${year + 1}`;
-        }
-        return `${year - 1}/${year}`;
+        return now.getMonth() >= 6 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
     },
-
-    getSemester: () => {
-        const month = new Date().getMonth();
-        return month >= 6 ? 1 : 2;
-    },
-
-    timeToMinutes: (time) => {
-        const [hours, minutes] = time.split(':').map(Number);
-        return hours * 60 + minutes;
-    },
-
-    isTimeOverlap: (start1, end1, start2, end2) => {
-        const s1 = Utils.timeToMinutes(start1);
-        const e1 = Utils.timeToMinutes(end1);
-        const s2 = Utils.timeToMinutes(start2);
-        const e2 = Utils.timeToMinutes(end2);
-        return s1 < e2 && s2 < e1;
-    },
-
-    debounce: (func, wait) => {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    },
+    
+    getSemester: () => new Date().getMonth() >= 6 ? 1 : 2,
 
     printDocument: (elementId, title) => {
         const element = document.getElementById(elementId);
         if (!element) return;
-
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>${title}</title>
-                <style>
-                    @page { size: A4; margin: 2cm; }
-                    body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; }
-                    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-                    th, td { border: 1px solid #000; padding: 8px; text-align: left; }
-                    th { background-color: #f0f0f0; font-weight: bold; }
-                    .doc-header { text-align: center; border-bottom: 3px double #000; padding-bottom: 15px; margin-bottom: 20px; }
-                    .doc-header h1 { font-size: 14pt; font-weight: bold; margin: 5px 0; }
-                    .doc-title { text-align: center; font-size: 14pt; font-weight: bold; text-decoration: underline; margin: 20px 0; }
-                    .info-box { display: grid; grid-template-columns: 150px auto; gap: 5px; margin: 15px 0; }
-                    .info-box dt::after { content: ':'; float: right; margin-right: 10px; }
-                    .signature-area { margin-top: 50px; }
-                    .signature-box { display: inline-block; width: 45%; text-align: center; vertical-align: top; }
-                    .signature-box.right { float: right; }
-                    .signature-line { margin-top: 60px; border-bottom: 1px solid #000; width: 200px; margin-left: auto; margin-right: auto; }
-                    .page-break { page-break-before: always; }
-                </style>
-            </head>
-            <body>
-                ${element.innerHTML}
-            </body>
-            </html>
+            <!DOCTYPE html><html><head><title>${title}</title>
+            <style>
+                @page { size: A4; margin: 2cm; }
+                body { font-family: 'Times New Roman', serif; font-size: 12pt; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #000; padding: 8px; }
+                th { background: #f0f0f0; }
+            </style>
+            </head><body>${element.innerHTML}</body></html>
         `);
         printWindow.document.close();
-        printWindow.onload = () => {
-            printWindow.print();
-        };
+        printWindow.onload = () => printWindow.print();
     }
 };
 
 console.log('Utils Loaded');
 
 // =====================================================
-// AUTHENTICATION MODULE
+// AUTHENTICATION MODULE - FIXED VERSION
 // =====================================================
 const Auth = {
     currentUser: null,
@@ -695,6 +431,7 @@ const Auth = {
     init: () => {
         Auth.renderAuthForm();
         Auth.setupAuthListener();
+        Auth.setupCompleteProfileForm();
     },
 
     renderAuthForm: () => {
@@ -702,12 +439,8 @@ const Auth = {
         container.innerHTML = `
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
                 <div class="flex border-b">
-                    <button id="login-tab" class="flex-1 py-4 text-center font-semibold text-primary border-b-2 border-primary">
-                        Masuk
-                    </button>
-                    <button id="register-tab" class="flex-1 py-4 text-center font-semibold text-gray-500 hover:text-primary">
-                        Daftar
-                    </button>
+                    <button id="login-tab" class="flex-1 py-4 text-center font-semibold text-primary border-b-2 border-primary">Masuk</button>
+                    <button id="register-tab" class="flex-1 py-4 text-center font-semibold text-gray-500 hover:text-primary">Daftar</button>
                 </div>
 
                 <div id="login-form" class="p-8">
@@ -746,19 +479,18 @@ const Auth = {
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
                             <input type="text" id="reg-nama" required
-                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                class="w-full px-4 py-3 border rounded-lg"
                                 placeholder="Nama lengkap dengan gelar">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">NPSN Sekolah</label>
-                            <input type="text" id="reg-npsn" required maxlength="8" pattern="[0-9]{8}"
-                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            <input type="text" id="reg-npsn" required maxlength="8"
+                                class="w-full px-4 py-3 border rounded-lg"
                                 placeholder="8 digit NPSN">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Jenjang</label>
-                            <select id="reg-jenjang" required
-                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <select id="reg-jenjang" required class="w-full px-4 py-3 border rounded-lg">
                                 <option value="">Pilih Jenjang</option>
                                 <option value="SD">SD</option>
                                 <option value="SMP">SMP</option>
@@ -769,19 +501,19 @@ const Auth = {
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Sekolah</label>
                             <input type="text" id="reg-sekolah" required
-                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                class="w-full px-4 py-3 border rounded-lg"
                                 placeholder="Nama lengkap sekolah">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                             <input type="email" id="reg-email" required
-                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                class="w-full px-4 py-3 border rounded-lg"
                                 placeholder="email@sekolah.sch.id">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                             <input type="password" id="reg-password" required minlength="6"
-                                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                class="w-full px-4 py-3 border rounded-lg"
                                 placeholder="Minimal 6 karakter">
                         </div>
                         <button type="submit" 
@@ -812,9 +544,12 @@ const Auth = {
             document.getElementById('login-tab').classList.add('text-gray-500');
         });
 
-        // Form submissions
         document.getElementById('login-form-submit').addEventListener('submit', Auth.handleLogin);
         document.getElementById('register-form-submit').addEventListener('submit', Auth.handleRegister);
+    },
+
+    setupCompleteProfileForm: () => {
+        document.getElementById('complete-profile-form').addEventListener('submit', Auth.handleCompleteProfile);
     },
 
     handleLogin: async (e) => {
@@ -829,7 +564,15 @@ const Auth = {
             Utils.showNotification('Login berhasil!', 'success');
         } catch (error) {
             console.error('Login error:', error);
-            Utils.showNotification('Login gagal: ' + error.message, 'error');
+            let errorMessage = 'Login gagal. ';
+            switch (error.code) {
+                case 'auth/user-not-found': errorMessage += 'Email tidak terdaftar.'; break;
+                case 'auth/wrong-password': errorMessage += 'Password salah.'; break;
+                case 'auth/invalid-email': errorMessage += 'Format email tidak valid.'; break;
+                case 'auth/too-many-requests': errorMessage += 'Terlalu banyak percobaan. Coba lagi nanti.'; break;
+                default: errorMessage += error.message;
+            }
+            Utils.showNotification(errorMessage, 'error');
         } finally {
             Utils.hideLoading();
         }
@@ -856,19 +599,19 @@ const Auth = {
             const userCredential = await auth.createUserWithEmailAndPassword(email, password);
             const user = userCredential.user;
 
+            // Create school document
             const schoolRef = db.collection(COLLECTIONS.SCHOOLS).doc(npsn);
             const schoolDoc = await schoolRef.get();
-
             if (!schoolDoc.exists) {
                 await schoolRef.set({
                     npsn: npsn,
                     nama: sekolah,
                     jenjang: jenjang,
-                    alamat: '',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             }
 
+            // Create user document
             await db.collection(COLLECTIONS.USERS).doc(user.uid).set({
                 uid: user.uid,
                 email: email,
@@ -877,15 +620,85 @@ const Auth = {
                 jenjang: jenjang,
                 namaSekolah: sekolah,
                 role: 'guru',
-                mapel: [],
-                rombel: [],
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            Utils.showNotification('Pendaftaran berhasil!', 'success');
+            Utils.showNotification('Pendaftaran berhasil! Selamat datang ' + nama, 'success');
         } catch (error) {
             console.error('Register error:', error);
-            Utils.showNotification('Pendaftaran gagal: ' + error.message, 'error');
+            let errorMessage = 'Pendaftaran gagal. ';
+            switch (error.code) {
+                case 'auth/email-already-in-use': 
+                    errorMessage = '⚠️ Email sudah terdaftar! Silakan LOGIN dengan email ini.'; 
+                    break;
+                case 'auth/weak-password': errorMessage += 'Password terlalu lemah.'; break;
+                default: errorMessage += error.message;
+            }
+            Utils.showNotification(errorMessage, 'error');
+        } finally {
+            Utils.hideLoading();
+        }
+    },
+
+    // Handle completing profile for users without Firestore data
+    handleCompleteProfile: async (e) => {
+        e.preventDefault();
+        Utils.showLoading('Menyimpan profil...');
+
+        const nama = document.getElementById('profile-nama').value;
+        const npsn = document.getElementById('profile-npsn').value;
+        const jenjang = document.getElementById('profile-jenjang').value;
+        const sekolah = document.getElementById('profile-sekolah').value;
+
+        if (!Utils.validateNPSN(npsn)) {
+            Utils.showNotification('NPSN harus 8 digit angka', 'error');
+            Utils.hideLoading();
+            return;
+        }
+
+        try {
+            const user = Auth.currentUser;
+
+            // Create school document if not exists
+            const schoolRef = db.collection(COLLECTIONS.SCHOOLS).doc(npsn);
+            const schoolDoc = await schoolRef.get();
+            if (!schoolDoc.exists) {
+                await schoolRef.set({
+                    npsn: npsn,
+                    nama: sekolah,
+                    jenjang: jenjang,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+
+            // Create user document
+            await db.collection(COLLECTIONS.USERS).doc(user.uid).set({
+                uid: user.uid,
+                email: user.email,
+                nama: nama,
+                npsn: npsn,
+                jenjang: jenjang,
+                namaSekolah: sekolah,
+                role: 'guru',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            Auth.userData = {
+                uid: user.uid,
+                email: user.email,
+                nama: nama,
+                npsn: npsn,
+                jenjang: jenjang,
+                namaSekolah: sekolah,
+                role: 'guru'
+            };
+
+            document.getElementById('complete-profile-modal').classList.add('hidden');
+            Utils.showNotification('Profil berhasil disimpan!', 'success');
+            Auth.showApp();
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            Utils.showNotification('Gagal menyimpan profil: ' + error.message, 'error');
         } finally {
             Utils.hideLoading();
         }
@@ -895,14 +708,27 @@ const Auth = {
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 Auth.currentUser = user;
+                console.log('User logged in:', user.email);
                 
-                const userDoc = await db.collection(COLLECTIONS.USERS).doc(user.uid).get();
-                if (userDoc.exists) {
-                    Auth.userData = userDoc.data();
-                    Auth.showApp();
-                } else {
-                    auth.signOut();
-                    Utils.showNotification('Data user tidak ditemukan', 'error');
+                try {
+                    // Try to get user data from Firestore
+                    const userDoc = await db.collection(COLLECTIONS.USERS).doc(user.uid).get();
+                    
+                    if (userDoc.exists) {
+                        Auth.userData = userDoc.data();
+                        console.log('User data found:', Auth.userData);
+                        Auth.showApp();
+                    } else {
+                        // User exists in Auth but not in Firestore
+                        // Show complete profile modal
+                        console.log('User data not found in Firestore. Showing complete profile form.');
+                        Auth.showCompleteProfileModal();
+                    }
+                } catch (error) {
+                    console.error('Error getting user data:', error);
+                    Utils.showNotification('Error mengambil data: ' + error.message, 'error');
+                    // Still show complete profile modal as fallback
+                    Auth.showCompleteProfileModal();
                 }
             } else {
                 Auth.currentUser = null;
@@ -912,8 +738,15 @@ const Auth = {
         });
     },
 
+    showCompleteProfileModal: () => {
+        document.getElementById('auth-container').classList.add('hidden');
+        document.getElementById('app-container').classList.add('hidden');
+        document.getElementById('complete-profile-modal').classList.remove('hidden');
+    },
+
     showApp: () => {
         document.getElementById('auth-container').classList.add('hidden');
+        document.getElementById('complete-profile-modal').classList.add('hidden');
         document.getElementById('app-container').classList.remove('hidden');
         App.init();
     },
@@ -921,6 +754,7 @@ const Auth = {
     showAuth: () => {
         document.getElementById('auth-container').classList.remove('hidden');
         document.getElementById('app-container').classList.add('hidden');
+        document.getElementById('complete-profile-modal').classList.add('hidden');
     },
 
     logout: async () => {
@@ -939,16 +773,15 @@ const App = {
     currentTab: 'dashboard',
 
     init: async () => {
-        console.log('Initializing App...');
+        console.log('Initializing App for user:', Auth.userData?.nama);
         
-        document.getElementById('user-name').textContent = Auth.userData.nama;
-        document.getElementById('school-name').textContent = Auth.userData.namaSekolah;
+        document.getElementById('user-name').textContent = Auth.userData?.nama || 'User';
+        document.getElementById('school-name').textContent = Auth.userData?.namaSekolah || 'Sekolah';
         document.getElementById('tahun-ajaran').textContent = `TA ${Utils.getTahunAjaran()}`;
 
         App.setupNavigation();
         App.renderProfilLulusan();
 
-        // Initialize modules
         await MasterData.init();
         await AtpKktp.init();
         await CalendarSchedule.init();
@@ -958,42 +791,26 @@ const App = {
 
         await App.loadDashboardStats();
 
-        document.getElementById('btn-print-current').addEventListener('click', () => {
-            App.printCurrentTab();
-        });
+        document.getElementById('btn-print-current').addEventListener('click', () => App.printCurrentTab());
 
         console.log('App initialized successfully');
     },
 
     setupNavigation: () => {
-        const navLinks = document.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                const tab = link.dataset.tab;
-                App.switchTab(tab);
-            });
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => App.switchTab(link.dataset.tab));
         });
-
         document.getElementById('toggle-sidebar')?.addEventListener('click', () => {
             document.getElementById('sidebar').classList.toggle('collapsed');
         });
     },
 
     switchTab: (tabName) => {
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.remove('active');
-        });
-
-        const selectedTab = document.getElementById(`tab-${tabName}`);
-        if (selectedTab) {
-            selectedTab.classList.add('active');
-        }
-
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.getElementById(`tab-${tabName}`)?.classList.add('active');
         document.querySelectorAll('.nav-link').forEach(link => {
             link.classList.remove('bg-gray-700');
-            if (link.dataset.tab === tabName) {
-                link.classList.add('bg-gray-700');
-            }
+            if (link.dataset.tab === tabName) link.classList.add('bg-gray-700');
         });
 
         const titles = {
@@ -1009,18 +826,16 @@ const App = {
             'bank-soal': 'Bank Soal'
         };
         document.getElementById('page-title').textContent = titles[tabName] || tabName;
-        
         App.currentTab = tabName;
     },
 
     renderProfilLulusan: () => {
         const container = document.getElementById('profil-lulusan-grid');
         const colors = ['purple', 'red', 'blue', 'yellow', 'green', 'indigo', 'pink', 'orange'];
-        
-        container.innerHTML = PROFIL_LULUSAN.map((profil, index) => `
-            <div class="p-4 bg-${colors[index]}-50 rounded-lg border border-${colors[index]}-200">
-                <h4 class="font-semibold text-${colors[index]}-800 text-sm">${profil.nama}</h4>
-                <p class="text-xs text-${colors[index]}-600 mt-1">${profil.deskripsi}</p>
+        container.innerHTML = PROFIL_LULUSAN.map((p, i) => `
+            <div class="p-4 bg-${colors[i]}-50 rounded-lg border border-${colors[i]}-200">
+                <h4 class="font-semibold text-${colors[i]}-800 text-sm">${p.nama}</h4>
+                <p class="text-xs text-${colors[i]}-600 mt-1">${p.deskripsi}</p>
             </div>
         `).join('');
     },
@@ -1028,21 +843,15 @@ const App = {
     loadDashboardStats: async () => {
         try {
             const userId = Auth.currentUser.uid;
-
-            const cpSnap = await db.collection(COLLECTIONS.CP_DATA)
-                .where('userId', '==', userId).get();
+            const [cpSnap, atpSnap, modulSnap, soalSnap] = await Promise.all([
+                db.collection(COLLECTIONS.CP_DATA).where('userId', '==', userId).get(),
+                db.collection(COLLECTIONS.ATP).where('userId', '==', userId).get(),
+                db.collection(COLLECTIONS.MODUL_AJAR).where('userId', '==', userId).get(),
+                db.collection(COLLECTIONS.BANK_SOAL).where('userId', '==', userId).get()
+            ]);
             document.getElementById('stat-cp').textContent = cpSnap.size;
-
-            const atpSnap = await db.collection(COLLECTIONS.ATP)
-                .where('userId', '==', userId).get();
             document.getElementById('stat-atp').textContent = atpSnap.size;
-
-            const modulSnap = await db.collection(COLLECTIONS.MODUL_AJAR)
-                .where('userId', '==', userId).get();
             document.getElementById('stat-modul').textContent = modulSnap.size;
-
-            const soalSnap = await db.collection(COLLECTIONS.BANK_SOAL)
-                .where('userId', '==', userId).get();
             document.getElementById('stat-soal').textContent = soalSnap.size;
         } catch (error) {
             console.error('Error loading stats:', error);
@@ -1050,25 +859,12 @@ const App = {
     },
 
     printCurrentTab: () => {
-        const tabId = `tab-${App.currentTab}`;
-        const titles = {
-            'dashboard': 'Dashboard',
-            'master-data': 'Master Data CP',
-            'atp': 'Alur Tujuan Pembelajaran',
-            'kktp': 'KKTP',
-            'calendar': 'Kalender Pendidikan',
-            'schedule': 'Jadwal Pelajaran',
-            'prota': 'Program Tahunan',
-            'promes': 'Program Semester',
-            'modul': 'Modul Ajar',
-            'bank-soal': 'Bank Soal'
-        };
-        Utils.printDocument(tabId, titles[App.currentTab] || 'Dokumen');
+        Utils.printDocument(`tab-${App.currentTab}`, App.currentTab);
     }
 };
 
 // =====================================================
-// MASTER DATA MODULE (Simplified for this combined file)
+// MASTER DATA MODULE
 // =====================================================
 const MasterData = {
     subjects: [],
@@ -1090,58 +886,42 @@ const MasterData = {
         container.innerHTML = `
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-1 space-y-6">
-                    <!-- Mata Pelajaran -->
                     <div class="bg-white rounded-xl shadow p-6">
                         <h3 class="text-lg font-semibold mb-4">📚 Mata Pelajaran</h3>
                         <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Template</label>
-                                <select id="subject-template" class="w-full px-3 py-2 border rounded-lg">
-                                    <option value="">-- Pilih Template --</option>
-                                    ${Object.entries(SUBJECT_TEMPLATES).map(([key, val]) => 
-                                        `<option value="${key}">${val.nama}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                            <button onclick="MasterData.addSubject()" 
-                                class="w-full bg-primary text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                            <select id="subject-template" class="w-full px-3 py-2 border rounded-lg">
+                                <option value="">-- Pilih Template Mapel --</option>
+                                ${Object.entries(SUBJECT_TEMPLATES).map(([k, v]) => `<option value="${k}">${v.nama}</option>`).join('')}
+                            </select>
+                            <button onclick="MasterData.addSubject()" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-blue-700">
                                 Tambah Mata Pelajaran
                             </button>
                         </div>
                         <div class="mt-4">
                             <h4 class="font-medium text-gray-700 mb-2">Mata Pelajaran Saya:</h4>
                             <div id="my-subjects-list" class="space-y-2 max-h-48 overflow-y-auto">
-                                <p class="text-gray-400 text-sm">Belum ada mata pelajaran</p>
+                                <p class="text-gray-400 text-sm">Memuat...</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Rombel -->
                     <div class="bg-white rounded-xl shadow p-6">
                         <h3 class="text-lg font-semibold mb-4">👥 Rombongan Belajar</h3>
                         <div class="space-y-4">
                             <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
-                                    <select id="rombel-kelas" class="w-full px-3 py-2 border rounded-lg">
-                                        ${kelasOptions.map(k => `<option value="${k}">Kelas ${k}</option>`).join('')}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Rombel</label>
-                                    <input type="text" id="rombel-nama" placeholder="A, B, C..." 
-                                        class="w-full px-3 py-2 border rounded-lg">
-                                </div>
+                                <select id="rombel-kelas" class="px-3 py-2 border rounded-lg">
+                                    ${kelasOptions.map(k => `<option value="${k}">Kelas ${k}</option>`).join('')}
+                                </select>
+                                <input type="text" id="rombel-nama" placeholder="A, B, C..." class="px-3 py-2 border rounded-lg">
                             </div>
-                            <button onclick="MasterData.addRombel()" 
-                                class="w-full bg-accent text-white py-2 rounded-lg hover:bg-green-600 transition">
+                            <button onclick="MasterData.addRombel()" class="w-full bg-accent text-white py-2 rounded-lg hover:bg-green-600">
                                 Tambah Rombel
                             </button>
                         </div>
                         <div class="mt-4">
                             <h4 class="font-medium text-gray-700 mb-2">Rombel Saya:</h4>
                             <div id="my-rombel-list" class="flex flex-wrap gap-2">
-                                <p class="text-gray-400 text-sm">Belum ada rombel</p>
+                                <p class="text-gray-400 text-sm">Memuat...</p>
                             </div>
                         </div>
                     </div>
@@ -1150,38 +930,20 @@ const MasterData = {
                 <div class="lg:col-span-2">
                     <div class="bg-white rounded-xl shadow p-6">
                         <h3 class="text-lg font-semibold mb-4">📝 Input Capaian Pembelajaran (CP)</h3>
-                        
                         <form id="cp-form" class="space-y-4">
                             <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
-                                    <select id="cp-mapel" required class="w-full px-3 py-2 border rounded-lg">
-                                        <option value="">Pilih Mata Pelajaran</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas/Fase</label>
-                                    <select id="cp-kelas" required class="w-full px-3 py-2 border rounded-lg">
-                                        <option value="">Pilih Kelas</option>
-                                        ${kelasOptions.map(k => `<option value="${k}">Kelas ${k}</option>`).join('')}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Elemen CP</label>
-                                <select id="cp-elemen" required class="w-full px-3 py-2 border rounded-lg">
-                                    <option value="">Pilih Elemen</option>
+                                <select id="cp-mapel" required class="px-3 py-2 border rounded-lg">
+                                    <option value="">Pilih Mata Pelajaran</option>
+                                </select>
+                                <select id="cp-kelas" required class="px-3 py-2 border rounded-lg">
+                                    <option value="">Pilih Kelas</option>
+                                    ${kelasOptions.map(k => `<option value="${k}">Kelas ${k}</option>`).join('')}
                                 </select>
                             </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Capaian Pembelajaran</label>
-                                <textarea id="cp-text" rows="4" required 
-                                    class="w-full px-3 py-2 border rounded-lg resize-none"
-                                    placeholder="Masukkan deskripsi Capaian Pembelajaran..."></textarea>
-                            </div>
-
+                            <select id="cp-elemen" required class="w-full px-3 py-2 border rounded-lg">
+                                <option value="">Pilih Elemen</option>
+                            </select>
+                            <textarea id="cp-text" rows="4" required class="w-full px-3 py-2 border rounded-lg" placeholder="Masukkan Capaian Pembelajaran..."></textarea>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Dimensi Profil Lulusan</label>
                                 <div class="grid grid-cols-2 gap-2">
@@ -1193,9 +955,7 @@ const MasterData = {
                                     `).join('')}
                                 </div>
                             </div>
-
-                            <button type="submit" 
-                                class="w-full bg-primary text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                            <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-blue-700">
                                 💾 Simpan CP
                             </button>
                         </form>
@@ -1204,7 +964,7 @@ const MasterData = {
                     <div class="bg-white rounded-xl shadow p-6 mt-6">
                         <h3 class="text-lg font-semibold mb-4">📋 Daftar Capaian Pembelajaran</h3>
                         <div id="cp-list" class="space-y-3 max-h-96 overflow-y-auto">
-                            <p class="text-gray-400 text-center py-8">Belum ada data CP</p>
+                            <p class="text-gray-400 text-center py-8">Memuat...</p>
                         </div>
                     </div>
                 </div>
@@ -1218,41 +978,28 @@ const MasterData = {
     handleMapelChange: (e) => {
         const subject = MasterData.subjects.find(s => s.id === e.target.value);
         const elemenSelect = document.getElementById('cp-elemen');
-
-        if (subject) {
-            elemenSelect.innerHTML = '<option value="">Pilih Elemen</option>' + 
-                subject.elemen.map(el => `<option value="${el}">${el}</option>`).join('');
-        } else {
-            elemenSelect.innerHTML = '<option value="">Pilih Elemen</option>';
-        }
+        elemenSelect.innerHTML = '<option value="">Pilih Elemen</option>' + 
+            (subject ? subject.elemen.map(el => `<option value="${el}">${el}</option>`).join('') : '');
     },
 
     addSubject: async () => {
         const template = document.getElementById('subject-template').value;
-        
-        if (!template) {
-            Utils.showNotification('Pilih template mata pelajaran', 'warning');
-            return;
-        }
+        if (!template) { Utils.showNotification('Pilih template mata pelajaran', 'warning'); return; }
 
-        const subjectData = SUBJECT_TEMPLATES[template];
-        Utils.showLoading('Menyimpan mata pelajaran...');
-
+        Utils.showLoading('Menyimpan...');
         try {
             await db.collection(COLLECTIONS.SUBJECTS).add({
                 userId: Auth.currentUser.uid,
                 npsn: Auth.userData.npsn,
                 kode: template,
-                ...subjectData,
+                ...SUBJECT_TEMPLATES[template],
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-
-            Utils.showNotification('Mata pelajaran berhasil ditambahkan', 'success');
+            Utils.showNotification('Mata pelajaran ditambahkan', 'success');
             document.getElementById('subject-template').value = '';
             await MasterData.loadSubjects();
         } catch (error) {
-            console.error('Error adding subject:', error);
-            Utils.showNotification('Gagal menyimpan: ' + error.message, 'error');
+            Utils.showNotification('Gagal: ' + error.message, 'error');
         } finally {
             Utils.hideLoading();
         }
@@ -1260,158 +1007,102 @@ const MasterData = {
 
     loadSubjects: async () => {
         try {
-            const snapshot = await db.collection(COLLECTIONS.SUBJECTS)
-                .where('userId', '==', Auth.currentUser.uid)
-                .get();
-
-            MasterData.subjects = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-
+            const snapshot = await db.collection(COLLECTIONS.SUBJECTS).where('userId', '==', Auth.currentUser.uid).get();
+            MasterData.subjects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             MasterData.renderSubjectsList();
             MasterData.updateMapelDropdowns();
-        } catch (error) {
-            console.error('Error loading subjects:', error);
-        }
+        } catch (error) { console.error('Error loading subjects:', error); }
     },
 
     renderSubjectsList: () => {
         const container = document.getElementById('my-subjects-list');
         if (!container) return;
-        
-        if (MasterData.subjects.length === 0) {
-            container.innerHTML = '<p class="text-gray-400 text-sm">Belum ada mata pelajaran</p>';
-            return;
-        }
-
-        container.innerHTML = MasterData.subjects.map(subj => `
-            <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                <div>
-                    <span class="font-medium text-sm">${subj.nama}</span>
-                    <span class="text-xs text-gray-500 block">${subj.elemen.length} elemen</span>
+        container.innerHTML = MasterData.subjects.length === 0 
+            ? '<p class="text-gray-400 text-sm">Belum ada mata pelajaran</p>'
+            : MasterData.subjects.map(s => `
+                <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <div>
+                        <span class="font-medium text-sm">${s.nama}</span>
+                        <span class="text-xs text-gray-500 block">${s.elemen?.length || 0} elemen</span>
+                    </div>
+                    <button onclick="MasterData.deleteSubject('${s.id}')" class="text-red-500 hover:text-red-700">🗑️</button>
                 </div>
-                <button onclick="MasterData.deleteSubject('${subj.id}')" 
-                    class="text-red-500 hover:text-red-700 text-sm">🗑️</button>
-            </div>
-        `).join('');
+            `).join('');
     },
 
     updateMapelDropdowns: () => {
-        const options = MasterData.subjects.map(s => 
-            `<option value="${s.id}">${s.nama}</option>`
-        ).join('');
-
+        const options = MasterData.subjects.map(s => `<option value="${s.id}">${s.nama}</option>`).join('');
         const cpMapel = document.getElementById('cp-mapel');
-        if (cpMapel) {
-            cpMapel.innerHTML = '<option value="">Pilih Mata Pelajaran</option>' + options;
-        }
+        if (cpMapel) cpMapel.innerHTML = '<option value="">Pilih Mata Pelajaran</option>' + options;
     },
 
     deleteSubject: async (id) => {
-        const confirm = await Utils.confirm('Hapus mata pelajaran ini?');
-        if (!confirm) return;
-
+        if (!(await Utils.confirm('Hapus mata pelajaran ini?'))) return;
         try {
             await db.collection(COLLECTIONS.SUBJECTS).doc(id).delete();
-            Utils.showNotification('Mata pelajaran dihapus', 'success');
+            Utils.showNotification('Dihapus', 'success');
             await MasterData.loadSubjects();
-        } catch (error) {
-            console.error('Error deleting subject:', error);
-            Utils.showNotification('Gagal menghapus', 'error');
-        }
+        } catch (error) { Utils.showNotification('Gagal', 'error'); }
     },
 
     addRombel: async () => {
         const kelas = document.getElementById('rombel-kelas').value;
         const nama = document.getElementById('rombel-nama').value.trim().toUpperCase();
+        if (!nama) { Utils.showNotification('Masukkan nama rombel', 'warning'); return; }
 
-        if (!kelas || !nama) {
-            Utils.showNotification('Lengkapi kelas dan nama rombel', 'warning');
-            return;
-        }
-
-        const rombelName = `${kelas}${nama}`;
-
-        Utils.showLoading('Menyimpan rombel...');
-
+        Utils.showLoading('Menyimpan...');
         try {
             await db.collection(COLLECTIONS.ROMBEL).add({
                 userId: Auth.currentUser.uid,
                 npsn: Auth.userData.npsn,
                 kelas: parseInt(kelas),
-                nama: rombelName,
+                nama: `${kelas}${nama}`,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-
-            Utils.showNotification('Rombel berhasil ditambahkan', 'success');
+            Utils.showNotification('Rombel ditambahkan', 'success');
             document.getElementById('rombel-nama').value = '';
             await MasterData.loadRombel();
-        } catch (error) {
-            console.error('Error adding rombel:', error);
-            Utils.showNotification('Gagal menyimpan', 'error');
-        } finally {
-            Utils.hideLoading();
-        }
+        } catch (error) { Utils.showNotification('Gagal', 'error'); }
+        finally { Utils.hideLoading(); }
     },
 
     loadRombel: async () => {
         try {
-            const snapshot = await db.collection(COLLECTIONS.ROMBEL)
-                .where('userId', '==', Auth.currentUser.uid)
-                .get();
-
-            MasterData.rombel = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-
+            const snapshot = await db.collection(COLLECTIONS.ROMBEL).where('userId', '==', Auth.currentUser.uid).get();
+            MasterData.rombel = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             MasterData.renderRombelList();
-        } catch (error) {
-            console.error('Error loading rombel:', error);
-        }
+        } catch (error) { console.error('Error loading rombel:', error); }
     },
 
     renderRombelList: () => {
         const container = document.getElementById('my-rombel-list');
         if (!container) return;
-        
-        if (MasterData.rombel.length === 0) {
-            container.innerHTML = '<p class="text-gray-400 text-sm">Belum ada rombel</p>';
-            return;
-        }
-
-        container.innerHTML = MasterData.rombel.map(r => `
-            <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                ${r.nama}
-                <button onclick="MasterData.deleteRombel('${r.id}')" 
-                    class="ml-2 text-blue-600 hover:text-red-600">✕</button>
-            </span>
-        `).join('');
+        container.innerHTML = MasterData.rombel.length === 0 
+            ? '<p class="text-gray-400 text-sm">Belum ada rombel</p>'
+            : MasterData.rombel.map(r => `
+                <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                    ${r.nama}
+                    <button onclick="MasterData.deleteRombel('${r.id}')" class="ml-2 hover:text-red-600">✕</button>
+                </span>
+            `).join('');
     },
 
     deleteRombel: async (id) => {
-        const confirm = await Utils.confirm('Hapus rombel ini?');
-        if (!confirm) return;
-
+        if (!(await Utils.confirm('Hapus rombel ini?'))) return;
         try {
             await db.collection(COLLECTIONS.ROMBEL).doc(id).delete();
-            Utils.showNotification('Rombel dihapus', 'success');
+            Utils.showNotification('Dihapus', 'success');
             await MasterData.loadRombel();
-        } catch (error) {
-            console.error('Error deleting rombel:', error);
-        }
+        } catch (error) { Utils.showNotification('Gagal', 'error'); }
     },
 
     saveCP: async (e) => {
         e.preventDefault();
-
         const mapelId = document.getElementById('cp-mapel').value;
         const kelas = document.getElementById('cp-kelas').value;
         const elemen = document.getElementById('cp-elemen').value;
         const cpText = document.getElementById('cp-text').value.trim();
-        const profilLulusan = Array.from(document.querySelectorAll('input[name="profil-lulusan"]:checked'))
-            .map(cb => cb.value);
+        const profilLulusan = Array.from(document.querySelectorAll('input[name="profil-lulusan"]:checked')).map(cb => cb.value);
 
         if (!mapelId || !kelas || !elemen || !cpText) {
             Utils.showNotification('Lengkapi semua field', 'warning');
@@ -1419,239 +1110,106 @@ const MasterData = {
         }
 
         const subject = MasterData.subjects.find(s => s.id === mapelId);
-
-        Utils.showLoading('Menyimpan CP...');
+        Utils.showLoading('Menyimpan...');
 
         try {
             await db.collection(COLLECTIONS.CP_DATA).add({
                 userId: Auth.currentUser.uid,
                 npsn: Auth.userData.npsn,
-                mapelId: mapelId,
-                mapelNama: subject.nama,
-                kelas: parseInt(kelas),
-                elemen: elemen,
+                mapelId, mapelNama: subject.nama,
+                kelas: parseInt(kelas), elemen,
                 capaianPembelajaran: cpText,
-                profilLulusan: profilLulusan,
+                profilLulusan,
                 tahunAjaran: Utils.getTahunAjaran(),
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-
             Utils.showNotification('CP berhasil disimpan', 'success');
             e.target.reset();
             await MasterData.loadCPData();
             App.loadDashboardStats();
-        } catch (error) {
-            console.error('Error saving CP:', error);
-            Utils.showNotification('Gagal menyimpan: ' + error.message, 'error');
-        } finally {
-            Utils.hideLoading();
-        }
+        } catch (error) { Utils.showNotification('Gagal: ' + error.message, 'error'); }
+        finally { Utils.hideLoading(); }
     },
 
     loadCPData: async () => {
         try {
-            const snapshot = await db.collection(COLLECTIONS.CP_DATA)
-                .where('userId', '==', Auth.currentUser.uid)
-                .get();
-
-            MasterData.cpData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-
+            const snapshot = await db.collection(COLLECTIONS.CP_DATA).where('userId', '==', Auth.currentUser.uid).get();
+            MasterData.cpData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             MasterData.renderCPList();
-        } catch (error) {
-            console.error('Error loading CP:', error);
-        }
+        } catch (error) { console.error('Error loading CP:', error); }
     },
 
     renderCPList: () => {
         const container = document.getElementById('cp-list');
         if (!container) return;
-
-        if (MasterData.cpData.length === 0) {
-            container.innerHTML = '<p class="text-gray-400 text-center py-8">Belum ada data CP</p>';
-            return;
-        }
-
-        container.innerHTML = MasterData.cpData.map(cp => `
-            <div class="border rounded-lg p-4 hover:shadow-md transition">
-                <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
-                                ${cp.mapelNama}
-                            </span>
-                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">
-                                Kelas ${cp.kelas}
-                            </span>
-                            <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs font-medium">
-                                ${cp.elemen}
-                            </span>
+        container.innerHTML = MasterData.cpData.length === 0 
+            ? '<p class="text-gray-400 text-center py-8">Belum ada data CP</p>'
+            : MasterData.cpData.map(cp => `
+                <div class="border rounded-lg p-4 hover:shadow-md transition">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex flex-wrap gap-2 mb-2">
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${cp.mapelNama}</span>
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Kelas ${cp.kelas}</span>
+                                <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">${cp.elemen}</span>
+                            </div>
+                            <p class="text-gray-700 text-sm">${cp.capaianPembelajaran}</p>
                         </div>
-                        <p class="text-gray-700">${cp.capaianPembelajaran}</p>
+                        <button onclick="MasterData.deleteCP('${cp.id}')" class="text-red-500 hover:text-red-700 ml-4">🗑️</button>
                     </div>
-                    <button onclick="MasterData.deleteCP('${cp.id}')" class="text-red-500 hover:text-red-700 ml-4">🗑️</button>
                 </div>
-            </div>
-        `).join('');
+            `).join('');
     },
 
     deleteCP: async (id) => {
-        const confirm = await Utils.confirm('Hapus CP ini?');
-        if (!confirm) return;
-
+        if (!(await Utils.confirm('Hapus CP ini?'))) return;
         try {
             await db.collection(COLLECTIONS.CP_DATA).doc(id).delete();
-            Utils.showNotification('CP dihapus', 'success');
+            Utils.showNotification('Dihapus', 'success');
             await MasterData.loadCPData();
             App.loadDashboardStats();
-        } catch (error) {
-            console.error('Error deleting CP:', error);
-        }
+        } catch (error) { Utils.showNotification('Gagal', 'error'); }
     }
 };
 
 // =====================================================
-// PLACEHOLDER MODULES (Simplified versions)
+// SIMPLIFIED PLACEHOLDER MODULES
 // =====================================================
-
 const AtpKktp = {
-    atpData: [],
-    kktpData: [],
-    
     init: async () => {
-        AtpKktp.renderATP();
-        AtpKktp.renderKKTP();
-    },
-
-    renderATP: () => {
-        document.getElementById('tab-atp').innerHTML = `
-            <div class="bg-white rounded-xl shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">🎯 Alur Tujuan Pembelajaran (ATP)</h3>
-                <p class="text-gray-500">Fitur ATP akan tersedia setelah Anda menambahkan CP dan Rombel.</p>
-                <div class="mt-4 p-4 bg-blue-50 rounded-lg">
-                    <p class="text-sm text-blue-800">💡 Tip: Tambahkan Capaian Pembelajaran di tab "Master Data" terlebih dahulu.</p>
-                </div>
-            </div>
-        `;
-    },
-
-    renderKKTP: () => {
-        document.getElementById('tab-kktp').innerHTML = `
-            <div class="bg-white rounded-xl shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">✅ Kriteria Ketercapaian Tujuan Pembelajaran (KKTP)</h3>
-                <p class="text-gray-500">Fitur KKTP akan tersedia setelah Anda membuat ATP.</p>
-            </div>
-        `;
+        document.getElementById('tab-atp').innerHTML = `<div class="bg-white rounded-xl shadow p-6"><h3 class="text-lg font-semibold mb-4">🎯 Alur Tujuan Pembelajaran (ATP)</h3><p class="text-gray-500">Tambahkan CP dan Rombel terlebih dahulu di Master Data.</p></div>`;
+        document.getElementById('tab-kktp').innerHTML = `<div class="bg-white rounded-xl shadow p-6"><h3 class="text-lg font-semibold mb-4">✅ KKTP</h3><p class="text-gray-500">Buat ATP terlebih dahulu untuk membuat KKTP.</p></div>`;
     }
 };
 
 const CalendarSchedule = {
     init: async () => {
-        CalendarSchedule.renderCalendar();
-        CalendarSchedule.renderSchedule();
-    },
-
-    renderCalendar: () => {
-        document.getElementById('tab-calendar').innerHTML = `
-            <div class="bg-white rounded-xl shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">📅 Kalender Pendidikan</h3>
-                <p class="text-gray-500 mb-4">Kalender pendidikan kolaboratif untuk sekolah Anda (NPSN: ${Auth.userData.npsn}).</p>
-                <div class="grid grid-cols-7 gap-2 text-center">
-                    ${['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(d => 
-                        `<div class="font-semibold p-2 bg-gray-100 rounded">${d}</div>`
-                    ).join('')}
-                </div>
-            </div>
-        `;
-    },
-
-    renderSchedule: () => {
-        document.getElementById('tab-schedule').innerHTML = `
-            <div class="bg-white rounded-xl shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">🕐 Jadwal Pelajaran</h3>
-                <p class="text-gray-500 mb-4">Kelola jadwal mengajar Anda dengan validasi anti-bentrok.</p>
-                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p class="text-sm text-yellow-800">⚠️ Sistem akan mencegah jadwal bentrok otomatis.</p>
-                </div>
-            </div>
-        `;
+        document.getElementById('tab-calendar').innerHTML = `<div class="bg-white rounded-xl shadow p-6"><h3 class="text-lg font-semibold mb-4">📅 Kalender Pendidikan</h3><p class="text-gray-500">Kalender pendidikan kolaboratif (NPSN: ${Auth.userData?.npsn || '-'}).</p></div>`;
+        document.getElementById('tab-schedule').innerHTML = `<div class="bg-white rounded-xl shadow p-6"><h3 class="text-lg font-semibold mb-4">🕐 Jadwal Pelajaran</h3><p class="text-gray-500">Kelola jadwal dengan validasi anti-bentrok.</p></div>`;
     }
 };
 
 const ProtaPromes = {
-    protaData: [],
-    promesData: [],
-    
     init: async () => {
-        ProtaPromes.renderProta();
-        ProtaPromes.renderPromes();
-    },
-
-    renderProta: () => {
-        document.getElementById('tab-prota').innerHTML = `
-            <div class="bg-white rounded-xl shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">📋 Program Tahunan (Prota)</h3>
-                <p class="text-gray-500">Buat Program Tahunan per mata pelajaran dan rombel.</p>
-            </div>
-        `;
-    },
-
-    renderPromes: () => {
-        document.getElementById('tab-promes').innerHTML = `
-            <div class="bg-white rounded-xl shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">📆 Program Semester (Promes)</h3>
-                <p class="text-gray-500">Distribusikan materi ke minggu-minggu pembelajaran.</p>
-            </div>
-        `;
+        document.getElementById('tab-prota').innerHTML = `<div class="bg-white rounded-xl shadow p-6"><h3 class="text-lg font-semibold mb-4">📋 Program Tahunan</h3><p class="text-gray-500">Buat Prota per mata pelajaran dan rombel.</p></div>`;
+        document.getElementById('tab-promes').innerHTML = `<div class="bg-white rounded-xl shadow p-6"><h3 class="text-lg font-semibold mb-4">📆 Program Semester</h3><p class="text-gray-500">Distribusi materi ke minggu pembelajaran.</p></div>`;
     }
 };
 
 const ModulAjar = {
-    modulData: [],
-    
     init: async () => {
-        ModulAjar.render();
-    },
-
-    render: () => {
-        document.getElementById('tab-modul').innerHTML = `
-            <div class="bg-white rounded-xl shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">📚 Modul Ajar</h3>
-                <p class="text-gray-500 mb-4">Buat modul ajar lengkap dengan format Kurikulum Merdeka.</p>
-                <button onclick="Utils.showNotification('Fitur akan segera tersedia', 'info')" 
-                    class="px-4 py-2 bg-primary text-white rounded-lg">
-                    ➕ Buat Modul Ajar
-                </button>
-            </div>
-        `;
+        document.getElementById('tab-modul').innerHTML = `<div class="bg-white rounded-xl shadow p-6"><h3 class="text-lg font-semibold mb-4">📚 Modul Ajar</h3><p class="text-gray-500">Buat modul ajar dengan format Kurikulum Merdeka.</p></div>`;
     }
 };
 
 const BankSoal = {
-    soalData: [],
-    
     init: async () => {
-        BankSoal.render();
-    },
-
-    render: () => {
-        document.getElementById('tab-bank-soal').innerHTML = `
-            <div class="bg-white rounded-xl shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">❓ Bank Soal</h3>
-                <p class="text-gray-500 mb-4">Kelola bank soal dengan berbagai tipe dan level kognitif.</p>
-                <button onclick="Utils.showNotification('Fitur akan segera tersedia', 'info')" 
-                    class="px-4 py-2 bg-primary text-white rounded-lg">
-                    ➕ Tambah Soal
-                </button>
-            </div>
-        `;
+        document.getElementById('tab-bank-soal').innerHTML = `<div class="bg-white rounded-xl shadow p-6"><h3 class="text-lg font-semibold mb-4">❓ Bank Soal</h3><p class="text-gray-500">Kelola bank soal dengan berbagai tipe.</p></div>`;
     }
 };
 
 // =====================================================
-// INITIALIZE APP
+// INITIALIZE
 // =====================================================
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM Loaded, initializing Auth...');
