@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guru Smart - Aplikasi Administrasi Guru</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Print CSS -->
+    <link rel="stylesheet" href="css/print.css">
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e40af',
+                        secondary: '#3b82f6',
+                        accent: '#10b981'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        
+        /* Tab transition */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Sidebar transition */
+        .sidebar { transition: transform 0.3s ease-in-out; }
+        .sidebar.collapsed { transform: translateX(-100%); }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 flex items-center space-x-4">
+            <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-gray-700 font-medium">Memuat...</span>
+        </div>
+    </div>
+
+    <!-- Auth Container (Login/Register) -->
+    <div id="auth-container" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700">
+        <!-- Will be populated by auth.js -->
+    </div>
+
+    <!-- Main App Container (Hidden until logged in) -->
+    <div id="app-container" class="hidden">
+        <!-- Lanjutan di bagian berikutnya -->
+    </div>
+    <!-- Main App Container -->
+    <div id="app-container" class="hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar fixed left-0 top-0 h-full w-64 bg-gray-800 text-white z-40 overflow-y-auto">
+            <div class="p-4 border-b border-gray-700">
+                <h1 class="text-xl font-bold">🎓 Guru Smart</h1>
+                <p id="user-name" class="text-sm text-gray-400 mt-1"></p>
+                <p id="school-name" class="text-xs text-gray-500"></p>
+            </div>
+            
+            <nav class="p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <button data-tab="dashboard" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
+                            <span class="mr-3">📊</span> Dashboard
+                        </button>
+                    </li>
+                    <li>
+                        <button data-tab="master-data" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
+                            <span class="mr-3">📝</span> Master Data & CP
+                        </button>
+                    </li>
+                    <li>
+                        <button data-tab="atp" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
+                            <span class="mr-3">🎯</span> ATP
+                        </button>
+                    </li>
+                    <li>
+                        <button data-tab="kktp" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
+                            <span class="mr-3">✅</span> KKTP
+                        </button>
+                    </li>
+                    <li>
+                        <button data-tab="calendar" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
+                            <span class="mr-3">📅</span> Kalender Pendidikan
+                        </button>
+                    </li>
+                    <li>
+                        <button data-tab="schedule" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
+                            <span class="mr-3">🕐</span> Jadwal Pelajaran
+                        </button>
+                    </li>
+                    <li>
+                        <button data-tab="prota" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
+                            <span class="mr-3">📋</span> Program Tahunan
+                        </button>
+                    </li>
+                    <li>
+                        <button data-tab="promes" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
+                            <span class="mr-3">📆</span> Program Semester
+                        </button>
+                    </li>
+                    <li>
+                        <button data-tab="modul" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
+                            <span class="mr-3">📚</span> Modul Ajar
+                        </button>
+                    </li>
+                    <li>
+                        <button data-tab="bank-soal" class="nav-link w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition">
+                            <span class="mr-3">❓</span> Bank Soal
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+                <button onclick="Auth.logout()" class="w-full flex items-center justify-center px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700 transition">
+                    <span class="mr-2">🚪</span> Keluar
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="ml-64 min-h-screen">
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm sticky top-0 z-30">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center">
+                        <button id="toggle-sidebar" class="mr-4 p-2 rounded-lg hover:bg-gray-100 lg:hidden">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                        </button>
+                        <h2 id="page-title" class="text-xl font-semibold text-gray-800">Dashboard</h2>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span id="tahun-ajaran" class="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded"></span>
+                        <button id="btn-print-current" class="no-print flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition">
+                            <span class="mr-2">🖨️</span> Cetak
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tab Contents -->
+            <div class="p-6">
+                <!-- Dashboard Tab -->
+                <div id="tab-dashboard" class="tab-content active">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 bg-blue-100 rounded-lg">
+                                    <span class="text-2xl">📝</span>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-gray-500 text-sm">Capaian Pembelajaran</p>
+                                    <p id="stat-cp" class="text-2xl font-bold text-gray-800">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 bg-green-100 rounded-lg">
+                                    <span class="text-2xl">🎯</span>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-gray-500 text-sm">ATP</p>
+                                    <p id="stat-atp" class="text-2xl font-bold text-gray-800">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 bg-yellow-100 rounded-lg">
+                                    <span class="text-2xl">📚</span>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-gray-500 text-sm">Modul Ajar</p>
+                                    <p id="stat-modul" class="text-2xl font-bold text-gray-800">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 bg-purple-100 rounded-lg">
+                                    <span class="text-2xl">❓</span>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-gray-500 text-sm">Bank Soal</p>
+                                    <p id="stat-soal" class="text-2xl font-bold text-gray-800">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-xl shadow p-6 mb-8">
+                        <h3 class="text-lg font-semibold mb-4">Aksi Cepat</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <button onclick="App.switchTab('master-data')" class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition text-center">
+                                <span class="text-3xl block mb-2">➕</span>
+                                <span class="text-sm text-gray-600">Input CP Baru</span>
+                            </button>
+                            <button onclick="App.switchTab('modul')" class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition text-center">
+                                <span class="text-3xl block mb-2">📚</span>
+                                <span class="text-sm text-gray-600">Buat Modul Ajar</span>
+                            </button>
+                            <button onclick="App.switchTab('schedule')" class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition text-center">
+                                <span class="text-3xl block mb-2">🕐</span>
+                                <span class="text-sm text-gray-600">Atur Jadwal</span>
+                            </button>
+                            <button onclick="App.switchTab('bank-soal')" class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition text-center">
+                                <span class="text-3xl block mb-2">❓</span>
+                                <span class="text-sm text-gray-600">Tambah Soal</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 8 Dimensi Profil Lulusan -->
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">8 Dimensi Profil Lulusan</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="profil-lulusan-grid">
+                            <!-- Will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Master Data Tab -->
+                <div id="tab-master-data" class="tab-content">
+                    <!-- Will be populated by master-data.js -->
+                </div>
+
+                <!-- ATP Tab -->
+                <div id="tab-atp" class="tab-content">
+                    <!-- Will be populated by atp-kktp.js -->
+                </div>
+
+                <!-- KKTP Tab -->
+                <div id="tab-kktp" class="tab-content">
+                    <!-- Will be populated by atp-kktp.js -->
+                </div>
+
+                <!-- Calendar Tab -->
+                <div id="tab-calendar" class="tab-content">
+                    <!-- Will be populated by calendar-schedule.js -->
+                </div>
+
+                <!-- Schedule Tab -->
+                <div id="tab-schedule" class="tab-content">
+                    <!-- Will be populated by calendar-schedule.js -->
+                </div>
+
+                <!-- Prota Tab -->
+                <div id="tab-prota" class="tab-content">
+                    <!-- Will be populated by prota-promes.js -->
+                </div>
+
+                <!-- Promes Tab -->
+                <div id="tab-promes" class="tab-content">
+                    <!-- Will be populated by prota-promes.js -->
+                </div>
+
+                <!-- Modul Tab -->
+                <div id="tab-modul" class="tab-content">
+                    <!-- Will be populated by modul-ajar.js -->
+                </div>
+
+                <!-- Bank Soal Tab -->
+                <div id="tab-bank-soal" class="tab-content">
+                    <!-- Will be populated by bank-soal.js -->
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/master-data.js"></script>
+    <script src="js/atp-kktp.js"></script>
+    <script src="js/calendar-schedule.js"></script>
+    <script src="js/prota-promes.js"></script>
+    <script src="js/modul-ajar.js"></script>
+    <script src="js/bank-soal.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
