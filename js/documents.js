@@ -625,27 +625,6 @@ export async function deleteLKPD(lkpdId) {
 // BANK SOAL FUNCTIONS
 // =====================================================
 
-// Tipe Soal
-export const TIPE_SOAL = [
-    { id: 'pilgan', nama: 'Pilihan Ganda', icon: 'fa-list-ol' },
-    { id: 'pilgan_kompleks', nama: 'Pilihan Ganda Kompleks', icon: 'fa-tasks' },
-    { id: 'isian', nama: 'Isian Singkat', icon: 'fa-i-cursor' },
-    { id: 'uraian', nama: 'Uraian', icon: 'fa-align-left' },
-    { id: 'menjodohkan', nama: 'Menjodohkan', icon: 'fa-random' },
-    { id: 'benar_salah', nama: 'Benar/Salah', icon: 'fa-check-circle' }
-];
-
-// Level Kognitif (Taksonomi Bloom)
-export const LEVEL_KOGNITIF = [
-    { id: 'C1', nama: 'Mengingat (C1)', deskripsi: 'Mengenali, mengingat kembali' },
-    { id: 'C2', nama: 'Memahami (C2)', deskripsi: 'Menafsirkan, memberi contoh, merangkum' },
-    { id: 'C3', nama: 'Mengaplikasikan (C3)', deskripsi: 'Menggunakan prosedur dalam situasi tertentu' },
-    { id: 'C4', nama: 'Menganalisis (C4)', deskripsi: 'Menguraikan, membedakan, mengorganisir' },
-    { id: 'C5', nama: 'Mengevaluasi (C5)', deskripsi: 'Memeriksa, mengkritik' },
-    { id: 'C6', nama: 'Mencipta (C6)', deskripsi: 'Merumuskan, merencanakan, memproduksi' }
-];
-
-// Get Bank Soal
 export async function getBankSoal(userId, mapelId, filters = {}) {
     try {
         let q = query(
@@ -826,4 +805,5 @@ export async function generatePaketSoal(mapelId, config) {
         console.error('Generate paket soal error:', error);
         return { success: false, error: error.message };
     }
+
 }
