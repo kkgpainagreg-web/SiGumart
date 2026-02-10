@@ -17,23 +17,13 @@
 // KONFIGURASI FIREBASE - GANTI DENGAN MILIK ANDA
 // =====================================================
 const firebaseConfig = {
-    // API Key - kunci untuk mengakses Firebase
-    apiKey: "MASUKKAN_API_KEY_ANDA_DISINI",
-    
-    // Auth Domain - domain untuk autentikasi
-    authDomain: "nama-project-anda.firebaseapp.com",
-    
-    // Project ID - ID unik project Anda
-    projectId: "nama-project-anda",
-    
-    // Storage Bucket - untuk menyimpan file (opsional)
-    storageBucket: "nama-project-anda.appspot.com",
-    
-    // Messaging Sender ID - untuk notifikasi (opsional)
-    messagingSenderId: "123456789012",
-    
-    // App ID - ID aplikasi Anda
-    appId: "1:123456789012:web:abcdef123456"
+  apiKey: "AIzaSyCyRKvngA1EqlQmgxgxU4465qgRw8TdT08",
+  authDomain: "si-gumart.firebaseapp.com",
+  projectId: "si-gumart",
+  storageBucket: "si-gumart.firebasestorage.app",
+  messagingSenderId: "544375918988",
+  appId: "1:544375918988:web:3375b3025b7d51ea2546a9",
+  measurementId: "G-40ZGJFEWD1"
 };
 
 // =====================================================
@@ -73,4 +63,5 @@ db.enablePersistence()
 // LOG UNTUK DEBUGGING (hapus di production)
 // =====================================================
 console.log("🔥 Firebase berhasil diinisialisasi!");
+
 console.log("📊 Project ID:", firebaseConfig.projectId);
