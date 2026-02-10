@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Guru - Admin PAI Satu Pintu</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 untuk notifikasi cantik -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Konfigurasi Tailwind Custom -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pai-hijau': {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Animasi dan efek khusus */
+        .sidebar-link {
+            transition: all 0.3s ease;
+        }
+        .sidebar-link:hover {
+            transform: translateX(5px);
+        }
+        
+        /* Animasi loading spinner */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #16a34a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Efek focus pada input */
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+        }
+        
+        /* Animasi checkbox kelas */
+        .kelas-checkbox:checked + label {
+            background-color: #16a34a;
+            color: white;
+            border-color: #16a34a;
+        }
+        
+        /* Animasi fade in */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    
+    <!-- ================================================
+         CONTAINER UTAMA - Layout 2 Kolom
+         ================================================ -->
+    <div class="flex min-h-screen">
+        
+        <!-- ================================================
+             SIDEBAR NAVIGASI (Copy dari dashboard.html)
+             ================================================ -->
+        <aside id="sidebar" class="w-64 bg-pai-hijau-800 text-white fixed h-full z-50">
+            
+            <!-- Header Sidebar -->
+            <div class="p-6 border-b border-pai-hijau-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                        <i class="fas fa-mosque text-pai-hijau-700 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">Admin PAI</h1>
+                        <p class="text-pai-hijau-300 text-xs">Satu Pintu</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Menu Navigasi -->
+            <nav class="p-4">
+                <p class="text-pai-hijau-400 text-xs uppercase tracking-wider mb-4 px-3">
+                    Menu Utama
+                </p>
+                
+                <ul class="space-y-2">
+                    <!-- Dashboard -->
+                    <li>
+                        <a href="dashboard.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-home w-5"></i>
+                            <span class="ml-3">Dashboard</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Profil Guru - AKTIF -->
+                    <li>
+                        <a href="profil.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg bg-pai-hijau-700 text-white">
+                            <i class="fas fa-user w-5"></i>
+                            <span class="ml-3">Profil Guru</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Kalender Pendidikan -->
+                    <li>
+                        <a href="kalender.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-calendar-alt w-5"></i>
+                            <span class="ml-3">Kalender Pendidikan</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Perencanaan -->
+                    <li>
+                        <a href="perencanaan.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-tasks w-5"></i>
+                            <span class="ml-3">Perencanaan</span>
+                            <span class="ml-auto bg-pai-hijau-600 text-xs px-2 py-1 rounded-full">
+                                Prota/Promes
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <!-- Modul Ajar -->
+                    <li>
+                        <a href="modul-ajar.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-book-open w-5"></i>
+                            <span class="ml-3">Modul Ajar</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Absensi -->
+                    <li>
+                        <a href="absensi.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-clipboard-check w-5"></i>
+                            <span class="ml-3">Absensi Siswa</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Nilai -->
+                    <li>
+                        <a href="nilai.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-chart-bar w-5"></i>
+                            <span class="ml-3">Daftar Nilai</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Kategori Dokumen -->
+                <p class="text-pai-hijau-400 text-xs uppercase tracking-wider mb-4 px-3 mt-8">
+                    Dokumen
+                </p>
+                
+                <ul class="space-y-2">
+                    <li>
+                        <a href="cetak.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-print w-5"></i>
+                            <span class="ml-3">Cetak Dokumen</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Footer Sidebar: Info User -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-pai-hijau-700">
+                <div class="flex items-center space-x-3">
+                    <div id="foto-profil-sidebar" class="w-10 h-10 bg-pai-hijau-600 rounded-full flex items-center justify-center overflow-hidden">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p id="nama-guru-sidebar" class="text-sm font-medium truncate">Memuat...</p>
+                        <p class="text-pai-hijau-400 text-xs">Guru PAI</p>
+                    </div>
+                    <button onclick="logoutUser()" 
+                            class="text-pai-hijau-400 hover:text-white transition-colors"
+                            title="Keluar">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- ================================================
+             KONTEN UTAMA (Bagian Kanan)
+             ================================================ -->
+        <main class="flex-1 ml-64">
+            
+            <!-- Header Atas -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-8 py-4 sticky top-0 z-40">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Profil Guru</h2>
+                        <p class="text-gray-500 text-sm">Lengkapi data diri Anda untuk memulai</p>
+                    </div>
+                    
+                    <!-- Indikator Status -->
+                    <div id="status-profil" class="flex items-center space-x-2">
+                        <span class="flex h-3 w-3 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+                        </span>
+                        <span class="text-sm text-yellow-600 font-medium">Belum Lengkap</span>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- ================================================
+                 AREA KONTEN FORM PROFIL
+                 ================================================ -->
+            <div class="p-8">
+                
+                <!-- Progress Bar Kelengkapan -->
+                <div class="bg-white rounded-2xl shadow-md p-6 mb-6 fade-in">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-gray-700">
+                            <i class="fas fa-tasks text-pai-hijau-600 mr-2"></i>
+                            Kelengkapan Profil
+                        </h3>
+                        <span id="persen-kelengkapan" class="text-2xl font-bold text-pai-hijau-600">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div id="progress-bar" 
+                             class="bg-gradient-to-r from-pai-hijau-400 to-pai-hijau-600 h-3 rounded-full transition-all duration-500" 
+                             style="width: 0%"></div>
+                    </div>
+                    <p id="pesan-kelengkapan" class="text-sm text-gray-500 mt-2">
+                        Silakan lengkapi semua data di bawah ini
+                    </p>
+                </div>
+                
+                <!-- Form Profil Guru -->
+                <form id="form-profil" class="space-y-6">
+                    
+                    <!-- ================================================
+                         SECTION 1: DATA PRIBADI
+                         ================================================ -->
+                    <div class="bg-white rounded-2xl shadow-md p-6 fade-in">
+                        
+                        <!-- Header Section -->
+                        <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-id-card text-blue-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">Data Pribadi</h3>
+                                <p class="text-sm text-gray-500">Informasi dasar tentang Anda</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Grid Form 2 Kolom -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <!-- Input: Nama Lengkap -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-user text-gray-400 mr-2"></i>
+                                    Nama Lengkap Beserta Gelar
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" 
+                                       id="input-nama" 
+                                       name="namaLengkap"
+                                       required
+                                       placeholder="Contoh: Budi Santoso, S.Pd.I"
+                                       class="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none transition-all">
+                                <p class="text-xs text-gray-400 mt-1">
+                                    Tuliskan nama lengkap sesuai SK/Ijazah beserta gelar
+                                </p>
+                            </div>
+                            
+                            <!-- Input: NIP -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-id-badge text-gray-400 mr-2"></i>
+                                    NIP (Nomor Induk Pegawai)
+                                </label>
+                                <input type="text" 
+                                       id="input-nip" 
+                                       name="nip"
+                                       placeholder="Contoh: 198501152010011001"
+                                       maxlength="18"
+                                       pattern="[0-9]*"
+                                       class="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none transition-all">
+                                <p class="text-xs text-gray-400 mt-1">
+                                    18 digit angka (kosongkan jika Non-PNS)
+                                </p>
+                            </div>
+                            
+                            <!-- Input: NUPTK -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-fingerprint text-gray-400 mr-2"></i>
+                                    NUPTK
+                                </label>
+                                <input type="text" 
+                                       id="input-nuptk" 
+                                       name="nuptk"
+                                       placeholder="Contoh: 1234567890123456"
+                                       maxlength="16"
+                                       class="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none transition-all">
+                                <p class="text-xs text-gray-400 mt-1">
+                                    16 digit Nomor Unik Pendidik dan Tenaga Kependidikan
+                                </p>
+                            </div>
+                            
+                            <!-- Input: Jenis Kelamin -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-venus-mars text-gray-400 mr-2"></i>
+                                    Jenis Kelamin
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex space-x-4">
+                                    <label class="flex items-center p-4 border border-gray-300 rounded-xl cursor-pointer hover:border-pai-hijau-500 transition-all flex-1">
+                                        <input type="radio" 
+                                               name="jenisKelamin" 
+                                               value="Laki-laki"
+                                               required
+                                               class="w-4 h-4 text-pai-hijau-600 focus:ring-pai-hijau-500">
+                                        <span class="ml-3 text-gray-700">
+                                            <i class="fas fa-mars text-blue-500 mr-1"></i>
+                                            Laki-laki
+                                        </span>
+                                    </label>
+                                    <label class="flex items-center p-4 border border-gray-300 rounded-xl cursor-pointer hover:border-pai-hijau-500 transition-all flex-1">
+                                        <input type="radio" 
+                                               name="jenisKelamin" 
+                                               value="Perempuan"
+                                               class="w-4 h-4 text-pai-hijau-600 focus:ring-pai-hijau-500">
+                                        <span class="ml-3 text-gray-700">
+                                            <i class="fas fa-venus text-pink-500 mr-1"></i>
+                                            Perempuan
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Input: No. HP -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-phone text-gray-400 mr-2"></i>
+                                    Nomor HP/WhatsApp
+                                </label>
+                                <input type="tel" 
+                                       id="input-nohp" 
+                                       name="noHP"
+                                       placeholder="Contoh: 081234567890"
+                                       class="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none transition-all">
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                    <!-- ================================================
+                         SECTION 2: DATA SEKOLAH
+                         ================================================ -->
+                    <div class="bg-white rounded-2xl shadow-md p-6 fade-in">
+                        
+                        <!-- Header Section -->
+                        <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-school text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">Data Sekolah</h3>
+                                <p class="text-sm text-gray-500">Informasi tempat Anda mengajar</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <!-- Input: Nama Sekolah -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-building text-gray-400 mr-2"></i>
+                                    Nama Sekolah
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" 
+                                       id="input-sekolah" 
+                                       name="namaSekolah"
+                                       required
+                                       placeholder="Contoh: SDN 1 Sukamaju"
+                                       class="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none transition-all">
+                            </div>
+                            
+                            <!-- Input: NPSN -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-hashtag text-gray-400 mr-2"></i>
+                                    NPSN Sekolah
+                                </label>
+                                <input type="text" 
+                                       id="input-npsn" 
+                                       name="npsn"
+                                       placeholder="Contoh: 20123456"
+                                       maxlength="8"
+                                       class="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none transition-all">
+                                <p class="text-xs text-gray-400 mt-1">
+                                    8 digit Nomor Pokok Sekolah Nasional
+                                </p>
+                            </div>
+                            
+                            <!-- Input: Alamat Sekolah -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-map-marker-alt text-gray-400 mr-2"></i>
+                                    Alamat Sekolah
+                                </label>
+                                <input type="text" 
+                                       id="input-alamat" 
+                                       name="alamatSekolah"
+                                       placeholder="Contoh: Jl. Pendidikan No. 123"
+                                       class="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none transition-all">
+                            </div>
+                            
+                            <!-- Input: Kabupaten/Kota -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-city text-gray-400 mr-2"></i>
+                                    Kabupaten/Kota
+                                </label>
+                                <input type="text" 
+                                       id="input-kabupaten" 
+                                       name="kabupaten"
+                                       placeholder="Contoh: Kab. Bandung"
+                                       class="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none transition-all">
+                            </div>
+                            
+                            <!-- Input: Provinsi -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-map text-gray-400 mr-2"></i>
+                                    Provinsi
+                                </label>
+                                <select id="input-provinsi" 
+                                        name="provinsi"
+                                        class="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none transition-all bg-white">
+                                    <option value="">-- Pilih Provinsi --</option>
+                                    <option value="Aceh">Aceh</option>
+                                    <option value="Sumatera Utara">Sumatera Utara</option>
+                                    <option value="Sumatera Barat">Sumatera Barat</option>
+                                    <option value="Riau">Riau</option>
+                                    <option value="Jambi">Jambi</option>
+                                    <option value="Sumatera Selatan">Sumatera Selatan</option>
+                                    <option value="Bengkulu">Bengkulu</option>
+                                    <option value="Lampung">Lampung</option>
+                                    <option value="Kepulauan Bangka Belitung">Kepulauan Bangka Belitung</option>
+                                    <option value="Kepulauan Riau">Kepulauan Riau</option>
+                                    <option value="DKI Jakarta">DKI Jakarta</option>
+                                    <option value="Jawa Barat">Jawa Barat</option>
+                                    <option value="Jawa Tengah">Jawa Tengah</option>
+                                    <option value="DI Yogyakarta">DI Yogyakarta</option>
+                                    <option value="Jawa Timur">Jawa Timur</option>
+                                    <option value="Banten">Banten</option>
+                                    <option value="Bali">Bali</option>
+                                    <option value="Nusa Tenggara Barat">Nusa Tenggara Barat</option>
+                                    <option value="Nusa Tenggara Timur">Nusa Tenggara Timur</option>
+                                    <option value="Kalimantan Barat">Kalimantan Barat</option>
+                                    <option value="Kalimantan Tengah">Kalimantan Tengah</option>
+                                    <option value="Kalimantan Selatan">Kalimantan Selatan</option>
+                                    <option value="Kalimantan Timur">Kalimantan Timur</option>
+                                    <option value="Kalimantan Utara">Kalimantan Utara</option>
+                                    <option value="Sulawesi Utara">Sulawesi Utara</option>
+                                    <option value="Sulawesi Tengah">Sulawesi Tengah</option>
+                                    <option value="Sulawesi Selatan">Sulawesi Selatan</option>
+                                    <option value="Sulawesi Tenggara">Sulawesi Tenggara</option>
+                                    <option value="Gorontalo">Gorontalo</option>
+                                    <option value="Sulawesi Barat">Sulawesi Barat</option>
+                                    <option value="Maluku">Maluku</option>
+                                    <option value="Maluku Utara">Maluku Utara</option>
+                                    <option value="Papua">Papua</option>
+                                    <option value="Papua Barat">Papua Barat</option>
+                                    <option value="Papua Selatan">Papua Selatan</option>
+                                    <option value="Papua Tengah">Papua Tengah</option>
+                                    <option value="Papua Pegunungan">Papua Pegunungan</option>
+                                    <option value="Papua Barat Daya">Papua Barat Daya</option>
+                                </select>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                    <!-- ================================================
+                         SECTION 3: KELAS YANG DIAMPU
+                         ================================================ -->
+                    <div class="bg-white rounded-2xl shadow-md p-6 fade-in">
+                        
+                        <!-- Header Section -->
+                        <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-chalkboard-teacher text-purple-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">Kelas yang Diampu</h3>
+                                <p class="text-sm text-gray-500">Pilih kelas yang Anda ajar PAI</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Info Fase -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+                                <div class="text-sm text-blue-700">
+                                    <p class="font-medium mb-1">Informasi Fase Kurikulum Merdeka:</p>
+                                    <ul class="list-disc list-inside space-y-1 text-blue-600">
+                                        <li><strong>Fase A</strong> = Kelas 1 & 2</li>
+                                        <li><strong>Fase B</strong> = Kelas 3 & 4</li>
+                                        <li><strong>Fase C</strong> = Kelas 5 & 6</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pilihan Kelas dengan Checkbox -->
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                            
+                            <!-- Kelas 1 -->
+                            <div class="relative">
+                                <input type="checkbox" 
+                                       id="kelas-1" 
+                                       name="kelasAmpu" 
+                                       value="1"
+                                       class="kelas-checkbox sr-only peer">
+                                <label for="kelas-1" 
+                                       class="flex flex-col items-center p-4 border-2 border-gray-300 rounded-xl cursor-pointer hover:border-pai-hijau-400 transition-all peer-checked:border-pai-hijau-600 peer-checked:bg-pai-hijau-600 peer-checked:text-white">
+                                    <span class="text-3xl font-bold mb-1">1</span>
+                                    <span class="text-xs opacity-75">Fase A</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Kelas 2 -->
+                            <div class="relative">
+                                <input type="checkbox" 
+                                       id="kelas-2" 
+                                       name="kelasAmpu" 
+                                       value="2"
+                                       class="kelas-checkbox sr-only peer">
+                                <label for="kelas-2" 
+                                       class="flex flex-col items-center p-4 border-2 border-gray-300 rounded-xl cursor-pointer hover:border-pai-hijau-400 transition-all peer-checked:border-pai-hijau-600 peer-checked:bg-pai-hijau-600 peer-checked:text-white">
+                                    <span class="text-3xl font-bold mb-1">2</span>
+                                    <span class="text-xs opacity-75">Fase A</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Kelas 3 -->
+                            <div class="relative">
+                                <input type="checkbox" 
+                                       id="kelas-3" 
+                                       name="kelasAmpu" 
+                                       value="3"
+                                       class="kelas-checkbox sr-only peer">
+                                <label for="kelas-3" 
+                                       class="flex flex-col items-center p-4 border-2 border-gray-300 rounded-xl cursor-pointer hover:border-pai-hijau-400 transition-all peer-checked:border-pai-hijau-600 peer-checked:bg-pai-hijau-600 peer-checked:text-white">
+                                    <span class="text-3xl font-bold mb-1">3</span>
+                                    <span class="text-xs opacity-75">Fase B</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Kelas 4 -->
+                            <div class="relative">
+                                <input type="checkbox" 
+                                       id="kelas-4" 
+                                       name="kelasAmpu" 
+                                       value="4"
+                                       class="kelas-checkbox sr-only peer">
+                                <label for="kelas-4" 
+                                       class="flex flex-col items-center p-4 border-2 border-gray-300 rounded-xl cursor-pointer hover:border-pai-hijau-400 transition-all peer-checked:border-pai-hijau-600 peer-checked:bg-pai-hijau-600 peer-checked:text-white">
+                                    <span class="text-3xl font-bold mb-1">4</span>
+                                    <span class="text-xs opacity-75">Fase B</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Kelas 5 -->
+                            <div class="relative">
+                                <input type="checkbox" 
+                                       id="kelas-5" 
+                                       name="kelasAmpu" 
+                                       value="5"
+                                       class="kelas-checkbox sr-only peer">
+                                <label for="kelas-5" 
+                                       class="flex flex-col items-center p-4 border-2 border-gray-300 rounded-xl cursor-pointer hover:border-pai-hijau-400 transition-all peer-checked:border-pai-hijau-600 peer-checked:bg-pai-hijau-600 peer-checked:text-white">
+                                    <span class="text-3xl font-bold mb-1">5</span>
+                                    <span class="text-xs opacity-75">Fase C</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Kelas 6 -->
+                            <div class="relative">
+                                <input type="checkbox" 
+                                       id="kelas-6" 
+                                       name="kelasAmpu" 
+                                       value="6"
+                                       class="kelas-checkbox sr-only peer">
+                                <label for="kelas-6" 
+                                       class="flex flex-col items-center p-4 border-2 border-gray-300 rounded-xl cursor-pointer hover:border-pai-hijau-400 transition-all peer-checked:border-pai-hijau-600 peer-checked:bg-pai-hijau-600 peer-checked:text-white">
+                                    <span class="text-3xl font-bold mb-1">6</span>
+                                    <span class="text-xs opacity-75">Fase C</span>
+                                </label>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- Validasi Kelas -->
+                        <p id="error-kelas" class="text-red-500 text-sm mt-3 hidden">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            Pilih minimal satu kelas yang Anda ampu
+                        </p>
+                        
+                    </div>
+                    
+                    <!-- ================================================
+                         SECTION 4: TAHUN AJARAN
+                         ================================================ -->
+                    <div class="bg-white rounded-2xl shadow-md p-6 fade-in">
+                        
+                        <!-- Header Section -->
+                        <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
+                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-calendar-check text-orange-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">Tahun Ajaran Aktif</h3>
+                                <p class="text-sm text-gray-500">Periode administrasi yang sedang berjalan</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <!-- Input: Tahun Ajaran -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar text-gray-400 mr-2"></i>
+                                    Tahun Ajaran
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <select id="input-tahun-ajaran" 
+                                        name="tahunAjaran"
+                                        required
+                                        class="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none transition-all bg-white">
+                                    <option value="">-- Pilih Tahun Ajaran --</option>
+                                    <option value="2024-2025">2024/2025</option>
+                                    <option value="2025-2026">2025/2026</option>
+                                    <option value="2026-2027">2026/2027</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Input: Semester Aktif -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-clock text-gray-400 mr-2"></i>
+                                    Semester Aktif
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <select id="input-semester" 
+                                        name="semesterAktif"
+                                        required
+                                        class="input-focus w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none transition-all bg-white">
+                                    <option value="">-- Pilih Semester --</option>
+                                    <option value="ganjil">Semester 1 (Ganjil)</option>
+                                    <option value="genap">Semester 2 (Genap)</option>
+                                </select>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                    <!-- ================================================
+                         TOMBOL AKSI
+                         ================================================ -->
+                    <div class="flex flex-col sm:flex-row gap-4 justify-end">
+                        
+                        <!-- Tombol Reset -->
+                        <button type="button" 
+                                onclick="resetForm()"
+                                class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center">
+                            <i class="fas fa-undo mr-2"></i>
+                            Reset Form
+                        </button>
+                        
+                        <!-- Tombol Simpan -->
+                        <button type="submit" 
+                                id="btn-simpan"
+                                class="px-8 py-3 bg-pai-hijau-600 text-white font-bold rounded-xl hover:bg-pai-hijau-700 transition-colors flex items-center justify-center shadow-lg hover:shadow-xl">
+                            <i class="fas fa-save mr-2"></i>
+                            Simpan Profil
+                        </button>
+                        
+                    </div>
+                    
+                </form>
+                
+            </div>
+            
+            <!-- Footer -->
+            <footer class="bg-white border-t border-gray-200 px-8 py-4 text-center text-gray-500 text-sm">
+                <p>© 2025 Admin PAI Satu Pintu - Dibuat dengan ❤️ untuk Guru PAI Indonesia</p>
+            </footer>
+            
+        </main>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-8 rounded-2xl text-center">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Menyimpan data...</p>
+        </div>
+    </div>
+    
+    <!-- ================================================
+         IMPORT FIREBASE SDK & JAVASCRIPT FILES
+         ================================================ -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/database.js"></script>
+    
+    <!-- ================================================
+         SCRIPT KHUSUS HALAMAN PROFIL
+         ================================================ -->
+    <script>
+        /**
+         * =====================================================
+         * VARIABEL GLOBAL
+         * =====================================================
+         */
+        let currentUserData = null;  // Menyimpan data user saat ini
+        
+        /**
+         * =====================================================
+         * FUNGSI: Inisialisasi halaman saat DOM siap
+         * =====================================================
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cek status login
+            checkAuthState();
+            
+            // Pasang event listener untuk form
+            setupFormListeners();
+        });
+        
+        /**
+         * =====================================================
+         * FUNGSI: Cek status autentikasi dan muat data
+         * =====================================================
+         */
+        function checkAuthState() {
+            showLoading();
+            
+            auth.onAuthStateChanged(async (user) => {
+                hideLoading();
+                
+                if (user) {
+                    // User sudah login, muat data profil
+                    console.log("👤 User login:", user.email);
+                    await loadUserProfile(user.uid);
+                } else {
+                    // Belum login, redirect ke halaman login
+                    console.log("👤 User belum login, redirect ke login");
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Muat data profil dari Firestore
+         * =====================================================
+         */
+        async function loadUserProfile(userId) {
+            try {
+                showLoading();
+                
+                // Ambil data dari Firestore
+                const doc = await db.collection('users').doc(userId).get();
+                
+                if (doc.exists) {
+                    currentUserData = doc.data();
+                    console.log("📦 Data profil dimuat:", currentUserData);
+                    
+                    // Isi form dengan data yang ada
+                    fillFormWithData(currentUserData);
+                    
+                    // Update sidebar
+                    updateSidebar(currentUserData);
+                    
+                    // Hitung kelengkapan
+                    hitungKelengkapan();
+                } else {
+                    console.log("📦 Profil belum ada, form kosong");
+                }
+                
+                hideLoading();
+                
+            } catch (error) {
+                console.error("❌ Gagal memuat profil:", error);
+                hideLoading();
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Memuat Data',
+                    text: 'Terjadi kesalahan saat memuat profil. Silakan refresh halaman.',
+                    confirmButtonColor: '#16a34a'
+                });
+            }
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Isi form dengan data yang sudah ada
+         * =====================================================
+         */
+        function fillFormWithData(data) {
+            // Data Pribadi
+            if (data.namaLengkap) {
+                document.getElementById('input-nama').value = data.namaLengkap;
+            }
+            if (data.nip) {
+                document.getElementById('input-nip').value = data.nip;
+            }
+            if (data.nuptk) {
+                document.getElementById('input-nuptk').value = data.nuptk;
+            }
+            if (data.jenisKelamin) {
+                const radio = document.querySelector(`input[name="jenisKelamin"][value="${data.jenisKelamin}"]`);
+                if (radio) radio.checked = true;
+            }
+            if (data.noHP) {
+                document.getElementById('input-nohp').value = data.noHP;
+            }
+            
+            // Data Sekolah
+            if (data.namaSekolah) {
+                document.getElementById('input-sekolah').value = data.namaSekolah;
+            }
+            if (data.npsn) {
+                document.getElementById('input-npsn').value = data.npsn;
+            }
+            if (data.alamatSekolah) {
+                document.getElementById('input-alamat').value = data.alamatSekolah;
+            }
+            if (data.kabupaten) {
+                document.getElementById('input-kabupaten').value = data.kabupaten;
+            }
+            if (data.provinsi) {
+                document.getElementById('input-provinsi').value = data.provinsi;
+            }
+            
+            // Kelas yang Diampu
+            if (data.kelasAmpu && Array.isArray(data.kelasAmpu)) {
+                data.kelasAmpu.forEach(kelas => {
+                    const checkbox = document.getElementById(`kelas-${kelas}`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
+            
+            // Tahun Ajaran
+            if (data.tahunAjaran) {
+                document.getElementById('input-tahun-ajaran').value = data.tahunAjaran;
+            }
+            if (data.semesterAktif) {
+                document.getElementById('input-semester').value = data.semesterAktif;
+            }
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Update tampilan sidebar dengan data user
+         * =====================================================
+         */
+        function updateSidebar(data) {
+            // Update nama di sidebar
+            const namaElement = document.getElementById('nama-guru-sidebar');
+            if (namaElement && data.namaLengkap) {
+                namaElement.textContent = data.namaLengkap;
+            }
+            
+            // Update foto profil jika ada
+            if (data.fotoProfil) {
+                const fotoElement = document.getElementById('foto-profil-sidebar');
+                if (fotoElement) {
+                    fotoElement.innerHTML = `<img src="${data.fotoProfil}" alt="Foto" class="w-full h-full object-cover">`;
+                }
+            }
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Setup event listener untuk form
+         * =====================================================
+         */
+        function setupFormListeners() {
+            const form = document.getElementById('form-profil');
+            
+            // Event submit form
+            form.addEventListener('submit', handleSubmit);
+            
+            // Event change untuk menghitung kelengkapan real-time
+            form.querySelectorAll('input, select').forEach(input => {
+                input.addEventListener('change', hitungKelengkapan);
+                input.addEventListener('input', hitungKelengkapan);
+            });
+            
+            // Validasi khusus NIP (hanya angka)
+            document.getElementById('input-nip').addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            
+            // Validasi khusus NUPTK (hanya angka)
+            document.getElementById('input-nuptk').addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            
+            // Validasi khusus NPSN (hanya angka)
+            document.getElementById('input-npsn').addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            
+            // Validasi No HP
+            document.getElementById('input-nohp').addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9+\-\s]/g, '');
+            });
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Handle submit form
+         * =====================================================
+         */
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            // Validasi kelas yang diampu
+            const kelasCheckboxes = document.querySelectorAll('input[name="kelasAmpu"]:checked');
+            if (kelasCheckboxes.length === 0) {
+                document.getElementById('error-kelas').classList.remove('hidden');
+                
+                // Scroll ke bagian kelas
+                document.getElementById('error-kelas').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                return;
+            } else {
+                document.getElementById('error-kelas').classList.add('hidden');
+            }
+            
+            // Kumpulkan data dari form
+            const formData = collectFormData();
+            
+            // Tampilkan loading
+            showLoading();
+            
+            // Update tombol
+            const btnSimpan = document.getElementById('btn-simpan');
+            const originalText = btnSimpan.innerHTML;
+            btnSimpan.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
+            btnSimpan.disabled = true;
+            
+            try {
+                // Simpan ke Firestore
+                const user = auth.currentUser;
+                
+                await db.collection('users').doc(user.uid).set({
+                    ...formData,
+                    email: user.email,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                
+                hideLoading();
+                
+                // Tampilkan notifikasi sukses
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Profil Anda berhasil disimpan.',
+                    confirmButtonColor: '#16a34a',
+                    timer: 2000,
+                    timerProgressBar: true
+                }).then(() => {
+                    // Update sidebar
+                    updateSidebar(formData);
+                    
+                    // Hitung ulang kelengkapan
+                    hitungKelengkapan();
+                });
+                
+                console.log("✅ Profil berhasil disimpan");
+                
+            } catch (error) {
+                console.error("❌ Gagal menyimpan profil:", error);
+                hideLoading();
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Menyimpan',
+                    text: 'Terjadi kesalahan. Silakan coba lagi.',
+                    confirmButtonColor: '#16a34a'
+                });
+                
+            } finally {
+                // Kembalikan tombol
+                btnSimpan.innerHTML = originalText;
+                btnSimpan.disabled = false;
+            }
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Kumpulkan data dari form
+         * =====================================================
+         */
+        function collectFormData() {
+            // Kumpulkan kelas yang dipilih
+            const kelasCheckboxes = document.querySelectorAll('input[name="kelasAmpu"]:checked');
+            const kelasAmpu = Array.from(kelasCheckboxes).map(cb => cb.value);
+            
+            // Kumpulkan jenis kelamin
+            const jenisKelamin = document.querySelector('input[name="jenisKelamin"]:checked');
+            
+            return {
+                // Data Pribadi
+                namaLengkap: document.getElementById('input-nama').value.trim(),
+                nip: document.getElementById('input-nip').value.trim(),
+                nuptk: document.getElementById('input-nuptk').value.trim(),
+                jenisKelamin: jenisKelamin ? jenisKelamin.value : '',
+                noHP: document.getElementById('input-nohp').value.trim(),
+                
+                // Data Sekolah
+                namaSekolah: document.getElementById('input-sekolah').value.trim(),
+                npsn: document.getElementById('input-npsn').value.trim(),
+                alamatSekolah: document.getElementById('input-alamat').value.trim(),
+                kabupaten: document.getElementById('input-kabupaten').value.trim(),
+                provinsi: document.getElementById('input-provinsi').value,
+                
+                // Kelas yang Diampu
+                kelasAmpu: kelasAmpu,
+                
+                // Tahun Ajaran
+                tahunAjaran: document.getElementById('input-tahun-ajaran').value,
+                semesterAktif: document.getElementById('input-semester').value
+            };
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Hitung persentase kelengkapan profil
+         * =====================================================
+         */
+        function hitungKelengkapan() {
+            // Daftar field yang dihitung (field wajib + penting)
+            const fieldsToCheck = [
+                { id: 'input-nama', weight: 15 },           // Wajib
+                { id: 'input-sekolah', weight: 15 },        // Wajib
+                { type: 'radio', name: 'jenisKelamin', weight: 10 },  // Wajib
+                { id: 'input-tahun-ajaran', weight: 10 },   // Wajib
+                { id: 'input-semester', weight: 10 },       // Wajib
+                { type: 'checkbox', name: 'kelasAmpu', weight: 15 },  // Wajib
+                { id: 'input-nip', weight: 5 },             // Opsional
+                { id: 'input-nuptk', weight: 5 },           // Opsional
+                { id: 'input-nohp', weight: 5 },            // Opsional
+                { id: 'input-npsn', weight: 5 },            // Opsional
+                { id: 'input-provinsi', weight: 5 }         // Opsional
+            ];
+            
+            let totalScore = 0;
+            let maxScore = 0;
+            
+            fieldsToCheck.forEach(field => {
+                maxScore += field.weight;
+                
+                if (field.type === 'radio') {
+                    // Cek radio button
+                    const checked = document.querySelector(`input[name="${field.name}"]:checked`);
+                    if (checked) totalScore += field.weight;
+                } else if (field.type === 'checkbox') {
+                    // Cek checkbox (minimal 1 terpilih)
+                    const checked = document.querySelectorAll(`input[name="${field.name}"]:checked`);
+                    if (checked.length > 0) totalScore += field.weight;
+                } else {
+                    // Cek input biasa
+                    const input = document.getElementById(field.id);
+                    if (input && input.value.trim() !== '') {
+                        totalScore += field.weight;
+                    }
+                }
+            });
+            
+            // Hitung persentase
+            const persen = Math.round((totalScore / maxScore) * 100);
+            
+            // Update tampilan
+            document.getElementById('persen-kelengkapan').textContent = persen + '%';
+            document.getElementById('progress-bar').style.width = persen + '%';
+            
+            // Update pesan dan warna
+            const statusElement = document.getElementById('status-profil');
+            const pesanElement = document.getElementById('pesan-kelengkapan');
+            
+            if (persen === 100) {
+                // Lengkap
+                pesanElement.textContent = '🎉 Profil Anda sudah lengkap! Silakan lanjut ke Kalender Pendidikan.';
+                pesanElement.className = 'text-sm text-green-600 mt-2 font-medium';
+                
+                statusElement.innerHTML = `
+                    <span class="flex h-3 w-3 relative">
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                    <span class="text-sm text-green-600 font-medium">Lengkap</span>
+                `;
+            } else if (persen >= 75) {
+                // Hampir lengkap
+                pesanElement.textContent = 'Hampir selesai! Lengkapi beberapa data lagi.';
+                pesanElement.className = 'text-sm text-blue-600 mt-2';
+                
+                statusElement.innerHTML = `
+                    <span class="flex h-3 w-3 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                    </span>
+                    <span class="text-sm text-blue-600 font-medium">Hampir Lengkap</span>
+                `;
+            } else {
+                // Belum lengkap
+                pesanElement.textContent = 'Silakan lengkapi semua data di bawah ini';
+                pesanElement.className = 'text-sm text-gray-500 mt-2';
+                
+                statusElement.innerHTML = `
+                    <span class="flex h-3 w-3 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+                    </span>
+                    <span class="text-sm text-yellow-600 font-medium">Belum Lengkap</span>
+                `;
+            }
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Reset form ke kondisi awal
+         * =====================================================
+         */
+        function resetForm() {
+            Swal.fire({
+                title: 'Reset Form?',
+                text: 'Semua perubahan yang belum disimpan akan hilang.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Reset',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Reset form
+                    document.getElementById('form-profil').reset();
+                    
+                    // Jika ada data sebelumnya, kembalikan
+                    if (currentUserData) {
+                        fillFormWithData(currentUserData);
+                    }
+                    
+                    // Hitung ulang kelengkapan
+                    hitungKelengkapan();
+                    
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Form Direset',
+                        text: 'Data dikembalikan ke kondisi terakhir yang tersimpan.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Logout user
+         * =====================================================
+         */
+        async function logoutUser() {
+            Swal.fire({
+                title: 'Keluar dari Aplikasi?',
+                text: 'Anda akan diarahkan ke halaman login.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Keluar',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        await auth.signOut();
+                        window.location.href = 'index.html';
+                    } catch (error) {
+                        console.error("❌ Gagal logout:", error);
+                    }
+                }
+            });
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI BANTUAN: Tampilkan/Sembunyikan Loading
+         * =====================================================
+         */
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+    </script>
+    
+</body>
+</html>

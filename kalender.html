@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalender Pendidikan - Admin PAI Satu Pintu</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Konfigurasi Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pai-hijau': {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Animasi sidebar */
+        .sidebar-link {
+            transition: all 0.3s ease;
+        }
+        .sidebar-link:hover {
+            transform: translateX(5px);
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #16a34a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Animasi fade in */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* Style untuk minggu di kalender */
+        .week-row {
+            transition: all 0.2s ease;
+        }
+        .week-row:hover {
+            background-color: #f0fdf4;
+        }
+        
+        /* Checkbox toggle style */
+        .toggle-checkbox:checked {
+            background-color: #16a34a;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #16a34a;
+        }
+        .toggle-checkbox:checked + .toggle-label .toggle-dot {
+            transform: translateX(100%);
+            background-color: white;
+        }
+        
+        /* Style untuk sel kalender */
+        .calendar-cell {
+            transition: all 0.2s ease;
+        }
+        .calendar-cell:hover {
+            transform: scale(1.1);
+        }
+        .calendar-cell.efektif {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .calendar-cell.tidak-efektif {
+            background-color: #fee2e2;
+            color: #991b1b;
+            text-decoration: line-through;
+        }
+        .calendar-cell.libur {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    
+    <!-- Container Utama -->
+    <div class="flex min-h-screen">
+        
+        <!-- ================================================
+             SIDEBAR NAVIGASI
+             ================================================ -->
+        <aside id="sidebar" class="w-64 bg-pai-hijau-800 text-white fixed h-full z-50">
+            
+            <!-- Header Sidebar -->
+            <div class="p-6 border-b border-pai-hijau-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                        <i class="fas fa-mosque text-pai-hijau-700 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">Admin PAI</h1>
+                        <p class="text-pai-hijau-300 text-xs">Satu Pintu</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Menu Navigasi -->
+            <nav class="p-4">
+                <p class="text-pai-hijau-400 text-xs uppercase tracking-wider mb-4 px-3">
+                    Menu Utama
+                </p>
+                
+                <ul class="space-y-2">
+                    <li>
+                        <a href="dashboard.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-home w-5"></i>
+                            <span class="ml-3">Dashboard</span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="profil.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-user w-5"></i>
+                            <span class="ml-3">Profil Guru</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Menu Aktif: Kalender -->
+                    <li>
+                        <a href="kalender.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg bg-pai-hijau-700 text-white">
+                            <i class="fas fa-calendar-alt w-5"></i>
+                            <span class="ml-3">Kalender Pendidikan</span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="perencanaan.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-tasks w-5"></i>
+                            <span class="ml-3">Perencanaan</span>
+                            <span class="ml-auto bg-pai-hijau-600 text-xs px-2 py-1 rounded-full">
+                                Prota/Promes
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="modul-ajar.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-book-open w-5"></i>
+                            <span class="ml-3">Modul Ajar</span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="absensi.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-clipboard-check w-5"></i>
+                            <span class="ml-3">Absensi Siswa</span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="nilai.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-chart-bar w-5"></i>
+                            <span class="ml-3">Daftar Nilai</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <p class="text-pai-hijau-400 text-xs uppercase tracking-wider mb-4 px-3 mt-8">
+                    Dokumen
+                </p>
+                
+                <ul class="space-y-2">
+                    <li>
+                        <a href="cetak.html" 
+                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
+                            <i class="fas fa-print w-5"></i>
+                            <span class="ml-3">Cetak Dokumen</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Footer Sidebar -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-pai-hijau-700">
+                <div class="flex items-center space-x-3">
+                    <div id="foto-profil-sidebar" class="w-10 h-10 bg-pai-hijau-600 rounded-full flex items-center justify-center overflow-hidden">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p id="nama-guru-sidebar" class="text-sm font-medium truncate">Memuat...</p>
+                        <p class="text-pai-hijau-400 text-xs">Guru PAI</p>
+                    </div>
+                    <button onclick="logoutUser()" 
+                            class="text-pai-hijau-400 hover:text-white transition-colors"
+                            title="Keluar">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- ================================================
+             KONTEN UTAMA
+             ================================================ -->
+        <main class="flex-1 ml-64">
+            
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-8 py-4 sticky top-0 z-40">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Kalender Pendidikan</h2>
+                        <p class="text-gray-500 text-sm">Atur minggu efektif untuk perencanaan pembelajaran</p>
+                    </div>
+                    
+                    <!-- Tahun Ajaran Aktif -->
+                    <div class="flex items-center space-x-3">
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-gray-700">Tahun Ajaran</p>
+                            <p id="tahun-ajaran-display" class="text-lg font-bold text-pai-hijau-600">-</p>
+                        </div>
+                        <div class="w-12 h-12 bg-pai-hijau-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-calendar text-pai-hijau-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Area Konten -->
+            <div class="p-8">
+                
+                <!-- ================================================
+                     SECTION 1: PENGATURAN TAHUN AJARAN
+                     ================================================ -->
+                <div class="bg-white rounded-2xl shadow-md p-6 mb-6 fade-in">
+                    
+                    <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-cog text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Pengaturan Tahun Ajaran</h3>
+                            <p class="text-sm text-gray-500">Tentukan periode semester ganjil dan genap</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- Pilih Tahun Ajaran -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-calendar-check text-gray-400 mr-2"></i>
+                                Tahun Ajaran <span class="text-red-500">*</span>
+                            </label>
+                            <select id="select-tahun-ajaran" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none bg-white">
+                                <option value="">-- Pilih Tahun Ajaran --</option>
+                                <option value="2024-2025">2024/2025</option>
+                                <option value="2025-2026">2025/2026</option>
+                                <option value="2026-2027">2026/2027</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Jumlah JP per Minggu -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-clock text-gray-400 mr-2"></i>
+                                Jam Pelajaran PAI per Minggu <span class="text-red-500">*</span>
+                            </label>
+                            <select id="select-jp-perminggu" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none bg-white">
+                                <option value="4">4 JP (Standar SD)</option>
+                                <option value="3">3 JP</option>
+                                <option value="2">2 JP</option>
+                            </select>
+                            <p class="text-xs text-gray-400 mt-1">1 JP = 35 menit untuk SD</p>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <!-- ================================================
+                     SECTION 2: SEMESTER GANJIL
+                     ================================================ -->
+                <div class="bg-white rounded-2xl shadow-md p-6 mb-6 fade-in">
+                    
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-leaf text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">Semester 1 (Ganjil)</h3>
+                                <p class="text-sm text-gray-500">Juli - Desember</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Ringkasan Semester Ganjil -->
+                        <div class="text-right">
+                            <p class="text-sm text-gray-500">Total Minggu Efektif</p>
+                            <p id="total-minggu-ganjil" class="text-3xl font-bold text-green-600">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        
+                        <!-- Tanggal Mulai Ganjil -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-play text-gray-400 mr-2"></i>
+                                Tanggal Mulai <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" 
+                                   id="tanggal-mulai-ganjil"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none">
+                        </div>
+                        
+                        <!-- Tanggal Selesai Ganjil -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-stop text-gray-400 mr-2"></i>
+                                Tanggal Selesai <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" 
+                                   id="tanggal-selesai-ganjil"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none">
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Tombol Generate Kalender Ganjil -->
+                    <button type="button" 
+                            onclick="generateKalender('ganjil')"
+                            class="w-full md:w-auto px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center">
+                        <i class="fas fa-calendar-plus mr-2"></i>
+                        Generate Kalender Semester Ganjil
+                    </button>
+                    
+                    <!-- Tabel Kalender Ganjil -->
+                    <div id="kalender-ganjil-container" class="mt-6 hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse">
+                                <thead>
+                                    <tr class="bg-green-50">
+                                        <th class="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Minggu Ke-</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Tanggal</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Bulan</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Status</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabel-kalender-ganjil">
+                                    <!-- Akan diisi oleh JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!-- ================================================
+                     SECTION 3: SEMESTER GENAP
+                     ================================================ -->
+                <div class="bg-white rounded-2xl shadow-md p-6 mb-6 fade-in">
+                    
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-snowflake text-blue-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">Semester 2 (Genap)</h3>
+                                <p class="text-sm text-gray-500">Januari - Juni</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Ringkasan Semester Genap -->
+                        <div class="text-right">
+                            <p class="text-sm text-gray-500">Total Minggu Efektif</p>
+                            <p id="total-minggu-genap" class="text-3xl font-bold text-blue-600">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        
+                        <!-- Tanggal Mulai Genap -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-play text-gray-400 mr-2"></i>
+                                Tanggal Mulai <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" 
+                                   id="tanggal-mulai-genap"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none">
+                        </div>
+                        
+                        <!-- Tanggal Selesai Genap -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-stop text-gray-400 mr-2"></i>
+                                Tanggal Selesai <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" 
+                                   id="tanggal-selesai-genap"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-pai-hijau-500 outline-none">
+                        </div>
+                        
+                    </div>
+                    
+                    <!-- Tombol Generate Kalender Genap -->
+                    <button type="button" 
+                            onclick="generateKalender('genap')"
+                            class="w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center">
+                        <i class="fas fa-calendar-plus mr-2"></i>
+                        Generate Kalender Semester Genap
+                    </button>
+                    
+                    <!-- Tabel Kalender Genap -->
+                    <div id="kalender-genap-container" class="mt-6 hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse">
+                                <thead>
+                                    <tr class="bg-blue-50">
+                                        <th class="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Minggu Ke-</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Tanggal</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Bulan</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Status</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabel-kalender-genap">
+                                    <!-- Akan diisi oleh JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!-- ================================================
+                     SECTION 4: RINGKASAN TAHUNAN
+                     ================================================ -->
+                <div class="bg-gradient-to-r from-pai-hijau-600 to-pai-hijau-800 rounded-2xl shadow-md p-6 mb-6 fade-in text-white">
+                    
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-chart-pie text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold">Ringkasan Tahun Ajaran</h3>
+                            <p class="text-sm text-pai-hijau-200">Rekapitulasi minggu efektif dan jam pelajaran</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        
+                        <!-- Total Minggu Efektif -->
+                        <div class="bg-white/10 rounded-xl p-4 text-center">
+                            <p class="text-pai-hijau-200 text-sm mb-1">Total Minggu Efektif</p>
+                            <p id="ringkasan-total-minggu" class="text-3xl font-bold">0</p>
+                            <p class="text-xs text-pai-hijau-300 mt-1">minggu</p>
+                        </div>
+                        
+                        <!-- Total JP -->
+                        <div class="bg-white/10 rounded-xl p-4 text-center">
+                            <p class="text-pai-hijau-200 text-sm mb-1">Total Jam Pelajaran</p>
+                            <p id="ringkasan-total-jp" class="text-3xl font-bold">0</p>
+                            <p class="text-xs text-pai-hijau-300 mt-1">JP</p>
+                        </div>
+                        
+                        <!-- JP Semester Ganjil -->
+                        <div class="bg-white/10 rounded-xl p-4 text-center">
+                            <p class="text-pai-hijau-200 text-sm mb-1">JP Semester Ganjil</p>
+                            <p id="ringkasan-jp-ganjil" class="text-3xl font-bold">0</p>
+                            <p class="text-xs text-pai-hijau-300 mt-1">JP</p>
+                        </div>
+                        
+                        <!-- JP Semester Genap -->
+                        <div class="bg-white/10 rounded-xl p-4 text-center">
+                            <p class="text-pai-hijau-200 text-sm mb-1">JP Semester Genap</p>
+                            <p id="ringkasan-jp-genap" class="text-3xl font-bold">0</p>
+                            <p class="text-xs text-pai-hijau-300 mt-1">JP</p>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <!-- ================================================
+                     SECTION 5: HARI LIBUR NASIONAL (REFERENSI)
+                     ================================================ -->
+                <div class="bg-white rounded-2xl shadow-md p-6 mb-6 fade-in">
+                    
+                    <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-flag text-yellow-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Referensi Hari Libur Nasional 2025</h3>
+                            <p class="text-sm text-gray-500">Gunakan sebagai acuan saat menandai minggu tidak efektif</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        
+                        <!-- Libur Semester Ganjil -->
+                        <div class="border border-gray-200 rounded-xl p-4">
+                            <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                                Juli - Desember 2024
+                            </h4>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex justify-between">
+                                    <span>Tahun Baru Hijriyah</span>
+                                    <span class="text-gray-400">7 Jul</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>HUT RI</span>
+                                    <span class="text-gray-400">17 Agt</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>Maulid Nabi</span>
+                                    <span class="text-gray-400">15 Sep</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>Natal</span>
+                                    <span class="text-gray-400">25 Des</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Libur Semester Genap -->
+                        <div class="border border-gray-200 rounded-xl p-4">
+                            <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                                Januari - Juni 2025
+                            </h4>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex justify-between">
+                                    <span>Tahun Baru Masehi</span>
+                                    <span class="text-gray-400">1 Jan</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>Imlek</span>
+                                    <span class="text-gray-400">29 Jan</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>Isra Mi'raj</span>
+                                    <span class="text-gray-400">27 Jan</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>Nyepi</span>
+                                    <span class="text-gray-400">29 Mar</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>Idul Fitri</span>
+                                    <span class="text-gray-400">30 Mar - 1 Apr</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>Waisak</span>
+                                    <span class="text-gray-400">12 Mei</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>Kenaikan Isa</span>
+                                    <span class="text-gray-400">29 Mei</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span>Idul Adha</span>
+                                    <span class="text-gray-400">6 Jun</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Kegiatan Sekolah Umum -->
+                        <div class="border border-gray-200 rounded-xl p-4">
+                            <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+                                <span class="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
+                                Kegiatan Sekolah
+                            </h4>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-center">
+                                    <i class="fas fa-check-circle text-orange-400 mr-2"></i>
+                                    PTS (Penilaian Tengah Semester)
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check-circle text-orange-400 mr-2"></i>
+                                    PAS/PAT (Penilaian Akhir)
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check-circle text-orange-400 mr-2"></i>
+                                    Libur Semester
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check-circle text-orange-400 mr-2"></i>
+                                    MPLS (Masa Pengenalan)
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check-circle text-orange-400 mr-2"></i>
+                                    Class Meeting
+                                </li>
+                            </ul>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <!-- ================================================
+                     TOMBOL SIMPAN
+                     ================================================ -->
+                <div class="flex justify-end gap-4">
+                    <button type="button" 
+                            onclick="resetKalender()"
+                            class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors flex items-center">
+                        <i class="fas fa-undo mr-2"></i>
+                        Reset
+                    </button>
+                    
+                    <button type="button" 
+                            id="btn-simpan-kalender"
+                            onclick="simpanKalender()"
+                            class="px-8 py-3 bg-pai-hijau-600 text-white font-bold rounded-xl hover:bg-pai-hijau-700 transition-colors flex items-center shadow-lg hover:shadow-xl">
+                        <i class="fas fa-save mr-2"></i>
+                        Simpan Kalender Pendidikan
+                    </button>
+                </div>
+                
+            </div>
+            
+            <!-- Footer -->
+            <footer class="bg-white border-t border-gray-200 px-8 py-4 text-center text-gray-500 text-sm">
+                <p>© 2025 Admin PAI Satu Pintu - Dibuat dengan ❤️ untuk Guru PAI Indonesia</p>
+            </footer>
+            
+        </main>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-8 rounded-2xl text-center">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Memproses data...</p>
+        </div>
+    </div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/database.js"></script>
+    
+    <!-- ================================================
+         SCRIPT HALAMAN KALENDER
+         ================================================ -->
+    <script>
+        /**
+         * =====================================================
+         * VARIABEL GLOBAL
+         * =====================================================
+         */
+        
+        // Menyimpan data kalender yang sudah di-generate
+        let dataKalenderGanjil = [];
+        let dataKalenderGenap = [];
+        
+        // Nama-nama bulan dalam Bahasa Indonesia
+        const NAMA_BULAN = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        
+        // Nama-nama hari dalam Bahasa Indonesia
+        const NAMA_HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        
+        // Opsi keterangan yang sering digunakan
+        const OPSI_KETERANGAN = [
+            'Efektif',
+            'Libur Nasional',
+            'Libur Semester',
+            'PTS (Penilaian Tengah Semester)',
+            'PAS (Penilaian Akhir Semester)',
+            'PAT (Penilaian Akhir Tahun)',
+            'MPLS',
+            'Class Meeting',
+            'Libur Hari Raya',
+            'Ujian Sekolah',
+            'Kegiatan Sekolah',
+            'Lainnya'
+        ];
+        
+        /**
+         * =====================================================
+         * INISIALISASI HALAMAN
+         * =====================================================
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cek status login
+            checkAuthState();
+            
+            // Set default tanggal berdasarkan tahun ajaran umum
+            setDefaultDates();
+            
+            // Event listener untuk perubahan tahun ajaran
+            document.getElementById('select-tahun-ajaran').addEventListener('change', function() {
+                const tahun = this.value;
+                if (tahun) {
+                    document.getElementById('tahun-ajaran-display').textContent = tahun.replace('-', '/');
+                    updateDefaultDates(tahun);
+                    loadKalenderData(tahun);
+                }
+            });
+        });
+        
+        /**
+         * =====================================================
+         * FUNGSI: Cek status autentikasi
+         * =====================================================
+         */
+        function checkAuthState() {
+            showLoading();
+            
+            auth.onAuthStateChanged(async (user) => {
+                hideLoading();
+                
+                if (user) {
+                    console.log("👤 User login:", user.email);
+                    await loadUserProfile(user.uid);
+                } else {
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Muat profil user untuk sidebar
+         * =====================================================
+         */
+        async function loadUserProfile(userId) {
+            try {
+                const doc = await db.collection('users').doc(userId).get();
+                
+                if (doc.exists) {
+                    const data = doc.data();
+                    
+                    // Update sidebar
+                    if (data.namaLengkap) {
+                        document.getElementById('nama-guru-sidebar').textContent = data.namaLengkap;
+                    }
+                    
+                    // Set tahun ajaran dari profil jika ada
+                    if (data.tahunAjaran) {
+                        document.getElementById('select-tahun-ajaran').value = data.tahunAjaran;
+                        document.getElementById('tahun-ajaran-display').textContent = data.tahunAjaran.replace('-', '/');
+                        updateDefaultDates(data.tahunAjaran);
+                        
+                        // Load data kalender yang sudah tersimpan
+                        await loadKalenderData(data.tahunAjaran);
+                    }
+                }
+            } catch (error) {
+                console.error("❌ Gagal memuat profil:", error);
+            }
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Set tanggal default
+         * =====================================================
+         */
+        function setDefaultDates() {
+            const now = new Date();
+            const year = now.getFullYear();
+            
+            // Default semester ganjil: Juli - Desember
+            document.getElementById('tanggal-mulai-ganjil').value = `${year}-07-15`;
+            document.getElementById('tanggal-selesai-ganjil').value = `${year}-12-20`;
+            
+            // Default semester genap: Januari - Juni tahun berikutnya
+            document.getElementById('tanggal-mulai-genap').value = `${year + 1}-01-06`;
+            document.getElementById('tanggal-selesai-genap').value = `${year + 1}-06-20`;
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Update tanggal default berdasarkan tahun ajaran
+         * =====================================================
+         */
+        function updateDefaultDates(tahunAjaran) {
+            const [tahunMulai, tahunSelesai] = tahunAjaran.split('-');
+            
+            // Semester ganjil
+            document.getElementById('tanggal-mulai-ganjil').value = `${tahunMulai}-07-15`;
+            document.getElementById('tanggal-selesai-ganjil').value = `${tahunMulai}-12-20`;
+            
+            // Semester genap
+            document.getElementById('tanggal-mulai-genap').value = `${tahunSelesai}-01-06`;
+            document.getElementById('tanggal-selesai-genap').value = `${tahunSelesai}-06-20`;
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Load data kalender yang sudah tersimpan
+         * =====================================================
+         */
+        async function loadKalenderData(tahunAjaran) {
+            try {
+                showLoading();
+                
+                const user = auth.currentUser;
+                if (!user) return;
+                
+                const doc = await db.collection('users').doc(user.uid)
+                    .collection('kalender')
+                    .doc(tahunAjaran)
+                    .get();
+                
+                if (doc.exists) {
+                    const data = doc.data();
+                    
+                    console.log("📅 Data kalender ditemukan:", data);
+                    
+                    // Isi form dengan data yang ada
+                    if (data.ganjil) {
+                        document.getElementById('tanggal-mulai-ganjil').value = data.ganjil.mulai;
+                        document.getElementById('tanggal-selesai-ganjil').value = data.ganjil.selesai;
+                        
+                        if (data.ganjil.minggu && data.ganjil.minggu.length > 0) {
+                            dataKalenderGanjil = data.ganjil.minggu;
+                            renderKalenderTabel('ganjil', dataKalenderGanjil);
+                            document.getElementById('kalender-ganjil-container').classList.remove('hidden');
+                        }
+                    }
+                    
+                    if (data.genap) {
+                        document.getElementById('tanggal-mulai-genap').value = data.genap.mulai;
+                        document.getElementById('tanggal-selesai-genap').value = data.genap.selesai;
+                        
+                        if (data.genap.minggu && data.genap.minggu.length > 0) {
+                            dataKalenderGenap = data.genap.minggu;
+                            renderKalenderTabel('genap', dataKalenderGenap);
+                            document.getElementById('kalender-genap-container').classList.remove('hidden');
+                        }
+                    }
+                    
+                    if (data.jpPerMinggu) {
+                        document.getElementById('select-jp-perminggu').value = data.jpPerMinggu;
+                    }
+                    
+                    // Update ringkasan
+                    updateRingkasan();
+                }
+                
+                hideLoading();
+                
+            } catch (error) {
+                console.error("❌ Gagal memuat kalender:", error);
+                hideLoading();
+            }
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Generate kalender berdasarkan tanggal
+         * =====================================================
+         */
+        function generateKalender(semester) {
+            // Ambil tanggal mulai dan selesai
+            const inputMulai = document.getElementById(`tanggal-mulai-${semester}`);
+            const inputSelesai = document.getElementById(`tanggal-selesai-${semester}`);
+            
+            if (!inputMulai.value || !inputSelesai.value) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Data Belum Lengkap',
+                    text: 'Silakan isi tanggal mulai dan selesai terlebih dahulu.',
+                    confirmButtonColor: '#16a34a'
+                });
+                return;
+            }
+            
+            const tanggalMulai = new Date(inputMulai.value);
+            const tanggalSelesai = new Date(inputSelesai.value);
+            
+            // Validasi tanggal
+            if (tanggalSelesai <= tanggalMulai) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Tanggal Tidak Valid',
+                    text: 'Tanggal selesai harus lebih besar dari tanggal mulai.',
+                    confirmButtonColor: '#16a34a'
+                });
+                return;
+            }
+            
+            // Generate data minggu
+            const dataMinggu = generateMingguData(tanggalMulai, tanggalSelesai);
+            
+            // Simpan ke variabel global
+            if (semester === 'ganjil') {
+                dataKalenderGanjil = dataMinggu;
+            } else {
+                dataKalenderGenap = dataMinggu;
+            }
+            
+            // Render tabel
+            renderKalenderTabel(semester, dataMinggu);
+            
+            // Tampilkan container
+            document.getElementById(`kalender-${semester}-container`).classList.remove('hidden');
+            
+            // Update ringkasan
+            updateRingkasan();
+            
+            // Notifikasi sukses
+            Swal.fire({
+                icon: 'success',
+                title: 'Kalender Berhasil Di-generate!',
+                text: `Ditemukan ${dataMinggu.length} minggu. Silakan tandai minggu yang tidak efektif.`,
+                confirmButtonColor: '#16a34a',
+                timer: 2000,
+                timerProgressBar: true
+            });
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Generate data minggu dari rentang tanggal
+         * =====================================================
+         */
+        function generateMingguData(tanggalMulai, tanggalSelesai) {
+            const dataMinggu = [];
+            let currentDate = new Date(tanggalMulai);
+            let mingguKe = 1;
+            
+            // Mulai dari hari Senin pertama
+            while (currentDate.getDay() !== 1) {
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            while (currentDate <= tanggalSelesai) {
+                // Hitung tanggal akhir minggu (Sabtu)
+                const tanggalAkhirMinggu = new Date(currentDate);
+                tanggalAkhirMinggu.setDate(tanggalAkhirMinggu.getDate() + 5);
+                
+                // Format tanggal
+                const tanggalMulaiStr = formatTanggal(currentDate);
+                const tanggalAkhirStr = formatTanggal(tanggalAkhirMinggu);
+                
+                // Buat data minggu
+                dataMinggu.push({
+                    mingguKe: mingguKe,
+                    tanggalMulai: currentDate.toISOString().split('T')[0],
+                    tanggalAkhir: tanggalAkhirMinggu.toISOString().split('T')[0],
+                    tanggalDisplay: `${tanggalMulaiStr} - ${tanggalAkhirStr}`,
+                    bulan: NAMA_BULAN[currentDate.getMonth()],
+                    efektif: true,  // Default: efektif
+                    keterangan: 'Efektif'
+                });
+                
+                // Pindah ke minggu berikutnya
+                currentDate.setDate(currentDate.getDate() + 7);
+                mingguKe++;
+            }
+            
+            return dataMinggu;
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Format tanggal ke format Indonesia
+         * =====================================================
+         */
+        function formatTanggal(date) {
+            const d = date.getDate();
+            const m = NAMA_BULAN[date.getMonth()].substring(0, 3);
+            return `${d} ${m}`;
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Render tabel kalender
+         * =====================================================
+         */
+        function renderKalenderTabel(semester, dataMinggu) {
+            const tbody = document.getElementById(`tabel-kalender-${semester}`);
+            tbody.innerHTML = '';
+            
+            dataMinggu.forEach((minggu, index) => {
+                const row = document.createElement('tr');
+                row.className = `week-row ${minggu.efektif ? '' : 'bg-red-50'}`;
+                
+                row.innerHTML = `
+                    <td class="border border-gray-200 px-4 py-3 font-medium">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full ${minggu.efektif ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                            ${minggu.mingguKe}
+                        </span>
+                    </td>
+                    <td class="border border-gray-200 px-4 py-3 text-sm">
+                        ${minggu.tanggalDisplay}
+                    </td>
+                    <td class="border border-gray-200 px-4 py-3 text-sm font-medium">
+                        ${minggu.bulan}
+                    </td>
+                    <td class="border border-gray-200 px-4 py-3 text-center">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" 
+                                   class="sr-only peer"
+                                   ${minggu.efektif ? 'checked' : ''}
+                                   onchange="toggleEfektif('${semester}', ${index}, this.checked)">
+                            <div class="w-14 h-7 bg-red-400 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500"></div>
+                            <span class="ml-2 text-xs ${minggu.efektif ? 'text-green-600' : 'text-red-600'}">
+                                ${minggu.efektif ? 'Efektif' : 'Tidak'}
+                            </span>
+                        </label>
+                    </td>
+                    <td class="border border-gray-200 px-4 py-3">
+                        <select class="w-full px-2 py-1 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-pai-hijau-500 outline-none"
+                                onchange="updateKeterangan('${semester}', ${index}, this.value)">
+                            ${OPSI_KETERANGAN.map(opsi => `
+                                <option value="${opsi}" ${minggu.keterangan === opsi ? 'selected' : ''}>
+                                    ${opsi}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Update total minggu efektif
+            updateTotalMinggu(semester);
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Toggle status efektif minggu
+         * =====================================================
+         */
+        function toggleEfektif(semester, index, isEfektif) {
+            if (semester === 'ganjil') {
+                dataKalenderGanjil[index].efektif = isEfektif;
+                dataKalenderGanjil[index].keterangan = isEfektif ? 'Efektif' : 'Libur/Tidak Efektif';
+            } else {
+                dataKalenderGenap[index].efektif = isEfektif;
+                dataKalenderGenap[index].keterangan = isEfektif ? 'Efektif' : 'Libur/Tidak Efektif';
+            }
+            
+            // Re-render tabel
+            const data = semester === 'ganjil' ? dataKalenderGanjil : dataKalenderGenap;
+            renderKalenderTabel(semester, data);
+            
+            // Update ringkasan
+            updateRingkasan();
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Update keterangan minggu
+         * =====================================================
+         */
+        function updateKeterangan(semester, index, keterangan) {
+            if (semester === 'ganjil') {
+                dataKalenderGanjil[index].keterangan = keterangan;
+                // Jika bukan "Efektif", set efektif = false
+                if (keterangan !== 'Efektif') {
+                    dataKalenderGanjil[index].efektif = false;
+                } else {
+                    dataKalenderGanjil[index].efektif = true;
+                }
+            } else {
+                dataKalenderGenap[index].keterangan = keterangan;
+                if (keterangan !== 'Efektif') {
+                    dataKalenderGenap[index].efektif = false;
+                } else {
+                    dataKalenderGenap[index].efektif = true;
+                }
+            }
+            
+            // Re-render tabel
+            const data = semester === 'ganjil' ? dataKalenderGanjil : dataKalenderGenap;
+            renderKalenderTabel(semester, data);
+            
+            // Update ringkasan
+            updateRingkasan();
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Update total minggu efektif per semester
+         * =====================================================
+         */
+        function updateTotalMinggu(semester) {
+            const data = semester === 'ganjil' ? dataKalenderGanjil : dataKalenderGenap;
+            const totalEfektif = data.filter(m => m.efektif).length;
+            
+            document.getElementById(`total-minggu-${semester}`).textContent = totalEfektif;
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Update ringkasan tahunan
+         * =====================================================
+         */
+        function updateRingkasan() {
+            const jpPerMinggu = parseInt(document.getElementById('select-jp-perminggu').value) || 4;
+            
+            // Hitung total minggu efektif
+            const mingguGanjil = dataKalenderGanjil.filter(m => m.efektif).length;
+            const mingguGenap = dataKalenderGenap.filter(m => m.efektif).length;
+            const totalMinggu = mingguGanjil + mingguGenap;
+            
+            // Hitung JP
+            const jpGanjil = mingguGanjil * jpPerMinggu;
+            const jpGenap = mingguGenap * jpPerMinggu;
+            const totalJP = jpGanjil + jpGenap;
+            
+            // Update display
+            document.getElementById('total-minggu-ganjil').textContent = mingguGanjil;
+            document.getElementById('total-minggu-genap').textContent = mingguGenap;
+            
+            document.getElementById('ringkasan-total-minggu').textContent = totalMinggu;
+            document.getElementById('ringkasan-total-jp').textContent = totalJP;
+            document.getElementById('ringkasan-jp-ganjil').textContent = jpGanjil;
+            document.getElementById('ringkasan-jp-genap').textContent = jpGenap;
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Simpan kalender ke Firestore
+         * =====================================================
+         */
+        async function simpanKalender() {
+            // Validasi
+            const tahunAjaran = document.getElementById('select-tahun-ajaran').value;
+            
+            if (!tahunAjaran) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pilih Tahun Ajaran',
+                    text: 'Silakan pilih tahun ajaran terlebih dahulu.',
+                    confirmButtonColor: '#16a34a'
+                });
+                return;
+            }
+            
+            if (dataKalenderGanjil.length === 0 && dataKalenderGenap.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Kalender Belum Di-generate',
+                    text: 'Silakan generate kalender semester terlebih dahulu.',
+                    confirmButtonColor: '#16a34a'
+                });
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) throw new Error("User tidak login");
+                
+                const jpPerMinggu = parseInt(document.getElementById('select-jp-perminggu').value) || 4;
+                
+                // Siapkan data untuk disimpan
+                const dataKalender = {
+                    tahunAjaran: tahunAjaran,
+                    jpPerMinggu: jpPerMinggu,
+                    ganjil: {
+                        mulai: document.getElementById('tanggal-mulai-ganjil').value,
+                        selesai: document.getElementById('tanggal-selesai-ganjil').value,
+                        minggu: dataKalenderGanjil,
+                        totalMingguEfektif: dataKalenderGanjil.filter(m => m.efektif).length,
+                        totalJP: dataKalenderGanjil.filter(m => m.efektif).length * jpPerMinggu
+                    },
+                    genap: {
+                        mulai: document.getElementById('tanggal-mulai-genap').value,
+                        selesai: document.getElementById('tanggal-selesai-genap').value,
+                        minggu: dataKalenderGenap,
+                        totalMingguEfektif: dataKalenderGenap.filter(m => m.efektif).length,
+                        totalJP: dataKalenderGenap.filter(m => m.efektif).length * jpPerMinggu
+                    },
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                // Simpan ke Firestore
+                await db.collection('users').doc(user.uid)
+                    .collection('kalender')
+                    .doc(tahunAjaran)
+                    .set(dataKalender, { merge: true });
+                
+                hideLoading();
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil Disimpan!',
+                    html: `
+                        <p>Kalender pendidikan tahun ajaran <strong>${tahunAjaran.replace('-', '/')}</strong> berhasil disimpan.</p>
+                        <div class="mt-4 text-left bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-600">📊 <strong>Ringkasan:</strong></p>
+                            <ul class="text-sm text-gray-600 mt-2">
+                                <li>• Semester Ganjil: ${dataKalender.ganjil.totalMingguEfektif} minggu efektif</li>
+                                <li>• Semester Genap: ${dataKalender.genap.totalMingguEfektif} minggu efektif</li>
+                                <li>• Total JP: ${dataKalender.ganjil.totalJP + dataKalender.genap.totalJP} JP</li>
+                            </ul>
+                        </div>
+                    `,
+                    confirmButtonColor: '#16a34a',
+                    confirmButtonText: 'Lanjut ke Perencanaan'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'perencanaan.html';
+                    }
+                });
+                
+                console.log("✅ Kalender berhasil disimpan");
+                
+            } catch (error) {
+                console.error("❌ Gagal menyimpan kalender:", error);
+                hideLoading();
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Menyimpan',
+                    text: 'Terjadi kesalahan. Silakan coba lagi.',
+                    confirmButtonColor: '#16a34a'
+                });
+            }
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Reset kalender
+         * =====================================================
+         */
+        function resetKalender() {
+            Swal.fire({
+                title: 'Reset Kalender?',
+                text: 'Semua data kalender yang belum disimpan akan hilang.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Reset',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Reset data
+                    dataKalenderGanjil = [];
+                    dataKalenderGenap = [];
+                    
+                    // Sembunyikan tabel
+                    document.getElementById('kalender-ganjil-container').classList.add('hidden');
+                    document.getElementById('kalender-genap-container').classList.add('hidden');
+                    
+                    // Reset ringkasan
+                    document.getElementById('total-minggu-ganjil').textContent = '0';
+                    document.getElementById('total-minggu-genap').textContent = '0';
+                    updateRingkasan();
+                    
+                    // Reset tanggal
+                    setDefaultDates();
+                    
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Kalender Direset',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI: Logout
+         * =====================================================
+         */
+        async function logoutUser() {
+            Swal.fire({
+                title: 'Keluar dari Aplikasi?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Keluar',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    await auth.signOut();
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+        
+        /**
+         * =====================================================
+         * FUNGSI BANTUAN: Loading
+         * =====================================================
+         */
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+        
+        // Event listener untuk perubahan JP per minggu
+        document.getElementById('select-jp-perminggu').addEventListener('change', updateRingkasan);
+    </script>
+    
+</body>
+</html>

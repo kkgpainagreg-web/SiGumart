@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Admin PAI Satu Pintu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pai-hijau': {
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-pai-hijau-600 to-pai-hijau-800 flex items-center justify-center p-4">
+    
+    <!-- Container Login -->
+    <div class="w-full max-w-md">
+        
+        <!-- Card Login -->
+        <div class="bg-white rounded-3xl shadow-2xl p-8">
+            
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-pai-hijau-100 rounded-2xl mx-auto flex items-center justify-center mb-4">
+                    <i class="fas fa-mosque text-pai-hijau-600 text-4xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Admin PAI Satu Pintu</h1>
+                <p class="text-gray-500 mt-2">Silakan masuk untuk melanjutkan</p>
+            </div>
+            
+            <!-- Form Login -->
+            <form id="form-login" class="space-y-6">
+                
+                <!-- Input Email -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-envelope mr-2"></i>Email
+                    </label>
+                    <input type="email" 
+                           id="input-email" 
+                           required
+                           placeholder="guru@sekolah.sch.id"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-transparent outline-none transition-all">
+                </div>
+                
+                <!-- Input Password -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-lock mr-2"></i>Password
+                    </label>
+                    <div class="relative">
+                        <input type="password" 
+                               id="input-password" 
+                               required
+                               placeholder="Masukkan password"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 focus:border-transparent outline-none transition-all">
+                        <button type="button" 
+                                onclick="togglePassword()"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <i id="icon-password" class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Pesan Error -->
+                <div id="pesan-error" class="hidden bg-red-100 text-red-700 p-4 rounded-xl text-sm">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span id="text-error"></span>
+                </div>
+                
+                <!-- Tombol Login -->
+                <button type="submit" 
+                        id="btn-login"
+                        class="w-full bg-pai-hijau-600 text-white font-bold py-3 rounded-xl hover:bg-pai-hijau-700 transition-colors flex items-center justify-center">
+                    <span>Masuk</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </form>
+            
+            <!-- Divider -->
+            <div class="flex items-center my-6">
+                <div class="flex-1 border-t border-gray-200"></div>
+                <span class="px-4 text-gray-400 text-sm">atau</span>
+                <div class="flex-1 border-t border-gray-200"></div>
+            </div>
+            
+            <!-- Login dengan Google -->
+            <button onclick="loginWithGoogle()" 
+                    class="w-full border border-gray-300 py-3 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center">
+                <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5 mr-3">
+                <span class="font-medium text-gray-700">Masuk dengan Google</span>
+            </button>
+            
+            <!-- Link Daftar -->
+            <p class="text-center text-gray-500 mt-6">
+                Belum punya akun? 
+                <a href="#" onclick="showRegisterModal()" class="text-pai-hijau-600 font-medium hover:underline">
+                    Daftar Sekarang
+                </a>
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <p class="text-center text-white/70 text-sm mt-6">
+            © 2025 Admin PAI Satu Pintu
+        </p>
+    </div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    
+    <script>
+        // Toggle tampilkan/sembunyikan password
+        function togglePassword() {
+            const input = document.getElementById('input-password');
+            const icon = document.getElementById('icon-password');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
+        // Handle form submit
+        document.getElementById('form-login').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('input-email').value;
+            const password = document.getElementById('input-password').value;
+            
+            loginWithEmail(email, password);
+        });
+    </script>
+    
+</body>
+</html>
