@@ -1,1278 +1,405 @@
 // ============================================
-// ABSENSI MODULE
+// MAIN APP MODULE
 // Admin PAI Super App
-// Terintegrasi dengan Jurnal Pembelajaran
 // ============================================
-
-// === STATE ===
-let classes = [];
-let students = [];
-let currentAbsensi = [];
-let savedAbsensiId = null;
-let lastSavedAbsensi = null;
 
 // === INITIALIZATION ===
 document.addEventListener('DOMContentLoaded', () => {
-    **initializeAbsensiPage();**
-
+    initializeDashboard();
+    setCurrentDate();
 });
 
-// === INITIALIZE PAGE ===
-async function initializeAbsensiPage() {
-    **auth.onAuthStateChanged(async (user) => {**
+// === SET CURRENT DATE ===
+function setCurrentDate() {
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    };
+    const today = new Date().toLocaleDateString('id-ID', options);
+    
+    const dateElement = document.getElementById('currentDate');
+    if (dateElement) {
+        dateElement.textContent = today;
+    }
+}
 
-        **if (user) {**
+// === INITIALIZE DASHBOARD ===
+async function initializeDashboard() {
+    // Wait for auth state
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            await loadUserInfo();
+            await loadDashboardStats();
+            await loadTodaySchedule();
+            await loadRecentJournals();
+            await loadAttendanceStats();
+        }
+    });
+}
 
-            **// Set tanggal hari ini**
-
-            **const today = new Date().toISOString().split('T')\[0];**
-
-            **document.getElementById('filterTanggal').value = today;**
-
+// === LOAD USER INFO ===
+async function loadUserInfo() {
+    try {
+        const userData = await getCurrentUserData();
+        
+        if (userData) {
+            // Update sidebar user info
+            const userName = document.getElementById('userName');
+            const userEmail = document.getElementById('userEmail');
+            const userAvatar = document.getElementById('userAvatar');
+            const welcomeName = document.getElementById('welcomeName');
             
-
-            **// Set bulan ini untuk rekap**
-
-            **const thisMonth = today.substring(0, 7);**
-
-            **document.getElementById('rekapBulan').value = thisMonth;**
-
+            if (userName) userName.textContent = userData.displayName || 'Guru PAI';
+            if (userEmail) userEmail.textContent = userData.email;
+            if (welcomeName) welcomeName.textContent = (userData.displayName || 'Guru').split(' ')[0];
             
+            if (userAvatar) {
+                const initial = (userData.displayName || 'G').charAt(0).toUpperCase();
+                userAvatar.textContent = initial;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading user info:', error);
+    }
+}
 
-            **await loadClasses();**
+// === LOAD DASHBOARD STATS ===
+async function loadDashboardStats() {
+    try {
+        const userId = auth.currentUser?.uid;
+        if (!userId) return;
+        
+        // Get student count
+        const studentsSnapshot = await collections.students
+            .where('teacherId', '==', userId)
+            .get();
+        document.getElementById('statStudents').textContent = studentsSnapshot.size;
+        
+        // Get class count
+        const classesSnapshot = await collections.classes
+            .where('teacherId', '==', userId)
+            .get();
+        document.getElementById('statClasses').textContent = classesSnapshot.size;
+        
+        // Get modules count
+        const modulesSnapshot = await collections.modules
+            .where('teacherId', '==', userId)
+            .get();
+        document.getElementById('statModules').textContent = modulesSnapshot.size;
+        
+        // Get questions count
+        const questionsSnapshot = await collections.questions
+            .where('teacherId', '==', userId)
+            .get();
+        document.getElementById('statQuestions').textContent = questionsSnapshot.size;
+        
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
 
-            **populateClassDropdowns();**
+// === LOAD TODAY'S SCHEDULE ===
+async function loadTodaySchedule() {
+    try {
+        const userId = auth.currentUser?.uid;
+        if (!userId) return;
+        
+        const today = new Date();
+        const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const todayName = dayNames[today.getDay()];
+        
+        const scheduleSnapshot = await collections.schedules
+            .where('teacherId', '==', userId)
+            .where('day', '==', todayName)
+            .orderBy('startTime')
+            .get();
+        
+        const container = document.getElementById('todaySchedule');
+        if (!container) return;
+        
+        if (scheduleSnapshot.empty) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <span class="text-4xl block mb-2">📚</span>
+                    <p>Tidak ada jadwal hari ini</p>
+                    <a href="jadwal.html" class="text-pai-green hover:underline text-sm">+ Tambah Jadwal</a>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        scheduleSnapshot.forEach(doc => {
+            const schedule = doc.data();
+            html += `
+                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-pai-light transition-colors">
+                    <div class="text-center">
+                        <div class="text-lg font-bold text-pai-green">${schedule.startTime}</div>
+                        <div class="text-xs text-gray-500">${schedule.endTime}</div>
+                    </div>
+                    <div class="w-1 h-12 bg-pai-green rounded-full"></div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800">${schedule.className}</h4>
+                        <p class="text-sm text-gray-600">${schedule.topic || 'PAI'}</p>
+                    </div>
+                    <a href="absensi.html?class=${doc.id}" class="btn btn-outline text-sm py-2">
+                        Absensi
+                    </a>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Error loading schedule:', error);
+    }
+}
 
-            **loadAbsensiHistory();**
-
-            **updateSidebarInfo();**
-
+// === LOAD RECENT JOURNALS ===
+async function loadRecentJournals() {
+    try {
+        const userId = auth.currentUser?.uid;
+        if (!userId) return;
+        
+        const journalsSnapshot = await collections.journals
+            .where('teacherId', '==', userId)
+            .orderBy('createdAt', 'desc')
+            .limit(5)
+            .get();
+        
+        const container = document.getElementById('recentJournals');
+        if (!container) return;
+        
+        if (journalsSnapshot.empty) {
+            container.innerHTML = `
+                <div class="text-center py-6 text-gray-500">
+                    <p class="text-sm">Belum ada jurnal</p>
+                    <a href="jurnal.html" class="text-pai-green hover:underline text-sm">+ Buat Jurnal</a>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        journalsSnapshot.forEach(doc => {
+            const journal = doc.data();
+            const date = journal.date?.toDate?.() || new Date();
+            const dateStr = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
             
-
-            **// Check if coming from schedule with class parameter**
-
-            **const urlParams = new URLSearchParams(window.location.search);**
-
-            **const classId = urlParams.get('class');**
-
-            **if (classId) {**
-
-                **document.getElementById('filterKelas').value = classId;**
-
-                **loadStudentsForAbsensi();**
-
-            **}**
-
-        **}**
-
-    **});**
-
+            html += `
+                <div class="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div class="w-10 h-10 bg-pai-light rounded-lg flex items-center justify-center text-pai-green font-bold text-sm">
+                        ${dateStr}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-medium text-gray-800 truncate">${journal.topic || 'Pembelajaran'}</h4>
+                        <p class="text-sm text-gray-500 truncate">${journal.className || 'Kelas'}</p>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Error loading journals:', error);
+    }
 }
 
-// === UPDATE SIDEBAR INFO ===
-async function updateSidebarInfo() {
-    **const userData = await getCurrentUserData();**
-
-    **if (userData) {**
-
-        **const name = userData.displayName || 'Guru PAI';**
-
-        **document.getElementById('sidebarName').textContent = name;**
-
-        **document.getElementById('sidebarEmail').textContent = userData.email;**
-
-        **document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();**
-
-    **}**
-
-}
-
-// === LOAD CLASSES ===
-async function loadClasses() {
-    **try {**
-
-        **const userId = auth.currentUser?.uid;**
-
-        **if (!userId) return;**
-
+// === LOAD ATTENDANCE STATS ===
+async function loadAttendanceStats() {
+    try {
+        const userId = auth.currentUser?.uid;
+        if (!userId) return;
         
-
-        **const snapshot = await collections.classes**
-
-            **.where('teacherId', '==', userId)**
-
-            **.orderBy('level')**
-
-            **.get();**
-
+        // Get this week's attendance
+        const startOfWeek = new Date();
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
         
-
-        **classes = \[];**
-
-        **snapshot.forEach(doc => {**
-
-            **classes.push({ id: doc.id, ...doc.data() });**
-
-        **});**
-
-    **} catch (error) {**
-
-        **console.error('Error loading classes:', error);**
-
-    **}**
-
-}
-
-// === POPULATE DROPDOWNS ===
-function populateClassDropdowns() {
-    **const options = classes.map(cls =>** 
-
-        **`<option value="${cls.id}">${cls.name}</option>`**
-
-    **).join('');**
-
-    
-
-    **const filterKelas = document.getElementById('filterKelas');**
-
-    **const rekapKelas = document.getElementById('rekapKelas');**
-
-    
-
-    **if (filterKelas) {**
-
-        **filterKelas.innerHTML = '<option value="">-- Pilih Kelas --</option>' + options;**
-
-    **}**
-
-    **if (rekapKelas) {**
-
-        **rekapKelas.innerHTML = '<option value="">Semua Kelas</option>' + options;**
-
-    **}**
-
-}
-
-// === LOAD STUDENTS FOR ABSENSI ===
-async function loadStudentsForAbsensi() {
-    **const classId = document.getElementById('filterKelas').value;**
-
-    
-
-    **if (!classId) {**
-
-        **document.getElementById('absensiBody').innerHTML = `**
-
-            **<tr>**
-
-                **<td colspan="6" class="text-center py-12 text-gray-500">**
-
-                    **<span class="text-5xl block mb-3">📋</span>**
-
-                    **<p class="font-medium">Pilih kelas dan tanggal untuk memulai absensi</p>**
-
-                **</td>**
-
-            **</tr>**
-
-        **`;**
-
-        **document.getElementById('classInfo').classList.add('hidden');**
-
-        **document.getElementById('absensiActions').classList.add('hidden');**
-
-        **return;**
-
-    **}**
-
-    
-
-    **try {**
-
-        **const userId = auth.currentUser?.uid;**
-
+        const attendanceSnapshot = await collections.attendance
+            .where('teacherId', '==', userId)
+            .where('date', '>=', startOfWeek)
+            .get();
         
-
-        **const snapshot = await collections.students**
-
-            **.where('teacherId', '==', userId)**
-
-            **.where('classId', '==', classId)**
-
-            **.orderBy('name')**
-
-            **.get();**
-
+        let stats = { hadir: 0, izin: 0, sakit: 0, alpha: 0 };
+        let total = 0;
         
-
-        **students = \[];**
-
-        **snapshot.forEach(doc => {**
-
-            **students.push({ id: doc.id, ...doc.data() });**
-
-        **});**
-
+        attendanceSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.records && Array.isArray(data.records)) {
+                data.records.forEach(record => {
+                    const status = record.status?.toLowerCase();
+                    if (stats.hasOwnProperty(status)) {
+                        stats[status]++;
+                    }
+                    total++;
+                });
+            }
+        });
         
-
-        **// Initialize current absensi data**
-
-        **currentAbsensi = students.map(student => ({**
-
-            **studentId: student.id,**
-
-            **studentName: student.name,**
-
-            **nis: student.nis,**
-
-            **gender: student.gender,**
-
-            **status: 'H', // Default hadir**
-
-            **keterangan: ''**
-
-        **}));**
-
+        // Calculate percentages and update UI
+        const hadir = total > 0 ? Math.round((stats.hadir / total) * 100) : 0;
+        const izin = total > 0 ? Math.round((stats.izin / total) * 100) : 0;
+        const sakit = total > 0 ? Math.round((stats.sakit / total) * 100) : 0;
+        const alpha = total > 0 ? Math.round((stats.alpha / total) * 100) : 0;
         
-
-        **// Load existing absensi if any**
-
-        **await loadAbsensiData();**
-
+        document.getElementById('attendanceHadir').textContent = hadir + '%';
+        document.getElementById('attendanceIzin').textContent = izin + '%';
+        document.getElementById('attendanceSakit').textContent = sakit + '%';
+        document.getElementById('attendanceAlpha').textContent = alpha + '%';
         
-
-    **} catch (error) {**
-
-        **console.error('Error loading students:', error);**
-
-        **showToast('Gagal memuat data siswa', 'error');**
-
-    **}**
-
-}
-
-// === LOAD ABSENSI DATA ===
-async function loadAbsensiData() {
-    **const classId = document.getElementById('filterKelas').value;**
-
-    **const tanggal = document.getElementById('filterTanggal').value;**
-
-    **const jam = document.getElementById('filterJam').value;**
-
-    
-
-    **if (!classId || !tanggal) return;**
-
-    
-
-    **try {**
-
-        **const userId = auth.currentUser?.uid;**
-
+        document.getElementById('progressHadir').style.width = hadir + '%';
+        document.getElementById('progressIzin').style.width = izin + '%';
+        document.getElementById('progressSakit').style.width = sakit + '%';
+        document.getElementById('progressAlpha').style.width = alpha + '%';
         
-
-        **// Check if absensi already exists for this date/class/jam**
-
-        **const snapshot = await collections.attendance**
-
-            **.where('teacherId', '==', userId)**
-
-            **.where('classId', '==', classId)**
-
-            **.where('date', '==', tanggal)**
-
-            **.where('jam', '==', jam)**
-
-            **.limit(1)**
-
-            **.get();**
-
-        
-
-        **if (!snapshot.empty) {**
-
-            **// Load existing data**
-
-            **const doc = snapshot.docs\[0];**
-
-            **savedAbsensiId = doc.id;**
-
-            **const data = doc.data();**
-
-            
-
-            **// Update current absensi with saved data**
-
-            **if (data.records) {**
-
-                **currentAbsensi = currentAbsensi.map(item => {**
-
-                    **const saved = data.records.find(r => r.studentId === item.studentId);**
-
-                    **return saved ? { ...item, ...saved } : item;**
-
-                **});**
-
-            **}**
-
-            
-
-            **showToast('Data absensi sebelumnya ditemukan', 'info');**
-
-        **} else {**
-
-            **savedAbsensiId = null;**
-
-            **// Reset to default (Hadir)**
-
-            **currentAbsensi = currentAbsensi.map(item => ({**
-
-                **...item,**
-
-                **status: 'H',**
-
-                **keterangan: ''**
-
-            **}));**
-
-        **}**
-
-        
-
-        **renderAbsensiTable();**
-
-        **updateCounters();**
-
-        
-
-        **document.getElementById('classInfo').classList.remove('hidden');**
-
-        **document.getElementById('absensiActions').classList.remove('hidden');**
-
-        
-
-        **// Update title**
-
-        **const selectedClass = classes.find(c => c.id === classId);**
-
-        **const dateObj = new Date(tanggal);**
-
-        **const formattedDate = dateObj.toLocaleDateString('id-ID', {** 
-
-            **weekday: 'long',** 
-
-            **day: 'numeric',** 
-
-            **month: 'long',** 
-
-            **year: 'numeric'** 
-
-        **});**
-
-        **document.getElementById('absensiTitle').textContent =** 
-
-            **`✅ Absensi ${selectedClass?.name || ''} - ${formattedDate}`;**
-
-        
-
-    **} catch (error) {**
-
-        **console.error('Error loading absensi:', error);**
-
-    **}**
-
-}
-
-// === RENDER ABSENSI TABLE ===
-function renderAbsensiTable() {
-    **const tbody = document.getElementById('absensiBody');**
-
-    
-
-    **if (currentAbsensi.length === 0) {**
-
-        **tbody.innerHTML = `**
-
-            **<tr>**
-
-                **<td colspan="6" class="text-center py-12 text-gray-500">**
-
-                    **<span class="text-5xl block mb-3">👨‍🎓</span>**
-
-                    **<p class="font-medium">Tidak ada siswa di kelas ini</p>**
-
-                    **<a href="jadwal.html" class="text-pai-green hover:underline">Tambah siswa terlebih dahulu</a>**
-
-                **</td>**
-
-            **</tr>**
-
-        **`;**
-
-        **return;**
-
-    **}**
-
-    
-
-    **tbody.innerHTML = currentAbsensi.map((item, index) => `**
-
-        **<tr>**
-
-            **<td class="text-center">${index + 1}</td>**
-
-            **<td>${item.nis || '-'}</td>**
-
-            **<td class="font-medium">${item.studentName}</td>**
-
-            **<td class="text-center">**
-
-                **<span class="badge ${item.gender === 'L' ? 'badge-info' : 'badge-warning'}">${item.gender}</span>**
-
-            **</td>**
-
-            **<td>**
-
-                **<div class="flex justify-center gap-2">**
-
-                    **<button onclick="setStatus(${index}, 'H')"** 
-
-                        **class="attendance-status ${item.status === 'H' ? 'hadir' : 'bg-gray-100'}" title="Hadir">**
-
-                        **H**
-
-                    **</button>**
-
-                    **<button onclick="setStatus(${index}, 'I')"** 
-
-                        **class="attendance-status ${item.status === 'I' ? 'izin' : 'bg-gray-100'}" title="Izin">**
-
-                        **I**
-
-                    **</button>**
-
-                    **<button onclick="setStatus(${index}, 'S')"** 
-
-                        **class="attendance-status ${item.status === 'S' ? 'sakit' : 'bg-gray-100'}" title="Sakit">**
-
-                        **S**
-
-                    **</button>**
-
-                    **<button onclick="setStatus(${index}, 'A')"** 
-
-                        **class="attendance-status ${item.status === 'A' ? 'alpha' : 'bg-gray-100'}" title="Alpha">**
-
-                        **A**
-
-                    **</button>**
-
-                **</div>**
-
-            **</td>**
-
-            **<td>**
-
-                **<input type="text"** 
-
-                    **value="${item.keterangan || ''}"**
-
-                    **onchange="setKeterangan(${index}, this.value)"**
-
-                    **placeholder="Keterangan..."**
-
-                    **class="form-input text-sm py-1">**
-
-            **</td>**
-
-        **</tr>**
-
-    **`).join('');**
-
-}
-
-// === SET STATUS ===
-function setStatus(index, status) {
-    **currentAbsensi\[index].status = status;**
-
-    **renderAbsensiTable();**
-
-    **updateCounters();**
-
-}
-
-// === SET KETERANGAN ===
-function setKeterangan(index, value) {
-    **currentAbsensi\[index].keterangan = value;**
-
-}
-
-// === SET ALL STATUS ===
-function setAllStatus(status) {
-    **currentAbsensi = currentAbsensi.map(item => ({**
-
-        **...item,**
-
-        **status: status**
-
-    **}));**
-
-    **renderAbsensiTable();**
-
-    **updateCounters();**
-
-    **showToast(`Semua siswa ditandai ${getStatusLabel(status)}`, 'success');**
-
-}
-
-// === GET STATUS LABEL ===
-function getStatusLabel(status) {
-    **const labels = { H: 'Hadir', I: 'Izin', S: 'Sakit', A: 'Alpha' };**
-
-    **return labels\[status] || status;**
-
-}
-
-// === UPDATE COUNTERS ===
-function updateCounters() {
-    **const counts = { H: 0, I: 0, S: 0, A: 0 };**
-
-    
-
-    **currentAbsensi.forEach(item => {**
-
-        **if (counts.hasOwnProperty(item.status)) {**
-
-            **counts\[item.status]++;**
-
-        **}**
-
-    **});**
-
-    
-
-    **document.getElementById('countHadir').textContent = counts.H;**
-
-    **document.getElementById('countIzin').textContent = counts.I;**
-
-    **document.getElementById('countSakit').textContent = counts.S;**
-
-    **document.getElementById('countAlpha').textContent = counts.A;**
-
-}
-
-// === RESET ABSENSI ===
-function resetAbsensi() {
-    **if (!confirm('Reset semua status ke Hadir?')) return;**
-
-    
-
-    **currentAbsensi = currentAbsensi.map(item => ({**
-
-        **...item,**
-
-        **status: 'H',**
-
-        **keterangan: ''**
-
-    **}));**
-
-    
-
-    **renderAbsensiTable();**
-
-    **updateCounters();**
-
-    **showToast('Absensi direset', 'info');**
-
-}
-
-// === SAVE ABSENSI ===
-async function saveAbsensi() {
-    **const classId = document.getElementById('filterKelas').value;**
-
-    **const tanggal = document.getElementById('filterTanggal').value;**
-
-    **const jam = document.getElementById('filterJam').value;**
-
-    
-
-    **if (!classId || !tanggal) {**
-
-        **showToast('Pilih kelas dan tanggal!', 'error');**
-
-        **return;**
-
-    **}**
-
-    
-
-    **if (currentAbsensi.length === 0) {**
-
-        **showToast('Tidak ada data siswa!', 'error');**
-
-        **return;**
-
-    **}**
-
-    
-
-    **const selectedClass = classes.find(c => c.id === classId);**
-
-    
-
-    **const data = {**
-
-        **classId,**
-
-        **className: selectedClass?.name || '',**
-
-        **date: tanggal,**
-
-        **jam,**
-
-        **records: currentAbsensi,**
-
-        **summary: {**
-
-            **total: currentAbsensi.length,**
-
-            **hadir: currentAbsensi.filter(r => r.status === 'H').length,**
-
-            **izin: currentAbsensi.filter(r => r.status === 'I').length,**
-
-            **sakit: currentAbsensi.filter(r => r.status === 'S').length,**
-
-            **alpha: currentAbsensi.filter(r => r.status === 'A').length**
-
-        **},**
-
-        **teacherId: auth.currentUser.uid,**
-
-        **updatedAt: firebase.firestore.FieldValue.serverTimestamp()**
-
-    **};**
-
-    
-
-    **try {**
-
-        **if (savedAbsensiId) {**
-
-            **await collections.attendance.doc(savedAbsensiId).update(data);**
-
-        **} else {**
-
-            **data.createdAt = firebase.firestore.FieldValue.serverTimestamp();**
-
-            **const docRef = await collections.attendance.add(data);**
-
-            **savedAbsensiId = docRef.id;**
-
-        **}**
-
-        
-
-        **lastSavedAbsensi = {**
-
-            **id: savedAbsensiId,**
-
-            **...data**
-
-        **};**
-
-        
-
-        **showToast('Absensi berhasil disimpan!', 'success');**
-
-        **loadAbsensiHistory();**
-
-        
-
-        **// Check if should create journal**
-
-        **const createJurnal = document.getElementById('createJurnal').checked;**
-
-        **if (createJurnal) {**
-
-            **showJurnalPrompt();**
-
-        **}**
-
-        
-
-    **} catch (error) {**
-
-        **console.error('Error saving absensi:', error);**
-
-        **showToast('Gagal menyimpan absensi', 'error');**
-
-    **}**
-
-}
-
-// === SHOW JURNAL PROMPT ===
-function showJurnalPrompt() {
-    **if (!lastSavedAbsensi) return;**
-
-    
-
-    **const dateObj = new Date(lastSavedAbsensi.date);**
-
-    **const formattedDate = dateObj.toLocaleDateString('id-ID', {** 
-
-        **weekday: 'long',** 
-
-        **day: 'numeric',** 
-
-        **month: 'long',** 
-
-        **year: 'numeric'** 
-
-    **});**
-
-    
-
-    **document.getElementById('promptKelas').textContent = lastSavedAbsensi.className;**
-
-    **document.getElementById('promptTanggal').textContent = formattedDate;**
-
-    **document.getElementById('promptKehadiran').textContent =** 
-
-        **`${lastSavedAbsensi.summary.hadir}/${lastSavedAbsensi.summary.total} hadir`;**
-
-    
-
-    **document.getElementById('jurnalPromptModal').classList.add('active');**
-
-}
-
-function closeJurnalPromptModal() {
-    **document.getElementById('jurnalPromptModal').classList.remove('active');**
-
-}
-
-function goToJurnal() {
-    **if (!lastSavedAbsensi) return;**
-
-    
-
-    **// Redirect to jurnal with pre-filled data**
-
-    **const params = new URLSearchParams({**
-
-        **absensiId: lastSavedAbsensi.id,**
-
-        **classId: lastSavedAbsensi.classId,**
-
-        **date: lastSavedAbsensi.date,**
-
-        **action: 'new'**
-
-    **});**
-
-    
-
-    **window.location.href = `jurnal.html?${params.toString()}`;**
-
-}
-
-// === LOAD ABSENSI HISTORY ===
-async function loadAbsensiHistory() {
-    **try {**
-
-        **const userId = auth.currentUser?.uid;**
-
-        **if (!userId) return;**
-
-        
-
-        **const snapshot = await collections.attendance**
-
-            **.where('teacherId', '==', userId)**
-
-            **.orderBy('date', 'desc')**
-
-            **.limit(10)**
-
-            **.get();**
-
-        
-
-        **const container = document.getElementById('absensiHistory');**
-
-        
-
-        **if (snapshot.empty) {**
-
-            **container.innerHTML = '<p class="text-gray-500 text-center py-4">Belum ada riwayat absensi</p>';**
-
-            **return;**
-
-        **}**
-
-        
-
-        **container.innerHTML = snapshot.docs.map(doc => {**
-
-            **const data = doc.data();**
-
-            **const dateObj = new Date(data.date);**
-
-            **const formattedDate = dateObj.toLocaleDateString('id-ID', {** 
-
-                **weekday: 'short',** 
-
-                **day: 'numeric',** 
-
-                **month: 'short',**
-
-                **year: 'numeric'**
-
-            **});**
-
-            
-
-            **return `**
-
-                **<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">**
-
-                    **<div class="flex items-center gap-3">**
-
-                        **<div class="w-10 h-10 bg-pai-light rounded-lg flex items-center justify-center text-pai-green font-bold text-sm">**
-
-                            **${dateObj.getDate()}**
-
-                        **</div>**
-
-                        **<div>**
-
-                            **<div class="font-medium text-gray-800">${data.className}</div>**
-
-                            **<div class="text-sm text-gray-500">${formattedDate} • Jam ke-${data.jam}</div>**
-
-                        **</div>**
-
-                    **</div>**
-
-                    **<div class="flex items-center gap-4">**
-
-                        **<div class="flex gap-2 text-sm">**
-
-                            **<span class="text-green-600">H:${data.summary?.hadir || 0}</span>**
-
-                            **<span class="text-blue-600">I:${data.summary?.izin || 0}</span>**
-
-                            **<span class="text-yellow-600">S:${data.summary?.sakit || 0}</span>**
-
-                            **<span class="text-red-600">A:${data.summary?.alpha || 0}</span>**
-
-                        **</div>**
-
-                        **<button onclick="viewAbsensi('${doc.id}')" class="text-pai-green hover:underline text-sm">**
-
-                            **Lihat**
-
-                        **</button>**
-
-                    **</div>**
-
-                **</div>**
-
-            **`;**
-
-        **}).join('');**
-
-        
-
-    **} catch (error) {**
-
-        **console.error('Error loading history:', error);**
-
-    **}**
-
-}
-
-// === VIEW ABSENSI ===
-async function viewAbsensi(id) {
-    **try {**
-
-        **const doc = await collections.attendance.doc(id).get();**
-
-        **if (!doc.exists) {**
-
-            **showToast('Data tidak ditemukan', 'error');**
-
-            **return;**
-
-        **}**
-
-        
-
-        **const data = doc.data();**
-
-        
-
-        **// Set form values**
-
-        **document.getElementById('filterKelas').value = data.classId;**
-
-        **document.getElementById('filterTanggal').value = data.date;**
-
-        **document.getElementById('filterJam').value = data.jam;**
-
-        
-
-        **// Load students first**
-
-        **await loadStudentsForAbsensi();**
-
-        
-
-    **} catch (error) {**
-
-        **console.error('Error viewing absensi:', error);**
-
-        **showToast('Gagal memuat data', 'error');**
-
-    **}**
-
-}
-
-// === REKAP MODAL ===
-function openRekapModal() {
-    **document.getElementById('rekapModal').classList.add('active');**
-
-    **generateRekap();**
-
-}
-
-function closeRekapModal() {
-    **document.getElementById('rekapModal').classList.remove('active');**
-
-}
-
-async function generateRekap() {
-    **const classId = document.getElementById('rekapKelas').value;**
-
-    **const bulan = document.getElementById('rekapBulan').value;**
-
-    
-
-    **if (!bulan) {**
-
-        **document.getElementById('rekapContent').innerHTML =** 
-
-            **'<p class="text-gray-500 text-center py-8">Pilih bulan untuk melihat rekap</p>';**
-
-        **return;**
-
-    **}**
-
-    
-
-    **try {**
-
-        **const userId = auth.currentUser?.uid;**
-
-        
-
-        **// Parse month**
-
-        **const \[year, month] = bulan.split('-');**
-
-        **const startDate = `${year}-${month}-01`;**
-
-        **const endDate = `${year}-${month}-31`;**
-
-        
-
-        **let query = collections.attendance**
-
-            **.where('teacherId', '==', userId)**
-
-            **.where('date', '>=', startDate)**
-
-            **.where('date', '<=', endDate);**
-
-        
-
-        **if (classId) {**
-
-            **query = query.where('classId', '==', classId);**
-
-        **}**
-
-        
-
-        **const snapshot = await query.orderBy('date').get();**
-
-        
-
-        **if (snapshot.empty) {**
-
-            **document.getElementById('rekapContent').innerHTML =** 
-
-                **'<p class="text-gray-500 text-center py-8">Tidak ada data absensi untuk periode ini</p>';**
-
-            **return;**
-
-        **}**
-
-        
-
-        **// Process data for recap**
-
-        **const rekapData = {};**
-
-        **const dates = new Set();**
-
-        
-
-        **snapshot.forEach(doc => {**
-
-            **const data = doc.data();**
-
-            **dates.add(data.date);**
-
-            
-
-            **data.records.forEach(record => {**
-
-                **if (!rekapData\[record.studentId]) {**
-
-                    **rekapData\[record.studentId] = {**
-
-                        **name: record.studentName,**
-
-                        **nis: record.nis,**
-
-                        **attendance: {},**
-
-                        **total: { H: 0, I: 0, S: 0, A: 0 }**
-
-                    **};**
-
-                **}**
-
-                
-
-                **rekapData\[record.studentId].attendance\[data.date] = record.status;**
-
-                **rekapData\[record.studentId].total\[record.status]++;**
-
-            **});**
-
-        **});**
-
-        
-
-        **const sortedDates = Array.from(dates).sort();**
-
-        
-
-        **// Generate table**
-
-        **let html = `**
-
-            **<table class="data-table text-sm">**
-
-                **<thead>**
-
-                    **<tr>**
-
-                        **<th class="sticky left-0 bg-pai-green">No</th>**
-
-                        **<th class="sticky left-10 bg-pai-green">Nama</th>**
-
-                        **${sortedDates.map(d => {**
-
-                            **const dateObj = new Date(d);**
-
-                            **return `<th class="text-center">${dateObj.getDate()}</th>`;**
-
-                        **}).join('')}**
-
-                        **<th class="text-center bg-green-700">H</th>**
-
-                        **<th class="text-center bg-blue-700">I</th>**
-
-                        **<th class="text-center bg-yellow-600">S</th>**
-
-                        **<th class="text-center bg-red-700">A</th>**
-
-                    **</tr>**
-
-                **</thead>**
-
-                **<tbody>**
-
-        **`;**
-
-        
-
-        **let index = 1;**
-
-        **for (const studentId in rekapData) {**
-
-            **const student = rekapData\[studentId];**
-
-            **html += `**
-
-                **<tr>**
-
-                    **<td class="sticky left-0 bg-white">${index++}</td>**
-
-                    **<td class="sticky left-10 bg-white font-medium">${student.name}</td>**
-
-                    **${sortedDates.map(d => {**
-
-                        **const status = student.attendance\[d] || '-';**
-
-                        **const colorClass = {**
-
-                            **'H': 'text-green-600',**
-
-                            **'I': 'text-blue-600',**
-
-                            **'S': 'text-yellow-600',**
-
-                            **'A': 'text-red-600'**
-
-                        **}\[status] || 'text-gray-400';**
-
-                        **return `<td class="text-center ${colorClass}">${status}</td>`;**
-
-                    **}).join('')}**
-
-                    **<td class="text-center font-bold text-green-600">${student.total.H}</td>**
-
-                    **<td class="text-center font-bold text-blue-600">${student.total.I}</td>**
-
-                    **<td class="text-center font-bold text-yellow-600">${student.total.S}</td>**
-
-                    **<td class="text-center font-bold text-red-600">${student.total.A}</td>**
-
-                **</tr>**
-
-            **`;**
-
-        **}**
-
-        
-
-        **html += '</tbody></table>';**
-
-        
-
-        **document.getElementById('rekapContent').innerHTML = html;**
-
-        
-
-    **} catch (error) {**
-
-        **console.error('Error generating rekap:', error);**
-
-        **showToast('Gagal membuat rekap', 'error');**
-
-    **}**
-
-}
-
-function printRekap() {
-    **window.print();**
-
-}
-
-function exportRekap() {
-    **showToast('Fitur export akan segera tersedia', 'info');**
-
-}
-
-// === EXPORT ABSENSI ===
-function exportAbsensi() {
-    **const table = document.getElementById('absensiTable');**
-
-    **if (!table) return;**
-
-    
-
-    **let csv = \[];**
-
-    **const rows = table.querySelectorAll('tr');**
-
-    
-
-    **rows.forEach(row => {**
-
-        **const cols = row.querySelectorAll('td, th');**
-
-        **const rowData = \[];**
-
-        **cols.forEach((col, index) => {**
-
-            **// Skip action columns**
-
-            **if (index < 5) {**
-
-                **let text = col.innerText.replace(/"/g, '""');**
-
-                **// For status column, get the active button**
-
-                **if (index === 4) {**
-
-                    **const activeBtn = col.querySelector('.hadir, .izin, .sakit, .alpha');**
-
-                    **text = activeBtn ? activeBtn.innerText : '-';**
-
-                **}**
-
-                **rowData.push('"' + text + '"');**
-
-            **}**
-
-        **});**
-
-        **if (rowData.length > 0) {**
-
-            **csv.push(rowData.join(','));**
-
-        **}**
-
-    **});**
-
-    
-
-    **const csvContent = csv.join('\\n');**
-
-    **const blob = new Blob(\[csvContent], { type: 'text/csv;charset=utf-8;' });**
-
-    **const link = document.createElement('a');**
-
-    **const tanggal = document.getElementById('filterTanggal').value;**
-
-    
-
-    **link.href = URL.createObjectURL(blob);**
-
-    **link.download = `absensi\_${tanggal}.csv`;**
-
-    **link.click();**
-
-    
-
-    **showToast('File berhasil diunduh!', 'success');**
-
+    } catch (error) {
+        console.error('Error loading attendance stats:', error);
+    }
 }
 
 // === SIDEBAR TOGGLE ===
 function toggleSidebar() {
-    **const sidebar = document.getElementById('sidebar');**
-
-    **sidebar.classList.toggle('open');**
-
-    **sidebar.classList.toggle('collapsed');**
-
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.querySelector('.main-content');
+    
+    sidebar.classList.toggle('open');
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('expanded');
 }
 
-console.log('✅ Absensi module initialized');
+// === QUICK ACTION MODAL ===
+function openQuickAction() {
+    document.getElementById('quickActionModal').classList.add('active');
+}
+
+function closeQuickAction() {
+    document.getElementById('quickActionModal').classList.remove('active');
+}
+
+// Close modal on outside click
+document.addEventListener('click', (e) => {
+    const modal = document.getElementById('quickActionModal');
+    if (e.target === modal) {
+        closeQuickAction();
+    }
+});
+
+// === UTILITY FUNCTIONS ===
+
+// Format date to Indonesian
+function formatDate(date, format = 'full') {
+    const options = {
+        full: { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
+        short: { day: 'numeric', month: 'short', year: 'numeric' },
+        time: { hour: '2-digit', minute: '2-digit' }
+    };
+    
+    return new Date(date).toLocaleDateString('id-ID', options[format] || options.full);
+}
+
+// Generate unique ID
+function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+// Debounce function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Show loading overlay
+function showLoading(message = 'Loading...') {
+    const overlay = document.createElement('div');
+    overlay.id = 'loadingOverlay';
+    overlay.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+    overlay.innerHTML = `
+        <div class="bg-white rounded-xl p-6 flex flex-col items-center gap-4">
+            <div class="loader"></div>
+            <p class="text-gray-700">${message}</p>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+// Hide loading overlay
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+// Export to PDF helper
+async function exportToPDF(elementId, filename) {
+    showLoading('Membuat PDF...');
+    
+    try {
+        const element = document.getElementById(elementId);
+        // Note: This requires html2pdf library
+        // <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+        
+        if (typeof html2pdf !== 'undefined') {
+            const opt = {
+                margin: 10,
+                filename: filename + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            await html2pdf().set(opt).from(element).save();
+            showToast('PDF berhasil diunduh!', 'success');
+        } else {
+            // Fallback: print dialog
+            window.print();
+        }
+    } catch (error) {
+        console.error('Export PDF error:', error);
+        showToast('Gagal membuat PDF.', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// Export to Excel helper
+function exportToExcel(tableId, filename) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+    
+    rows.forEach(row => {
+        const cols = row.querySelectorAll('td, th');
+        const rowData = [];
+        cols.forEach(col => {
+            rowData.push('"' + col.innerText.replace(/"/g, '""') + '"');
+        });
+        csv.push(rowData.join(','));
+    });
+    
+    const csvContent = csv.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    link.href = URL.createObjectURL(blob);
+    link.download = filename + '.csv';
+    link.click();
+    
+    showToast('File berhasil diunduh!', 'success');
+}
+
+console.log('✅ App module initialized');
