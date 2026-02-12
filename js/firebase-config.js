@@ -3,6 +3,8 @@
 // Admin PAI Super App
 // ============================================
 
+// Konfigurasi Firebase Anda
+// PENTING: Ganti dengan konfigurasi dari Firebase Console Anda
 const firebaseConfig = {
   apiKey: "AIzaSyCyRKvngA1EqlQmgxgxU4465qgRw8TdT08",
   authDomain: "si-gumart.firebaseapp.com",
@@ -10,8 +12,7 @@ const firebaseConfig = {
   storageBucket: "si-gumart.firebasestorage.app",
   messagingSenderId: "544375918988",
   appId: "1:544375918988:web:3375b3025b7d51ea2546a9",
-  measurementId: "G-40ZGJFEWD1"
-};
+ };
 
 // Inisialisasi Firebase
 firebase.initializeApp(firebaseConfig);
@@ -20,15 +21,26 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Pengaturan Firestore untuk offline persistence
-db.enablePersistence()
-    .catch((err) => {
-        if (err.code === 'failed-precondition') {
-            console.log('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-        } else if (err.code === 'unimplemented') {
-            console.log('The current browser does not support offline persistence.');
-        }
-    });
+// Pengaturan Firestore untuk offline persistence (cara baru)
+db.settings({
+    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+});
+
+// Enable persistence dengan cara yang lebih modern
+try {
+    db.enablePersistence({ synchronizeTabs: true })
+        .catch((err) => {
+            if (err.code === 'failed-precondition') {
+                // Multiple tabs open
+                console.log('Persistence failed: Multiple tabs open');
+            } else if (err.code === 'unimplemented') {
+                // Browser tidak support
+                console.log('Persistence not supported');
+            }
+        });
+} catch (e) {
+    console.log('Persistence setup skipped');
+}
 
 // Timestamp helper
 const timestamp = firebase.firestore.FieldValue.serverTimestamp();
@@ -49,7 +61,8 @@ const collections = {
     prota: db.collection('prota'),
     promes: db.collection('promes'),
     modules: db.collection('modules'),
-    calendar: db.collection('calendar')
+    calendar: db.collection('calendar'),
+    documents: db.collection('documents')
 };
 
 console.log('✅ Firebase initialized successfully');
