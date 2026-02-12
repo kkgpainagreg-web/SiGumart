@@ -3,629 +3,391 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin PAI Satu Pintu - Dashboard</title>
-    
-    <!-- 
-    =====================================================
-    TAILWIND CSS - Framework CSS untuk styling
-    Kita pakai CDN agar tidak perlu install apapun
-    =====================================================
-    -->
+    <title>Dashboard - Admin PAI Super App</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- 
-    =====================================================
-    FONT AWESOME - Untuk ikon-ikon cantik
-    =====================================================
-    -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- 
-    =====================================================
-    KONFIGURASI WARNA TAILWIND CUSTOM
-    Warna hijau khas PAI/Islami
-    =====================================================
-    -->
+    <link rel="stylesheet" href="css/styles.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        // Warna utama aplikasi (hijau Islami)
-                        'pai-hijau': {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        }
+                        'pai-green': '#1B5E20',
+                        'pai-gold': '#F9A825',
+                        'pai-light': '#E8F5E9',
                     }
                 }
             }
         }
     </script>
-    
-    <style>
-        /* 
-        =====================================================
-        CSS CUSTOM TAMBAHAN
-        Untuk animasi dan efek khusus
-        =====================================================
-        */
-        
-        /* Animasi sidebar saat hover */
-        .sidebar-link {
-            transition: all 0.3s ease;
-        }
-        
-        .sidebar-link:hover {
-            transform: translateX(5px);
-        }
-        
-        /* Animasi card saat hover */
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Loading spinner */
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #16a34a;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
 </head>
-
-<body class="bg-gray-100 font-sans">
-    <!-- 
-    =====================================================
-    CONTAINER UTAMA - Menggunakan Flexbox
-    Membagi layar jadi 2: Sidebar (kiri) + Konten (kanan)
-    =====================================================
-    -->
-    <div class="flex min-h-screen">
-        
-        <!-- 
-        =====================================================
-        SIDEBAR NAVIGASI (Bagian Kiri)
-        - Lebar tetap: 64 (256px)
-        - Warna: Hijau gelap (pai-hijau-800)
-        =====================================================
-        -->
-        <aside id="sidebar" class="w-64 bg-pai-hijau-800 text-white fixed h-full z-50 transition-all duration-300">
-            
-            <!-- Header Sidebar: Logo dan Nama Aplikasi -->
-            <div class="p-6 border-b border-pai-hijau-700">
-                <div class="flex items-center space-x-3">
-                    <!-- Ikon Aplikasi -->
-                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-                        <i class="fas fa-mosque text-pai-hijau-700 text-2xl"></i>
-                    </div>
-                    <!-- Nama Aplikasi -->
-                    <div>
-                        <h1 class="font-bold text-lg leading-tight">Admin PAI</h1>
-                        <p class="text-pai-hijau-300 text-xs">Satu Pintu</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Menu Navigasi -->
-            <nav class="p-4">
-                <!-- Label Kategori -->
-                <p class="text-pai-hijau-400 text-xs uppercase tracking-wider mb-4 px-3">
-                    Menu Utama
-                </p>
-                
-                <!-- Daftar Menu -->
-                <ul class="space-y-2">
-                    
-                    <!-- Menu 1: Dashboard -->
-                    <li>
-                        <a href="dashboard.html" 
-                           class="sidebar-link flex items-center px-4 py-3 rounded-lg bg-pai-hijau-700 text-white">
-                            <i class="fas fa-home w-5"></i>
-                            <span class="ml-3">Dashboard</span>
-                        </a>
-                    </li>
-                    
-                    <!-- Menu 2: Profil Guru -->
-                    <li>
-                        <a href="profil.html" 
-                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
-                            <i class="fas fa-user w-5"></i>
-                            <span class="ml-3">Profil Guru</span>
-                        </a>
-                    </li>
-                    
-                    <!-- Menu 3: Kalender Pendidikan -->
-                    <li>
-                        <a href="kalender.html" 
-                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
-                            <i class="fas fa-calendar-alt w-5"></i>
-                            <span class="ml-3">Kalender Pendidikan</span>
-                        </a>
-                    </li>
-                    
-                    <!-- Menu 4: Perencanaan (dengan submenu) -->
-                    <li>
-                        <a href="perencanaan.html" 
-                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
-                            <i class="fas fa-tasks w-5"></i>
-                            <span class="ml-3">Perencanaan</span>
-                            <span class="ml-auto bg-pai-hijau-600 text-xs px-2 py-1 rounded-full">
-                                Prota/Promes
-                            </span>
-                        </a>
-                    </li>
-                    
-                    <!-- Menu 5: Modul Ajar -->
-                    <li>
-                        <a href="modul-ajar.html" 
-                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
-                            <i class="fas fa-book-open w-5"></i>
-                            <span class="ml-3">Modul Ajar</span>
-                        </a>
-                    </li>
-                    
-                    <!-- Menu 6: Absensi -->
-                    <li>
-                        <a href="absensi.html" 
-                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
-                            <i class="fas fa-clipboard-check w-5"></i>
-                            <span class="ml-3">Absensi Siswa</span>
-                        </a>
-                    </li>
-                    
-                    <!-- Menu 7: Daftar Nilai -->
-                    <li>
-                        <a href="nilai.html" 
-                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
-                            <i class="fas fa-chart-bar w-5"></i>
-                            <span class="ml-3">Daftar Nilai</span>
-                        </a>
-                    </li>
-                </ul>
-                
-                <!-- Label Kategori: Dokumen -->
-                <p class="text-pai-hijau-400 text-xs uppercase tracking-wider mb-4 px-3 mt-8">
-                    Dokumen
-                </p>
-                
-                <ul class="space-y-2">
-                    <!-- Menu: Cetak Dokumen -->
-                    <li>
-                        <a href="cetak.html" 
-                           class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100">
-                            <i class="fas fa-print w-5"></i>
-                            <span class="ml-3">Cetak Dokumen</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            
-            <!-- Footer Sidebar: Info User -->
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-pai-hijau-700">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-pai-hijau-600 rounded-full flex items-center justify-center">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="flex-1">
-                        <!-- Nama guru akan diisi dari database -->
-                        <p id="nama-guru-sidebar" class="text-sm font-medium">Memuat...</p>
-                        <p class="text-pai-hijau-400 text-xs">Guru PAI</p>
-                    </div>
-                    <!-- Tombol Logout -->
-                    <button onclick="logoutUser()" 
-                            class="text-pai-hijau-400 hover:text-white transition-colors"
-                            title="Keluar">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                </div>
-            </div>
-        </aside>
-        
-        <!-- 
-        =====================================================
-        KONTEN UTAMA (Bagian Kanan)
-        - Margin kiri = lebar sidebar (ml-64)
-        - Flex-1 = mengisi sisa layar
-        =====================================================
-        -->
-        <main class="flex-1 ml-64">
-            
-            <!-- 
-            =====================================================
-            HEADER ATAS
-            - Menampilkan judul halaman dan info user
-            =====================================================
-            -->
-            <header class="bg-white shadow-sm border-b border-gray-200 px-8 py-4">
-                <div class="flex items-center justify-between">
-                    
-                    <!-- Judul Halaman -->
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Dashboard</h2>
-                        <p class="text-gray-500 text-sm">Selamat datang di Admin PAI Satu Pintu</p>
-                    </div>
-                    
-                    <!-- Info Tanggal dan Notifikasi -->
-                    <div class="flex items-center space-x-4">
-                        <!-- Tanggal Hari Ini -->
-                        <div class="text-right">
-                            <p id="tanggal-hari-ini" class="text-sm font-medium text-gray-700"></p>
-                            <p id="waktu-sekarang" class="text-xs text-gray-500"></p>
-                        </div>
-                        
-                        <!-- Tombol Notifikasi -->
-                        <button class="relative p-2 text-gray-500 hover:text-pai-hijau-600 transition-colors">
-                            <i class="fas fa-bell text-xl"></i>
-                            <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-                        </button>
-                    </div>
-                </div>
-            </header>
-            
-            <!-- 
-            =====================================================
-            AREA KONTEN DASHBOARD
-            =====================================================
-            -->
-            <div class="p-8">
-                
-                <!-- 
-                =====================================================
-                BARIS 1: Kartu Statistik
-                Grid 4 kolom untuk menampilkan ringkasan data
-                =====================================================
-                -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    
-                    <!-- Kartu 1: Total Siswa -->
-                    <div class="card-hover bg-white rounded-2xl shadow-md p-6 transition-all duration-300">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-500 text-sm">Total Siswa</p>
-                                <p id="total-siswa" class="text-3xl font-bold text-gray-800 mt-1">0</p>
-                            </div>
-                            <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center">
-                                <i class="fas fa-users text-blue-600 text-2xl"></i>
-                            </div>
-                        </div>
-                        <p class="text-green-500 text-sm mt-3">
-                            <i class="fas fa-arrow-up mr-1"></i>
-                            <span>Semester Ganjil 2025</span>
-                        </p>
-                    </div>
-                    
-                    <!-- Kartu 2: Kelas Diampu -->
-                    <div class="card-hover bg-white rounded-2xl shadow-md p-6 transition-all duration-300">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-500 text-sm">Kelas Diampu</p>
-                                <p id="total-kelas" class="text-3xl font-bold text-gray-800 mt-1">0</p>
-                            </div>
-                            <div class="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center">
-                                <i class="fas fa-chalkboard text-green-600 text-2xl"></i>
-                            </div>
-                        </div>
-                        <p class="text-gray-500 text-sm mt-3">
-                            <i class="fas fa-school mr-1"></i>
-                            <span id="nama-sekolah-card">-</span>
-                        </p>
-                    </div>
-                    
-                    <!-- Kartu 3: Modul Ajar Selesai -->
-                    <div class="card-hover bg-white rounded-2xl shadow-md p-6 transition-all duration-300">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-500 text-sm">Modul Ajar</p>
-                                <p id="total-modul" class="text-3xl font-bold text-gray-800 mt-1">0</p>
-                            </div>
-                            <div class="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center">
-                                <i class="fas fa-book text-purple-600 text-2xl"></i>
-                            </div>
-                        </div>
-                        <p class="text-purple-500 text-sm mt-3">
-                            <i class="fas fa-check-circle mr-1"></i>
-                            <span>Sudah dibuat</span>
-                        </p>
-                    </div>
-                    
-                    <!-- Kartu 4: Minggu Efektif -->
-                    <div class="card-hover bg-white rounded-2xl shadow-md p-6 transition-all duration-300">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-500 text-sm">Minggu Efektif</p>
-                                <p id="minggu-efektif" class="text-3xl font-bold text-gray-800 mt-1">0</p>
-                            </div>
-                            <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center">
-                                <i class="fas fa-calendar-week text-orange-600 text-2xl"></i>
-                            </div>
-                        </div>
-                        <p class="text-orange-500 text-sm mt-3">
-                            <i class="fas fa-clock mr-1"></i>
-                            <span>Semester ini</span>
-                        </p>
-                    </div>
-                </div>
-                
-                <!-- 
-                =====================================================
-                BARIS 2: Status dan Panduan Cepat
-                =====================================================
-                -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                    
-                    <!-- Panel Kiri: Status Kelengkapan Administrasi -->
-                    <div class="lg:col-span-2 bg-white rounded-2xl shadow-md p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">
-                            <i class="fas fa-clipboard-list text-pai-hijau-600 mr-2"></i>
-                            Status Kelengkapan Administrasi
-                        </h3>
-                        
-                        <!-- Daftar Status -->
-                        <div class="space-y-4">
-                            
-                            <!-- Status 1: Profil Guru -->
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                                <div class="flex items-center">
-                                    <div id="status-profil-icon" class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-                                        <i class="fas fa-user text-gray-500"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-800">Profil Guru</p>
-                                        <p id="status-profil-text" class="text-sm text-gray-500">Belum diisi</p>
-                                    </div>
-                                </div>
-                                <a href="profil.html" class="text-pai-hijau-600 hover:text-pai-hijau-700 text-sm font-medium">
-                                    Lengkapi <i class="fas fa-arrow-right ml-1"></i>
-                                </a>
-                            </div>
-                            
-                            <!-- Status 2: Kalender Pendidikan -->
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                                <div class="flex items-center">
-                                    <div id="status-kalender-icon" class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-                                        <i class="fas fa-calendar text-gray-500"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-800">Kalender Pendidikan</p>
-                                        <p id="status-kalender-text" class="text-sm text-gray-500">Belum diatur</p>
-                                    </div>
-                                </div>
-                                <a href="kalender.html" class="text-pai-hijau-600 hover:text-pai-hijau-700 text-sm font-medium">
-                                    Atur <i class="fas fa-arrow-right ml-1"></i>
-                                </a>
-                            </div>
-                            
-                            <!-- Status 3: Prota/Promes -->
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                                <div class="flex items-center">
-                                    <div id="status-prota-icon" class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-                                        <i class="fas fa-tasks text-gray-500"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-800">Prota & Promes</p>
-                                        <p id="status-prota-text" class="text-sm text-gray-500">Belum dibuat</p>
-                                    </div>
-                                </div>
-                                <a href="perencanaan.html" class="text-pai-hijau-600 hover:text-pai-hijau-700 text-sm font-medium">
-                                    Buat <i class="fas fa-arrow-right ml-1"></i>
-                                </a>
-                            </div>
-                            
-                            <!-- Status 4: Modul Ajar -->
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                                <div class="flex items-center">
-                                    <div id="status-modul-icon" class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-                                        <i class="fas fa-book-open text-gray-500"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-800">Modul Ajar</p>
-                                        <p id="status-modul-text" class="text-sm text-gray-500">Belum dibuat</p>
-                                    </div>
-                                </div>
-                                <a href="modul-ajar.html" class="text-pai-hijau-600 hover:text-pai-hijau-700 text-sm font-medium">
-                                    Buat <i class="fas fa-arrow-right ml-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Panel Kanan: Panduan Cepat -->
-                    <div class="bg-gradient-to-br from-pai-hijau-600 to-pai-hijau-800 rounded-2xl shadow-md p-6 text-white">
-                        <h3 class="text-lg font-bold mb-4">
-                            <i class="fas fa-lightbulb mr-2"></i>
-                            Panduan Cepat
-                        </h3>
-                        
-                        <div class="space-y-4">
-                            <div class="flex items-start">
-                                <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                                    <span class="font-bold text-sm">1</span>
-                                </div>
-                                <p class="text-sm text-pai-hijau-100">Lengkapi <strong>Profil Guru</strong> terlebih dahulu</p>
-                            </div>
-                            
-                            <div class="flex items-start">
-                                <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                                    <span class="font-bold text-sm">2</span>
-                                </div>
-                                <p class="text-sm text-pai-hijau-100">Atur <strong>Kalender Pendidikan</strong> dan minggu efektif</p>
-                            </div>
-                            
-                            <div class="flex items-start">
-                                <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                                    <span class="font-bold text-sm">3</span>
-                                </div>
-                                <p class="text-sm text-pai-hijau-100">Pilih TP dari <strong>Master CP 2025</strong> untuk menyusun Prota/Promes</p>
-                            </div>
-                            
-                            <div class="flex items-start">
-                                <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                                    <span class="font-bold text-sm">4</span>
-                                </div>
-                                <p class="text-sm text-pai-hijau-100"><strong>Cetak</strong> semua dokumen dengan satu klik!</p>
-                            </div>
-                        </div>
-                        
-                        <button onclick="window.location.href='profil.html'" 
-                                class="w-full mt-6 bg-white text-pai-hijau-700 font-bold py-3 rounded-xl hover:bg-pai-hijau-50 transition-colors">
-                            Mulai Sekarang <i class="fas fa-arrow-right ml-2"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- 
-                =====================================================
-                BARIS 3: Informasi CP PAI 2025
-                =====================================================
-                -->
-                <div class="bg-white rounded-2xl shadow-md p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-bold text-gray-800">
-                            <i class="fas fa-book-quran text-pai-hijau-600 mr-2"></i>
-                            Capaian Pembelajaran PAI SD 2025
-                        </h3>
-                        <span class="bg-pai-hijau-100 text-pai-hijau-700 px-3 py-1 rounded-full text-sm font-medium">
-                            Kepka BSKAP No. 046/H/KR/2025
-                        </span>
-                    </div>
-                    
-                    <p class="text-gray-600 mb-4">
-                        Aplikasi ini menggunakan data CP terbaru sesuai regulasi Kemendikbudristek.
-                    </p>
-                    
-                    <!-- Daftar Elemen CP -->
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        <div class="bg-blue-50 p-4 rounded-xl text-center">
-                            <i class="fas fa-quran text-blue-600 text-2xl mb-2"></i>
-                            <p class="text-sm font-medium text-blue-800">Al-Qur'an Hadis</p>
-                        </div>
-                        <div class="bg-green-50 p-4 rounded-xl text-center">
-                            <i class="fas fa-star-and-crescent text-green-600 text-2xl mb-2"></i>
-                            <p class="text-sm font-medium text-green-800">Akidah</p>
-                        </div>
-                        <div class="bg-purple-50 p-4 rounded-xl text-center">
-                            <i class="fas fa-heart text-purple-600 text-2xl mb-2"></i>
-                            <p class="text-sm font-medium text-purple-800">Akhlak</p>
-                        </div>
-                        <div class="bg-orange-50 p-4 rounded-xl text-center">
-                            <i class="fas fa-balance-scale text-orange-600 text-2xl mb-2"></i>
-                            <p class="text-sm font-medium text-orange-800">Fikih</p>
-                        </div>
-                        <div class="bg-red-50 p-4 rounded-xl text-center">
-                            <i class="fas fa-landmark text-red-600 text-2xl mb-2"></i>
-                            <p class="text-sm font-medium text-red-800">Sejarah Islam</p>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-            
-            <!-- 
-            =====================================================
-            FOOTER
-            =====================================================
-            -->
-            <footer class="bg-white border-t border-gray-200 px-8 py-4 text-center text-gray-500 text-sm">
-                <p>© 2025 Admin PAI Satu Pintu - Dibuat dengan ❤️ untuk Guru PAI Indonesia</p>
-            </footer>
-            
-        </main>
-    </div>
+<body class="bg-gray-100">
     
-    <!-- 
-    =====================================================
-    LOADING OVERLAY
-    Ditampilkan saat aplikasi sedang memuat data
-    =====================================================
-    -->
-    <div id="loading-overlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-8 rounded-2xl text-center">
-            <div class="spinner mx-auto mb-4"></div>
-            <p class="text-gray-600">Memuat data...</p>
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+        <!-- Logo -->
+        <div class="p-5 border-b border-green-700">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                    <span class="text-2xl">🕌</span>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg">PAI Super App</h1>
+                    <p class="text-green-300 text-xs">Admin Dashboard</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Menu -->
+        <nav class="py-4">
+            <div class="px-4 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Menu Utama</span>
+            </div>
+            
+            <a href="dashboard.html" class="sidebar-menu-item active">
+                <span class="menu-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="profil.html" class="sidebar-menu-item">
+                <span class="menu-icon">👤</span>
+                <span>Profil</span>
+            </a>
+            
+            <a href="kalender.html" class="sidebar-menu-item">
+                <span class="menu-icon">📅</span>
+                <span>Kalender Akademik</span>
+            </a>
+            
+            <a href="jadwal.html" class="sidebar-menu-item">
+                <span class="menu-icon">🕐</span>
+                <span>Jadwal Mengajar</span>
+            </a>
+            
+            <div class="px-4 mt-6 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Akademik</span>
+            </div>
+            
+            <a href="absensi.html" class="sidebar-menu-item">
+                <span class="menu-icon">✅</span>
+                <span>Absensi Siswa</span>
+            </a>
+            
+            <a href="nilai.html" class="sidebar-menu-item">
+                <span class="menu-icon">📝</span>
+                <span>Daftar Nilai</span>
+            </a>
+            
+            <a href="jurnal.html" class="sidebar-menu-item">
+                <span class="menu-icon">📖</span>
+                <span>Jurnal Pembelajaran</span>
+            </a>
+            
+            <a href="bank-soal.html" class="sidebar-menu-item">
+                <span class="menu-icon">❓</span>
+                <span>Bank Soal</span>
+            </a>
+            
+            <div class="px-4 mt-6 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Generator</span>
+            </div>
+            
+            <a href="generator.html" class="sidebar-menu-item">
+                <span class="menu-icon">⚡</span>
+                <span>Generator Dokumen</span>
+            </a>
+        </nav>
+        
+        <!-- User Info -->
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-green-700">
+            <div class="flex items-center gap-3">
+                <div id="userAvatar" class="w-10 h-10 bg-pai-gold rounded-full flex items-center justify-center text-lg font-bold">
+                    G
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p id="userName" class="text-white font-medium truncate">Loading...</p>
+                    <p id="userEmail" class="text-green-300 text-xs truncate">loading@email.com</p>
+                </div>
+                <button onclick="logout()" class="text-green-300 hover:text-white transition-colors" title="Logout">
+                    🚪
+                </button>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        
+        <!-- HEADER -->
+        <header class="header px-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg">
+                    <span class="text-xl">☰</span>
+                </button>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Dashboard</h1>
+                    <p class="text-sm text-gray-500" id="currentDate">Loading...</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- Notification -->
+                <button class="relative p-2 hover:bg-gray-100 rounded-lg">
+                    <span class="text-xl">🔔</span>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+                
+                <!-- Quick Actions -->
+                <button onclick="openQuickAction()" class="btn btn-primary">
+                    <span>+ Buat Baru</span>
+                </button>
+            </div>
+        </header>
+        
+        <!-- CONTENT -->
+        <div class="p-6">
+            
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-r from-pai-green to-green-600 rounded-2xl p-6 mb-6 text-white">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">Assalamu'alaikum, <span id="welcomeName">Guru</span>! 👋</h2>
+                        <p class="text-green-100">Selamat datang di Admin PAI Super App. Semoga hari ini produktif!</p>
+                    </div>
+                    <div class="text-center md:text-right">
+                        <p class="text-green-100 text-sm">Tahun Ajaran</p>
+                        <p class="text-2xl font-bold">2024/2025</p>
+                        <p class="text-green-100 text-sm">Semester Genap</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                
+                <!-- Total Siswa -->
+                <div class="stat-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm mb-1">Total Siswa</p>
+                            <p class="text-3xl font-bold text-gray-800" id="statStudents">0</p>
+                            <p class="text-xs text-green-600 mt-1">↑ Data terbaru</p>
+                        </div>
+                        <div class="stat-icon bg-blue-100 text-blue-600">
+                            👨‍🎓
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Kelas Diajar -->
+                <div class="stat-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm mb-1">Kelas Diajar</p>
+                            <p class="text-3xl font-bold text-gray-800" id="statClasses">0</p>
+                            <p class="text-xs text-gray-500 mt-1">Aktif semester ini</p>
+                        </div>
+                        <div class="stat-icon bg-green-100 text-green-600">
+                            🏫
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modul Ajar -->
+                <div class="stat-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm mb-1">Modul Ajar</p>
+                            <p class="text-3xl font-bold text-gray-800" id="statModules">0</p>
+                            <p class="text-xs text-pai-gold mt-1">📄 Siap digunakan</p>
+                        </div>
+                        <div class="stat-icon bg-yellow-100 text-yellow-600">
+                            📚
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bank Soal -->
+                <div class="stat-card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm mb-1">Bank Soal</p>
+                            <p class="text-3xl font-bold text-gray-800" id="statQuestions">0</p>
+                            <p class="text-xs text-purple-600 mt-1">❓ Tersedia</p>
+                        </div>
+                        <div class="stat-icon bg-purple-100 text-purple-600">
+                            📝
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Jadwal Hari Ini -->
+                <div class="lg:col-span-2 card">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="font-bold text-gray-800">📅 Jadwal Mengajar Hari Ini</h3>
+                        <a href="jadwal.html" class="text-pai-green text-sm hover:underline">Lihat Semua</a>
+                    </div>
+                    <div class="card-body">
+                        <div id="todaySchedule" class="space-y-3">
+                            <!-- Schedule items will be loaded here -->
+                            <div class="text-center py-8 text-gray-500">
+                                <span class="text-4xl block mb-2">📚</span>
+                                <p>Tidak ada jadwal hari ini</p>
+                                <a href="jadwal.html" class="text-pai-green hover:underline text-sm">+ Tambah Jadwal</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Access -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="font-bold text-gray-800">⚡ Akses Cepat</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="grid grid-cols-2 gap-3">
+                            <a href="absensi.html" class="p-4 bg-blue-50 rounded-xl text-center hover:bg-blue-100 transition-colors">
+                                <span class="text-2xl block mb-2">✅</span>
+                                <span class="text-sm font-medium text-gray-700">Absensi</span>
+                            </a>
+                            <a href="nilai.html" class="p-4 bg-green-50 rounded-xl text-center hover:bg-green-100 transition-colors">
+                                <span class="text-2xl block mb-2">📊</span>
+                                <span class="text-sm font-medium text-gray-700">Input Nilai</span>
+                            </a>
+                            <a href="jurnal.html" class="p-4 bg-yellow-50 rounded-xl text-center hover:bg-yellow-100 transition-colors">
+                                <span class="text-2xl block mb-2">📖</span>
+                                <span class="text-sm font-medium text-gray-700">Jurnal</span>
+                            </a>
+                            <a href="generator.html" class="p-4 bg-purple-50 rounded-xl text-center hover:bg-purple-100 transition-colors">
+                                <span class="text-2xl block mb-2">⚙️</span>
+                                <span class="text-sm font-medium text-gray-700">Generator</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activities -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                
+                <!-- Jurnal Terbaru -->
+                <div class="card">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="font-bold text-gray-800">📖 Jurnal Pembelajaran Terbaru</h3>
+                        <a href="jurnal.html" class="text-pai-green text-sm hover:underline">Lihat Semua</a>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentJournals" class="space-y-3">
+                            <div class="text-center py-6 text-gray-500">
+                                <p class="text-sm">Belum ada jurnal</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Statistik Absensi -->
+                <div class="card">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="font-bold text-gray-800">📊 Statistik Absensi Minggu Ini</h3>
+                        <a href="absensi.html" class="text-pai-green text-sm hover:underline">Detail</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">Hadir</span>
+                                    <span class="font-medium text-green-600" id="attendanceHadir">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill bg-green-500" id="progressHadir" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">Izin</span>
+                                    <span class="font-medium text-blue-600" id="attendanceIzin">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill bg-blue-500" id="progressIzin" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">Sakit</span>
+                                    <span class="font-medium text-yellow-600" id="attendanceSakit">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill bg-yellow-500" id="progressSakit" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">Alpha</span>
+                                    <span class="font-medium text-red-600" id="attendanceAlpha">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill bg-red-500" id="progressAlpha" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+    
+    <!-- Quick Action Modal -->
+    <div id="quickActionModal" class="modal-overlay">
+        <div class="modal-content max-w-md">
+            <div class="modal-header">
+                <h3 class="font-bold text-lg">Buat Baru</h3>
+                <button onclick="closeQuickAction()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="absensi.html?action=new" class="p-4 border rounded-xl text-center hover:border-pai-green hover:bg-pai-light transition-all">
+                        <span class="text-3xl block mb-2">✅</span>
+                        <span class="font-medium">Absensi Baru</span>
+                    </a>
+                    <a href="jurnal.html?action=new" class="p-4 border rounded-xl text-center hover:border-pai-green hover:bg-pai-light transition-all">
+                        <span class="text-3xl block mb-2">📖</span>
+                        <span class="font-medium">Jurnal Baru</span>
+                    </a>
+                    <a href="nilai.html?action=new" class="p-4 border rounded-xl text-center hover:border-pai-green hover:bg-pai-light transition-all">
+                        <span class="text-3xl block mb-2">📝</span>
+                        <span class="font-medium">Input Nilai</span>
+                    </a>
+                    <a href="bank-soal.html?action=new" class="p-4 border rounded-xl text-center hover:border-pai-green hover:bg-pai-light transition-all">
+                        <span class="text-3xl block mb-2">❓</span>
+                        <span class="font-medium">Soal Baru</span>
+                    </a>
+                    <a href="generator.html?type=modul" class="p-4 border rounded-xl text-center hover:border-pai-green hover:bg-pai-light transition-all col-span-2">
+                        <span class="text-3xl block mb-2">⚡</span>
+                        <span class="font-medium">Generate Modul Ajar (ATP, Prota, Promes)</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
     
-    <!-- 
-    =====================================================
-    IMPORT FILE JAVASCRIPT
-    Urutan penting! Firebase config harus paling awal
-    =====================================================
-    -->
-    
-    <!-- 1. Firebase SDK -->
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 transform translate-x-full transition-transform duration-300 z-50">
+        <div id="toastContent" class="px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+            <span id="toastIcon">✓</span>
+            <span id="toastMessage">Pesan</span>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
-    <!-- 2. File JavaScript kita -->
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/database.js"></script>
     <script src="js/app.js"></script>
-    
-    <!-- 
-    =====================================================
-    SCRIPT UNTUK DASHBOARD
-    =====================================================
-    -->
-    <script>
-        // =====================================================
-        // FUNGSI: Menampilkan tanggal dan waktu Indonesia
-        // =====================================================
-        function updateDateTime() {
-            const now = new Date();
-            
-            // Format tanggal dalam Bahasa Indonesia
-            const optionsTanggal = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            };
-            const tanggal = now.toLocaleDateString('id-ID', optionsTanggal);
-            
-            // Format waktu
-            const waktu = now.toLocaleTimeString('id-ID', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-            
-            // Tampilkan ke elemen HTML
-            document.getElementById('tanggal-hari-ini').textContent = tanggal;
-            document.getElementById('waktu-sekarang').textContent = waktu + ' WIB';
-        }
-        
-        // Update waktu setiap detik
-        updateDateTime();
-        setInterval(updateDateTime, 1000);
-        
-        // =====================================================
-        // FUNGSI: Cek status login saat halaman dibuka
-        // Akan dipanggil dari auth.js
-        // =====================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            // Cek apakah user sudah login
-            // Jika belum, redirect ke halaman login
-            checkAuthState();
-        });
-    </script>
-    
 </body>
 </html>

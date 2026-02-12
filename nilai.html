@@ -3,1419 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Nilai - Admin PAI Satu Pintu</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Daftar Nilai - Admin PAI Super App</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- html2pdf -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <!-- Konfigurasi Tailwind -->
+    <link rel="stylesheet" href="css/styles.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'pai-hijau': {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        }
+                        'pai-green': '#1B5E20',
+                        'pai-gold': '#F9A825',
+                        'pai-light': '#E8F5E9',
                     }
                 }
             }
         }
     </script>
-    
-    <style>
-        .sidebar-link { transition: all 0.3s ease; }
-        .sidebar-link:hover { transform: translateX(5px); }
-        
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #16a34a;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in { animation: fadeIn 0.5s ease-out; }
-        
-        /* Tab styles */
-        .tab-btn.active {
-            background-color: #16a34a;
-            color: white;
-        }
-        
-        /* Input nilai */
-        .nilai-input {
-            width: 60px;
-            text-align: center;
-            transition: all 0.2s ease;
-        }
-        .nilai-input:focus {
-            transform: scale(1.1);
-            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.3);
-        }
-        .nilai-input.nilai-rendah {
-            background-color: #fee2e2;
-            border-color: #ef4444;
-        }
-        .nilai-input.nilai-tinggi {
-            background-color: #dcfce7;
-            border-color: #22c55e;
-        }
-        
-        /* Predikat badges */
-        .predikat-A { background-color: #22c55e; color: white; }
-        .predikat-B { background-color: #3b82f6; color: white; }
-        .predikat-C { background-color: #f59e0b; color: white; }
-        .predikat-D { background-color: #ef4444; color: white; }
-        
-        /* Print styles */
-        @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
-            .no-print { display: none !important; }
-            @page { size: A4; margin: 1.5cm; }
-        }
-        
-        /* Dokumen style */
-        .dokumen-nilai {
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 11pt;
-            line-height: 1.4;
-        }
-        .dokumen-nilai table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .dokumen-nilai th, .dokumen-nilai td {
-            border: 1px solid #000;
-            padding: 4px 6px;
-        }
-    </style>
 </head>
+<body class="bg-gray-100">
+    
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+        <div class="p-5 border-b border-green-700">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                    <span class="text-2xl">🕌</span>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg">PAI Super App</h1>
+                    <p class="text-green-300 text-xs">Admin Dashboard</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="py-4">
+            <div class="px-4 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Menu Utama</span>
+            </div>
+            
+            <a href="dashboard.html" class="sidebar-menu-item">
+                <span class="menu-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="profil.html" class="sidebar-menu-item">
+                <span class="menu-icon">👤</span>
+                <span>Profil</span>
+            </a>
+            
+            <a href="kalender.html" class="sidebar-menu-item">
+                <span class="menu-icon">📅</span>
+                <span>Kalender Akademik</span>
+            </a>
+            
+            <a href="jadwal.html" class="sidebar-menu-item">
+                <span class="menu-icon">🕐</span>
+                <span>Jadwal Mengajar</span>
+            </a>
+            
+            <div class="px-4 mt-6 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Akademik</span>
+            </div>
+            
+            <a href="absensi.html" class="sidebar-menu-item">
+                <span class="menu-icon">✅</span>
+                <span>Absensi Siswa</span>
+            </a>
+            
+            <a href="nilai.html" class="sidebar-menu-item active">
+                <span class="menu-icon">📝</span>
+                <span>Daftar Nilai</span>
+            </a>
+            
+            <a href="jurnal.html" class="sidebar-menu-item">
+                <span class="menu-icon">📖</span>
+                <span>Jurnal Pembelajaran</span>
+            </a>
+            
+            <a href="bank-soal.html" class="sidebar-menu-item">
+                <span class="menu-icon">❓</span>
+                <span>Bank Soal</span>
+            </a>
+            
+            <div class="px-4 mt-6 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Generator</span>
+            </div>
+            
+            <a href="generator.html" class="sidebar-menu-item">
+                <span class="menu-icon">⚡</span>
+                <span>Generator Dokumen</span>
+            </a>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-green-700">
+            <div class="flex items-center gap-3">
+                <div id="sidebarAvatar" class="w-10 h-10 bg-pai-gold rounded-full flex items-center justify-center text-lg font-bold">G</div>
+                <div class="flex-1 min-w-0">
+                    <p id="sidebarName" class="text-white font-medium truncate">Loading...</p>
+                    <p id="sidebarEmail" class="text-green-300 text-xs truncate">loading@email.com</p>
+                </div>
+                <button onclick="logout()" class="text-green-300 hover:text-white transition-colors" title="Logout">🚪</button>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        
+        <!-- HEADER -->
+        <header class="header px-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg">
+                    <span class="text-xl">☰</span>
+                </button>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Daftar Nilai</h1>
+                    <p class="text-sm text-gray-500">Input dan kelola nilai peserta didik</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-2">
+                <button onclick="exportNilai()" class="btn btn-outline">
+                    📥 Export
+                </button>
+                <button onclick="openPenilaianModal()" class="btn btn-primary">
+                    + Buat Penilaian
+                </button>
+            </div>
+        </header>
+        
+        <!-- CONTENT -->
+        <div class="p-6">
+            
+            <!-- Tabs -->
+            <div class="card mb-6">
+                <div class="tabs border-b-0 px-4 pt-4">
+                    <button onclick="switchNilaiTab('input')" id="tabInput" class="tab-item active">
+                        📝 Input Nilai
+                    </button>
+                    <button onclick="switchNilaiTab('rekap')" id="tabRekap" class="tab-item">
+                        📊 Rekap Nilai
+                    </button>
+                    <button onclick="switchNilaiTab('penilaian')" id="tabPenilaian" class="tab-item">
+                        📋 Daftar Penilaian
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Input Nilai -->
+            <div id="contentInput" class="tab-content active">
+                <div class="card mb-6">
+                    <div class="card-body">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="form-group mb-0">
+                                <label class="form-label">Pilih Kelas *</label>
+                                <select id="inputKelas" class="form-select" onchange="loadPenilaianForKelas()">
+                                    <option value="">-- Pilih Kelas --</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Pilih Penilaian *</label>
+                                <select id="inputPenilaian" class="form-select" onchange="loadNilaiInput()">
+                                    <option value="">-- Pilih Penilaian --</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Jenis</label>
+                                <input type="text" id="inputJenis" class="form-input" readonly placeholder="-">
+                            </div>
+                            <div class="form-group mb-0 flex items-end">
+                                <button onclick="loadNilaiInput()" class="btn btn-primary w-full">
+                                    🔍 Tampilkan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tabel Input Nilai -->
+                <div class="card">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 id="inputNilaiTitle" class="font-bold text-gray-800">📝 Input Nilai</h3>
+                        <div class="flex items-center gap-4">
+                            <div class="text-sm text-gray-600">
+                                KKM: <span id="kkm" class="font-bold text-pai-green">75</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="data-table" id="nilaiInputTable">
+                                <thead>
+                                    <tr>
+                                        <th class="w-12">No</th>
+                                        <th>NIS</th>
+                                        <th>Nama Siswa</th>
+                                        <th>L/P</th>
+                                        <th class="w-24 text-center">Nilai</th>
+                                        <th class="text-center">Status</th>
+                                        <th>Catatan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="nilaiInputBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center py-12 text-gray-500">
+                                            <span class="text-5xl block mb-3">📝</span>
+                                            <p class="font-medium">Pilih kelas dan penilaian untuk input nilai</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Save Button -->
+                        <div id="nilaiActions" class="hidden mt-6 flex justify-between items-center border-t pt-6">
+                            <div class="text-sm text-gray-600">
+                                <span>Rata-rata: <strong id="avgNilai">-</strong></span>
+                                <span class="mx-3">|</span>
+                                <span>Tuntas: <strong id="countTuntas">-</strong></span>
+                                <span class="mx-3">|</span>
+                                <span>Belum Tuntas: <strong id="countBelum">-</strong></span>
+                            </div>
+                            <button onclick="saveNilai()" class="btn btn-primary">
+                                💾 Simpan Nilai
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Rekap Nilai -->
+            <div id="contentRekap" class="tab-content">
+                <div class="card mb-6">
+                    <div class="card-body">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="form-group mb-0">
+                                <label class="form-label">Pilih Kelas</label>
+                                <select id="rekapKelas" class="form-select" onchange="loadRekapNilai()">
+                                    <option value="">-- Pilih Kelas --</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Semester</label>
+                                <select id="rekapSemester" class="form-select" onchange="loadRekapNilai()">
+                                    <option value="1">Semester 1 (Ganjil)</option>
+                                    <option value="2">Semester 2 (Genap)</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0 flex items-end gap-2">
+                                <button onclick="loadRekapNilai()" class="btn btn-primary flex-1">
+                                    📊 Tampilkan Rekap
+                                </button>
+                                <button onclick="printRekap()" class="btn btn-outline">
+                                    🖨️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="font-bold text-gray-800">📊 Rekap Nilai Semester</h3>
+                    </div>
+                    <div class="card-body overflow-x-auto">
+                        <div id="rekapNilaiContent">
+                            <p class="text-gray-500 text-center py-8">Pilih kelas untuk melihat rekap nilai</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Daftar Penilaian -->
+            <div id="contentPenilaian" class="tab-content">
+                <div class="card">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="font-bold text-gray-800">📋 Daftar Penilaian</h3>
+                        <button onclick="openPenilaianModal()" class="btn btn-primary">
+                            + Buat Penilaian
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="penilaianList" class="space-y-4">
+                            <p class="text-gray-500 text-center py-8">Memuat daftar penilaian...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+    
+    <!-- Modal Buat Penilaian -->
+    <div id="penilaianModal" class="modal-overlay">
+        <div class="modal-content max-w-lg">
+            <div class="modal-header">
+                <h3 id="penilaianModalTitle" class="font-bold text-lg">Buat Penilaian Baru</h3>
+                <button onclick="closePenilaianModal()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formPenilaian" class="space-y-4">
+                    <input type="hidden" id="penilaianId">
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nama Penilaian *</label>
+                        <input type="text" id="penilaianNama" class="form-input" placeholder="Contoh: Ulangan Harian 1 - Surah Al-Fatihah" required>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Jenis Penilaian *</label>
+                            <select id="penilaianJenis" class="form-select" required>
+                                <option value="">Pilih jenis</option>
+                                <option value="Tugas">Tugas</option>
+                                <option value="Ulangan Harian">Ulangan Harian</option>
+                                <option value="PTS">PTS (Penilaian Tengah Semester)</option>
+                                <option value="PAS">PAS (Penilaian Akhir Semester)</option>
+                                <option value="Praktik">Praktik</option>
+                                <option value="Hafalan">Hafalan</option>
+                                <option value="Proyek">Proyek</option>
+                                <option value="Portofolio">Portofolio</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Kelas *</label>
+                            <select id="penilaianKelas" class="form-select" required>
+                                <option value="">Pilih kelas</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Tanggal</label>
+                            <input type="date" id="penilaianTanggal" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">KKM</label>
+                            <input type="number" id="penilaianKKM" class="form-input" value="75" min="0" max="100">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Elemen/Bab</label>
+                        <select id="penilaianElemen" class="form-select">
+                            <option value="">Pilih elemen</option>
+                            <option value="alquranHadis">Al-Qur'an dan Hadis</option>
+                            <option value="akidah">Akidah</option>
+                            <option value="akhlak">Akhlak</option>
+                            <option value="fikih">Fikih</option>
+                            <option value="sejarah">Sejarah Peradaban Islam</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Deskripsi/Materi</label>
+                        <textarea id="penilaianDeskripsi" class="form-textarea" rows="2" placeholder="Deskripsi materi yang dinilai..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closePenilaianModal()" class="btn btn-secondary">Batal</button>
+                <button type="button" onclick="savePenilaian()" class="btn btn-primary">💾 Simpan</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 transform translate-x-full transition-transform duration-300 z-50">
+        <div id="toastContent" class="px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+            <span id="toastIcon">✓</span>
+            <span id="toastMessage">Pesan</span>
+        </div>
+    </div>
 
-<body class="bg-gray-100 font-sans">
-    
-    <div class="flex min-h-screen">
-        
-        <!-- ================================================
-             SIDEBAR
-             ================================================ -->
-        <aside class="w-64 bg-pai-hijau-800 text-white fixed h-full z-50 no-print">
-            <div class="p-6 border-b border-pai-hijau-700">
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-                        <i class="fas fa-mosque text-pai-hijau-700 text-2xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-lg leading-tight">Admin PAI</h1>
-                        <p class="text-pai-hijau-300 text-xs">Satu Pintu</p>
-                    </div>
-                </div>
-            </div>
-            
-            <nav class="p-4">
-                <p class="text-pai-hijau-400 text-xs uppercase tracking-wider mb-4 px-3">Menu Utama</p>
-                <ul class="space-y-2">
-                    <li><a href="dashboard.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-home w-5"></i><span class="ml-3">Dashboard</span></a></li>
-                    <li><a href="profil.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-user w-5"></i><span class="ml-3">Profil Guru</span></a></li>
-                    <li><a href="kalender.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-calendar-alt w-5"></i><span class="ml-3">Kalender Pendidikan</span></a></li>
-                    <li><a href="perencanaan.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-tasks w-5"></i><span class="ml-3">Perencanaan</span></a></li>
-                    <li><a href="modul-ajar.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-book-open w-5"></i><span class="ml-3">Modul Ajar</span></a></li>
-                    <li><a href="absensi.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-clipboard-check w-5"></i><span class="ml-3">Absensi Siswa</span></a></li>
-                    <!-- Aktif -->
-                    <li><a href="nilai.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg bg-pai-hijau-700 text-white"><i class="fas fa-chart-bar w-5"></i><span class="ml-3">Daftar Nilai</span></a></li>
-                </ul>
-                
-                <p class="text-pai-hijau-400 text-xs uppercase tracking-wider mb-4 px-3 mt-8">Dokumen</p>
-                <ul class="space-y-2">
-                    <li><a href="cetak.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-print w-5"></i><span class="ml-3">Cetak Dokumen</span></a></li>
-                </ul>
-            </nav>
-            
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-pai-hijau-700">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-pai-hijau-600 rounded-full flex items-center justify-center"><i class="fas fa-user"></i></div>
-                    <div class="flex-1">
-                        <p id="nama-guru-sidebar" class="text-sm font-medium truncate">Memuat...</p>
-                        <p class="text-pai-hijau-400 text-xs">Guru PAI</p>
-                    </div>
-                    <button onclick="logoutUser()" class="text-pai-hijau-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></button>
-                </div>
-            </div>
-        </aside>
-        
-        <!-- ================================================
-             KONTEN UTAMA
-             ================================================ -->
-        <main class="flex-1 ml-64">
-            
-            <!-- Header -->
-            <header class="bg-white shadow-sm border-b border-gray-200 px-8 py-4 sticky top-0 z-40 no-print">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Daftar Nilai</h2>
-                        <p class="text-gray-500 text-sm">Input dan rekap nilai siswa PAI</p>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <div class="text-right">
-                            <p class="text-sm text-gray-500">Tahun Ajaran</p>
-                            <p id="display-tahun-ajaran" class="font-bold text-pai-hijau-600">-</p>
-                        </div>
-                    </div>
-                </div>
-            </header>
-            
-            <!-- Area Konten -->
-            <div class="p-8 no-print">
-                
-                <!-- ================================================
-                     FILTER
-                     ================================================ -->
-                <div class="bg-white rounded-2xl shadow-md p-6 mb-6 fade-in">
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
-                            <select id="filter-kelas" onchange="onFilterChange()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                                <option value="">-- Pilih Kelas --</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
-                            <select id="filter-semester" onchange="onFilterChange()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                                <option value="">-- Pilih --</option>
-                                <option value="ganjil">Semester 1 (Ganjil)</option>
-                                <option value="genap">Semester 2 (Genap)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Penilaian</label>
-                            <select id="filter-jenis" onchange="onFilterChange()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                                <option value="harian">Penilaian Harian</option>
-                                <option value="pts">PTS (Tengah Semester)</option>
-                                <option value="pas">PAS/PAT (Akhir Semester)</option>
-                                <option value="keterampilan">Keterampilan/Praktik</option>
-                                <option value="sikap">Sikap Spiritual & Sosial</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Elemen/Materi</label>
-                            <select id="filter-elemen" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                                <option value="">Semua Elemen</option>
-                                <option value="AL_QURAN_HADIS">Al-Qur'an Hadis</option>
-                                <option value="AKIDAH">Akidah</option>
-                                <option value="AKHLAK">Akhlak</option>
-                                <option value="FIKIH">Fikih</option>
-                                <option value="SPI">Sejarah Islam</option>
-                            </select>
-                        </div>
-                        <div class="flex items-end">
-                            <button onclick="loadNilai()" class="w-full px-6 py-3 bg-pai-hijau-600 text-white font-medium rounded-xl hover:bg-pai-hijau-700 transition-colors">
-                                <i class="fas fa-search mr-2"></i>Tampilkan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- ================================================
-                     TAB NAVIGATION
-                     ================================================ -->
-                <div class="flex space-x-2 mb-6">
-                    <button onclick="showTab('input-nilai')" id="tab-input-nilai" class="tab-btn active px-6 py-3 rounded-xl font-medium transition-colors bg-gray-200 text-gray-700 flex items-center">
-                        <i class="fas fa-edit mr-2"></i>
-                        Input Nilai
-                    </button>
-                    <button onclick="showTab('rekap-nilai')" id="tab-rekap-nilai" class="tab-btn px-6 py-3 rounded-xl font-medium transition-colors bg-gray-200 text-gray-700 flex items-center">
-                        <i class="fas fa-table mr-2"></i>
-                        Rekap Nilai
-                    </button>
-                    <button onclick="showTab('analisis')" id="tab-analisis" class="tab-btn px-6 py-3 rounded-xl font-medium transition-colors bg-gray-200 text-gray-700 flex items-center">
-                        <i class="fas fa-chart-line mr-2"></i>
-                        Analisis
-                    </button>
-                </div>
-                
-                <!-- ================================================
-                     TAB 1: INPUT NILAI
-                     ================================================ -->
-                <div id="content-input-nilai" class="tab-content">
-                    
-                    <div class="bg-white rounded-2xl shadow-md p-6 fade-in">
-                        
-                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-                            <div class="flex items-center">
-                                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
-                                    <i class="fas fa-edit text-blue-600 text-xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-gray-800">Input Nilai Siswa</h3>
-                                    <p class="text-sm text-gray-500" id="info-input-nilai">Pilih kelas dan jenis penilaian</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <div>
-                                    <label class="text-sm text-gray-600 mr-2">KKTP:</label>
-                                    <input type="number" id="input-KKTP" value="75" min="0" max="100"
-                                           class="w-16 px-3 py-2 border border-gray-300 rounded-lg text-center">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Keterangan -->
-                        <div class="flex items-center space-x-6 mb-6 p-4 bg-gray-50 rounded-xl text-sm">
-                            <span class="text-gray-600">Keterangan:</span>
-                            <span class="flex items-center">
-                                <span class="w-4 h-4 bg-red-100 border border-red-400 rounded mr-1"></span>
-                                <span>Di bawah KKTP</span>
-                            </span>
-                            <span class="flex items-center">
-                                <span class="w-4 h-4 bg-green-100 border border-green-400 rounded mr-1"></span>
-                                <span>Di atas 90</span>
-                            </span>
-                            <span class="ml-auto text-gray-500">
-                                <i class="fas fa-keyboard mr-1"></i>
-                                Tekan Tab/Enter untuk pindah
-                            </span>
-                        </div>
-                        
-                        <!-- Tabel Input Nilai -->
-                        <div class="overflow-x-auto">
-                            <table class="w-full border-collapse">
-                                <thead>
-                                    <tr class="bg-gray-50">
-                                        <th class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 w-12">No</th>
-                                        <th class="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700 w-24">NIS</th>
-                                        <th class="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Nama Siswa</th>
-                                        <th class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 w-20">L/P</th>
-                                        <th id="header-nilai-1" class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 w-20">Nilai 1</th>
-                                        <th id="header-nilai-2" class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 w-20">Nilai 2</th>
-                                        <th id="header-nilai-3" class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 w-20">Nilai 3</th>
-                                        <th class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 w-20 bg-blue-50">Rata-rata</th>
-                                        <th class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700 w-20 bg-green-50">Predikat</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabel-input-nilai">
-                                    <tr>
-                                        <td colspan="9" class="border border-gray-200 px-4 py-12 text-center text-gray-400">
-                                            <i class="fas fa-clipboard-list text-4xl mb-3"></i>
-                                            <p>Pilih kelas dan semester untuk input nilai</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Tombol Simpan -->
-                        <div id="btn-simpan-nilai" class="mt-6 flex justify-between items-center hidden">
-                            <div class="text-sm text-gray-500">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Nilai akan otomatis tersimpan saat Anda berpindah kolom
-                            </div>
-                            <button onclick="simpanSemuaNilai()" class="px-6 py-3 bg-pai-hijau-600 text-white font-medium rounded-xl hover:bg-pai-hijau-700 transition-colors">
-                                <i class="fas fa-save mr-2"></i>
-                                Simpan Semua Nilai
-                            </button>
-                        </div>
-                        
-                    </div>
-                    
-                </div>
-                
-                <!-- ================================================
-                     TAB 2: REKAP NILAI
-                     ================================================ -->
-                <div id="content-rekap-nilai" class="tab-content hidden">
-                    
-                    <div class="bg-white rounded-2xl shadow-md p-6 fade-in">
-                        
-                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-                            <div class="flex items-center">
-                                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
-                                    <i class="fas fa-table text-green-600 text-xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-gray-800">Rekap Nilai Semester</h3>
-                                    <p class="text-sm text-gray-500" id="info-rekap-nilai">Nilai akhir dan rapor</p>
-                                </div>
-                            </div>
-                            <div class="flex space-x-3">
-                                <button onclick="loadRekapNilai()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center">
-                                    <i class="fas fa-sync-alt mr-2"></i>Muat Rekap
-                                </button>
-                                <button onclick="cetakRekap()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center">
-                                    <i class="fas fa-print mr-2"></i>Cetak
-                                </button>
-                                <button onclick="exportRekapPDF()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center">
-                                    <i class="fas fa-file-pdf mr-2"></i>PDF
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Statistik Rekap -->
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-                            <div class="bg-gray-50 rounded-xl p-4 text-center">
-                                <p class="text-gray-600 text-sm">Total Siswa</p>
-                                <p id="rekap-total-siswa" class="text-2xl font-bold text-gray-700">0</p>
-                            </div>
-                            <div class="bg-green-50 rounded-xl p-4 text-center">
-                                <p class="text-green-600 text-sm">Tuntas</p>
-                                <p id="rekap-tuntas" class="text-2xl font-bold text-green-700">0</p>
-                            </div>
-                            <div class="bg-red-50 rounded-xl p-4 text-center">
-                                <p class="text-red-600 text-sm">Belum Tuntas</p>
-                                <p id="rekap-tidak-tuntas" class="text-2xl font-bold text-red-700">0</p>
-                            </div>
-                            <div class="bg-blue-50 rounded-xl p-4 text-center">
-                                <p class="text-blue-600 text-sm">Rata-rata Kelas</p>
-                                <p id="rekap-rata-rata" class="text-2xl font-bold text-blue-700">0</p>
-                            </div>
-                            <div class="bg-purple-50 rounded-xl p-4 text-center">
-                                <p class="text-purple-600 text-sm">% Ketuntasan</p>
-                                <p id="rekap-persen-tuntas" class="text-2xl font-bold text-purple-700">0%</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Tabel Rekap Nilai -->
-                        <div id="print-area" class="overflow-x-auto">
-                            <!-- Header cetak -->
-                            <div id="header-cetak" class="hidden mb-4">
-                                <div class="text-center mb-4">
-                                    <h1 class="text-lg font-bold">DAFTAR NILAI SISWA</h1>
-                                    <h2 class="text-base">PENDIDIKAN AGAMA ISLAM DAN BUDI PEKERTI</h2>
-                                    <p id="cetak-sekolah">-</p>
-                                    <p id="cetak-periode">-</p>
-                                </div>
-                            </div>
-                            
-                            <table class="w-full border-collapse text-sm">
-                                <thead>
-                                    <tr class="bg-pai-hijau-600 text-white">
-                                        <th rowspan="2" class="border border-gray-300 px-2 py-2 text-center w-10">No</th>
-                                        <th rowspan="2" class="border border-gray-300 px-2 py-2 text-left w-48">Nama Siswa</th>
-                                        <th colspan="5" class="border border-gray-300 px-2 py-2 text-center">Pengetahuan (60%)</th>
-                                        <th colspan="2" class="border border-gray-300 px-2 py-2 text-center">Keterampilan (40%)</th>
-                                        <th rowspan="2" class="border border-gray-300 px-2 py-2 text-center w-16 bg-blue-700">NA</th>
-                                        <th rowspan="2" class="border border-gray-300 px-2 py-2 text-center w-16 bg-green-700">Pred</th>
-                                        <th rowspan="2" class="border border-gray-300 px-2 py-2 text-center w-20">Ket</th>
-                                    </tr>
-                                    <tr class="bg-pai-hijau-500 text-white text-xs">
-                                        <th class="border border-gray-300 px-1 py-1 text-center">PH</th>
-                                        <th class="border border-gray-300 px-1 py-1 text-center">PTS</th>
-                                        <th class="border border-gray-300 px-1 py-1 text-center">PAS</th>
-                                        <th class="border border-gray-300 px-1 py-1 text-center">Rata</th>
-                                        <th class="border border-gray-300 px-1 py-1 text-center">Pred</th>
-                                        <th class="border border-gray-300 px-1 py-1 text-center">Rata</th>
-                                        <th class="border border-gray-300 px-1 py-1 text-center">Pred</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabel-rekap-nilai">
-                                    <tr>
-                                        <td colspan="12" class="border border-gray-200 px-4 py-12 text-center text-gray-400">
-                                            <i class="fas fa-table text-4xl mb-3"></i>
-                                            <p>Klik "Muat Rekap" untuk melihat rekap nilai</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Keterangan Predikat -->
-                        <div class="mt-4 p-4 bg-gray-50 rounded-xl text-sm">
-                            <p class="font-medium mb-2">Keterangan Predikat:</p>
-                            <div class="flex flex-wrap gap-4">
-                                <span class="flex items-center"><span class="predikat-A px-2 py-1 rounded text-xs font-bold mr-2">A</span> 90-100 (Sangat Baik)</span>
-                                <span class="flex items-center"><span class="predikat-B px-2 py-1 rounded text-xs font-bold mr-2">B</span> 80-89 (Baik)</span>
-                                <span class="flex items-center"><span class="predikat-C px-2 py-1 rounded text-xs font-bold mr-2">C</span> 70-79 (Cukup)</span>
-                                <span class="flex items-center"><span class="predikat-D px-2 py-1 rounded text-xs font-bold mr-2">D</span> &lt;70 (Kurang)</span>
-                            </div>
-                        </div>
-                        
-                    </div>
-                    
-                </div>
-                
-                <!-- ================================================
-                     TAB 3: ANALISIS NILAI
-                     ================================================ -->
-                <div id="content-analisis" class="tab-content hidden">
-                    
-                    <div class="bg-white rounded-2xl shadow-md p-6 fade-in">
-                        
-                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-                            <div class="flex items-center">
-                                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
-                                    <i class="fas fa-chart-line text-purple-600 text-xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-gray-800">Analisis Ketuntasan Belajar</h3>
-                                    <p class="text-sm text-gray-500">Analisis per elemen/materi</p>
-                                </div>
-                            </div>
-                            <button onclick="generateAnalisis()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                                <i class="fas fa-calculator mr-2"></i>Generate Analisis
-                            </button>
-                        </div>
-                        
-                        <!-- Distribusi Predikat -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            
-                            <div class="border border-gray-200 rounded-xl p-4">
-                                <h4 class="font-medium text-gray-700 mb-4">Distribusi Predikat</h4>
-                                <div class="space-y-3">
-                                    <div class="flex items-center">
-                                        <span class="w-16 text-sm font-medium">A (90-100)</span>
-                                        <div class="flex-1 mx-3 bg-gray-200 rounded-full h-6 overflow-hidden">
-                                            <div id="bar-predikat-a" class="bg-green-500 h-full transition-all" style="width: 0%"></div>
-                                        </div>
-                                        <span id="count-predikat-a" class="w-12 text-right font-medium">0</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <span class="w-16 text-sm font-medium">B (80-89)</span>
-                                        <div class="flex-1 mx-3 bg-gray-200 rounded-full h-6 overflow-hidden">
-                                            <div id="bar-predikat-b" class="bg-blue-500 h-full transition-all" style="width: 0%"></div>
-                                        </div>
-                                        <span id="count-predikat-b" class="w-12 text-right font-medium">0</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <span class="w-16 text-sm font-medium">C (70-79)</span>
-                                        <div class="flex-1 mx-3 bg-gray-200 rounded-full h-6 overflow-hidden">
-                                            <div id="bar-predikat-c" class="bg-yellow-500 h-full transition-all" style="width: 0%"></div>
-                                        </div>
-                                        <span id="count-predikat-c" class="w-12 text-right font-medium">0</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <span class="w-16 text-sm font-medium">D (&lt;70)</span>
-                                        <div class="flex-1 mx-3 bg-gray-200 rounded-full h-6 overflow-hidden">
-                                            <div id="bar-predikat-d" class="bg-red-500 h-full transition-all" style="width: 0%"></div>
-                                        </div>
-                                        <span id="count-predikat-d" class="w-12 text-right font-medium">0</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-xl p-4">
-                                <h4 class="font-medium text-gray-700 mb-4">Ringkasan Statistik</h4>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="bg-blue-50 rounded-lg p-3 text-center">
-                                        <p class="text-sm text-blue-600">Nilai Tertinggi</p>
-                                        <p id="stat-tertinggi" class="text-2xl font-bold text-blue-700">-</p>
-                                    </div>
-                                    <div class="bg-red-50 rounded-lg p-3 text-center">
-                                        <p class="text-sm text-red-600">Nilai Terendah</p>
-                                        <p id="stat-terendah" class="text-2xl font-bold text-red-700">-</p>
-                                    </div>
-                                    <div class="bg-green-50 rounded-lg p-3 text-center">
-                                        <p class="text-sm text-green-600">Modus</p>
-                                        <p id="stat-modus" class="text-2xl font-bold text-green-700">-</p>
-                                    </div>
-                                    <div class="bg-purple-50 rounded-lg p-3 text-center">
-                                        <p class="text-sm text-purple-600">Standar Deviasi</p>
-                                        <p id="stat-std" class="text-2xl font-bold text-purple-700">-</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                        </div>
-                        
-                        <!-- Daftar Siswa Perlu Remedi -->
-                        <div class="border border-gray-200 rounded-xl p-4">
-                            <h4 class="font-medium text-gray-700 mb-4">
-                                <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
-                                Siswa yang Perlu Remedial
-                            </h4>
-                            <div id="daftar-remedi" class="space-y-2">
-                                <p class="text-gray-400 text-center py-4">Generate analisis untuk melihat daftar</p>
-                            </div>
-                        </div>
-                        
-                    </div>
-                    
-                </div>
-                
-            </div>
-            
-            <!-- Footer -->
-            <footer class="bg-white border-t border-gray-200 px-8 py-4 text-center text-gray-500 text-sm no-print">
-                <p>© 2025 Admin PAI Satu Pintu</p>
-            </footer>
-            
-        </main>
-    </div>
-    
-    <!-- ================================================
-         MODAL: DESKRIPSI NILAI
-         ================================================ -->
-    <div id="modal-deskripsi" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-gray-200">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-gray-800">Deskripsi Nilai Siswa</h3>
-                    <button onclick="closeModalDeskripsi()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="mb-4">
-                    <p class="text-sm text-gray-500">Nama Siswa:</p>
-                    <p id="deskripsi-nama" class="font-bold text-lg">-</p>
-                </div>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Pengetahuan:</label>
-                        <textarea id="deskripsi-pengetahuan" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Keterampilan:</label>
-                        <textarea id="deskripsi-keterampilan" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none"></textarea>
-                    </div>
-                </div>
-                
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button onclick="generateDeskripsiOtomatis()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50">
-                        <i class="fas fa-magic mr-2"></i>Generate Otomatis
-                    </button>
-                    <button onclick="simpanDeskripsi()" class="px-6 py-2 bg-pai-hijau-600 text-white rounded-xl hover:bg-pai-hijau-700">
-                        <i class="fas fa-save mr-2"></i>Simpan
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-8 rounded-2xl text-center">
-            <div class="spinner mx-auto mb-4"></div>
-            <p id="loading-text" class="text-gray-600">Memproses...</p>
-        </div>
-    </div>
-    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/database.js"></script>
-    
-    <!-- ================================================
-         SCRIPT HALAMAN NILAI
-         ================================================ -->
-    <script>
-        /**
-         * =====================================================
-         * VARIABEL GLOBAL
-         * =====================================================
-         */
-        let profilGuru = null;
-        let daftarSiswa = [];
-        let dataNilai = {};  // { siswaId: { nilai1, nilai2, nilai3, ... } }
-        let currentKelas = '';
-        let currentSemester = '';
-        let currentJenis = 'harian';
-        let selectedSiswaId = null;
-        
-        const NAMA_BULAN = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-                           'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        
-        /**
-         * =====================================================
-         * INISIALISASI
-         * =====================================================
-         */
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuthState();
-        });
-        
-        function checkAuthState() {
-            showLoading('Memuat data...');
-            
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    await loadInitialData(user.uid);
-                    hideLoading();
-                } else {
-                    window.location.href = 'index.html';
-                }
-            });
-        }
-        
-        async function loadInitialData(userId) {
-            try {
-                const profilDoc = await db.collection('users').doc(userId).get();
-                if (profilDoc.exists) {
-                    profilGuru = profilDoc.data();
-                    document.getElementById('nama-guru-sidebar').textContent = profilGuru.namaLengkap || 'Guru PAI';
-                    document.getElementById('display-tahun-ajaran').textContent = profilGuru.tahunAjaran?.replace('-', '/') || '-';
-                    
-                    // Populate kelas
-                    const selectKelas = document.getElementById('filter-kelas');
-                    selectKelas.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-                    (profilGuru.kelasAmpu || []).sort((a,b) => a-b).forEach(k => {
-                        selectKelas.innerHTML += `<option value="${k}">Kelas ${k}</option>`;
-                    });
-                }
-            } catch (error) {
-                console.error("❌ Error:", error);
-            }
-        }
-        
-        /**
-         * =====================================================
-         * TAB NAVIGATION
-         * =====================================================
-         */
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById('content-' + tabId).classList.remove('hidden');
-            
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-        }
-        
-        /**
-         * =====================================================
-         * FILTER CHANGE
-         * =====================================================
-         */
-        function onFilterChange() {
-            currentKelas = document.getElementById('filter-kelas').value;
-            currentSemester = document.getElementById('filter-semester').value;
-            currentJenis = document.getElementById('filter-jenis').value;
-            
-            updateHeader();
-        }
-        
-        function updateHeader() {
-            const jenis = document.getElementById('filter-jenis').value;
-            
-            // Update header kolom nilai berdasarkan jenis
-            if (jenis === 'harian') {
-                document.getElementById('header-nilai-1').textContent = 'PH 1';
-                document.getElementById('header-nilai-2').textContent = 'PH 2';
-                document.getElementById('header-nilai-3').textContent = 'PH 3';
-            } else if (jenis === 'pts') {
-                document.getElementById('header-nilai-1').textContent = 'PTS';
-                document.getElementById('header-nilai-2').classList.add('hidden');
-                document.getElementById('header-nilai-3').classList.add('hidden');
-            } else if (jenis === 'pas') {
-                document.getElementById('header-nilai-1').textContent = 'PAS/PAT';
-                document.getElementById('header-nilai-2').classList.add('hidden');
-                document.getElementById('header-nilai-3').classList.add('hidden');
-            } else if (jenis === 'keterampilan') {
-                document.getElementById('header-nilai-1').textContent = 'Praktik';
-                document.getElementById('header-nilai-2').textContent = 'Proyek';
-                document.getElementById('header-nilai-3').textContent = 'Produk';
-            } else if (jenis === 'sikap') {
-                document.getElementById('header-nilai-1').textContent = 'Spiritual';
-                document.getElementById('header-nilai-2').textContent = 'Sosial';
-                document.getElementById('header-nilai-3').classList.add('hidden');
-            }
-        }
-        
-        /**
-         * =====================================================
-         * LOAD NILAI
-         * =====================================================
-         */
-        async function loadNilai() {
-            if (!currentKelas || !currentSemester) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Pilih Filter',
-                    text: 'Silakan pilih kelas dan semester.',
-                    confirmButtonColor: '#16a34a'
-                });
-                return;
-            }
-            
-            showLoading('Memuat data...');
-            
-            try {
-                const user = auth.currentUser;
-                
-                // Load siswa
-                const siswaSnapshot = await db.collection('users').doc(user.uid)
-                    .collection('siswa')
-                    .where('kelas', '==', currentKelas)
-                    .orderBy('nama', 'asc')
-                    .get();
-                
-                daftarSiswa = siswaSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                // Load nilai yang sudah ada
-                const nilaiDocId = `${profilGuru.tahunAjaran}_${currentSemester}_${currentKelas}_${currentJenis}`;
-                const nilaiDoc = await db.collection('users').doc(user.uid)
-                    .collection('nilai')
-                    .doc(nilaiDocId)
-                    .get();
-                
-                if (nilaiDoc.exists) {
-                    dataNilai = nilaiDoc.data().data || {};
-                } else {
-                    dataNilai = {};
-                }
-                
-                // Render tabel
-                renderTabelInputNilai();
-                
-                // Update info
-                document.getElementById('info-input-nilai').textContent = 
-                    `Kelas ${currentKelas} - ${currentSemester === 'ganjil' ? 'Semester 1' : 'Semester 2'} - ${getJenisLabel(currentJenis)}`;
-                
-                document.getElementById('btn-simpan-nilai').classList.remove('hidden');
-                
-                hideLoading();
-                
-            } catch (error) {
-                console.error("❌ Error:", error);
-                hideLoading();
-            }
-        }
-        
-        function getJenisLabel(jenis) {
-            const labels = {
-                'harian': 'Penilaian Harian',
-                'pts': 'PTS',
-                'pas': 'PAS/PAT',
-                'keterampilan': 'Keterampilan',
-                'sikap': 'Sikap'
-            };
-            return labels[jenis] || jenis;
-        }
-        
-        /**
-         * =====================================================
-         * RENDER TABEL INPUT NILAI
-         * =====================================================
-         */
-        function renderTabelInputNilai() {
-            const tbody = document.getElementById('tabel-input-nilai');
-            const KKTP = parseInt(document.getElementById('input-KKTP').value) || 75;
-            const jenis = currentJenis;
-            
-            if (daftarSiswa.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="9" class="border border-gray-200 px-4 py-12 text-center text-gray-400">
-                            <i class="fas fa-users text-4xl mb-3"></i>
-                            <p>Belum ada siswa di kelas ini</p>
-                            <a href="absensi.html" class="text-pai-hijau-600 hover:underline">+ Tambah siswa di menu Absensi</a>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            const showNilai2 = ['harian', 'keterampilan', 'sikap'].includes(jenis);
-            const showNilai3 = ['harian', 'keterampilan'].includes(jenis);
-            
-            tbody.innerHTML = daftarSiswa.map((siswa, idx) => {
-                const nilai = dataNilai[siswa.id] || {};
-                const n1 = nilai.nilai1 || '';
-                const n2 = nilai.nilai2 || '';
-                const n3 = nilai.nilai3 || '';
-                
-                // Hitung rata-rata
-                let rataRata = '-';
-                let predikat = '-';
-                let predikatClass = '';
-                
-                const nilaiArr = [n1, n2, n3].filter(n => n !== '' && !isNaN(n)).map(Number);
-                if (nilaiArr.length > 0) {
-                    const avg = nilaiArr.reduce((a, b) => a + b, 0) / nilaiArr.length;
-                    rataRata = avg.toFixed(0);
-                    predikat = getPredikat(avg);
-                    predikatClass = `predikat-${predikat}`;
-                }
-                
-                return `
-                    <tr class="hover:bg-gray-50" data-siswa-id="${siswa.id}">
-                        <td class="border border-gray-200 px-4 py-2 text-center">${idx + 1}</td>
-                        <td class="border border-gray-200 px-4 py-2 font-mono text-sm">${siswa.nis || '-'}</td>
-                        <td class="border border-gray-200 px-4 py-2 font-medium">${siswa.nama}</td>
-                        <td class="border border-gray-200 px-4 py-2 text-center">
-                            <span class="px-2 py-1 rounded-full text-xs ${siswa.jenisKelamin === 'L' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}">
-                                ${siswa.jenisKelamin || '-'}
-                            </span>
-                        </td>
-                        <td class="border border-gray-200 px-2 py-2 text-center">
-                            <input type="number" 
-                                   value="${n1}"
-                                   min="0" max="100"
-                                   onchange="updateNilai('${siswa.id}', 'nilai1', this.value)"
-                                   onkeydown="handleKeyNav(event, ${idx}, 1)"
-                                   id="nilai-${siswa.id}-1"
-                                   class="nilai-input px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pai-hijau-500 outline-none ${getNilaiClass(n1, KKTP)}">
-                        </td>
-                        <td class="border border-gray-200 px-2 py-2 text-center ${!showNilai2 ? 'hidden' : ''}">
-                            <input type="number" 
-                                   value="${n2}"
-                                   min="0" max="100"
-                                   onchange="updateNilai('${siswa.id}', 'nilai2', this.value)"
-                                   onkeydown="handleKeyNav(event, ${idx}, 2)"
-                                   id="nilai-${siswa.id}-2"
-                                   class="nilai-input px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pai-hijau-500 outline-none ${getNilaiClass(n2, KKTP)}">
-                        </td>
-                        <td class="border border-gray-200 px-2 py-2 text-center ${!showNilai3 ? 'hidden' : ''}">
-                            <input type="number" 
-                                   value="${n3}"
-                                   min="0" max="100"
-                                   onchange="updateNilai('${siswa.id}', 'nilai3', this.value)"
-                                   onkeydown="handleKeyNav(event, ${idx}, 3)"
-                                   id="nilai-${siswa.id}-3"
-                                   class="nilai-input px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pai-hijau-500 outline-none ${getNilaiClass(n3, KKTP)}">
-                        </td>
-                        <td class="border border-gray-200 px-4 py-2 text-center bg-blue-50 font-bold" id="rata-${siswa.id}">
-                            ${rataRata}
-                        </td>
-                        <td class="border border-gray-200 px-4 py-2 text-center bg-green-50">
-                            <span class="px-2 py-1 rounded text-xs font-bold ${predikatClass}" id="predikat-${siswa.id}">
-                                ${predikat}
-                            </span>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-        
-        function getNilaiClass(nilai, KKTP) {
-            if (nilai === '' || isNaN(nilai)) return '';
-            const n = parseInt(nilai);
-            if (n < KKTP) return 'nilai-rendah';
-            if (n >= 90) return 'nilai-tinggi';
-            return '';
-        }
-        
-        function getPredikat(nilai) {
-            if (nilai >= 90) return 'A';
-            if (nilai >= 80) return 'B';
-            if (nilai >= 70) return 'C';
-            return 'D';
-        }
-        
-        /**
-         * =====================================================
-         * UPDATE NILAI
-         * =====================================================
-         */
-        function updateNilai(siswaId, key, value) {
-            if (!dataNilai[siswaId]) {
-                dataNilai[siswaId] = {};
-            }
-            dataNilai[siswaId][key] = value ? parseInt(value) : '';
-            
-            // Update warna input
-            const KKTP = parseInt(document.getElementById('input-KKTP').value) || 75;
-            const input = document.getElementById(`nilai-${siswaId}-${key.replace('nilai', '')}`);
-            input.className = `nilai-input px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pai-hijau-500 outline-none ${getNilaiClass(value, KKTP)}`;
-            
-            // Hitung ulang rata-rata
-            hitungRataRata(siswaId);
-        }
-        
-        function hitungRataRata(siswaId) {
-            const nilai = dataNilai[siswaId] || {};
-            const nilaiArr = [nilai.nilai1, nilai.nilai2, nilai.nilai3].filter(n => n !== '' && n !== undefined && !isNaN(n)).map(Number);
-            
-            const rataEl = document.getElementById(`rata-${siswaId}`);
-            const predikatEl = document.getElementById(`predikat-${siswaId}`);
-            
-            if (nilaiArr.length > 0) {
-                const avg = nilaiArr.reduce((a, b) => a + b, 0) / nilaiArr.length;
-                rataEl.textContent = avg.toFixed(0);
-                
-                const predikat = getPredikat(avg);
-                predikatEl.textContent = predikat;
-                predikatEl.className = `px-2 py-1 rounded text-xs font-bold predikat-${predikat}`;
-            } else {
-                rataEl.textContent = '-';
-                predikatEl.textContent = '-';
-                predikatEl.className = 'px-2 py-1 rounded text-xs font-bold';
-            }
-        }
-        
-        /**
-         * =====================================================
-         * KEYBOARD NAVIGATION
-         * =====================================================
-         */
-        function handleKeyNav(event, rowIdx, colIdx) {
-            const maxRow = daftarSiswa.length - 1;
-            const maxCol = 3;
-            
-            if (event.key === 'Enter' || event.key === 'Tab') {
-                event.preventDefault();
-                
-                let nextRow = rowIdx;
-                let nextCol = colIdx;
-                
-                if (event.shiftKey) {
-                    // Shift + Tab = mundur
-                    nextCol--;
-                    if (nextCol < 1) {
-                        nextCol = maxCol;
-                        nextRow--;
-                    }
-                } else {
-                    // Tab/Enter = maju
-                    nextCol++;
-                    if (nextCol > maxCol) {
-                        nextCol = 1;
-                        nextRow++;
-                    }
-                }
-                
-                if (nextRow >= 0 && nextRow <= maxRow) {
-                    const nextSiswa = daftarSiswa[nextRow];
-                    const nextInput = document.getElementById(`nilai-${nextSiswa.id}-${nextCol}`);
-                    if (nextInput && !nextInput.closest('td').classList.contains('hidden')) {
-                        nextInput.focus();
-                        nextInput.select();
-                    }
-                }
-            }
-        }
-        
-        /**
-         * =====================================================
-         * SIMPAN NILAI
-         * =====================================================
-         */
-        async function simpanSemuaNilai() {
-            showLoading('Menyimpan nilai...');
-            
-            try {
-                const user = auth.currentUser;
-                const nilaiDocId = `${profilGuru.tahunAjaran}_${currentSemester}_${currentKelas}_${currentJenis}`;
-                
-                await db.collection('users').doc(user.uid)
-                    .collection('nilai')
-                    .doc(nilaiDocId)
-                    .set({
-                        tahunAjaran: profilGuru.tahunAjaran,
-                        semester: currentSemester,
-                        kelas: currentKelas,
-                        jenis: currentJenis,
-                        data: dataNilai,
-                        KKTP: parseInt(document.getElementById('input-KKTP').value) || 75,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-                
-                hideLoading();
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Nilai Tersimpan!',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                
-            } catch (error) {
-                console.error("❌ Error:", error);
-                hideLoading();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Menyimpan',
-                    confirmButtonColor: '#16a34a'
-                });
-            }
-        }
-        
-        /**
-         * =====================================================
-         * LOAD REKAP NILAI
-         * =====================================================
-         */
-        async function loadRekapNilai() {
-            if (!currentKelas || !currentSemester) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Pilih Kelas dan Semester',
-                    confirmButtonColor: '#16a34a'
-                });
-                return;
-            }
-            
-            showLoading('Memuat rekap...');
-            
-            try {
-                const user = auth.currentUser;
-                
-                // Load siswa
-                const siswaSnapshot = await db.collection('users').doc(user.uid)
-                    .collection('siswa')
-                    .where('kelas', '==', currentKelas)
-                    .orderBy('nama', 'asc')
-                    .get();
-                
-                daftarSiswa = siswaSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                // Load semua jenis nilai
-                const jenisNilai = ['harian', 'pts', 'pas', 'keterampilan'];
-                const semuaNilai = {};
-                
-                for (const jenis of jenisNilai) {
-                    const nilaiDocId = `${profilGuru.tahunAjaran}_${currentSemester}_${currentKelas}_${jenis}`;
-                    const doc = await db.collection('users').doc(user.uid)
-                        .collection('nilai')
-                        .doc(nilaiDocId)
-                        .get();
-                    
-                    if (doc.exists) {
-                        semuaNilai[jenis] = doc.data().data || {};
-                    }
-                }
-                
-                // Render rekap
-                renderRekapNilai(semuaNilai);
-                
-                // Update header cetak
-                document.getElementById('cetak-sekolah').textContent = profilGuru?.namaSekolah || '-';
-                document.getElementById('cetak-periode').textContent = 
-                    `Kelas ${currentKelas} - Semester ${currentSemester === 'ganjil' ? '1 (Ganjil)' : '2 (Genap)'} - TA ${profilGuru.tahunAjaran?.replace('-', '/')}`;
-                
-                hideLoading();
-                
-            } catch (error) {
-                console.error("❌ Error:", error);
-                hideLoading();
-            }
-        }
-        
-        function renderRekapNilai(semuaNilai) {
-            const tbody = document.getElementById('tabel-rekap-nilai');
-            const KKTP = parseInt(document.getElementById('input-KKTP').value) || 75;
-            
-            let totalNilai = 0;
-            let countNilai = 0;
-            let tuntas = 0;
-            let tidakTuntas = 0;
-            
-            tbody.innerHTML = daftarSiswa.map((siswa, idx) => {
-                // Ambil nilai per jenis
-                const nilaiHarian = semuaNilai.harian?.[siswa.id] || {};
-                const nilaiPTS = semuaNilai.pts?.[siswa.id] || {};
-                const nilaiPAS = semuaNilai.pas?.[siswa.id] || {};
-                const nilaiKeterampilan = semuaNilai.keterampilan?.[siswa.id] || {};
-                
-                // Hitung rata-rata Penilaian Harian
-                const phArr = [nilaiHarian.nilai1, nilaiHarian.nilai2, nilaiHarian.nilai3].filter(n => n && !isNaN(n)).map(Number);
-                const rataPH = phArr.length > 0 ? phArr.reduce((a,b) => a+b, 0) / phArr.length : 0;
-                
-                // Nilai PTS dan PAS
-                const pts = nilaiPTS.nilai1 || 0;
-                const pas = nilaiPAS.nilai1 || 0;
-                
-                // Rata-rata Pengetahuan (PH 40%, PTS 30%, PAS 30%)
-                const rataPengetahuan = (rataPH * 0.4) + (pts * 0.3) + (pas * 0.3);
-                const predikatPengetahuan = getPredikat(rataPengetahuan);
-                
-                // Rata-rata Keterampilan
-                const ktArr = [nilaiKeterampilan.nilai1, nilaiKeterampilan.nilai2, nilaiKeterampilan.nilai3].filter(n => n && !isNaN(n)).map(Number);
-                const rataKeterampilan = ktArr.length > 0 ? ktArr.reduce((a,b) => a+b, 0) / ktArr.length : 0;
-                const predikatKeterampilan = getPredikat(rataKeterampilan);
-                
-                // Nilai Akhir (Pengetahuan 60%, Keterampilan 40%)
-                const nilaiAkhir = (rataPengetahuan * 0.6) + (rataKeterampilan * 0.4);
-                const predikatAkhir = getPredikat(nilaiAkhir);
-                
-                // Statistik
-                if (nilaiAkhir > 0) {
-                    totalNilai += nilaiAkhir;
-                    countNilai++;
-                    if (nilaiAkhir >= KKTP) tuntas++;
-                    else tidakTuntas++;
-                }
-                
-                const ketuntasan = nilaiAkhir >= KKTP ? 'Tuntas' : 'Remedi';
-                const ketClass = nilaiAkhir >= KKTP ? 'text-green-600' : 'text-red-600';
-                
-                return `
-                    <tr class="hover:bg-gray-50">
-                        <td class="border border-gray-200 px-2 py-1 text-center text-xs">${idx + 1}</td>
-                        <td class="border border-gray-200 px-2 py-1 text-xs font-medium">${siswa.nama}</td>
-                        <td class="border border-gray-200 px-1 py-1 text-center text-xs">${rataPH.toFixed(0) || '-'}</td>
-                        <td class="border border-gray-200 px-1 py-1 text-center text-xs">${pts || '-'}</td>
-                        <td class="border border-gray-200 px-1 py-1 text-center text-xs">${pas || '-'}</td>
-                        <td class="border border-gray-200 px-1 py-1 text-center text-xs font-bold">${rataPengetahuan.toFixed(0)}</td>
-                        <td class="border border-gray-200 px-1 py-1 text-center text-xs">
-                            <span class="px-1 rounded predikat-${predikatPengetahuan}">${predikatPengetahuan}</span>
-                        </td>
-                        <td class="border border-gray-200 px-1 py-1 text-center text-xs font-bold">${rataKeterampilan.toFixed(0) || '-'}</td>
-                        <td class="border border-gray-200 px-1 py-1 text-center text-xs">
-                            <span class="px-1 rounded predikat-${predikatKeterampilan}">${predikatKeterampilan || '-'}</span>
-                        </td>
-                        <td class="border border-gray-200 px-1 py-1 text-center text-xs font-bold bg-blue-50">${nilaiAkhir.toFixed(0)}</td>
-                        <td class="border border-gray-200 px-1 py-1 text-center text-xs bg-green-50">
-                            <span class="px-1 rounded font-bold predikat-${predikatAkhir}">${predikatAkhir}</span>
-                        </td>
-                        <td class="border border-gray-200 px-1 py-1 text-center text-xs ${ketClass} font-medium">${ketuntasan}</td>
-                    </tr>
-                `;
-            }).join('');
-            
-            // Update statistik
-            const rataRataKelas = countNilai > 0 ? totalNilai / countNilai : 0;
-            const persenTuntas = daftarSiswa.length > 0 ? (tuntas / daftarSiswa.length * 100) : 0;
-            
-            document.getElementById('rekap-total-siswa').textContent = daftarSiswa.length;
-            document.getElementById('rekap-tuntas').textContent = tuntas;
-            document.getElementById('rekap-tidak-tuntas').textContent = tidakTuntas;
-            document.getElementById('rekap-rata-rata').textContent = rataRataKelas.toFixed(1);
-            document.getElementById('rekap-persen-tuntas').textContent = persenTuntas.toFixed(0) + '%';
-        }
-        
-        /**
-         * =====================================================
-         * GENERATE ANALISIS
-         * =====================================================
-         */
-        function generateAnalisis() {
-            if (daftarSiswa.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Muat Data Dulu',
-                    text: 'Silakan muat rekap nilai terlebih dahulu.',
-                    confirmButtonColor: '#16a34a'
-                });
-                return;
-            }
-            
-            const KKTP = parseInt(document.getElementById('input-KKTP').value) || 75;
-            
-            // Kumpulkan semua nilai akhir
-            const nilaiAkhirArr = [];
-            const siswaRemedi = [];
-            let countA = 0, countB = 0, countC = 0, countD = 0;
-            
-            daftarSiswa.forEach(siswa => {
-                // Untuk demo, ambil dari rata-rata dataNilai
-                const nilai = dataNilai[siswa.id] || {};
-                const nilaiArr = [nilai.nilai1, nilai.nilai2, nilai.nilai3].filter(n => n && !isNaN(n)).map(Number);
-                
-                if (nilaiArr.length > 0) {
-                    const avg = nilaiArr.reduce((a,b) => a+b, 0) / nilaiArr.length;
-                    nilaiAkhirArr.push(avg);
-                    
-                    const predikat = getPredikat(avg);
-                    if (predikat === 'A') countA++;
-                    else if (predikat === 'B') countB++;
-                    else if (predikat === 'C') countC++;
-                    else countD++;
-                    
-                    if (avg < KKTP) {
-                        siswaRemedi.push({ nama: siswa.nama, nilai: avg.toFixed(0) });
-                    }
-                }
-            });
-            
-            const total = nilaiAkhirArr.length;
-            
-            // Update bar chart
-            document.getElementById('bar-predikat-a').style.width = total > 0 ? (countA / total * 100) + '%' : '0%';
-            document.getElementById('bar-predikat-b').style.width = total > 0 ? (countB / total * 100) + '%' : '0%';
-            document.getElementById('bar-predikat-c').style.width = total > 0 ? (countC / total * 100) + '%' : '0%';
-            document.getElementById('bar-predikat-d').style.width = total > 0 ? (countD / total * 100) + '%' : '0%';
-            
-            document.getElementById('count-predikat-a').textContent = countA;
-            document.getElementById('count-predikat-b').textContent = countB;
-            document.getElementById('count-predikat-c').textContent = countC;
-            document.getElementById('count-predikat-d').textContent = countD;
-            
-            // Statistik
-            if (nilaiAkhirArr.length > 0) {
-                const tertinggi = Math.max(...nilaiAkhirArr);
-                const terendah = Math.min(...nilaiAkhirArr);
-                const mean = nilaiAkhirArr.reduce((a,b) => a+b, 0) / nilaiAkhirArr.length;
-                const variance = nilaiAkhirArr.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / nilaiAkhirArr.length;
-                const std = Math.sqrt(variance);
-                
-                document.getElementById('stat-tertinggi').textContent = tertinggi.toFixed(0);
-                document.getElementById('stat-terendah').textContent = terendah.toFixed(0);
-                document.getElementById('stat-modus').textContent = mean.toFixed(0);
-                document.getElementById('stat-std').textContent = std.toFixed(1);
-            }
-            
-            // Daftar remedi
-            const remediContainer = document.getElementById('daftar-remedi');
-            if (siswaRemedi.length === 0) {
-                remediContainer.innerHTML = '<p class="text-green-600 text-center py-4"><i class="fas fa-check-circle mr-2"></i>Semua siswa tuntas!</p>';
-            } else {
-                remediContainer.innerHTML = siswaRemedi.map((s, idx) => `
-                    <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                        <span class="font-medium">${idx + 1}. ${s.nama}</span>
-                        <span class="text-red-600 font-bold">Nilai: ${s.nilai}</span>
-                    </div>
-                `).join('');
-            }
-        }
-        
-        /**
-         * =====================================================
-         * CETAK & EXPORT
-         * =====================================================
-         */
-        function cetakRekap() {
-            document.getElementById('header-cetak').classList.remove('hidden');
-            window.print();
-            setTimeout(() => {
-                document.getElementById('header-cetak').classList.add('hidden');
-            }, 500);
-        }
-        
-        async function exportRekapPDF() {
-            showLoading('Membuat PDF...');
-            
-            try {
-                document.getElementById('header-cetak').classList.remove('hidden');
-                
-                const element = document.getElementById('print-area');
-                
-                const opt = {
-                    margin: 10,
-                    filename: `Rekap_Nilai_Kelas${currentKelas}_${currentSemester}_${profilGuru?.tahunAjaran || ''}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-                
-                await html2pdf().set(opt).from(element).save();
-                
-                document.getElementById('header-cetak').classList.add('hidden');
-                hideLoading();
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'PDF Berhasil!',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                
-            } catch (error) {
-                console.error("❌ Error:", error);
-                document.getElementById('header-cetak').classList.add('hidden');
-                hideLoading();
-            }
-        }
-        
-        /**
-         * =====================================================
-         * MODAL DESKRIPSI
-         * =====================================================
-         */
-        function showDeskripsiModal(siswaId) {
-            selectedSiswaId = siswaId;
-            const siswa = daftarSiswa.find(s => s.id === siswaId);
-            
-            document.getElementById('deskripsi-nama').textContent = siswa?.nama || '-';
-            document.getElementById('modal-deskripsi').classList.remove('hidden');
-        }
-        
-        function closeModalDeskripsi() {
-            document.getElementById('modal-deskripsi').classList.add('hidden');
-        }
-        
-        function generateDeskripsiOtomatis() {
-            const siswa = daftarSiswa.find(s => s.id === selectedSiswaId);
-            const nilai = dataNilai[selectedSiswaId] || {};
-            const nilaiArr = [nilai.nilai1, nilai.nilai2, nilai.nilai3].filter(n => n && !isNaN(n)).map(Number);
-            const avg = nilaiArr.length > 0 ? nilaiArr.reduce((a,b) => a+b, 0) / nilaiArr.length : 0;
-            const predikat = getPredikat(avg);
-            
-            let deskPengetahuan = '';
-            let deskKeterampilan = '';
-            
-            if (predikat === 'A') {
-                deskPengetahuan = `${siswa?.nama || 'Ananda'} menunjukkan pemahaman yang sangat baik dalam materi Pendidikan Agama Islam. Mampu menjelaskan konsep dengan tepat dan dapat mengaitkan dengan kehidupan sehari-hari.`;
-                deskKeterampilan = `${siswa?.nama || 'Ananda'} sangat terampil dalam praktik ibadah dan menunjukkan sikap yang sangat baik dalam kehidupan beragama.`;
-            } else if (predikat === 'B') {
-                deskPengetahuan = `${siswa?.nama || 'Ananda'} menunjukkan pemahaman yang baik dalam materi Pendidikan Agama Islam. Mampu memahami konsep dasar dengan baik.`;
-                deskKeterampilan = `${siswa?.nama || 'Ananda'} terampil dalam praktik ibadah dan menunjukkan sikap yang baik.`;
-            } else if (predikat === 'C') {
-                deskPengetahuan = `${siswa?.nama || 'Ananda'} cukup memahami materi Pendidikan Agama Islam. Perlu lebih giat belajar untuk meningkatkan pemahaman.`;
-                deskKeterampilan = `${siswa?.nama || 'Ananda'} cukup terampil dalam praktik ibadah. Perlu terus berlatih untuk meningkatkan keterampilan.`;
-            } else {
-                deskPengetahuan = `${siswa?.nama || 'Ananda'} perlu bimbingan lebih lanjut dalam memahami materi Pendidikan Agama Islam.`;
-                deskKeterampilan = `${siswa?.nama || 'Ananda'} perlu bimbingan dan latihan lebih dalam praktik ibadah.`;
-            }
-            
-            document.getElementById('deskripsi-pengetahuan').value = deskPengetahuan;
-            document.getElementById('deskripsi-keterampilan').value = deskKeterampilan;
-        }
-        
-        async function simpanDeskripsi() {
-            // Simpan deskripsi ke Firestore
-            closeModalDeskripsi();
-            Swal.fire({
-                icon: 'success',
-                title: 'Deskripsi Tersimpan!',
-                timer: 1500,
-                showConfirmButton: false
-            });
-        }
-        
-        /**
-         * =====================================================
-         * HELPERS
-         * =====================================================
-         */
-        async function logoutUser() {
-            const result = await Swal.fire({
-                title: 'Keluar?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#16a34a',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Ya, Keluar',
-                cancelButtonText: 'Batal'
-            });
-            if (result.isConfirmed) {
-                await auth.signOut();
-                window.location.href = 'index.html';
-            }
-        }
-        
-        function showLoading(text = 'Memproses...') {
-            document.getElementById('loading-text').textContent = text;
-            document.getElementById('loading-overlay').classList.remove('hidden');
-        }
-        
-        function hideLoading() {
-            document.getElementById('loading-overlay').classList.add('hidden');
-        }
-    </script>
-    
+    <script src="js/nilai.js"></script>
 </body>
-
 </html>

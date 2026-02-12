@@ -3,996 +3,394 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jurnal Mengajar - Admin PAI Satu Pintu</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Jurnal Pembelajaran - Admin PAI Super App</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- html2pdf -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <!-- Konfigurasi Tailwind -->
+    <link rel="stylesheet" href="css/styles.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'pai-hijau': {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        }
+                        'pai-green': '#1B5E20',
+                        'pai-gold': '#F9A825',
+                        'pai-light': '#E8F5E9',
                     }
                 }
             }
         }
     </script>
-    
-    <style>
-        .sidebar-link { transition: all 0.3s ease; }
-        .sidebar-link:hover { transform: translateX(5px); }
-        
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #16a34a;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in { animation: fadeIn 0.5s ease-out; }
-        
-        /* Jurnal card */
-        .jurnal-card {
-            transition: all 0.2s ease;
-        }
-        .jurnal-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        /* Timeline */
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -26px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: #e5e7eb;
-        }
-        .timeline-item::after {
-            content: '';
-            position: absolute;
-            left: -32px;
-            top: 6px;
-            width: 14px;
-            height: 14px;
-            background: #16a34a;
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 0 0 2px #16a34a;
-        }
-        
-        /* Print styles */
-        @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
-            .no-print { display: none !important; }
-            @page { size: A4; margin: 1.5cm; }
-        }
-    </style>
 </head>
-
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100">
     
-    <div class="flex min-h-screen">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+        <div class="p-5 border-b border-green-700">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                    <span class="text-2xl">🕌</span>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg">PAI Super App</h1>
+                    <p class="text-green-300 text-xs">Admin Dashboard</p>
+                </div>
+            </div>
+        </div>
         
-        <!-- ================================================
-             SIDEBAR
-             ================================================ -->
-        <aside class="w-64 bg-pai-hijau-800 text-white fixed h-full z-50 no-print">
-            <div class="p-6 border-b border-pai-hijau-700">
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-                        <i class="fas fa-mosque text-pai-hijau-700 text-2xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-lg leading-tight">Admin PAI</h1>
-                        <p class="text-pai-hijau-300 text-xs">Satu Pintu</p>
-                    </div>
+        <nav class="py-4">
+            <div class="px-4 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Menu Utama</span>
+            </div>
+            
+            <a href="dashboard.html" class="sidebar-menu-item">
+                <span class="menu-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="profil.html" class="sidebar-menu-item">
+                <span class="menu-icon">👤</span>
+                <span>Profil</span>
+            </a>
+            
+            <a href="kalender.html" class="sidebar-menu-item">
+                <span class="menu-icon">📅</span>
+                <span>Kalender Akademik</span>
+            </a>
+            
+            <a href="jadwal.html" class="sidebar-menu-item">
+                <span class="menu-icon">🕐</span>
+                <span>Jadwal Mengajar</span>
+            </a>
+            
+            <div class="px-4 mt-6 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Akademik</span>
+            </div>
+            
+            <a href="absensi.html" class="sidebar-menu-item">
+                <span class="menu-icon">✅</span>
+                <span>Absensi Siswa</span>
+            </a>
+            
+            <a href="nilai.html" class="sidebar-menu-item">
+                <span class="menu-icon">📝</span>
+                <span>Daftar Nilai</span>
+            </a>
+            
+            <a href="jurnal.html" class="sidebar-menu-item active">
+                <span class="menu-icon">📖</span>
+                <span>Jurnal Pembelajaran</span>
+            </a>
+            
+            <a href="bank-soal.html" class="sidebar-menu-item">
+                <span class="menu-icon">❓</span>
+                <span>Bank Soal</span>
+            </a>
+            
+            <div class="px-4 mt-6 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Generator</span>
+            </div>
+            
+            <a href="generator.html" class="sidebar-menu-item">
+                <span class="menu-icon">⚡</span>
+                <span>Generator Dokumen</span>
+            </a>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-green-700">
+            <div class="flex items-center gap-3">
+                <div id="sidebarAvatar" class="w-10 h-10 bg-pai-gold rounded-full flex items-center justify-center text-lg font-bold">G</div>
+                <div class="flex-1 min-w-0">
+                    <p id="sidebarName" class="text-white font-medium truncate">Loading...</p>
+                    <p id="sidebarEmail" class="text-green-300 text-xs truncate">loading@email.com</p>
+                </div>
+                <button onclick="logout()" class="text-green-300 hover:text-white transition-colors" title="Logout">🚪</button>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        
+        <!-- HEADER -->
+        <header class="header px-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg">
+                    <span class="text-xl">☰</span>
+                </button>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Jurnal Pembelajaran</h1>
+                    <p class="text-sm text-gray-500">Dokumentasi kegiatan pembelajaran harian</p>
                 </div>
             </div>
             
-            <nav class="p-4">
-                <p class="text-pai-hijau-400 text-xs uppercase tracking-wider mb-4 px-3">Menu Utama</p>
-                <ul class="space-y-2">
-                    <li><a href="dashboard.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-home w-5"></i><span class="ml-3">Dashboard</span></a></li>
-                    <li><a href="profil.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-user w-5"></i><span class="ml-3">Profil Guru</span></a></li>
-                    <li><a href="kalender.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-calendar-alt w-5"></i><span class="ml-3">Kalender Pendidikan</span></a></li>
-                    <li><a href="perencanaan.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-tasks w-5"></i><span class="ml-3">Perencanaan</span></a></li>
-                    <li><a href="modul-ajar.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-book-open w-5"></i><span class="ml-3">Modul Ajar</span></a></li>
-                    <li><a href="absensi.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-clipboard-check w-5"></i><span class="ml-3">Absensi Siswa</span></a></li>
-                    <li><a href="nilai.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-chart-bar w-5"></i><span class="ml-3">Daftar Nilai</span></a></li>
-                    <li><a href="bank-soal.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-question-circle w-5"></i><span class="ml-3">Bank Soal</span></a></li>
-                    <!-- Aktif -->
-                    <li><a href="jurnal.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg bg-pai-hijau-700 text-white"><i class="fas fa-journal-whills w-5"></i><span class="ml-3">Jurnal Mengajar</span></a></li>
-                </ul>
-                
-                <p class="text-pai-hijau-400 text-xs uppercase tracking-wider mb-4 px-3 mt-8">Dokumen</p>
-                <ul class="space-y-2">
-                    <li><a href="cetak.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-print w-5"></i><span class="ml-3">Cetak Dokumen</span></a></li>
-                </ul>
-            </nav>
-            
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-pai-hijau-700">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-pai-hijau-600 rounded-full flex items-center justify-center"><i class="fas fa-user"></i></div>
-                    <div class="flex-1">
-                        <p id="nama-guru-sidebar" class="text-sm font-medium truncate">Memuat...</p>
-                        <p class="text-pai-hijau-400 text-xs">Guru PAI</p>
-                    </div>
-                    <button onclick="logoutUser()" class="text-pai-hijau-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></button>
-                </div>
+            <div class="flex gap-2">
+                <button onclick="exportJurnal()" class="btn btn-outline">
+                    📥 Export
+                </button>
+                <button onclick="openJurnalModal()" class="btn btn-primary">
+                    + Buat Jurnal
+                </button>
             </div>
-        </aside>
+        </header>
         
-        <!-- ================================================
-             KONTEN UTAMA
-             ================================================ -->
-        <main class="flex-1 ml-64">
+        <!-- CONTENT -->
+        <div class="p-6">
             
-            <!-- Header -->
-            <header class="bg-white shadow-sm border-b border-gray-200 px-8 py-4 sticky top-0 z-40 no-print">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Jurnal Mengajar</h2>
-                        <p class="text-gray-500 text-sm">Catatan harian kegiatan pembelajaran</p>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span id="tanggal-hari-ini" class="px-4 py-2 bg-pai-hijau-100 text-pai-hijau-700 rounded-lg font-medium"></span>
-                        <button onclick="showTambahJurnalModal()" class="px-4 py-2 bg-pai-hijau-600 text-white rounded-lg hover:bg-pai-hijau-700">
-                            <i class="fas fa-plus mr-2"></i>Tulis Jurnal
-                        </button>
-                    </div>
-                </div>
-            </header>
-            
-            <!-- Area Konten -->
-            <div class="p-8 no-print">
-                
-                <!-- ================================================
-                     FILTER
-                     ================================================ -->
-                <div class="bg-white rounded-2xl shadow-md p-6 mb-6 fade-in">
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
-                            <select id="filter-kelas" onchange="loadJurnal()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
+            <!-- Filter Section -->
+            <div class="card mb-6">
+                <div class="card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label">Filter Kelas</label>
+                            <select id="filterKelas" class="form-select" onchange="loadJurnalList()">
                                 <option value="">Semua Kelas</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Bulan</label>
-                            <select id="filter-bulan" onchange="loadJurnal()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                                <option value="">Semua Bulan</option>
-                                <option value="1">Januari</option>
-                                <option value="2">Februari</option>
-                                <option value="3">Maret</option>
-                                <option value="4">April</option>
-                                <option value="5">Mei</option>
-                                <option value="6">Juni</option>
-                                <option value="7">Juli</option>
-                                <option value="8">Agustus</option>
-                                <option value="9">September</option>
-                                <option value="10">Oktober</option>
-                                <option value="11">November</option>
-                                <option value="12">Desember</option>
+                        <div class="form-group mb-0">
+                            <label class="form-label">Bulan</label>
+                            <input type="month" id="filterBulan" class="form-input" onchange="loadJurnalList()">
+                        </div>
+                        <div class="form-group mb-0">
+                            <label class="form-label">Elemen</label>
+                            <select id="filterElemen" class="form-select" onchange="loadJurnalList()">
+                                <option value="">Semua Elemen</option>
+                                <option value="alquranHadis">Al-Qur'an dan Hadis</option>
+                                <option value="akidah">Akidah</option>
+                                <option value="akhlak">Akhlak</option>
+                                <option value="fikih">Fikih</option>
+                                <option value="sejarah">Sejarah Peradaban Islam</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
-                            <select id="filter-tahun" onchange="loadJurnal()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                                <option value="2024">2024</option>
-                                <option value="2025">2025</option>
-                                <option value="2026">2026</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                            <select id="filter-status" onchange="filterJurnal()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                                <option value="">Semua Status</option>
-                                <option value="terlaksana">Terlaksana</option>
-                                <option value="tidak">Tidak Terlaksana</option>
-                                <option value="sebagian">Sebagian</option>
-                            </select>
-                        </div>
-                        <div class="flex items-end">
-                            <button onclick="exportJurnalPDF()" class="w-full px-6 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors">
-                                <i class="fas fa-file-pdf mr-2"></i>Export PDF
+                        <div class="form-group mb-0 flex items-end">
+                            <button onclick="loadJurnalList()" class="btn btn-primary w-full">
+                                🔍 Filter
                             </button>
                         </div>
                     </div>
                 </div>
-                
-                <!-- ================================================
-                     STATISTIK JURNAL
-                     ================================================ -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-white rounded-xl shadow-md p-4 text-center">
-                        <i class="fas fa-calendar-check text-blue-500 text-2xl mb-2"></i>
-                        <p id="stat-total" class="text-2xl font-bold text-gray-700">0</p>
-                        <p class="text-xs text-gray-500">Total Jurnal</p>
-                    </div>
-                    <div class="bg-green-50 rounded-xl shadow-md p-4 text-center">
-                        <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
-                        <p id="stat-terlaksana" class="text-2xl font-bold text-green-700">0</p>
-                        <p class="text-xs text-green-600">Terlaksana</p>
-                    </div>
-                    <div class="bg-yellow-50 rounded-xl shadow-md p-4 text-center">
-                        <i class="fas fa-exclamation-circle text-yellow-500 text-2xl mb-2"></i>
-                        <p id="stat-sebagian" class="text-2xl font-bold text-yellow-700">0</p>
-                        <p class="text-xs text-yellow-600">Sebagian</p>
-                    </div>
-                    <div class="bg-red-50 rounded-xl shadow-md p-4 text-center">
-                        <i class="fas fa-times-circle text-red-500 text-2xl mb-2"></i>
-                        <p id="stat-tidak" class="text-2xl font-bold text-red-700">0</p>
-                        <p class="text-xs text-red-600">Tidak Terlaksana</p>
+            </div>
+            
+            <!-- Statistics -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+                    <div class="text-3xl font-bold text-pai-green" id="statTotal">0</div>
+                    <div class="text-sm text-gray-600">Total Jurnal</div>
+                </div>
+                <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+                    <div class="text-3xl font-bold text-blue-600" id="statBulanIni">0</div>
+                    <div class="text-sm text-gray-600">Bulan Ini</div>
+                </div>
+                <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+                    <div class="text-3xl font-bold text-yellow-600" id="statMingguIni">0</div>
+                    <div class="text-sm text-gray-600">Minggu Ini</div>
+                </div>
+                <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+                    <div class="text-3xl font-bold text-purple-600" id="statKelas">0</div>
+                    <div class="text-sm text-gray-600">Kelas Aktif</div>
+                </div>
+            </div>
+            
+            <!-- Jurnal List -->
+            <div class="card">
+                <div class="card-header flex items-center justify-between">
+                    <h3 class="font-bold text-gray-800">📖 Daftar Jurnal Pembelajaran</h3>
+                    <div class="flex gap-2">
+                        <button onclick="toggleView('grid')" id="btnGrid" class="p-2 rounded hover:bg-gray-100">
+                            ▦
+                        </button>
+                        <button onclick="toggleView('list')" id="btnList" class="p-2 rounded hover:bg-gray-100 bg-gray-200">
+                            ☰
+                        </button>
                     </div>
                 </div>
-                
-                <!-- ================================================
-                     DAFTAR JURNAL (TIMELINE)
-                     ================================================ -->
-                <div class="bg-white rounded-2xl shadow-md p-6 fade-in">
+                <div class="card-body">
+                    <div id="jurnalList" class="space-y-4">
+                        <p class="text-gray-500 text-center py-8">Memuat data jurnal...</p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+    
+    <!-- Modal Tambah/Edit Jurnal -->
+    <div id="jurnalModal" class="modal-overlay">
+        <div class="modal-content max-w-3xl">
+            <div class="modal-header">
+                <h3 id="jurnalModalTitle" class="font-bold text-lg">Buat Jurnal Pembelajaran</h3>
+                <button onclick="closeJurnalModal()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+            </div>
+            <div class="modal-body max-h-[70vh] overflow-y-auto">
+                <form id="formJurnal" class="space-y-4">
+                    <input type="hidden" id="jurnalId">
+                    <input type="hidden" id="jurnalAbsensiId">
                     
-                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
-                                <i class="fas fa-journal-whills text-purple-600 text-xl"></i>
+                    <!-- Info Dasar -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-700 mb-3">📋 Informasi Dasar</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="form-group mb-0">
+                                <label class="form-label">Kelas *</label>
+                                <select id="jurnalKelas" class="form-select" required onchange="updateJurnalInfo()">
+                                    <option value="">Pilih Kelas</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Tanggal *</label>
+                                <input type="date" id="jurnalTanggal" class="form-input" required>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Jam Pelajaran</label>
+                                <select id="jurnalJam" class="form-select">
+                                    <option value="1-2">Jam ke 1-2</option>
+                                    <option value="3-4">Jam ke 3-4</option>
+                                    <option value="5-6">Jam ke 5-6</option>
+                                    <option value="7-8">Jam ke 7-8</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Materi Pembelajaran -->
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-700 mb-3">📚 Materi Pembelajaran</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="form-group mb-0">
+                                <label class="form-label">Elemen/Bab *</label>
+                                <select id="jurnalElemen" class="form-select" required onchange="loadCapaian()">
+                                    <option value="">Pilih Elemen</option>
+                                    <option value="alquranHadis">Al-Qur'an dan Hadis</option>
+                                    <option value="akidah">Akidah</option>
+                                    <option value="akhlak">Akhlak</option>
+                                    <option value="fikih">Fikih</option>
+                                    <option value="sejarah">Sejarah Peradaban Islam</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Capaian Pembelajaran</label>
+                                <select id="jurnalCapaian" class="form-select">
+                                    <option value="">Pilih capaian</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label class="form-label">Topik/Materi *</label>
+                            <input type="text" id="jurnalTopik" class="form-input" placeholder="Contoh: Surah Al-Fatihah ayat 1-4" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Kegiatan Pembelajaran -->
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-700 mb-3">📝 Kegiatan Pembelajaran</h4>
+                        <div class="form-group">
+                            <label class="form-label">Tujuan Pembelajaran</label>
+                            <textarea id="jurnalTujuan" class="form-textarea" rows="2" placeholder="Tujuan pembelajaran yang ingin dicapai..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Kegiatan/Aktivitas *</label>
+                            <textarea id="jurnalKegiatan" class="form-textarea" rows="3" placeholder="Deskripsi kegiatan pembelajaran yang dilakukan..." required></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group mb-0">
+                                <label class="form-label">Metode Pembelajaran</label>
+                                <select id="jurnalMetode" class="form-select" multiple>
+                                    <option value="ceramah">Ceramah Interaktif</option>
+                                    <option value="diskusi">Diskusi Kelompok</option>
+                                    <option value="praktik">Praktik Langsung</option>
+                                    <option value="hafalan">Hafalan/Tahfidz</option>
+                                    <option value="kisah">Metode Kisah</option>
+                                    <option value="demonstrasi">Demonstrasi</option>
+                                    <option value="tanya-jawab">Tanya Jawab</option>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Tekan Ctrl untuk pilih lebih dari satu</p>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Media/Sumber Belajar</label>
+                                <input type="text" id="jurnalMedia" class="form-input" placeholder="Al-Qur'an, Buku Paket, Video, dll">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kehadiran (dari Absensi) -->
+                    <div class="bg-yellow-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-700 mb-3">✅ Data Kehadiran</h4>
+                        <div id="jurnalKehadiran" class="grid grid-cols-4 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold text-green-600" id="jurnalHadir">-</div>
+                                <div class="text-sm text-gray-600">Hadir</div>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800">Catatan Jurnal</h3>
-                                <p class="text-sm text-gray-500" id="info-jurnal">Menampilkan jurnal terbaru</p>
+                                <div class="text-2xl font-bold text-blue-600" id="jurnalIzin">-</div>
+                                <div class="text-sm text-gray-600">Izin</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-yellow-600" id="jurnalSakit">-</div>
+                                <div class="text-sm text-gray-600">Sakit</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-red-600" id="jurnalAlpha">-</div>
+                                <div class="text-sm text-gray-600">Alpha</div>
                             </div>
                         </div>
+                        <p class="text-xs text-gray-500 mt-2 text-center">
+                            Data diambil dari absensi. <a href="absensi.html" class="text-pai-green hover:underline">Input absensi</a> jika belum ada.
+                        </p>
                     </div>
                     
-                    <!-- Timeline Jurnal -->
-                    <div id="daftar-jurnal" class="relative ml-8 space-y-6">
-                        <div class="text-center py-12 text-gray-400">
-                            <i class="fas fa-book-open text-5xl mb-4"></i>
-                            <p>Belum ada jurnal</p>
-                            <p class="text-sm">Klik "Tulis Jurnal" untuk menambahkan catatan</p>
+                    <!-- Refleksi -->
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-700 mb-3">💭 Refleksi & Catatan</h4>
+                        <div class="form-group">
+                            <label class="form-label">Refleksi Pembelajaran</label>
+                            <textarea id="jurnalRefleksi" class="form-textarea" rows="2" placeholder="Hal yang berjalan baik, tantangan, dll..."></textarea>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label class="form-label">Rencana Tindak Lanjut</label>
+                            <textarea id="jurnalTindakLanjut" class="form-textarea" rows="2" placeholder="Rencana untuk pertemuan selanjutnya..."></textarea>
                         </div>
                     </div>
-                    
-                </div>
-                
+                </form>
             </div>
-            
-            <!-- Footer -->
-            <footer class="bg-white border-t border-gray-200 px-8 py-4 text-center text-gray-500 text-sm no-print">
-                <p>© 2025 Admin PAI Satu Pintu</p>
-            </footer>
-            
-        </main>
-    </div>
-    
-    <!-- ================================================
-         MODAL: TAMBAH/EDIT JURNAL
-         ================================================ -->
-    <div id="modal-jurnal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
-                <div class="flex items-center justify-between">
-                    <h3 id="modal-jurnal-title" class="text-lg font-bold text-gray-800">Tulis Jurnal Mengajar</h3>
-                    <button onclick="closeModalJurnal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeJurnalModal()" class="btn btn-secondary">Batal</button>
+                <button type="button" onclick="saveJurnal()" class="btn btn-primary">💾 Simpan Jurnal</button>
             </div>
-            
-            <form id="form-jurnal" class="p-6 space-y-4">
-                <input type="hidden" id="jurnal-id">
-                
-                <!-- Baris 1: Tanggal, Kelas, Jam ke -->
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal <span class="text-red-500">*</span></label>
-                        <input type="date" id="jurnal-tanggal" required
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kelas <span class="text-red-500">*</span></label>
-                        <select id="jurnal-kelas" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                            <option value="">Pilih Kelas</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jam ke-</label>
-                        <input type="text" id="jurnal-jam" placeholder="Contoh: 1-2"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none">
-                    </div>
-                </div>
-                
-                <!-- Materi/Topik -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Materi/Topik Pembelajaran <span class="text-red-500">*</span></label>
-                    <input type="text" id="jurnal-materi" required placeholder="Contoh: Tata Cara Wudhu"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none">
-                </div>
-                
-                <!-- Tujuan Pembelajaran -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tujuan Pembelajaran</label>
-                    <textarea id="jurnal-tujuan" rows="2" placeholder="Tujuan pembelajaran yang ingin dicapai..."
-                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none"></textarea>
-                </div>
-                
-                <!-- Kegiatan Pembelajaran -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Kegiatan Pembelajaran <span class="text-red-500">*</span></label>
-                    <textarea id="jurnal-kegiatan" rows="4" required placeholder="Deskripsi kegiatan yang dilakukan selama pembelajaran..."
-                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none"></textarea>
-                </div>
-                
-                <!-- Status Pelaksanaan -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status Pelaksanaan <span class="text-red-500">*</span></label>
-                    <div class="flex space-x-4">
-                        <label class="flex items-center p-4 border rounded-xl cursor-pointer hover:bg-green-50 flex-1">
-                            <input type="radio" name="jurnal-status" value="terlaksana" required class="mr-3">
-                            <span class="font-medium text-green-600"><i class="fas fa-check-circle mr-1"></i> Terlaksana</span>
-                        </label>
-                        <label class="flex items-center p-4 border rounded-xl cursor-pointer hover:bg-yellow-50 flex-1">
-                            <input type="radio" name="jurnal-status" value="sebagian" class="mr-3">
-                            <span class="font-medium text-yellow-600"><i class="fas fa-exclamation-circle mr-1"></i> Sebagian</span>
-                        </label>
-                        <label class="flex items-center p-4 border rounded-xl cursor-pointer hover:bg-red-50 flex-1">
-                            <input type="radio" name="jurnal-status" value="tidak" class="mr-3">
-                            <span class="font-medium text-red-600"><i class="fas fa-times-circle mr-1"></i> Tidak</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <!-- Jumlah Siswa -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Siswa Hadir</label>
-                        <input type="number" id="jurnal-hadir" min="0" placeholder="0"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Siswa Tidak Hadir</label>
-                        <input type="number" id="jurnal-tidak-hadir" min="0" placeholder="0"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none">
-                    </div>
-                </div>
-                
-                <!-- Kendala -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Kendala/Hambatan</label>
-                    <textarea id="jurnal-kendala" rows="2" placeholder="Kendala yang dihadapi selama pembelajaran (jika ada)..."
-                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none"></textarea>
-                </div>
-                
-                <!-- Solusi -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Solusi/Tindak Lanjut</label>
-                    <textarea id="jurnal-solusi" rows="2" placeholder="Solusi atau rencana tindak lanjut..."
-                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none"></textarea>
-                </div>
-                
-                <!-- Catatan Tambahan -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Catatan Tambahan</label>
-                    <textarea id="jurnal-catatan" rows="2" placeholder="Catatan lain yang perlu dicatat..."
-                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none"></textarea>
-                </div>
-                
-                <!-- Tombol -->
-                <div class="flex justify-end space-x-3 pt-4 border-t">
-                    <button type="button" onclick="closeModalJurnal()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-6 py-3 bg-pai-hijau-600 text-white rounded-xl hover:bg-pai-hijau-700">
-                        <i class="fas fa-save mr-2"></i>Simpan Jurnal
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
     
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-8 rounded-2xl text-center">
-            <div class="spinner mx-auto mb-4"></div>
-            <p id="loading-text" class="text-gray-600">Memproses...</p>
+    <!-- Modal Detail Jurnal -->
+    <div id="jurnalDetailModal" class="modal-overlay">
+        <div class="modal-content max-w-3xl">
+            <div class="modal-header">
+                <h3 class="font-bold text-lg">📖 Detail Jurnal Pembelajaran</h3>
+                <button onclick="closeJurnalDetailModal()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+            </div>
+            <div class="modal-body" id="jurnalDetailContent">
+                <!-- Will be filled by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="deleteJurnal()" class="btn btn-danger">🗑️ Hapus</button>
+                <button type="button" onclick="editJurnal()" class="btn btn-warning">✏️ Edit</button>
+                <button type="button" onclick="printJurnal()" class="btn btn-outline">🖨️ Cetak</button>
+                <button type="button" onclick="closeJurnalDetailModal()" class="btn btn-secondary">Tutup</button>
+            </div>
         </div>
     </div>
     
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 transform translate-x-full transition-transform duration-300 z-50">
+        <div id="toastContent" class="px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+            <span id="toastIcon">✓</span>
+            <span id="toastMessage">Pesan</span>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/database.js"></script>
-    
-    <!-- ================================================
-         SCRIPT JURNAL MENGAJAR
-         ================================================ -->
-    <script>
-        /**
-         * =====================================================
-         * VARIABEL GLOBAL
-         * =====================================================
-         */
-        let profilGuru = null;
-        let daftarJurnal = [];
-        let filteredJurnal = [];
-        
-        const NAMA_HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        const NAMA_BULAN = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-                           'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        
-        /**
-         * =====================================================
-         * INISIALISASI
-         * =====================================================
-         */
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuthState();
-            
-            // Set tanggal hari ini
-            const today = new Date();
-            document.getElementById('tanggal-hari-ini').textContent = today.toLocaleDateString('id-ID', {
-                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-            });
-            document.getElementById('jurnal-tanggal').value = today.toISOString().split('T')[0];
-            document.getElementById('filter-bulan').value = today.getMonth() + 1;
-            document.getElementById('filter-tahun').value = today.getFullYear();
-            
-            document.getElementById('form-jurnal').addEventListener('submit', handleSimpanJurnal);
-        });
-        
-        function checkAuthState() {
-            showLoading('Memuat data...');
-            
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    await loadInitialData(user.uid);
-                    hideLoading();
-                } else {
-                    window.location.href = 'index.html';
-                }
-            });
-        }
-        
-        async function loadInitialData(userId) {
-            try {
-                const profilDoc = await db.collection('users').doc(userId).get();
-                if (profilDoc.exists) {
-                    profilGuru = profilDoc.data();
-                    document.getElementById('nama-guru-sidebar').textContent = profilGuru.namaLengkap || 'Guru PAI';
-                    
-                    // Populate kelas
-                    const selectKelas = document.getElementById('filter-kelas');
-                    const selectKelasModal = document.getElementById('jurnal-kelas');
-                    
-                    selectKelas.innerHTML = '<option value="">Semua Kelas</option>';
-                    selectKelasModal.innerHTML = '<option value="">Pilih Kelas</option>';
-                    
-                    (profilGuru.kelasAmpu || []).sort((a,b) => a-b).forEach(k => {
-                        selectKelas.innerHTML += `<option value="${k}">Kelas ${k}</option>`;
-                        selectKelasModal.innerHTML += `<option value="${k}">Kelas ${k}</option>`;
-                    });
-                }
-                
-                // Load jurnal
-                await loadJurnal();
-                
-            } catch (error) {
-                console.error("❌ Error:", error);
-            }
-        }
-        
-        /**
-         * =====================================================
-         * LOAD JURNAL
-         * =====================================================
-         */
-        async function loadJurnal() {
-            try {
-                const user = auth.currentUser;
-                const kelas = document.getElementById('filter-kelas').value;
-                const bulan = document.getElementById('filter-bulan').value;
-                const tahun = document.getElementById('filter-tahun').value;
-                
-                let query = db.collection('users').doc(user.uid).collection('jurnal');
-                
-                // Filter berdasarkan tanggal
-                if (bulan && tahun) {
-                    const startDate = `${tahun}-${String(bulan).padStart(2, '0')}-01`;
-                    const endDate = `${tahun}-${String(bulan).padStart(2, '0')}-31`;
-                    query = query.where('tanggal', '>=', startDate).where('tanggal', '<=', endDate);
-                }
-                
-                query = query.orderBy('tanggal', 'desc');
-                
-                const snapshot = await query.get();
-                daftarJurnal = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                // Filter kelas jika dipilih
-                if (kelas) {
-                    filteredJurnal = daftarJurnal.filter(j => j.kelas === kelas);
-                } else {
-                    filteredJurnal = [...daftarJurnal];
-                }
-                
-                renderDaftarJurnal();
-                updateStatistik();
-                
-            } catch (error) {
-                console.error("❌ Error:", error);
-            }
-        }
-        
-        function filterJurnal() {
-            const status = document.getElementById('filter-status').value;
-            
-            if (status) {
-                filteredJurnal = daftarJurnal.filter(j => j.status === status);
-            } else {
-                filteredJurnal = [...daftarJurnal];
-            }
-            
-            renderDaftarJurnal();
-        }
-        
-        /**
-         * =====================================================
-         * RENDER DAFTAR JURNAL
-         * =====================================================
-         */
-        function renderDaftarJurnal() {
-            const container = document.getElementById('daftar-jurnal');
-            
-            if (filteredJurnal.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12 text-gray-400">
-                        <i class="fas fa-book-open text-5xl mb-4"></i>
-                        <p>Tidak ada jurnal ditemukan</p>
-                        <p class="text-sm">Coba ubah filter atau tulis jurnal baru</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = filteredJurnal.map(jurnal => {
-                const tanggalObj = new Date(jurnal.tanggal);
-                const hari = NAMA_HARI[tanggalObj.getDay()];
-                const tanggalFormatted = tanggalObj.toLocaleDateString('id-ID', {
-                    day: 'numeric', month: 'long', year: 'numeric'
-                });
-                
-                let statusBadge = '';
-                let statusIcon = '';
-                if (jurnal.status === 'terlaksana') {
-                    statusBadge = 'bg-green-100 text-green-700';
-                    statusIcon = '<i class="fas fa-check-circle text-green-500"></i>';
-                } else if (jurnal.status === 'sebagian') {
-                    statusBadge = 'bg-yellow-100 text-yellow-700';
-                    statusIcon = '<i class="fas fa-exclamation-circle text-yellow-500"></i>';
-                } else {
-                    statusBadge = 'bg-red-100 text-red-700';
-                    statusIcon = '<i class="fas fa-times-circle text-red-500"></i>';
-                }
-                
-                return `
-                    <div class="timeline-item relative jurnal-card bg-gray-50 rounded-xl p-5 border border-gray-200">
-                        <div class="flex items-start justify-between">
-                            <div class="flex-1">
-                                <!-- Header -->
-                                <div class="flex items-center flex-wrap gap-2 mb-3">
-                                    <span class="px-3 py-1 bg-pai-hijau-100 text-pai-hijau-700 rounded-full text-sm font-medium">
-                                        Kelas ${jurnal.kelas}
-                                    </span>
-                                    <span class="text-gray-500 text-sm">
-                                        <i class="fas fa-calendar mr-1"></i>
-                                        ${hari}, ${tanggalFormatted}
-                                    </span>
-                                    ${jurnal.jam ? `<span class="text-gray-500 text-sm"><i class="fas fa-clock mr-1"></i>Jam ke-${jurnal.jam}</span>` : ''}
-                                    <span class="px-2 py-1 ${statusBadge} rounded-full text-xs font-medium">
-                                        ${statusIcon} ${jurnal.status.charAt(0).toUpperCase() + jurnal.status.slice(1)}
-                                    </span>
-                                </div>
-                                
-                                <!-- Materi -->
-                                <h4 class="font-bold text-gray-800 text-lg mb-2">${jurnal.materi}</h4>
-                                
-                                <!-- Kegiatan -->
-                                <p class="text-gray-600 mb-3">${jurnal.kegiatan}</p>
-                                
-                                <!-- Detail -->
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                                    ${jurnal.tujuan ? `
-                                        <div class="bg-white rounded-lg p-2">
-                                            <span class="text-gray-500">Tujuan:</span>
-                                            <p class="text-gray-700 truncate">${jurnal.tujuan}</p>
-                                        </div>
-                                    ` : ''}
-                                    <div class="bg-white rounded-lg p-2">
-                                        <span class="text-gray-500">Hadir:</span>
-                                        <p class="text-gray-700 font-medium">${jurnal.hadir || 0} siswa</p>
-                                    </div>
-                                    <div class="bg-white rounded-lg p-2">
-                                        <span class="text-gray-500">Tidak Hadir:</span>
-                                        <p class="text-gray-700 font-medium">${jurnal.tidakHadir || 0} siswa</p>
-                                    </div>
-                                    ${jurnal.kendala ? `
-                                        <div class="bg-red-50 rounded-lg p-2">
-                                            <span class="text-red-500">Kendala:</span>
-                                            <p class="text-red-700 truncate">${jurnal.kendala}</p>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                            
-                            <!-- Aksi -->
-                            <div class="flex flex-col space-y-2 ml-4">
-                                <button onclick="editJurnal('${jurnal.id}')" class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="hapusJurnal('${jurnal.id}')" class="p-2 text-red-600 hover:bg-red-100 rounded-lg" title="Hapus">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            // Update info
-            document.getElementById('info-jurnal').textContent = `Menampilkan ${filteredJurnal.length} jurnal`;
-        }
-        
-        /**
-         * =====================================================
-         * UPDATE STATISTIK
-         * =====================================================
-         */
-        function updateStatistik() {
-            document.getElementById('stat-total').textContent = daftarJurnal.length;
-            document.getElementById('stat-terlaksana').textContent = daftarJurnal.filter(j => j.status === 'terlaksana').length;
-            document.getElementById('stat-sebagian').textContent = daftarJurnal.filter(j => j.status === 'sebagian').length;
-            document.getElementById('stat-tidak').textContent = daftarJurnal.filter(j => j.status === 'tidak').length;
-        }
-        
-        /**
-         * =====================================================
-         * MODAL JURNAL
-         * =====================================================
-         */
-        function showTambahJurnalModal() {
-            document.getElementById('modal-jurnal-title').textContent = 'Tulis Jurnal Mengajar';
-            document.getElementById('form-jurnal').reset();
-            document.getElementById('jurnal-id').value = '';
-            document.getElementById('jurnal-tanggal').value = new Date().toISOString().split('T')[0];
-            
-            document.getElementById('modal-jurnal').classList.remove('hidden');
-        }
-        
-        function closeModalJurnal() {
-            document.getElementById('modal-jurnal').classList.add('hidden');
-        }
-        
-        /**
-         * =====================================================
-         * SIMPAN JURNAL
-         * =====================================================
-         */
-        async function handleSimpanJurnal(e) {
-            e.preventDefault();
-            
-            showLoading('Menyimpan jurnal...');
-            
-            try {
-                const user = auth.currentUser;
-                const jurnalId = document.getElementById('jurnal-id').value;
-                
-                const dataJurnal = {
-                    tanggal: document.getElementById('jurnal-tanggal').value,
-                    kelas: document.getElementById('jurnal-kelas').value,
-                    jam: document.getElementById('jurnal-jam').value.trim(),
-                    materi: document.getElementById('jurnal-materi').value.trim(),
-                    tujuan: document.getElementById('jurnal-tujuan').value.trim(),
-                    kegiatan: document.getElementById('jurnal-kegiatan').value.trim(),
-                    status: document.querySelector('input[name="jurnal-status"]:checked')?.value || 'terlaksana',
-                    hadir: parseInt(document.getElementById('jurnal-hadir').value) || 0,
-                    tidakHadir: parseInt(document.getElementById('jurnal-tidak-hadir').value) || 0,
-                    kendala: document.getElementById('jurnal-kendala').value.trim(),
-                    solusi: document.getElementById('jurnal-solusi').value.trim(),
-                    catatan: document.getElementById('jurnal-catatan').value.trim(),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                
-                if (jurnalId) {
-                    // Update
-                    await db.collection('users').doc(user.uid)
-                        .collection('jurnal')
-                        .doc(jurnalId)
-                        .update(dataJurnal);
-                } else {
-                    // Create
-                    dataJurnal.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    await db.collection('users').doc(user.uid)
-                        .collection('jurnal')
-                        .add(dataJurnal);
-                }
-                
-                closeModalJurnal();
-                await loadJurnal();
-                
-                hideLoading();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Jurnal Tersimpan!',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                
-            } catch (error) {
-                console.error("❌ Error:", error);
-                hideLoading();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Menyimpan',
-                    confirmButtonColor: '#16a34a'
-                });
-            }
-        }
-        
-        /**
-         * =====================================================
-         * EDIT JURNAL
-         * =====================================================
-         */
-        function editJurnal(jurnalId) {
-            const jurnal = daftarJurnal.find(j => j.id === jurnalId);
-            if (!jurnal) return;
-            
-            document.getElementById('modal-jurnal-title').textContent = 'Edit Jurnal Mengajar';
-            document.getElementById('jurnal-id').value = jurnal.id;
-            document.getElementById('jurnal-tanggal').value = jurnal.tanggal;
-            document.getElementById('jurnal-kelas').value = jurnal.kelas;
-            document.getElementById('jurnal-jam').value = jurnal.jam || '';
-            document.getElementById('jurnal-materi').value = jurnal.materi;
-            document.getElementById('jurnal-tujuan').value = jurnal.tujuan || '';
-            document.getElementById('jurnal-kegiatan').value = jurnal.kegiatan;
-            document.getElementById('jurnal-hadir').value = jurnal.hadir || '';
-            document.getElementById('jurnal-tidak-hadir').value = jurnal.tidakHadir || '';
-            document.getElementById('jurnal-kendala').value = jurnal.kendala || '';
-            document.getElementById('jurnal-solusi').value = jurnal.solusi || '';
-            document.getElementById('jurnal-catatan').value = jurnal.catatan || '';
-            
-            const radioStatus = document.querySelector(`input[name="jurnal-status"][value="${jurnal.status}"]`);
-            if (radioStatus) radioStatus.checked = true;
-            
-            document.getElementById('modal-jurnal').classList.remove('hidden');
-        }
-        
-        /**
-         * =====================================================
-         * HAPUS JURNAL
-         * =====================================================
-         */
-        async function hapusJurnal(jurnalId) {
-            const result = await Swal.fire({
-                title: 'Hapus Jurnal?',
-                text: 'Jurnal yang dihapus tidak dapat dikembalikan.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Ya, Hapus',
-                cancelButtonText: 'Batal'
-            });
-            
-            if (result.isConfirmed) {
-                showLoading('Menghapus...');
-                
-                try {
-                    const user = auth.currentUser;
-                    await db.collection('users').doc(user.uid)
-                        .collection('jurnal')
-                        .doc(jurnalId)
-                        .delete();
-                    
-                    await loadJurnal();
-                    
-                    hideLoading();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Terhapus!',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    
-                } catch (error) {
-                    console.error("❌ Error:", error);
-                    hideLoading();
-                }
-            }
-        }
-        
-        /**
-         * =====================================================
-         * EXPORT PDF
-         * =====================================================
-         */
-        async function exportJurnalPDF() {
-            if (filteredJurnal.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Tidak Ada Jurnal',
-                    confirmButtonColor: '#16a34a'
-                });
-                return;
-            }
-            
-            showLoading('Membuat PDF...');
-            
-            const bulan = document.getElementById('filter-bulan').value;
-            const tahun = document.getElementById('filter-tahun').value;
-            
-            // Generate HTML
-            let html = `
-                <div style="font-family: 'Times New Roman', serif; font-size: 11pt; padding: 20px;">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h2 style="margin: 0;">JURNAL MENGAJAR</h2>
-                        <h3 style="margin: 5px 0;">PENDIDIKAN AGAMA ISLAM DAN BUDI PEKERTI</h3>
-                        <p style="margin: 0;">${profilGuru?.namaSekolah || '-'}</p>
-                        <p style="margin: 0;">${bulan ? NAMA_BULAN[bulan] : ''} ${tahun}</p>
-                    </div>
-                    
-                    <table style="width: 100%; border-collapse: collapse; font-size: 10pt;">
-                        <thead>
-                            <tr style="background: #f0f0f0;">
-                                <th style="border: 1px solid #000; padding: 8px; width: 30px;">No</th>
-                                <th style="border: 1px solid #000; padding: 8px; width: 80px;">Tanggal</th>
-                                <th style="border: 1px solid #000; padding: 8px; width: 50px;">Kelas</th>
-                                <th style="border: 1px solid #000; padding: 8px;">Materi</th>
-                                <th style="border: 1px solid #000; padding: 8px;">Kegiatan</th>
-                                <th style="border: 1px solid #000; padding: 8px; width: 50px;">Hadir</th>
-                                <th style="border: 1px solid #000; padding: 8px; width: 60px;">Status</th>
-                                <th style="border: 1px solid #000; padding: 8px;">Kendala</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            filteredJurnal.forEach((jurnal, idx) => {
-                const tanggalFormatted = new Date(jurnal.tanggal).toLocaleDateString('id-ID');
-                
-                html += `
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${idx + 1}</td>
-                        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${tanggalFormatted}</td>
-                        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${jurnal.kelas}</td>
-                        <td style="border: 1px solid #000; padding: 6px;">${jurnal.materi}</td>
-                        <td style="border: 1px solid #000; padding: 6px;">${jurnal.kegiatan}</td>
-                        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${jurnal.hadir || 0}</td>
-                        <td style="border: 1px solid #000; padding: 6px; text-align: center;">${jurnal.status}</td>
-                        <td style="border: 1px solid #000; padding: 6px;">${jurnal.kendala || '-'}</td>
-                    </tr>
-                `;
-            });
-            
-            html += `
-                        </tbody>
-                    </table>
-                    
-                    <div style="margin-top: 40px; display: flex; justify-content: flex-end;">
-                        <div style="text-align: center;">
-                            <p>${profilGuru?.kabupaten || '................'}, ${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}</p>
-                            <p>Guru PAI</p>
-                            <br><br><br><br>
-                            <p style="font-weight: bold; text-decoration: underline;">${profilGuru?.namaLengkap || '...........................'}</p>
-                            <p>NIP. ${profilGuru?.nip || '...........................'}</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Create temporary element
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-            document.body.appendChild(tempDiv);
-            
-            try {
-                const opt = {
-                    margin: 10,
-                    filename: `Jurnal_Mengajar_${bulan ? NAMA_BULAN[bulan] : ''}_${tahun}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-                };
-                
-                await html2pdf().set(opt).from(tempDiv).save();
-                
-                document.body.removeChild(tempDiv);
-                hideLoading();
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'PDF Berhasil!',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                
-            } catch (error) {
-                document.body.removeChild(tempDiv);
-                console.error("❌ Error:", error);
-                hideLoading();
-            }
-        }
-        
-        /**
-         * =====================================================
-         * HELPERS
-         * =====================================================
-         */
-        async function logoutUser() {
-            const result = await Swal.fire({
-                title: 'Keluar?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#16a34a',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Ya, Keluar',
-                cancelButtonText: 'Batal'
-            });
-            if (result.isConfirmed) {
-                await auth.signOut();
-                window.location.href = 'index.html';
-            }
-        }
-        
-        function showLoading(text = 'Memproses...') {
-            document.getElementById('loading-text').textContent = text;
-            document.getElementById('loading-overlay').classList.remove('hidden');
-        }
-        
-        function hideLoading() {
-            document.getElementById('loading-overlay').classList.add('hidden');
-        }
-    </script>
-    
+    <script src="js/curriculum-data.js"></script>
+    <script src="js/jurnal.js"></script>
 </body>
 </html>

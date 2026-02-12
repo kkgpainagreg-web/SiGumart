@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadwal Mengajar - Admin PAI Super App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pai-green': '#1B5E20',
+                        'pai-gold': '#F9A825',
+                        'pai-light': '#E8F5E9',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+        <div class="p-5 border-b border-green-700">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                    <span class="text-2xl">🕌</span>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg">PAI Super App</h1>
+                    <p class="text-green-300 text-xs">Admin Dashboard</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="py-4">
+            <div class="px-4 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Menu Utama</span>
+            </div>
+            
+            <a href="dashboard.html" class="sidebar-menu-item">
+                <span class="menu-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="profil.html" class="sidebar-menu-item">
+                <span class="menu-icon">👤</span>
+                <span>Profil</span>
+            </a>
+            
+            <a href="kalender.html" class="sidebar-menu-item">
+                <span class="menu-icon">📅</span>
+                <span>Kalender Akademik</span>
+            </a>
+            
+            <a href="jadwal.html" class="sidebar-menu-item active">
+                <span class="menu-icon">🕐</span>
+                <span>Jadwal Mengajar</span>
+            </a>
+            
+            <div class="px-4 mt-6 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Akademik</span>
+            </div>
+            
+            <a href="absensi.html" class="sidebar-menu-item">
+                <span class="menu-icon">✅</span>
+                <span>Absensi Siswa</span>
+            </a>
+            
+            <a href="nilai.html" class="sidebar-menu-item">
+                <span class="menu-icon">📝</span>
+                <span>Daftar Nilai</span>
+            </a>
+            
+            <a href="jurnal.html" class="sidebar-menu-item">
+                <span class="menu-icon">📖</span>
+                <span>Jurnal Pembelajaran</span>
+            </a>
+            
+            <a href="bank-soal.html" class="sidebar-menu-item">
+                <span class="menu-icon">❓</span>
+                <span>Bank Soal</span>
+            </a>
+            
+            <div class="px-4 mt-6 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Generator</span>
+            </div>
+            
+            <a href="generator.html" class="sidebar-menu-item">
+                <span class="menu-icon">⚡</span>
+                <span>Generator Dokumen</span>
+            </a>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-green-700">
+            <div class="flex items-center gap-3">
+                <div id="sidebarAvatar" class="w-10 h-10 bg-pai-gold rounded-full flex items-center justify-center text-lg font-bold">G</div>
+                <div class="flex-1 min-w-0">
+                    <p id="sidebarName" class="text-white font-medium truncate">Loading...</p>
+                    <p id="sidebarEmail" class="text-green-300 text-xs truncate">loading@email.com</p>
+                </div>
+                <button onclick="logout()" class="text-green-300 hover:text-white transition-colors" title="Logout">🚪</button>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        
+        <!-- HEADER -->
+        <header class="header px-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg">
+                    <span class="text-xl">☰</span>
+                </button>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Jadwal Mengajar</h1>
+                    <p class="text-sm text-gray-500">Kelola jadwal dan kelas yang diajar</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-2">
+                <button onclick="openClassModal()" class="btn btn-outline">
+                    + Tambah Kelas
+                </button>
+                <button onclick="openScheduleModal()" class="btn btn-primary">
+                    + Tambah Jadwal
+                </button>
+            </div>
+        </header>
+        
+        <!-- CONTENT -->
+        <div class="p-6">
+            
+            <!-- Tabs -->
+            <div class="card mb-6">
+                <div class="tabs border-b-0 px-4 pt-4">
+                    <button onclick="switchJadwalTab('weekly')" id="tabWeekly" class="tab-item active">
+                        📅 Jadwal Mingguan
+                    </button>
+                    <button onclick="switchJadwalTab('classes')" id="tabClasses" class="tab-item">
+                        🏫 Daftar Kelas
+                    </button>
+                    <button onclick="switchJadwalTab('students')" id="tabStudents" class="tab-item">
+                        👨‍🎓 Daftar Siswa
+                    </button>
+                </div>
+            </div>
+            <!-- Tab Content: Jadwal Mingguan -->
+            <div id="contentWeekly" class="tab-content active">
+                <div class="card">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="font-bold text-gray-800">📅 Jadwal Mengajar Mingguan</h3>
+                        <button onclick="printSchedule()" class="btn btn-outline text-sm">
+                            🖨️ Cetak
+                        </button>
+                    </div>
+                    <div class="card-body overflow-x-auto">
+                        <table class="data-table" id="weeklyScheduleTable">
+                            <thead>
+                                <tr>
+                                    <th class="w-20">Jam</th>
+                                    <th>Senin</th>
+                                    <th>Selasa</th>
+                                    <th>Rabu</th>
+                                    <th>Kamis</th>
+                                    <th>Jumat</th>
+                                    <th>Sabtu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weeklyScheduleBody">
+                                <!-- Will be generated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Daftar Kelas -->
+            <div id="contentClasses" class="tab-content">
+                <div class="card">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="font-bold text-gray-800">🏫 Daftar Kelas yang Diajar</h3>
+                        <button onclick="openClassModal()" class="btn btn-primary text-sm">
+                            + Tambah Kelas
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="classesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Will be generated by JavaScript -->
+                            <div class="text-center py-8 text-gray-500 col-span-full">
+                                <span class="text-4xl block mb-2">🏫</span>
+                                <p>Belum ada kelas</p>
+                                <button onclick="openClassModal()" class="text-pai-green hover:underline text-sm mt-2">
+                                    + Tambah Kelas Baru
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Daftar Siswa -->
+            <div id="contentStudents" class="tab-content">
+                <div class="card">
+                    <div class="card-header flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <h3 class="font-bold text-gray-800">👨‍🎓 Daftar Siswa</h3>
+                            <select id="filterClass" onchange="filterStudentsByClass()" class="form-select w-auto">
+                                <option value="">Semua Kelas</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openImportModal()" class="btn btn-outline text-sm">
+                                📥 Import
+                            </button>
+                            <button onclick="openStudentModal()" class="btn btn-primary text-sm">
+                                + Tambah Siswa
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="data-table" id="studentsTable">
+                                <thead>
+                                    <tr>
+                                        <th class="w-12">No</th>
+                                        <th>NIS</th>
+                                        <th>Nama Siswa</th>
+                                        <th>Kelas</th>
+                                        <th>L/P</th>
+                                        <th class="w-24">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentsBody">
+                                    <tr>
+                                        <td colspan="6" class="text-center py-8 text-gray-500">
+                                            <span class="text-4xl block mb-2">👨‍🎓</span>
+                                            <p>Belum ada data siswa</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+    
+    <!-- Modal Tambah Jadwal -->
+    <div id="scheduleModal" class="modal-overlay">
+        <div class="modal-content max-w-lg">
+            <div class="modal-header">
+                <h3 id="scheduleModalTitle" class="font-bold text-lg">Tambah Jadwal</h3>
+                <button onclick="closeScheduleModal()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formSchedule" class="space-y-4">
+                    <input type="hidden" id="scheduleId">
+                    
+                    <div class="form-group">
+                        <label class="form-label">Pilih Kelas *</label>
+                        <select id="scheduleClass" class="form-select" required>
+                            <option value="">Pilih kelas</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Hari *</label>
+                        <select id="scheduleDay" class="form-select" required>
+                            <option value="">Pilih hari</option>
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                            <option value="Sabtu">Sabtu</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Jam Mulai *</label>
+                            <input type="time" id="scheduleStart" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Jam Selesai *</label>
+                            <input type="time" id="scheduleEnd" class="form-input" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Ruangan</label>
+                        <input type="text" id="scheduleRoom" class="form-input" placeholder="Contoh: Ruang Kelas 1A">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Catatan</label>
+                        <textarea id="scheduleNote" class="form-textarea" rows="2" placeholder="Catatan tambahan (opsional)"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeScheduleModal()" class="btn btn-secondary">Batal</button>
+                <button type="button" onclick="saveSchedule()" class="btn btn-primary">💾 Simpan</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Tambah Kelas -->
+    <div id="classModal" class="modal-overlay">
+        <div class="modal-content max-w-lg">
+            <div class="modal-header">
+                <h3 id="classModalTitle" class="font-bold text-lg">Tambah Kelas</h3>
+                <button onclick="closeClassModal()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formClass" class="space-y-4">
+                    <input type="hidden" id="classId">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Tingkat Kelas *</label>
+                            <select id="classLevel" class="form-select" required onchange="updateFase()">
+                                <option value="">Pilih tingkat</option>
+                                <option value="1">Kelas 1</option>
+                                <option value="2">Kelas 2</option>
+                                <option value="3">Kelas 3</option>
+                                <option value="4">Kelas 4</option>
+                                <option value="5">Kelas 5</option>
+                                <option value="6">Kelas 6</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rombel *</label>
+                            <input type="text" id="classRombel" class="form-input" placeholder="A / B / C" required maxlength="5">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap Kelas</label>
+                        <input type="text" id="className" class="form-input" placeholder="Otomatis terisi" readonly>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Fase</label>
+                            <input type="text" id="classFase" class="form-input" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Jumlah Siswa</label>
+                            <input type="number" id="classStudentCount" class="form-input" placeholder="0" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Wali Kelas</label>
+                        <input type="text" id="classWali" class="form-input" placeholder="Nama wali kelas">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeClassModal()" class="btn btn-secondary">Batal</button>
+                <button type="button" onclick="saveClass()" class="btn btn-primary">💾 Simpan</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Tambah Siswa -->
+    <div id="studentModal" class="modal-overlay">
+        <div class="modal-content max-w-lg">
+            <div class="modal-header">
+                <h3 id="studentModalTitle" class="font-bold text-lg">Tambah Siswa</h3>
+                <button onclick="closeStudentModal()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formStudent" class="space-y-4">
+                    <input type="hidden" id="studentId">
+                    
+                    <div class="form-group">
+                        <label class="form-label">NIS *</label>
+                        <input type="text" id="studentNis" class="form-input" placeholder="Nomor Induk Siswa" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap *</label>
+                        <input type="text" id="studentName" class="form-input" placeholder="Nama lengkap siswa" required>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">Kelas *</label>
+                            <select id="studentClass" class="form-select" required>
+                                <option value="">Pilih kelas</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Jenis Kelamin *</label>
+                            <select id="studentGender" class="form-select" required>
+                                <option value="">Pilih</option>
+                                <option value="L">Laki-laki</option>
+                                <option value="P">Perempuan</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tempat, Tanggal Lahir</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="studentBirthPlace" class="form-input" placeholder="Tempat lahir">
+                            <input type="date" id="studentBirthDate" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nama Orang Tua/Wali</label>
+                        <input type="text" id="studentParent" class="form-input" placeholder="Nama orang tua atau wali">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeStudentModal()" class="btn btn-secondary">Batal</button>
+                <button type="button" onclick="saveStudent()" class="btn btn-primary">💾 Simpan</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Import Siswa -->
+    <div id="importModal" class="modal-overlay">
+        <div class="modal-content max-w-lg">
+            <div class="modal-header">
+                <h3 class="font-bold text-lg">Import Data Siswa</h3>
+                <button onclick="closeImportModal()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="space-y-4">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-blue-800 text-sm">
+                            <strong>ℹ️ Petunjuk:</strong><br>
+                            1. Download template Excel/CSV<br>
+                            2. Isi data siswa sesuai format<br>
+                            3. Upload file yang sudah diisi
+                        </p>
+                    </div>
+                    
+                    <button onclick="downloadTemplate()" class="btn btn-outline w-full">
+                        📥 Download Template Excel
+                    </button>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Pilih Kelas Tujuan *</label>
+                        <select id="importClass" class="form-select">
+                            <option value="">Pilih kelas</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Upload File *</label>
+                        <input type="file" id="importFile" accept=".csv,.xlsx,.xls" class="form-input">
+                    </div>
+                    
+                    <div id="importPreview" class="hidden">
+                        <h4 class="font-medium mb-2">Preview Data:</h4>
+                        <div class="max-h-40 overflow-y-auto border rounded-lg p-2 text-sm" id="importPreviewContent">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeImportModal()" class="btn btn-secondary">Batal</button>
+                <button type="button" onclick="processImport()" class="btn btn-primary">📥 Import</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 transform translate-x-full transition-transform duration-300 z-50">
+        <div id="toastContent" class="px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+            <span id="toastIcon">✓</span>
+            <span id="toastMessage">Pesan</span>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/curriculum-data.js"></script>
+    <script src="js/jadwal.js"></script>
+</body>
+</html>

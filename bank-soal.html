@@ -3,1279 +3,437 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bank Soal - Admin PAI Satu Pintu</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Bank Soal - Admin PAI Super App</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- html2pdf -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <!-- Konfigurasi Tailwind -->
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Font Arabic -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'pai-hijau': {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        }
+                        'pai-green': '#1B5E20',
+                        'pai-gold': '#F9A825',
+                        'pai-light': '#E8F5E9',
                     }
                 }
             }
         }
     </script>
-    
     <style>
-        .sidebar-link { transition: all 0.3s ease; }
-        .sidebar-link:hover { transform: translateX(5px); }
-        
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #16a34a;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+        .arabic-text {
+            font-family: 'Amiri', 'Traditional Arabic', serif;
+            direction: rtl;
+            text-align: right;
+            font-size: 1.5rem;
+            line-height: 2.5;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in { animation: fadeIn 0.5s ease-out; }
-        
-        /* Soal card */
-        .soal-card {
-            transition: all 0.2s ease;
-        }
-        .soal-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-        
-        /* Badge tingkat */
-        .badge-mudah { background-color: #dcfce7; color: #166534; }
-        .badge-sedang { background-color: #fef3c7; color: #92400e; }
-        .badge-sulit { background-color: #fee2e2; color: #991b1b; }
-        
-        /* Badge elemen */
-        .badge-quran { background-color: #dbeafe; color: #1e40af; }
-        .badge-akidah { background-color: #dcfce7; color: #166534; }
-        .badge-akhlak { background-color: #f3e8ff; color: #7c3aed; }
-        .badge-fikih { background-color: #ffedd5; color: #c2410c; }
-        .badge-spi { background-color: #fee2e2; color: #b91c1c; }
-        
-        /* Print styles */
-        @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
-            .no-print { display: none !important; }
-            @page { size: A4; margin: 2cm; }
+        .arabic-input {
+            font-family: 'Amiri', 'Traditional Arabic', serif;
+            direction: rtl;
+            text-align: right;
+            font-size: 1.25rem;
         }
     </style>
 </head>
-
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100">
     
-    <div class="flex min-h-screen">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+        <div class="p-5 border-b border-green-700">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                    <span class="text-2xl">🕌</span>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg">PAI Super App</h1>
+                    <p class="text-green-300 text-xs">Admin Dashboard</p>
+                </div>
+            </div>
+        </div>
         
-        <!-- ================================================
-             SIDEBAR
-             ================================================ -->
-        <aside class="w-64 bg-pai-hijau-800 text-white fixed h-full z-50 no-print">
-            <div class="p-6 border-b border-pai-hijau-700">
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-                        <i class="fas fa-mosque text-pai-hijau-700 text-2xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-lg leading-tight">Admin PAI</h1>
-                        <p class="text-pai-hijau-300 text-xs">Satu Pintu</p>
-                    </div>
+        <nav class="py-4">
+            <div class="px-4 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Menu Utama</span>
+            </div>
+            
+            <a href="dashboard.html" class="sidebar-menu-item">
+                <span class="menu-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="profil.html" class="sidebar-menu-item">
+                <span class="menu-icon">👤</span>
+                <span>Profil</span>
+            </a>
+            
+            <a href="kalender.html" class="sidebar-menu-item">
+                <span class="menu-icon">📅</span>
+                <span>Kalender Akademik</span>
+            </a>
+            
+            <a href="jadwal.html" class="sidebar-menu-item">
+                <span class="menu-icon">🕐</span>
+                <span>Jadwal Mengajar</span>
+            </a>
+            
+            <div class="px-4 mt-6 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Akademik</span>
+            </div>
+            
+            <a href="absensi.html" class="sidebar-menu-item">
+                <span class="menu-icon">✅</span>
+                <span>Absensi Siswa</span>
+            </a>
+            
+            <a href="nilai.html" class="sidebar-menu-item">
+                <span class="menu-icon">📝</span>
+                <span>Daftar Nilai</span>
+            </a>
+            
+            <a href="jurnal.html" class="sidebar-menu-item">
+                <span class="menu-icon">📖</span>
+                <span>Jurnal Pembelajaran</span>
+            </a>
+            
+            <a href="bank-soal.html" class="sidebar-menu-item active">
+                <span class="menu-icon">❓</span>
+                <span>Bank Soal</span>
+            </a>
+            
+            <div class="px-4 mt-6 mb-2">
+                <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Generator</span>
+            </div>
+            
+            <a href="generator.html" class="sidebar-menu-item">
+                <span class="menu-icon">⚡</span>
+                <span>Generator Dokumen</span>
+            </a>
+        </nav>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-green-700">
+            <div class="flex items-center gap-3">
+                <div id="sidebarAvatar" class="w-10 h-10 bg-pai-gold rounded-full flex items-center justify-center text-lg font-bold">G</div>
+                <div class="flex-1 min-w-0">
+                    <p id="sidebarName" class="text-white font-medium truncate">Loading...</p>
+                    <p id="sidebarEmail" class="text-green-300 text-xs truncate">loading@email.com</p>
+                </div>
+                <button onclick="logout()" class="text-green-300 hover:text-white transition-colors" title="Logout">🚪</button>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        
+        <!-- HEADER -->
+        <header class="header px-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg">
+                    <span class="text-xl">☰</span>
+                </button>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Bank Soal</h1>
+                    <p class="text-sm text-gray-500">Kelola soal-soal PAI (support teks Arab/RTL)</p>
                 </div>
             </div>
             
-            <nav class="p-4">
-                <p class="text-pai-hijau-400 text-xs uppercase tracking-wider mb-4 px-3">Menu Utama</p>
-                <ul class="space-y-2">
-                    <li><a href="dashboard.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-home w-5"></i><span class="ml-3">Dashboard</span></a></li>
-                    <li><a href="profil.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-user w-5"></i><span class="ml-3">Profil Guru</span></a></li>
-                    <li><a href="kalender.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-calendar-alt w-5"></i><span class="ml-3">Kalender Pendidikan</span></a></li>
-                    <li><a href="perencanaan.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-tasks w-5"></i><span class="ml-3">Perencanaan</span></a></li>
-                    <li><a href="modul-ajar.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-book-open w-5"></i><span class="ml-3">Modul Ajar</span></a></li>
-                    <li><a href="absensi.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-clipboard-check w-5"></i><span class="ml-3">Absensi Siswa</span></a></li>
-                    <li><a href="nilai.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-chart-bar w-5"></i><span class="ml-3">Daftar Nilai</span></a></li>
-                    <!-- Aktif -->
-                    <li><a href="bank-soal.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg bg-pai-hijau-700 text-white"><i class="fas fa-question-circle w-5"></i><span class="ml-3">Bank Soal</span></a></li>
-                    <li><a href="jurnal.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-journal-whills w-5"></i><span class="ml-3">Jurnal Mengajar</span></a></li>
-                </ul>
-                
-                <p class="text-pai-hijau-400 text-xs uppercase tracking-wider mb-4 px-3 mt-8">Dokumen</p>
-                <ul class="space-y-2">
-                    <li><a href="cetak.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg hover:bg-pai-hijau-700 text-pai-hijau-100"><i class="fas fa-print w-5"></i><span class="ml-3">Cetak Dokumen</span></a></li>
-                </ul>
-            </nav>
+            <div class="flex gap-2">
+                <button onclick="exportSoal()" class="btn btn-outline">
+                    📥 Export
+                </button>
+                <button onclick="openSoalModal()" class="btn btn-primary">
+                    + Tambah Soal
+                </button>
+            </div>
+        </header>
+        
+        <!-- CONTENT -->
+        <div class="p-6">
             
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-pai-hijau-700">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-pai-hijau-600 rounded-full flex items-center justify-center"><i class="fas fa-user"></i></div>
-                    <div class="flex-1">
-                        <p id="nama-guru-sidebar" class="text-sm font-medium truncate">Memuat...</p>
-                        <p class="text-pai-hijau-400 text-xs">Guru PAI</p>
-                    </div>
-                    <button onclick="logoutUser()" class="text-pai-hijau-400 hover:text-white"><i class="fas fa-sign-out-alt"></i></button>
+            <!-- Statistics -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+                    <div class="text-3xl font-bold text-pai-green" id="statTotal">0</div>
+                    <div class="text-sm text-gray-600">Total Soal</div>
+                </div>
+                <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+                    <div class="text-3xl font-bold text-blue-600" id="statPG">0</div>
+                    <div class="text-sm text-gray-600">Pilihan Ganda</div>
+                </div>
+                <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+                    <div class="text-3xl font-bold text-yellow-600" id="statEssay">0</div>
+                    <div class="text-sm text-gray-600">Essay</div>
+                </div>
+                <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+                    <div class="text-3xl font-bold text-purple-600" id="statIsiSingkat">0</div>
+                    <div class="text-sm text-gray-600">Isian Singkat</div>
+                </div>
+                <div class="bg-white rounded-xl p-4 text-center shadow-sm">
+                    <div class="text-3xl font-bold text-green-600" id="statPraktik">0</div>
+                    <div class="text-sm text-gray-600">Praktik/Hafalan</div>
                 </div>
             </div>
-        </aside>
-        
-        <!-- ================================================
-             KONTEN UTAMA
-             ================================================ -->
-        <main class="flex-1 ml-64">
             
-            <!-- Header -->
-            <header class="bg-white shadow-sm border-b border-gray-200 px-8 py-4 sticky top-0 z-40 no-print">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Bank Soal PAI</h2>
-                        <p class="text-gray-500 text-sm">Kelola kumpulan soal per elemen dan tingkat kesulitan</p>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span id="badge-total-soal" class="px-4 py-2 bg-pai-hijau-100 text-pai-hijau-700 rounded-lg font-medium">
-                            <i class="fas fa-database mr-2"></i>0 Soal
-                        </span>
-                        <button onclick="showTambahSoalModal()" class="px-4 py-2 bg-pai-hijau-600 text-white rounded-lg hover:bg-pai-hijau-700">
-                            <i class="fas fa-plus mr-2"></i>Tambah Soal
-                        </button>
-                    </div>
-                </div>
-            </header>
-            
-            <!-- Area Konten -->
-            <div class="p-8 no-print">
-                
-                <!-- ================================================
-                     FILTER & SEARCH
-                     ================================================ -->
-                <div class="bg-white rounded-2xl shadow-md p-6 mb-6 fade-in">
-                    <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
-                        
-                        <!-- Search -->
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cari Soal</label>
-                            <div class="relative">
-                                <input type="text" id="search-soal" placeholder="Ketik kata kunci..."
-                                       onkeyup="filterSoal()"
-                                       class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none">
-                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                            </div>
-                        </div>
-                        
-                        <!-- Filter Kelas -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
-                            <select id="filter-kelas" onchange="filterSoal()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                                <option value="">Semua Kelas</option>
-                                <option value="1">Kelas 1</option>
-                                <option value="2">Kelas 2</option>
-                                <option value="3">Kelas 3</option>
-                                <option value="4">Kelas 4</option>
-                                <option value="5">Kelas 5</option>
-                                <option value="6">Kelas 6</option>
+            <!-- Filter Section -->
+            <div class="card mb-6">
+                <div class="card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div class="form-group mb-0">
+                            <label class="form-label">Fase/Kelas</label>
+                            <select id="filterFase" class="form-select" onchange="loadSoalList()">
+                                <option value="">Semua Fase</option>
+                                <option value="A">Fase A (Kelas 1-2)</option>
+                                <option value="B">Fase B (Kelas 3-4)</option>
+                                <option value="C">Fase C (Kelas 5-6)</option>
                             </select>
                         </div>
-                        
-                        <!-- Filter Elemen -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Elemen</label>
-                            <select id="filter-elemen" onchange="filterSoal()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
+                        <div class="form-group mb-0">
+                            <label class="form-label">Elemen</label>
+                            <select id="filterElemen" class="form-select" onchange="loadSoalList()">
                                 <option value="">Semua Elemen</option>
-                                <option value="AL_QURAN_HADIS">Al-Qur'an Hadis</option>
-                                <option value="AKIDAH">Akidah</option>
-                                <option value="AKHLAK">Akhlak</option>
-                                <option value="FIKIH">Fikih</option>
-                                <option value="SPI">Sejarah Islam</option>
+                                <option value="alquranHadis">Al-Qur'an dan Hadis</option>
+                                <option value="akidah">Akidah</option>
+                                <option value="akhlak">Akhlak</option>
+                                <option value="fikih">Fikih</option>
+                                <option value="sejarah">Sejarah Peradaban Islam</option>
                             </select>
                         </div>
-                        
-                        <!-- Filter Jenis -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Soal</label>
-                            <select id="filter-jenis" onchange="filterSoal()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
+                        <div class="form-group mb-0">
+                            <label class="form-label">Jenis Soal</label>
+                            <select id="filterJenis" class="form-select" onchange="loadSoalList()">
                                 <option value="">Semua Jenis</option>
-                                <option value="pilgan">Pilihan Ganda</option>
+                                <option value="pg">Pilihan Ganda</option>
+                                <option value="essay">Essay</option>
                                 <option value="isian">Isian Singkat</option>
-                                <option value="uraian">Uraian</option>
-                                <option value="benar-salah">Benar/Salah</option>
-                                <option value="menjodohkan">Menjodohkan</option>
+                                <option value="praktik">Praktik/Hafalan</option>
                             </select>
                         </div>
-                        
-                        <!-- Filter Tingkat -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Tingkat</label>
-                            <select id="filter-tingkat" onchange="filterSoal()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
+                        <div class="form-group mb-0">
+                            <label class="form-label">Tingkat Kesulitan</label>
+                            <select id="filterTingkat" class="form-select" onchange="loadSoalList()">
                                 <option value="">Semua Tingkat</option>
                                 <option value="mudah">Mudah (C1-C2)</option>
                                 <option value="sedang">Sedang (C3-C4)</option>
                                 <option value="sulit">Sulit (C5-C6)</option>
                             </select>
                         </div>
+                        <div class="form-group mb-0">
+                            <label class="form-label">Cari</label>
+                            <input type="text" id="filterSearch" class="form-input" placeholder="Kata kunci..." onkeyup="debounceSearch()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Soal List -->
+            <div class="card">
+                <div class="card-header flex items-center justify-between">
+                    <h3 class="font-bold text-gray-800">📚 Daftar Soal</h3>
+                    <div class="text-sm text-gray-600">
+                        Menampilkan <span id="showingCount">0</span> soal
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="soalList" class="space-y-4">
+                        <p class="text-gray-500 text-center py-8">Memuat daftar soal...</p>
+                    </div>
+                    
+                    <!-- Load More -->
+                    <div id="loadMoreContainer" class="hidden text-center mt-6">
+                        <button onclick="loadMoreSoal()" class="btn btn-outline">
+                            Muat Lebih Banyak
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+    
+    <!-- Modal Tambah/Edit Soal -->
+    <div id="soalModal" class="modal-overlay">
+        <div class="modal-content max-w-4xl">
+            <div class="modal-header">
+                <h3 id="soalModalTitle" class="font-bold text-lg">Tambah Soal Baru</h3>
+                <button onclick="closeSoalModal()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+            </div>
+            <div class="modal-body max-h-[70vh] overflow-y-auto">
+                <form id="formSoal" class="space-y-4">
+                    <input type="hidden" id="soalId">
+                    
+                    <!-- Info Soal -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-700 mb-3">📋 Informasi Soal</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="form-group mb-0">
+                                <label class="form-label">Fase *</label>
+                                <select id="soalFase" class="form-select" required>
+                                    <option value="">Pilih Fase</option>
+                                    <option value="A">Fase A (Kelas 1-2)</option>
+                                    <option value="B">Fase B (Kelas 3-4)</option>
+                                    <option value="C">Fase C (Kelas 5-6)</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Elemen *</label>
+                                <select id="soalElemen" class="form-select" required>
+                                    <option value="">Pilih Elemen</option>
+                                    <option value="alquranHadis">Al-Qur'an dan Hadis</option>
+                                    <option value="akidah">Akidah</option>
+                                    <option value="akhlak">Akhlak</option>
+                                    <option value="fikih">Fikih</option>
+                                    <option value="sejarah">Sejarah Peradaban Islam</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Jenis Soal *</label>
+                                <select id="soalJenis" class="form-select" required onchange="toggleJenisOptions()">
+                                    <option value="">Pilih Jenis</option>
+                                    <option value="pg">Pilihan Ganda</option>
+                                    <option value="essay">Essay</option>
+                                    <option value="isian">Isian Singkat</option>
+                                    <option value="praktik">Praktik/Hafalan</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Tingkat Kesulitan</label>
+                                <select id="soalTingkat" class="form-select">
+                                    <option value="mudah">Mudah (C1-C2)</option>
+                                    <option value="sedang">Sedang (C3-C4)</option>
+                                    <option value="sulit">Sulit (C5-C6)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Konten Soal -->
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-700 mb-3">✏️ Konten Soal</h4>
                         
+                        <!-- Toggle Arab -->
+                        <div class="flex items-center gap-2 mb-3">
+                            <input type="checkbox" id="hasArabic" class="w-4 h-4" onchange="toggleArabicInput()">
+                            <label for="hasArabic" class="text-sm text-gray-600">Soal mengandung teks Arab</label>
+                        </div>
+                        
+                        <!-- Teks Arab (RTL) -->
+                        <div id="arabicInputContainer" class="hidden mb-4">
+                            <div class="form-group">
+                                <label class="form-label">Teks Arab (RTL)</label>
+                                <textarea id="soalArab" class="form-textarea arabic-input" rows="2" 
+                                    placeholder="اكتب النص العربي هنا..."></textarea>
+                                <p class="text-xs text-gray-500 mt-1">Untuk ayat Al-Qur'an, hadis, doa, dll</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Pertanyaan -->
+                        <div class="form-group">
+                            <label class="form-label">Pertanyaan *</label>
+                            <textarea id="soalPertanyaan" class="form-textarea" rows="3" 
+                                placeholder="Tuliskan pertanyaan di sini..." required></textarea>
+                        </div>
+                        
+                        <!-- Pilihan Ganda Options -->
+                        <div id="pgOptions" class="hidden">
+                            <label class="form-label">Pilihan Jawaban</label>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <input type="radio" name="jawabanBenar" value="A" class="w-4 h-4">
+                                    <span class="font-bold w-6">A.</span>
+                                    <input type="text" id="opsiA" class="form-input flex-1" placeholder="Pilihan A">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="radio" name="jawabanBenar" value="B" class="w-4 h-4">
+                                    <span class="font-bold w-6">B.</span>
+                                    <input type="text" id="opsiB" class="form-input flex-1" placeholder="Pilihan B">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="radio" name="jawabanBenar" value="C" class="w-4 h-4">
+                                    <span class="font-bold w-6">C.</span>
+                                    <input type="text" id="opsiC" class="form-input flex-1" placeholder="Pilihan C">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="radio" name="jawabanBenar" value="D" class="w-4 h-4">
+                                    <span class="font-bold w-6">D.</span>
+                                    <input type="text" id="opsiD" class="form-input flex-1" placeholder="Pilihan D">
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Pilih radio button untuk menandai jawaban yang benar</p>
+                        </div>
+                        
+                        <!-- Kunci Jawaban (Essay/Isian) -->
+                        <div id="kunciJawabanContainer">
+                            <div class="form-group">
+                                <label class="form-label">Kunci Jawaban / Rubrik Penilaian</label>
+                                <textarea id="soalKunci" class="form-textarea" rows="3" 
+                                    placeholder="Kunci jawaban atau rubrik penilaian..."></textarea>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- ================================================
-                     STATISTIK SOAL
-                     ================================================ -->
-                <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
-                    <div class="bg-white rounded-xl shadow-md p-4 text-center">
-                        <i class="fas fa-database text-gray-400 text-2xl mb-2"></i>
-                        <p id="stat-total" class="text-2xl font-bold text-gray-700">0</p>
-                        <p class="text-xs text-gray-500">Total Soal</p>
+                    
+                    <!-- Info Tambahan -->
+                    <div class="bg-yellow-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-700 mb-3">📌 Informasi Tambahan</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group mb-0">
+                                <label class="form-label">Topik/Materi</label>
+                                <input type="text" id="soalTopik" class="form-input" placeholder="Contoh: Surah Al-Fatihah">
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label">Skor/Bobot</label>
+                                <input type="number" id="soalSkor" class="form-input" value="10" min="1" max="100">
+                            </div>
+                        </div>
+                        <div class="form-group mt-4 mb-0">
+                            <label class="form-label">Pembahasan (Opsional)</label>
+                            <textarea id="soalPembahasan" class="form-textarea" rows="2" 
+                                placeholder="Pembahasan atau penjelasan jawaban..."></textarea>
+                        </div>
                     </div>
-                    <div class="bg-blue-50 rounded-xl shadow-md p-4 text-center">
-                        <i class="fas fa-list-ol text-blue-500 text-2xl mb-2"></i>
-                        <p id="stat-pilgan" class="text-2xl font-bold text-blue-700">0</p>
-                        <p class="text-xs text-blue-600">Pilihan Ganda</p>
-                    </div>
-                    <div class="bg-green-50 rounded-xl shadow-md p-4 text-center">
-                        <i class="fas fa-pen text-green-500 text-2xl mb-2"></i>
-                        <p id="stat-isian" class="text-2xl font-bold text-green-700">0</p>
-                        <p class="text-xs text-green-600">Isian</p>
-                    </div>
-                    <div class="bg-purple-50 rounded-xl shadow-md p-4 text-center">
-                        <i class="fas fa-align-left text-purple-500 text-2xl mb-2"></i>
-                        <p id="stat-uraian" class="text-2xl font-bold text-purple-700">0</p>
-                        <p class="text-xs text-purple-600">Uraian</p>
-                    </div>
-                    <div class="bg-yellow-50 rounded-xl shadow-md p-4 text-center">
-                        <i class="fas fa-check-circle text-yellow-500 text-2xl mb-2"></i>
-                        <p id="stat-bs" class="text-2xl font-bold text-yellow-700">0</p>
-                        <p class="text-xs text-yellow-600">Benar/Salah</p>
-                    </div>
-                    <div class="bg-red-50 rounded-xl shadow-md p-4 text-center">
-                        <i class="fas fa-arrows-alt-h text-red-500 text-2xl mb-2"></i>
-                        <p id="stat-jodoh" class="text-2xl font-bold text-red-700">0</p>
-                        <p class="text-xs text-red-600">Menjodohkan</p>
-                    </div>
-                </div>
-                
-                <!-- ================================================
-                     TOMBOL AKSI
-                     ================================================ -->
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center space-x-3">
-                        <button onclick="selectAllSoal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
-                            <i class="fas fa-check-square mr-2"></i>Pilih Semua
-                        </button>
-                        <button onclick="generateNaskahSoal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            <i class="fas fa-file-alt mr-2"></i>Buat Naskah Soal
-                        </button>
-                        <button onclick="exportBankSoal()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                            <i class="fas fa-file-pdf mr-2"></i>Export PDF
-                        </button>
-                    </div>
-                    <div class="text-sm text-gray-500">
-                        <span id="count-selected">0</span> soal dipilih
-                    </div>
-                </div>
-                
-                <!-- ================================================
-                     DAFTAR SOAL
-                     ================================================ -->
-                <div id="daftar-soal" class="space-y-4">
-                    <div class="text-center py-12 text-gray-400">
-                        <i class="fas fa-question-circle text-5xl mb-4"></i>
-                        <p>Belum ada soal</p>
-                        <p class="text-sm">Klik "Tambah Soal" untuk menambahkan soal baru</p>
-                    </div>
-                </div>
-                
+                </form>
             </div>
-            
-            <!-- Footer -->
-            <footer class="bg-white border-t border-gray-200 px-8 py-4 text-center text-gray-500 text-sm no-print">
-                <p>© 2025 Admin PAI Satu Pintu</p>
-            </footer>
-            
-        </main>
-    </div>
-    
-    <!-- ================================================
-         MODAL: TAMBAH/EDIT SOAL
-         ================================================ -->
-    <div id="modal-soal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
-                <div class="flex items-center justify-between">
-                    <h3 id="modal-soal-title" class="text-lg font-bold text-gray-800">Tambah Soal Baru</h3>
-                    <button onclick="closeModalSoal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <form id="form-soal" class="p-6 space-y-4">
-                <input type="hidden" id="soal-id">
-                
-                <!-- Baris 1: Kelas, Elemen, Jenis -->
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kelas <span class="text-red-500">*</span></label>
-                        <select id="soal-kelas" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                            <option value="">Pilih</option>
-                            <option value="1">Kelas 1</option>
-                            <option value="2">Kelas 2</option>
-                            <option value="3">Kelas 3</option>
-                            <option value="4">Kelas 4</option>
-                            <option value="5">Kelas 5</option>
-                            <option value="6">Kelas 6</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Elemen <span class="text-red-500">*</span></label>
-                        <select id="soal-elemen" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                            <option value="">Pilih</option>
-                            <option value="AL_QURAN_HADIS">Al-Qur'an Hadis</option>
-                            <option value="AKIDAH">Akidah</option>
-                            <option value="AKHLAK">Akhlak</option>
-                            <option value="FIKIH">Fikih</option>
-                            <option value="SPI">Sejarah Islam</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Soal <span class="text-red-500">*</span></label>
-                        <select id="soal-jenis" required onchange="onJenisSoalChange()" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                            <option value="">Pilih</option>
-                            <option value="pilgan">Pilihan Ganda</option>
-                            <option value="isian">Isian Singkat</option>
-                            <option value="uraian">Uraian</option>
-                            <option value="benar-salah">Benar/Salah</option>
-                            <option value="menjodohkan">Menjodohkan</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <!-- Baris 2: Tingkat, Bobot -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tingkat Kesulitan <span class="text-red-500">*</span></label>
-                        <select id="soal-tingkat" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none bg-white">
-                            <option value="">Pilih</option>
-                            <option value="mudah">Mudah (C1-C2: Mengingat, Memahami)</option>
-                            <option value="sedang">Sedang (C3-C4: Menerapkan, Menganalisis)</option>
-                            <option value="sulit">Sulit (C5-C6: Mengevaluasi, Mencipta)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Bobot Nilai</label>
-                        <input type="number" id="soal-bobot" value="1" min="1" max="10"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none">
-                    </div>
-                </div>
-                
-                <!-- Pertanyaan -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Pertanyaan/Soal <span class="text-red-500">*</span></label>
-                    <textarea id="soal-pertanyaan" rows="4" required placeholder="Tulis pertanyaan di sini..."
-                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none"></textarea>
-                </div>
-                
-                <!-- Pilihan Ganda (hidden by default) -->
-                <div id="container-pilgan" class="hidden space-y-3">
-                    <label class="block text-sm font-medium text-gray-700">Pilihan Jawaban</label>
-                    <div class="flex items-center space-x-3">
-                        <span class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center font-bold">A</span>
-                        <input type="text" id="pilihan-a" placeholder="Pilihan A" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
-                        <label class="flex items-center"><input type="radio" name="jawaban-benar" value="A" class="mr-2"> Benar</label>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center font-bold">B</span>
-                        <input type="text" id="pilihan-b" placeholder="Pilihan B" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
-                        <label class="flex items-center"><input type="radio" name="jawaban-benar" value="B" class="mr-2"> Benar</label>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center font-bold">C</span>
-                        <input type="text" id="pilihan-c" placeholder="Pilihan C" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
-                        <label class="flex items-center"><input type="radio" name="jawaban-benar" value="C" class="mr-2"> Benar</label>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center font-bold">D</span>
-                        <input type="text" id="pilihan-d" placeholder="Pilihan D" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
-                        <label class="flex items-center"><input type="radio" name="jawaban-benar" value="D" class="mr-2"> Benar</label>
-                    </div>
-                </div>
-                
-                <!-- Benar/Salah (hidden by default) -->
-                <div id="container-bs" class="hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Jawaban Benar</label>
-                    <div class="flex space-x-4">
-                        <label class="flex items-center p-4 border rounded-xl cursor-pointer hover:bg-green-50">
-                            <input type="radio" name="jawaban-bs" value="benar" class="mr-3">
-                            <span class="font-medium text-green-600">BENAR</span>
-                        </label>
-                        <label class="flex items-center p-4 border rounded-xl cursor-pointer hover:bg-red-50">
-                            <input type="radio" name="jawaban-bs" value="salah" class="mr-3">
-                            <span class="font-medium text-red-600">SALAH</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <!-- Kunci Jawaban (untuk isian & uraian) -->
-                <div id="container-kunci" class="hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Kunci Jawaban</label>
-                    <textarea id="soal-kunci" rows="3" placeholder="Tulis kunci jawaban..."
-                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none"></textarea>
-                </div>
-                
-                <!-- Pembahasan -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Pembahasan (Opsional)</label>
-                    <textarea id="soal-pembahasan" rows="3" placeholder="Pembahasan atau penjelasan jawaban..."
-                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pai-hijau-500 outline-none"></textarea>
-                </div>
-                
-                <!-- Tombol -->
-                <div class="flex justify-end space-x-3 pt-4 border-t">
-                    <button type="button" onclick="closeModalSoal()" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-6 py-3 bg-pai-hijau-600 text-white rounded-xl hover:bg-pai-hijau-700">
-                        <i class="fas fa-save mr-2"></i>Simpan Soal
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <!-- ================================================
-         MODAL: GENERATE NASKAH SOAL
-         ================================================ -->
-    <div id="modal-naskah" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-gray-800">Generate Naskah Soal</h3>
-                    <button onclick="closeModalNaskah()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="p-6">
-                <!-- Pengaturan -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
-                        <select id="naskah-kelas" class="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none bg-white">
-                            <option value="1">Kelas 1</option>
-                            <option value="2">Kelas 2</option>
-                            <option value="3">Kelas 3</option>
-                            <option value="4">Kelas 4</option>
-                            <option value="5">Kelas 5</option>
-                            <option value="6">Kelas 6</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Ujian</label>
-                        <select id="naskah-jenis" class="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none bg-white">
-                            <option value="PH">Penilaian Harian</option>
-                            <option value="PTS">PTS</option>
-                            <option value="PAS">PAS/PAT</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Soal PG</label>
-                        <input type="number" id="naskah-pg" value="10" min="0" max="50" class="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Soal Uraian</label>
-                        <input type="number" id="naskah-uraian" value="5" min="0" max="20" class="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none">
-                    </div>
-                </div>
-                
-                <!-- Preview Naskah -->
-                <div id="preview-naskah" class="bg-gray-50 rounded-xl p-6 min-h-[300px]">
-                    <p class="text-gray-400 text-center">Klik "Generate" untuk membuat naskah soal</p>
-                </div>
-                
-                <!-- Tombol -->
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button onclick="generateNaskah()" class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700">
-                        <i class="fas fa-cogs mr-2"></i>Generate
-                    </button>
-                    <button onclick="cetakNaskah()" class="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700">
-                        <i class="fas fa-print mr-2"></i>Cetak
-                    </button>
-                    <button onclick="exportNaskahPDF()" class="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700">
-                        <i class="fas fa-file-pdf mr-2"></i>PDF
-                    </button>
-                </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeSoalModal()" class="btn btn-secondary">Batal</button>
+                <button type="button" onclick="saveSoal()" class="btn btn-primary">💾 Simpan Soal</button>
             </div>
         </div>
     </div>
     
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-8 rounded-2xl text-center">
-            <div class="spinner mx-auto mb-4"></div>
-            <p id="loading-text" class="text-gray-600">Memproses...</p>
+    <!-- Modal Detail Soal -->
+    <div id="soalDetailModal" class="modal-overlay">
+        <div class="modal-content max-w-3xl">
+            <div class="modal-header">
+                <h3 class="font-bold text-lg">📋 Detail Soal</h3>
+                <button onclick="closeSoalDetailModal()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+            </div>
+            <div class="modal-body" id="soalDetailContent">
+                <!-- Will be filled by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="deleteSoal()" class="btn btn-danger">🗑️ Hapus</button>
+                <button type="button" onclick="editSoal()" class="btn btn-warning">✏️ Edit</button>
+                <button type="button" onclick="duplicateSoal()" class="btn btn-outline">📋 Duplikat</button>
+                <button type="button" onclick="closeSoalDetailModal()" class="btn btn-secondary">Tutup</button>
+            </div>
         </div>
     </div>
     
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 transform translate-x-full transition-transform duration-300 z-50">
+        <div id="toastContent" class="px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+            <span id="toastIcon">✓</span>
+            <span id="toastMessage">Pesan</span>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/database.js"></script>
-    
-    <!-- ================================================
-         SCRIPT BANK SOAL
-         ================================================ -->
-    <script>
-        /**
-         * =====================================================
-         * VARIABEL GLOBAL
-         * =====================================================
-         */
-        let profilGuru = null;
-        let daftarSoal = [];
-        let filteredSoal = [];
-        let selectedSoalIds = new Set();
-        
-        const NAMA_ELEMEN = {
-            'AL_QURAN_HADIS': "Al-Qur'an Hadis",
-            'AKIDAH': 'Akidah',
-            'AKHLAK': 'Akhlak',
-            'FIKIH': 'Fikih',
-            'SPI': 'Sejarah Islam'
-        };
-        
-        const BADGE_ELEMEN = {
-            'AL_QURAN_HADIS': 'badge-quran',
-            'AKIDAH': 'badge-akidah',
-            'AKHLAK': 'badge-akhlak',
-            'FIKIH': 'badge-fikih',
-            'SPI': 'badge-spi'
-        };
-        
-        /**
-         * =====================================================
-         * INISIALISASI
-         * =====================================================
-         */
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuthState();
-            document.getElementById('form-soal').addEventListener('submit', handleSimpanSoal);
-        });
-        
-        function checkAuthState() {
-            showLoading('Memuat data...');
-            
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    await loadInitialData(user.uid);
-                    hideLoading();
-                } else {
-                    window.location.href = 'index.html';
-                }
-            });
-        }
-        
-        async function loadInitialData(userId) {
-            try {
-                const profilDoc = await db.collection('users').doc(userId).get();
-                if (profilDoc.exists) {
-                    profilGuru = profilDoc.data();
-                    document.getElementById('nama-guru-sidebar').textContent = profilGuru.namaLengkap || 'Guru PAI';
-                }
-                
-                // Load soal
-                await loadBankSoal(userId);
-                
-            } catch (error) {
-                console.error("❌ Error:", error);
-            }
-        }
-        
-        /**
-         * =====================================================
-         * LOAD BANK SOAL
-         * =====================================================
-         */
-        async function loadBankSoal(userId) {
-            try {
-                const snapshot = await db.collection('users').doc(userId || auth.currentUser.uid)
-                    .collection('bank_soal')
-                    .orderBy('createdAt', 'desc')
-                    .get();
-                
-                daftarSoal = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                filteredSoal = [...daftarSoal];
-                
-                renderDaftarSoal();
-                updateStatistik();
-                
-            } catch (error) {
-                console.error("❌ Error:", error);
-            }
-        }
-        
-        /**
-         * =====================================================
-         * RENDER DAFTAR SOAL
-         * =====================================================
-         */
-        function renderDaftarSoal() {
-            const container = document.getElementById('daftar-soal');
-            
-            if (filteredSoal.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12 text-gray-400">
-                        <i class="fas fa-question-circle text-5xl mb-4"></i>
-                        <p>Tidak ada soal ditemukan</p>
-                        <p class="text-sm">Coba ubah filter atau tambah soal baru</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = filteredSoal.map((soal, idx) => {
-                const isSelected = selectedSoalIds.has(soal.id);
-                
-                return `
-                    <div class="soal-card bg-white rounded-xl shadow-md p-5 ${isSelected ? 'ring-2 ring-pai-hijau-500' : ''}" data-soal-id="${soal.id}">
-                        <div class="flex items-start">
-                            <!-- Checkbox -->
-                            <div class="mr-4">
-                                <input type="checkbox" 
-                                       ${isSelected ? 'checked' : ''}
-                                       onchange="toggleSelectSoal('${soal.id}')"
-                                       class="w-5 h-5 rounded text-pai-hijau-600 focus:ring-pai-hijau-500">
-                            </div>
-                            
-                            <!-- Nomor -->
-                            <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center font-bold text-gray-600 mr-4 flex-shrink-0">
-                                ${idx + 1}
-                            </div>
-                            
-                            <!-- Konten -->
-                            <div class="flex-1">
-                                <!-- Badges -->
-                                <div class="flex flex-wrap items-center gap-2 mb-3">
-                                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                        Kelas ${soal.kelas}
-                                    </span>
-                                    <span class="px-2 py-1 rounded-full text-xs font-medium ${BADGE_ELEMEN[soal.elemen] || 'bg-gray-100'}">
-                                        ${NAMA_ELEMEN[soal.elemen] || soal.elemen}
-                                    </span>
-                                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                                        ${getJenisLabel(soal.jenis)}
-                                    </span>
-                                    <span class="px-2 py-1 rounded-full text-xs font-medium badge-${soal.tingkat}">
-                                        ${soal.tingkat.charAt(0).toUpperCase() + soal.tingkat.slice(1)}
-                                    </span>
-                                </div>
-                                
-                                <!-- Pertanyaan -->
-                                <p class="text-gray-800 mb-3">${soal.pertanyaan}</p>
-                                
-                                <!-- Pilihan (jika pilgan) -->
-                                ${soal.jenis === 'pilgan' ? `
-                                    <div class="grid grid-cols-2 gap-2 mb-3 text-sm">
-                                        <div class="${soal.jawabanBenar === 'A' ? 'text-green-600 font-medium' : 'text-gray-600'}">
-                                            A. ${soal.pilihanA || '-'}
-                                        </div>
-                                        <div class="${soal.jawabanBenar === 'B' ? 'text-green-600 font-medium' : 'text-gray-600'}">
-                                            B. ${soal.pilihanB || '-'}
-                                        </div>
-                                        <div class="${soal.jawabanBenar === 'C' ? 'text-green-600 font-medium' : 'text-gray-600'}">
-                                            C. ${soal.pilihanC || '-'}
-                                        </div>
-                                        <div class="${soal.jawabanBenar === 'D' ? 'text-green-600 font-medium' : 'text-gray-600'}">
-                                            D. ${soal.pilihanD || '-'}
-                                        </div>
-                                    </div>
-                                ` : ''}
-                                
-                                <!-- Kunci Jawaban -->
-                                ${soal.kunciJawaban ? `
-                                    <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
-                                        <span class="font-medium text-green-700">Kunci:</span> ${soal.kunciJawaban}
-                                    </div>
-                                ` : ''}
-                            </div>
-                            
-                            <!-- Aksi -->
-                            <div class="flex flex-col space-y-2 ml-4">
-                                <button onclick="editSoal('${soal.id}')" class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="duplikatSoal('${soal.id}')" class="p-2 text-green-600 hover:bg-green-100 rounded-lg" title="Duplikat">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                                <button onclick="hapusSoal('${soal.id}')" class="p-2 text-red-600 hover:bg-red-100 rounded-lg" title="Hapus">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            // Update badge
-            document.getElementById('badge-total-soal').innerHTML = `<i class="fas fa-database mr-2"></i>${daftarSoal.length} Soal`;
-        }
-        
-        function getJenisLabel(jenis) {
-            const labels = {
-                'pilgan': 'Pilihan Ganda',
-                'isian': 'Isian Singkat',
-                'uraian': 'Uraian',
-                'benar-salah': 'Benar/Salah',
-                'menjodohkan': 'Menjodohkan'
-            };
-            return labels[jenis] || jenis;
-        }
-        
-        /**
-         * =====================================================
-         * UPDATE STATISTIK
-         * =====================================================
-         */
-        function updateStatistik() {
-            document.getElementById('stat-total').textContent = daftarSoal.length;
-            document.getElementById('stat-pilgan').textContent = daftarSoal.filter(s => s.jenis === 'pilgan').length;
-            document.getElementById('stat-isian').textContent = daftarSoal.filter(s => s.jenis === 'isian').length;
-            document.getElementById('stat-uraian').textContent = daftarSoal.filter(s => s.jenis === 'uraian').length;
-            document.getElementById('stat-bs').textContent = daftarSoal.filter(s => s.jenis === 'benar-salah').length;
-            document.getElementById('stat-jodoh').textContent = daftarSoal.filter(s => s.jenis === 'menjodohkan').length;
-        }
-        
-        /**
-         * =====================================================
-         * FILTER SOAL
-         * =====================================================
-         */
-        function filterSoal() {
-            const search = document.getElementById('search-soal').value.toLowerCase();
-            const kelas = document.getElementById('filter-kelas').value;
-            const elemen = document.getElementById('filter-elemen').value;
-            const jenis = document.getElementById('filter-jenis').value;
-            const tingkat = document.getElementById('filter-tingkat').value;
-            
-            filteredSoal = daftarSoal.filter(soal => {
-                const matchSearch = !search || soal.pertanyaan.toLowerCase().includes(search);
-                const matchKelas = !kelas || soal.kelas === kelas;
-                const matchElemen = !elemen || soal.elemen === elemen;
-                const matchJenis = !jenis || soal.jenis === jenis;
-                const matchTingkat = !tingkat || soal.tingkat === tingkat;
-                
-                return matchSearch && matchKelas && matchElemen && matchJenis && matchTingkat;
-            });
-            
-            renderDaftarSoal();
-        }
-        
-        /**
-         * =====================================================
-         * SELECT SOAL
-         * =====================================================
-         */
-        function toggleSelectSoal(soalId) {
-            if (selectedSoalIds.has(soalId)) {
-                selectedSoalIds.delete(soalId);
-            } else {
-                selectedSoalIds.add(soalId);
-            }
-            
-            document.getElementById('count-selected').textContent = selectedSoalIds.size;
-            renderDaftarSoal();
-        }
-        
-        function selectAllSoal() {
-            if (selectedSoalIds.size === filteredSoal.length) {
-                selectedSoalIds.clear();
-            } else {
-                filteredSoal.forEach(s => selectedSoalIds.add(s.id));
-            }
-            
-            document.getElementById('count-selected').textContent = selectedSoalIds.size;
-            renderDaftarSoal();
-        }
-        
-        /**
-         * =====================================================
-         * MODAL SOAL
-         * =====================================================
-         */
-        function showTambahSoalModal() {
-            document.getElementById('modal-soal-title').textContent = 'Tambah Soal Baru';
-            document.getElementById('form-soal').reset();
-            document.getElementById('soal-id').value = '';
-            
-            // Reset containers
-            document.getElementById('container-pilgan').classList.add('hidden');
-            document.getElementById('container-bs').classList.add('hidden');
-            document.getElementById('container-kunci').classList.add('hidden');
-            
-            document.getElementById('modal-soal').classList.remove('hidden');
-        }
-        
-        function closeModalSoal() {
-            document.getElementById('modal-soal').classList.add('hidden');
-        }
-        
-        function onJenisSoalChange() {
-            const jenis = document.getElementById('soal-jenis').value;
-            
-            // Reset semua container
-            document.getElementById('container-pilgan').classList.add('hidden');
-            document.getElementById('container-bs').classList.add('hidden');
-            document.getElementById('container-kunci').classList.add('hidden');
-            
-            // Tampilkan sesuai jenis
-            if (jenis === 'pilgan') {
-                document.getElementById('container-pilgan').classList.remove('hidden');
-            } else if (jenis === 'benar-salah') {
-                document.getElementById('container-bs').classList.remove('hidden');
-            } else if (jenis === 'isian' || jenis === 'uraian') {
-                document.getElementById('container-kunci').classList.remove('hidden');
-            }
-        }
-        
-        /**
-         * =====================================================
-         * SIMPAN SOAL
-         * =====================================================
-         */
-        async function handleSimpanSoal(e) {
-            e.preventDefault();
-            
-            showLoading('Menyimpan soal...');
-            
-            try {
-                const user = auth.currentUser;
-                const soalId = document.getElementById('soal-id').value;
-                const jenis = document.getElementById('soal-jenis').value;
-                
-                // Kumpulkan data
-                const dataSoal = {
-                    kelas: document.getElementById('soal-kelas').value,
-                    elemen: document.getElementById('soal-elemen').value,
-                    jenis: jenis,
-                    tingkat: document.getElementById('soal-tingkat').value,
-                    bobot: parseInt(document.getElementById('soal-bobot').value) || 1,
-                    pertanyaan: document.getElementById('soal-pertanyaan').value.trim(),
-                    pembahasan: document.getElementById('soal-pembahasan').value.trim(),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                
-                // Tambah data sesuai jenis
-                if (jenis === 'pilgan') {
-                    dataSoal.pilihanA = document.getElementById('pilihan-a').value.trim();
-                    dataSoal.pilihanB = document.getElementById('pilihan-b').value.trim();
-                    dataSoal.pilihanC = document.getElementById('pilihan-c').value.trim();
-                    dataSoal.pilihanD = document.getElementById('pilihan-d').value.trim();
-                    dataSoal.jawabanBenar = document.querySelector('input[name="jawaban-benar"]:checked')?.value || 'A';
-                    dataSoal.kunciJawaban = dataSoal.jawabanBenar;
-                } else if (jenis === 'benar-salah') {
-                    dataSoal.kunciJawaban = document.querySelector('input[name="jawaban-bs"]:checked')?.value || 'benar';
-                } else {
-                    dataSoal.kunciJawaban = document.getElementById('soal-kunci').value.trim();
-                }
-                
-                if (soalId) {
-                    // Update
-                    await db.collection('users').doc(user.uid)
-                        .collection('bank_soal')
-                        .doc(soalId)
-                        .update(dataSoal);
-                } else {
-                    // Create
-                    dataSoal.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    await db.collection('users').doc(user.uid)
-                        .collection('bank_soal')
-                        .add(dataSoal);
-                }
-                
-                closeModalSoal();
-                await loadBankSoal(user.uid);
-                
-                hideLoading();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Soal Tersimpan!',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                
-            } catch (error) {
-                console.error("❌ Error:", error);
-                hideLoading();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Menyimpan',
-                    confirmButtonColor: '#16a34a'
-                });
-            }
-        }
-        
-        /**
-         * =====================================================
-         * EDIT SOAL
-         * =====================================================
-         */
-        function editSoal(soalId) {
-            const soal = daftarSoal.find(s => s.id === soalId);
-            if (!soal) return;
-            
-            document.getElementById('modal-soal-title').textContent = 'Edit Soal';
-            document.getElementById('soal-id').value = soal.id;
-            document.getElementById('soal-kelas').value = soal.kelas;
-            document.getElementById('soal-elemen').value = soal.elemen;
-            document.getElementById('soal-jenis').value = soal.jenis;
-            document.getElementById('soal-tingkat').value = soal.tingkat;
-            document.getElementById('soal-bobot').value = soal.bobot || 1;
-            document.getElementById('soal-pertanyaan').value = soal.pertanyaan;
-            document.getElementById('soal-pembahasan').value = soal.pembahasan || '';
-            
-            // Tampilkan container sesuai jenis
-            onJenisSoalChange();
-            
-            // Isi data sesuai jenis
-            if (soal.jenis === 'pilgan') {
-                document.getElementById('pilihan-a').value = soal.pilihanA || '';
-                document.getElementById('pilihan-b').value = soal.pilihanB || '';
-                document.getElementById('pilihan-c').value = soal.pilihanC || '';
-                document.getElementById('pilihan-d').value = soal.pilihanD || '';
-                const radioBenar = document.querySelector(`input[name="jawaban-benar"][value="${soal.jawabanBenar}"]`);
-                if (radioBenar) radioBenar.checked = true;
-            } else if (soal.jenis === 'benar-salah') {
-                const radioBs = document.querySelector(`input[name="jawaban-bs"][value="${soal.kunciJawaban}"]`);
-                if (radioBs) radioBs.checked = true;
-            } else {
-                document.getElementById('soal-kunci').value = soal.kunciJawaban || '';
-            }
-            
-            document.getElementById('modal-soal').classList.remove('hidden');
-        }
-        
-        /**
-         * =====================================================
-         * DUPLIKAT SOAL
-         * =====================================================
-         */
-        async function duplikatSoal(soalId) {
-            const soal = daftarSoal.find(s => s.id === soalId);
-            if (!soal) return;
-            
-            showLoading('Menduplikat soal...');
-            
-            try {
-                const user = auth.currentUser;
-                const { id, createdAt, updatedAt, ...dataSoal } = soal;
-                
-                dataSoal.pertanyaan = '[COPY] ' + dataSoal.pertanyaan;
-                dataSoal.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                dataSoal.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
-                
-                await db.collection('users').doc(user.uid)
-                    .collection('bank_soal')
-                    .add(dataSoal);
-                
-                await loadBankSoal(user.uid);
-                
-                hideLoading();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Soal Diduplikat!',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                
-            } catch (error) {
-                console.error("❌ Error:", error);
-                hideLoading();
-            }
-        }
-        
-        /**
-         * =====================================================
-         * HAPUS SOAL
-         * =====================================================
-         */
-        async function hapusSoal(soalId) {
-            const result = await Swal.fire({
-                title: 'Hapus Soal?',
-                text: 'Soal yang dihapus tidak dapat dikembalikan.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Ya, Hapus',
-                cancelButtonText: 'Batal'
-            });
-            
-            if (result.isConfirmed) {
-                showLoading('Menghapus...');
-                
-                try {
-                    const user = auth.currentUser;
-                    await db.collection('users').doc(user.uid)
-                        .collection('bank_soal')
-                        .doc(soalId)
-                        .delete();
-                    
-                    await loadBankSoal(user.uid);
-                    
-                    hideLoading();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Terhapus!',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    
-                } catch (error) {
-                    console.error("❌ Error:", error);
-                    hideLoading();
-                }
-            }
-        }
-        
-        /**
-         * =====================================================
-         * GENERATE NASKAH SOAL
-         * =====================================================
-         */
-        function generateNaskahSoal() {
-            document.getElementById('modal-naskah').classList.remove('hidden');
-        }
-        
-        function closeModalNaskah() {
-            document.getElementById('modal-naskah').classList.add('hidden');
-        }
-        
-        function generateNaskah() {
-            const kelas = document.getElementById('naskah-kelas').value;
-            const jenisUjian = document.getElementById('naskah-jenis').value;
-            const jumlahPG = parseInt(document.getElementById('naskah-pg').value) || 0;
-            const jumlahUraian = parseInt(document.getElementById('naskah-uraian').value) || 0;
-            
-            // Filter soal berdasarkan kelas
-            const soalKelas = daftarSoal.filter(s => s.kelas === kelas);
-            const soalPG = soalKelas.filter(s => s.jenis === 'pilgan');
-            const soalUraian = soalKelas.filter(s => s.jenis === 'uraian' || s.jenis === 'isian');
-            
-            // Acak dan ambil
-            const shuffledPG = soalPG.sort(() => Math.random() - 0.5).slice(0, jumlahPG);
-            const shuffledUraian = soalUraian.sort(() => Math.random() - 0.5).slice(0, jumlahUraian);
-            
-            // Generate HTML
-            let html = `
-                <div style="font-family: 'Times New Roman', serif; font-size: 12pt;">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h2 style="margin: 0;">SOAL ${jenisUjian}</h2>
-                        <h3 style="margin: 5px 0;">PENDIDIKAN AGAMA ISLAM DAN BUDI PEKERTI</h3>
-                        <p style="margin: 0;">${profilGuru?.namaSekolah || '-'}</p>
-                        <p style="margin: 0;">Kelas ${kelas}</p>
-                    </div>
-                    
-                    <hr style="border: 1px solid #000; margin: 20px 0;">
-            `;
-            
-            // Soal Pilihan Ganda
-            if (shuffledPG.length > 0) {
-                html += `<h4>I. Pilihan Ganda</h4><p style="font-style: italic;">Pilihlah jawaban yang paling tepat!</p>`;
-                shuffledPG.forEach((soal, idx) => {
-                    html += `
-                        <p style="margin: 15px 0 5px 0;"><strong>${idx + 1}. ${soal.pertanyaan}</strong></p>
-                        <table style="margin-left: 20px;">
-                            <tr><td style="padding: 2px 10px;">A. ${soal.pilihanA || '-'}</td><td style="padding: 2px 10px;">C. ${soal.pilihanC || '-'}</td></tr>
-                            <tr><td style="padding: 2px 10px;">B. ${soal.pilihanB || '-'}</td><td style="padding: 2px 10px;">D. ${soal.pilihanD || '-'}</td></tr>
-                        </table>
-                    `;
-                });
-            }
-            
-            // Soal Uraian
-            if (shuffledUraian.length > 0) {
-                html += `<h4 style="margin-top: 30px;">II. Uraian</h4><p style="font-style: italic;">Jawablah pertanyaan berikut dengan benar!</p>`;
-                shuffledUraian.forEach((soal, idx) => {
-                    html += `<p style="margin: 15px 0 5px 0;"><strong>${idx + 1}. ${soal.pertanyaan}</strong></p>`;
-                });
-            }
-            
-            html += `</div>`;
-            
-            document.getElementById('preview-naskah').innerHTML = html;
-        }
-        
-        function cetakNaskah() {
-            const content = document.getElementById('preview-naskah').innerHTML;
-            const printWindow = window.open('', '', 'width=800,height=600');
-            printWindow.document.write(`
-                <html><head><title>Naskah Soal</title></head>
-                <body>${content}</body></html>
-            `);
-            printWindow.document.close();
-            printWindow.print();
-        }
-        
-        async function exportNaskahPDF() {
-            showLoading('Membuat PDF...');
-            
-            try {
-                const element = document.getElementById('preview-naskah');
-                
-                const opt = {
-                    margin: 15,
-                    filename: `Naskah_Soal_Kelas${document.getElementById('naskah-kelas').value}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-                
-                await html2pdf().set(opt).from(element).save();
-                
-                hideLoading();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'PDF Berhasil!',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                
-            } catch (error) {
-                console.error("❌ Error:", error);
-                hideLoading();
-            }
-        }
-        
-        async function exportBankSoal() {
-            if (filteredSoal.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Tidak Ada Soal',
-                    confirmButtonColor: '#16a34a'
-                });
-                return;
-            }
-            
-            showLoading('Membuat PDF...');
-            
-            // Generate HTML untuk semua soal
-            let html = `
-                <div style="font-family: Arial, sans-serif; font-size: 11pt; padding: 20px;">
-                    <h2 style="text-align: center;">BANK SOAL PAI</h2>
-                    <p style="text-align: center;">${profilGuru?.namaSekolah || '-'}</p>
-                    <hr style="margin: 20px 0;">
-            `;
-            
-            filteredSoal.forEach((soal, idx) => {
-                html += `
-                    <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                        <p><strong>${idx + 1}. [${NAMA_ELEMEN[soal.elemen]}] [${soal.tingkat}]</strong></p>
-                        <p>${soal.pertanyaan}</p>
-                        ${soal.jenis === 'pilgan' ? `
-                            <p style="margin-left: 20px;">A. ${soal.pilihanA}<br>B. ${soal.pilihanB}<br>C. ${soal.pilihanC}<br>D. ${soal.pilihanD}</p>
-                        ` : ''}
-                        <p style="color: green;"><strong>Jawaban:</strong> ${soal.kunciJawaban || soal.jawabanBenar || '-'}</p>
-                    </div>
-                `;
-            });
-            
-            html += `</div>`;
-            
-            // Create temporary element
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-            document.body.appendChild(tempDiv);
-            
-            try {
-                const opt = {
-                    margin: 10,
-                    filename: 'Bank_Soal_PAI.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-                
-                await html2pdf().set(opt).from(tempDiv).save();
-                
-                document.body.removeChild(tempDiv);
-                hideLoading();
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'PDF Berhasil!',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                
-            } catch (error) {
-                document.body.removeChild(tempDiv);
-                console.error("❌ Error:", error);
-                hideLoading();
-            }
-        }
-        
-        /**
-         * =====================================================
-         * HELPERS
-         * =====================================================
-         */
-        async function logoutUser() {
-            const result = await Swal.fire({
-                title: 'Keluar?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#16a34a',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Ya, Keluar',
-                cancelButtonText: 'Batal'
-            });
-            if (result.isConfirmed) {
-                await auth.signOut();
-                window.location.href = 'index.html';
-            }
-        }
-        
-        function showLoading(text = 'Memproses...') {
-            document.getElementById('loading-text').textContent = text;
-            document.getElementById('loading-overlay').classList.remove('hidden');
-        }
-        
-        function hideLoading() {
-            document.getElementById('loading-overlay').classList.add('hidden');
-        }
-    </script>
-    
+    <script src="js/bank-soal.js"></script>
 </body>
 </html>
