@@ -73,41 +73,56 @@ function updateProfileDisplay(data) {
 
 // === POPULATE USER FORM ===
 function populateUserForm(data) {
-    document.getElementById('inputName').value = data.displayName || '';
-    document.getElementById('inputNip').value = data.profile?.nip || '';
-    document.getElementById('inputEmail').value = data.email || '';
-    document.getElementById('inputPhone').value = data.profile?.phone || '';
-    document.getElementById('inputAddress').value = data.profile?.address || '';
-    document.getElementById('inputEducation').value = data.profile?.education || '';
-    document.getElementById('inputSpecialization').value = data.profile?.specialization || 'PAI';
-    document.getElementById('inputTahunAjaran').value = data.settings?.tahunAjaran || '2024/2025';
-    document.getElementById('inputSemester').value = data.settings?.semester || '2';
+    const setVal = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value || '';
+    };
+    
+    setVal('inputName', data.displayName);
+    setVal('inputNip', data.profile?.nip);
+    setVal('inputEmail', data.email);
+    setVal('inputPhone', data.profile?.phone);
+    setVal('inputAddress', data.profile?.address);
+    setVal('inputEducation', data.profile?.education);
+    setVal('inputSpecialization', data.profile?.specialization || 'PAI');
+    setVal('inputTahunAjaran', data.settings?.tahunAjaran || '2024/2025');
+    setVal('inputSemester', data.settings?.semester || '2');
 }
 
 // === POPULATE SCHOOL FORM ===
 function populateSchoolForm(school) {
-    document.getElementById('inputSchoolName').value = school.name || '';
-    document.getElementById('inputNpsn').value = school.npsn || '';
-    document.getElementById('inputJenjang').value = school.jenjang || 'SD';
-    document.getElementById('inputStatus').value = school.status || 'Negeri';
-    document.getElementById('inputSchoolAddress').value = school.address || '';
-    document.getElementById('inputKelurahan').value = school.kelurahan || '';
-    document.getElementById('inputKecamatan').value = school.kecamatan || '';
-    document.getElementById('inputKabupaten').value = school.kabupaten || '';
-    document.getElementById('inputProvinsi').value = school.provinsi || '';
-    document.getElementById('inputKodePos').value = school.kodePos || '';
-    document.getElementById('inputSchoolPhone').value = school.phone || '';
-    document.getElementById('inputSchoolEmail').value = school.email || '';
-    document.getElementById('inputSchoolWebsite').value = school.website || '';
+    const setVal = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value || '';
+    };
+    
+    setVal('inputSchoolName', school.name);
+    setVal('inputNpsn', school.npsn);
+    setVal('inputJenjang', school.jenjang || 'SD');
+    setVal('inputStatus', school.status || 'Negeri');
+    setVal('inputSchoolAddress', school.address);
+    setVal('inputKelurahan', school.kelurahan);
+    setVal('inputKecamatan', school.kecamatan);
+    setVal('inputKabupaten', school.kabupaten);
+    setVal('inputProvinsi', school.provinsi);
+    setVal('inputKodePos', school.kodePos);
+    setVal('inputSchoolPhone', school.phone);
+    setVal('inputSchoolEmail', school.email);
+    setVal('inputSchoolWebsite', school.website);
 }
 
 // === POPULATE PRINCIPAL FORM ===
 function populatePrincipalForm(principal) {
-    document.getElementById('inputPrincipalName').value = principal.name || '';
-    document.getElementById('inputPrincipalNip').value = principal.nip || '';
-    document.getElementById('inputPrincipalPangkat').value = principal.pangkat || '';
-    document.getElementById('inputPrincipalEducation').value = principal.education || '';
-    document.getElementById('inputPrincipalPhone').value = principal.phone || '';
+    const setVal = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value || '';
+    };
+    
+    setVal('inputPrincipalName', principal.name);
+    setVal('inputPrincipalNip', principal.nip);
+    setVal('inputPrincipalPangkat', principal.pangkat);
+    setVal('inputPrincipalEducation', principal.education);
+    setVal('inputPrincipalPhone', principal.phone);
 }
 
 // === SETUP FORM LISTENERS ===
@@ -135,19 +150,24 @@ function setupFormListeners() {
 async function handleUserSubmit(e) {
     e.preventDefault();
     
+    const getVal = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+    };
+    
     const data = {
-        displayName: document.getElementById('inputName').value.trim(),
+        displayName: getVal('inputName'),
         profile: {
-            nip: document.getElementById('inputNip').value.trim(),
-            phone: document.getElementById('inputPhone').value.trim(),
-            address: document.getElementById('inputAddress').value.trim(),
-            education: document.getElementById('inputEducation').value,
-            specialization: document.getElementById('inputSpecialization').value
+            nip: getVal('inputNip'),
+            phone: getVal('inputPhone'),
+            address: getVal('inputAddress'),
+            education: getVal('inputEducation'),
+            specialization: getVal('inputSpecialization')
         },
         settings: {
             ...currentProfileData?.settings,
-            tahunAjaran: document.getElementById('inputTahunAjaran').value,
-            semester: document.getElementById('inputSemester').value
+            tahunAjaran: getVal('inputTahunAjaran'),
+            semester: getVal('inputSemester')
         }
     };
     
@@ -156,9 +176,11 @@ async function handleUserSubmit(e) {
         
         if (success) {
             // Update Firebase Auth profile
-            await auth.currentUser.updateProfile({
-                displayName: data.displayName
-            });
+            if (auth.currentUser) {
+                await auth.currentUser.updateProfile({
+                    displayName: data.displayName
+                });
+            }
             
             showToast('Profil berhasil diperbarui!', 'success');
             currentProfileData = { ...currentProfileData, ...data };
@@ -177,20 +199,25 @@ async function handleUserSubmit(e) {
 async function handleSchoolSubmit(e) {
     e.preventDefault();
     
+    const getVal = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+    };
+    
     const school = {
-        name: document.getElementById('inputSchoolName').value.trim(),
-        npsn: document.getElementById('inputNpsn').value.trim(),
-        jenjang: document.getElementById('inputJenjang').value,
-        status: document.getElementById('inputStatus').value,
-        address: document.getElementById('inputSchoolAddress').value.trim(),
-        kelurahan: document.getElementById('inputKelurahan').value.trim(),
-        kecamatan: document.getElementById('inputKecamatan').value.trim(),
-        kabupaten: document.getElementById('inputKabupaten').value.trim(),
-        provinsi: document.getElementById('inputProvinsi').value.trim(),
-        kodePos: document.getElementById('inputKodePos').value.trim(),
-        phone: document.getElementById('inputSchoolPhone').value.trim(),
-        email: document.getElementById('inputSchoolEmail').value.trim(),
-        website: document.getElementById('inputSchoolWebsite').value.trim()
+        name: getVal('inputSchoolName'),
+        npsn: getVal('inputNpsn'),
+        jenjang: getVal('inputJenjang'),
+        status: getVal('inputStatus'),
+        address: getVal('inputSchoolAddress'),
+        kelurahan: getVal('inputKelurahan'),
+        kecamatan: getVal('inputKecamatan'),
+        kabupaten: getVal('inputKabupaten'),
+        provinsi: getVal('inputProvinsi'),
+        kodePos: getVal('inputKodePos'),
+        phone: getVal('inputSchoolPhone'),
+        email: getVal('inputSchoolEmail'),
+        website: getVal('inputSchoolWebsite')
     };
     
     try {
@@ -212,12 +239,17 @@ async function handleSchoolSubmit(e) {
 async function handlePrincipalSubmit(e) {
     e.preventDefault();
     
+    const getVal = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+    };
+    
     const principal = {
-        name: document.getElementById('inputPrincipalName').value.trim(),
-        nip: document.getElementById('inputPrincipalNip').value.trim(),
-        pangkat: document.getElementById('inputPrincipalPangkat').value,
-        education: document.getElementById('inputPrincipalEducation').value,
-        phone: document.getElementById('inputPrincipalPhone').value.trim()
+        name: getVal('inputPrincipalName'),
+        nip: getVal('inputPrincipalNip'),
+        pangkat: getVal('inputPrincipalPangkat'),
+        education: getVal('inputPrincipalEducation'),
+        phone: getVal('inputPrincipalPhone')
     };
     
     try {
@@ -238,12 +270,33 @@ async function handlePrincipalSubmit(e) {
 // === TAB SWITCHING ===
 function switchProfilTab(tab) {
     // Update tab buttons
-    document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`tab${capitalize(tab)}`).classList.add('active');
-    
-    // Update tab content
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-    document.getElementById(`content${capitalize(tab)}`).classList.add('active');
+    const tabs = ['User', 'School', 'Principal'];
+    tabs.forEach(t => {
+        const btn = document.getElementById(`tab${t}`);
+        const content = document.getElementById(`content${t}`);
+        
+        if (btn) {
+            if (t.toLowerCase() === tab.toLowerCase() || 
+                (tab === 'user' && t === 'User') ||
+                (tab === 'school' && t === 'School') ||
+                (tab === 'principal' && t === 'Principal')) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+        
+        if (content) {
+            if (t.toLowerCase() === tab.toLowerCase() ||
+                (tab === 'user' && t === 'User') ||
+                (tab === 'school' && t === 'School') ||
+                (tab === 'principal' && t === 'Principal')) {
+                content.classList.add('active');
+            } else {
+                content.classList.remove('active');
+            }
+        }
+    });
 }
 
 // === RESET FORMS ===
@@ -258,6 +311,9 @@ function resetSchoolForm() {
     if (currentProfileData?.school) {
         populateSchoolForm(currentProfileData.school);
         showToast('Form direset ke data tersimpan', 'info');
+    } else {
+        document.getElementById('formSchool')?.reset();
+        showToast('Form direset', 'info');
     }
 }
 
@@ -265,6 +321,9 @@ function resetPrincipalForm() {
     if (currentProfileData?.principal) {
         populatePrincipalForm(currentProfileData.principal);
         showToast('Form direset ke data tersimpan', 'info');
+    } else {
+        document.getElementById('formPrincipal')?.reset();
+        showToast('Form direset', 'info');
     }
 }
 
@@ -287,26 +346,31 @@ async function uploadPhoto(event) {
     try {
         showToast('Mengupload foto...', 'info');
         
-        const storage = firebase.storage();
-        const userId = auth.currentUser.uid;
-        const storageRef = storage.ref(`profiles/${userId}/photo.jpg`);
-        
-        await storageRef.put(file);
-        const photoURL = await storageRef.getDownloadURL();
-        
-        // Update Firebase Auth
-        await auth.currentUser.updateProfile({ photoURL });
-        
-        // Update Firestore
-        await updateUserData({ photoURL });
-        
-        // Update display
-        const avatar = document.getElementById('profileAvatar');
-        if (avatar) {
-            avatar.innerHTML = `<img src="${photoURL}" class="w-full h-full rounded-full object-cover">`;
+        // Check if Firebase Storage is available
+        if (typeof firebase !== 'undefined' && firebase.storage) {
+            const storage = firebase.storage();
+            const userId = auth.currentUser.uid;
+            const storageRef = storage.ref(`profiles/${userId}/photo.jpg`);
+            
+            await storageRef.put(file);
+            const photoURL = await storageRef.getDownloadURL();
+            
+            // Update Firebase Auth
+            await auth.currentUser.updateProfile({ photoURL });
+            
+            // Update Firestore
+            await updateUserData({ photoURL });
+            
+            // Update display
+            const avatar = document.getElementById('profileAvatar');
+            if (avatar) {
+                avatar.innerHTML = `<img src="${photoURL}" class="w-full h-full rounded-full object-cover">`;
+            }
+            
+            showToast('Foto berhasil diupload!', 'success');
+        } else {
+            showToast('Firebase Storage tidak tersedia', 'warning');
         }
-        
-        showToast('Foto berhasil diupload!', 'success');
         
     } catch (error) {
         console.error('Error uploading photo:', error);
@@ -319,14 +383,13 @@ function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.querySelector('.main-content');
     
-    sidebar.classList.toggle('open');
-    sidebar.classList.toggle('collapsed');
-    mainContent.classList.toggle('expanded');
-}
-
-// === HELPER FUNCTIONS ===
-function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+    if (sidebar) {
+        sidebar.classList.toggle('open');
+        sidebar.classList.toggle('collapsed');
+    }
+    if (mainContent) {
+        mainContent.classList.toggle('expanded');
+    }
 }
 
 console.log('✅ Profil module initialized');
