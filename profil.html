@@ -24,7 +24,7 @@
     
     <!-- SIDEBAR -->
     <aside id="sidebar" class="sidebar">
-        <div class="p-5 border-b border-green-700">
+        <div class="p-5 border-b border-green-700 flex-shrink-0">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
                     <span class="text-2xl">🕌</span>
@@ -36,7 +36,8 @@
             </div>
         </div>
         
-        <nav class="py-4">
+        <!-- Scrollable Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4 sidebar-nav">
             <div class="px-4 mb-2">
                 <span class="text-green-300 text-xs font-semibold uppercase tracking-wider">Menu Utama</span>
             </div>
@@ -93,9 +94,13 @@
                 <span class="menu-icon">⚡</span>
                 <span>Generator Dokumen</span>
             </a>
+            
+            <!-- Spacer untuk user info di bawah -->
+            <div class="h-24"></div>
         </nav>
         
-        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-green-700">
+        <!-- User Info - Fixed at bottom -->
+        <div class="flex-shrink-0 p-4 border-t border-green-700 bg-gradient-to-t from-green-900">
             <div class="flex items-center gap-3">
                 <div id="sidebarAvatar" class="w-10 h-10 bg-pai-gold rounded-full flex items-center justify-center text-lg font-bold">
                     G
@@ -122,7 +127,7 @@
                 </button>
                 <div>
                     <h1 class="text-xl font-bold text-gray-800">Profil</h1>
-                    <p class="text-sm text-gray-500">Kelola data diri, sekolah, dan kepala sekolah</p>
+                    <p class="text-sm text-gray-500">Kelola data profil, sekolah, dan kepala sekolah</p>
                 </div>
             </div>
         </header>
@@ -132,273 +137,218 @@
             
             <!-- Tabs -->
             <div class="card mb-6">
-                <div class="tabs border-b border-gray-200">
-                    <button class="tab-item active" onclick="switchTab('guru')">
+                <div class="tabs border-b-0 px-4 pt-4">
+                    <button onclick="switchProfilTab('user')" id="tabUser" class="tab-item active">
                         👤 Data Guru
                     </button>
-                    <button class="tab-item" onclick="switchTab('sekolah')">
-                        🏫 Data Sekolah
+                    <button onclick="switchProfilTab('school')" id="tabSchool" class="tab-item">
+                        🏫 Satuan Pendidikan
                     </button>
-                    <button class="tab-item" onclick="switchTab('kepsek')">
+                    <button onclick="switchProfilTab('principal')" id="tabPrincipal" class="tab-item">
                         👨‍💼 Kepala Sekolah
-                    </button>
-                    <button class="tab-item" onclick="switchTab('kelas')">
-                        📚 Kelas Diampu
                     </button>
                 </div>
             </div>
             
             <!-- Tab Content: Data Guru -->
-            <div id="tabGuru" class="tab-content active">
-                <div class="card">
-                    <div class="card-header flex items-center justify-between">
-                        <h3 class="font-bold text-gray-800">👤 Data Diri Guru</h3>
-                        <button onclick="editMode('guru')" id="btnEditGuru" class="btn btn-outline text-sm">
-                            ✏️ Edit
-                        </button>
+            <div id="contentUser" class="tab-content active">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Profile Card -->
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div class="relative inline-block mb-4">
+                                <div id="profileAvatar" class="w-32 h-32 bg-pai-green rounded-full mx-auto flex items-center justify-center text-5xl text-white font-bold">
+                                    G
+                                </div>
+                                <label class="absolute bottom-0 right-0 w-10 h-10 bg-pai-gold rounded-full flex items-center justify-center cursor-pointer hover:bg-yellow-500 transition-colors">
+                                    <span>📷</span>
+                                    <input type="file" class="hidden" accept="image/*" onchange="uploadPhoto(event)">
+                                </label>
+                            </div>
+                            <h2 id="profileName" class="text-xl font-bold text-gray-800 mb-1">Loading...</h2>
+                            <p id="profileRole" class="text-gray-500 mb-4">Guru PAI</p>
+                            <div class="flex justify-center gap-2">
+                                <span class="badge badge-success">Aktif</span>
+                                <span class="badge badge-info">Kurikulum Merdeka</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <form id="formGuru" onsubmit="saveGuru(event)">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Foto Profil -->
-                                <div class="md:col-span-2 flex items-center gap-6">
-                                    <div class="relative">
-                                        <div id="profilePhoto" class="w-24 h-24 bg-pai-light rounded-full flex items-center justify-center text-4xl font-bold text-pai-green">
-                                            G
-                                        </div>
-                                        <button type="button" class="absolute bottom-0 right-0 w-8 h-8 bg-pai-green text-white rounded-full flex items-center justify-center text-sm disabled:opacity-50" disabled id="btnChangePhoto">
-                                            📷
-                                        </button>
+                    
+                    <!-- Form Data Guru -->
+                    <div class="lg:col-span-2 card">
+                        <div class="card-header">
+                            <h3 class="font-bold text-gray-800">📋 Informasi Guru</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="formUserProfile" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Nama Lengkap *</label>
+                                        <input type="text" id="inputName" class="form-input" placeholder="Nama lengkap dengan gelar" required>
                                     </div>
-                                    <div>
-                                        <h4 id="displayName" class="text-xl font-bold text-gray-800">Nama Guru</h4>
-                                        <p id="displayEmail" class="text-gray-500">email@sekolah.sch.id</p>
-                                        <span class="badge badge-success mt-2">Guru PAI</span>
+                                    <div class="form-group">
+                                        <label class="form-label">NIP</label>
+                                        <input type="text" id="inputNip" class="form-input" placeholder="Nomor Induk Pegawai">
                                     </div>
                                 </div>
                                 
-                                <!-- Nama Lengkap -->
-                                <div class="form-group">
-                                    <label class="form-label">Nama Lengkap</label>
-                                    <input type="text" id="guruNama" class="form-input" disabled required>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Email *</label>
+                                        <input type="email" id="inputEmail" class="form-input" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">No. HP/WhatsApp</label>
+                                        <input type="tel" id="inputPhone" class="form-input" placeholder="08xxxxxxxxxx">
+                                    </div>
                                 </div>
                                 
-                                <!-- NIP -->
                                 <div class="form-group">
-                                    <label class="form-label">NIP</label>
-                                    <input type="text" id="guruNIP" class="form-input" placeholder="Masukkan NIP" disabled>
+                                    <label class="form-label">Alamat</label>
+                                    <textarea id="inputAddress" class="form-textarea" rows="2" placeholder="Alamat lengkap"></textarea>
                                 </div>
                                 
-                                <!-- NUPTK -->
-                                <div class="form-group">
-                                    <label class="form-label">NUPTK</label>
-                                    <input type="text" id="guruNUPTK" class="form-input" placeholder="Masukkan NUPTK" disabled>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Pendidikan Terakhir</label>
+                                        <select id="inputEducation" class="form-select">
+                                            <option value="">Pilih pendidikan</option>
+                                            <option value="D3">D3</option>
+                                            <option value="S1">S1/D4</option>
+                                            <option value="S2">S2</option>
+                                            <option value="S3">S3</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Bidang Studi</label>
+                                        <select id="inputSpecialization" class="form-select">
+                                            <option value="PAI">Pendidikan Agama Islam</option>
+                                            <option value="PAI-BP">PAI dan Budi Pekerti</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 
-                                <!-- No. HP -->
-                                <div class="form-group">
-                                    <label class="form-label">No. HP</label>
-                                    <input type="tel" id="guruPhone" class="form-input" placeholder="08xxxxxxxxxx" disabled>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Tahun Ajaran</label>
+                                        <select id="inputTahunAjaran" class="form-select">
+                                            <option value="2024/2025">2024/2025</option>
+                                            <option value="2025/2026">2025/2026</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Semester</label>
+                                        <select id="inputSemester" class="form-select">
+                                            <option value="1">Semester 1 (Ganjil)</option>
+                                            <option value="2">Semester 2 (Genap)</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 
-                                <!-- Jenis Kelamin -->
-                                <div class="form-group">
-                                    <label class="form-label">Jenis Kelamin</label>
-                                    <select id="guruGender" class="form-select" disabled>
-                                        <option value="">Pilih Jenis Kelamin</option>
-                                        <option value="L">Laki-laki</option>
-                                        <option value="P">Perempuan</option>
-                                    </select>
+                                <div class="flex justify-end gap-3 pt-4">
+                                    <button type="button" onclick="resetUserForm()" class="btn btn-secondary">
+                                        🔄 Reset
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        💾 Simpan Perubahan
+                                    </button>
                                 </div>
-                                
-                                <!-- Tempat Lahir -->
-                                <div class="form-group">
-                                    <label class="form-label">Tempat Lahir</label>
-                                    <input type="text" id="guruTempatLahir" class="form-input" placeholder="Tempat lahir" disabled>
-                                </div>
-                                
-                                <!-- Tanggal Lahir -->
-                                <div class="form-group">
-                                    <label class="form-label">Tanggal Lahir</label>
-                                    <input type="date" id="guruTanggalLahir" class="form-input" disabled>
-                                </div>
-                                
-                                <!-- Pendidikan Terakhir -->
-                                <div class="form-group">
-                                    <label class="form-label">Pendidikan Terakhir</label>
-                                    <select id="guruPendidikan" class="form-select" disabled>
-                                        <option value="">Pilih Pendidikan</option>
-                                        <option value="S1">S1</option>
-                                        <option value="S2">S2</option>
-                                        <option value="S3">S3</option>
-                                        <option value="D3">D3</option>
-                                        <option value="D4">D4</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Jurusan -->
-                                <div class="form-group">
-                                    <label class="form-label">Jurusan/Program Studi</label>
-                                    <input type="text" id="guruJurusan" class="form-input" placeholder="Contoh: Pendidikan Agama Islam" disabled>
-                                </div>
-                                
-                                <!-- Alamat -->
-                                <div class="form-group md:col-span-2">
-                                    <label class="form-label">Alamat Lengkap</label>
-                                    <textarea id="guruAlamat" class="form-textarea" rows="3" placeholder="Alamat lengkap" disabled></textarea>
-                                </div>
-                            </div>
-                            
-                            <!-- Buttons -->
-                            <div id="guruButtons" class="flex gap-3 mt-6 hidden">
-                                <button type="submit" class="btn btn-primary">
-                                    💾 Simpan
-                                </button>
-                                <button type="button" onclick="cancelEdit('guru')" class="btn btn-secondary">
-                                    ❌ Batal
-                                </button>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Tab Content: Data Sekolah -->
-            <div id="tabSekolah" class="tab-content">
+            <!-- Tab Content: Satuan Pendidikan -->
+            <div id="contentSchool" class="tab-content">
                 <div class="card">
-                    <div class="card-header flex items-center justify-between">
+                    <div class="card-header">
                         <h3 class="font-bold text-gray-800">🏫 Data Satuan Pendidikan</h3>
-                        <button onclick="editMode('sekolah')" id="btnEditSekolah" class="btn btn-outline text-sm">
-                            ✏️ Edit
-                        </button>
                     </div>
                     <div class="card-body">
-                        <form id="formSekolah" onsubmit="saveSekolah(event)">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                
-                                <!-- Nama Sekolah -->
-                                <div class="form-group md:col-span-2">
-                                    <label class="form-label">Nama Satuan Pendidikan</label>
-                                    <input type="text" id="sekolahNama" class="form-input" placeholder="Contoh: SD Negeri 1 Contoh" disabled required>
+                        <form id="formSchool" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="form-group">
+                                    <label class="form-label">Nama Sekolah *</label>
+                                    <input type="text" id="inputSchoolName" class="form-input" placeholder="SD/MI ..." required>
                                 </div>
-                                
-                                <!-- NPSN -->
                                 <div class="form-group">
                                     <label class="form-label">NPSN</label>
-                                    <input type="text" id="sekolahNPSN" class="form-input" placeholder="8 digit NPSN" maxlength="8" disabled>
+                                    <input type="text" id="inputNpsn" class="form-input" placeholder="Nomor Pokok Sekolah Nasional">
                                 </div>
-                                
-                                <!-- Jenjang -->
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="form-group">
                                     <label class="form-label">Jenjang</label>
-                                    <select id="sekolahJenjang" class="form-select" disabled>
-                                        <option value="">Pilih Jenjang</option>
-                                        <option value="SD">SD/MI</option>
-                                        <option value="SMP">SMP/MTs</option>
-                                        <option value="SMA">SMA/MA</option>
-                                        <option value="SMK">SMK</option>
+                                    <select id="inputJenjang" class="form-select">
+                                        <option value="SD">SD</option>
+                                        <option value="MI">MI</option>
                                     </select>
                                 </div>
-                                
-                                <!-- Status -->
                                 <div class="form-group">
                                     <label class="form-label">Status</label>
-                                    <select id="sekolahStatus" class="form-select" disabled>
-                                        <option value="">Pilih Status</option>
+                                    <select id="inputStatus" class="form-select">
                                         <option value="Negeri">Negeri</option>
                                         <option value="Swasta">Swasta</option>
                                     </select>
                                 </div>
-                                
-                                <!-- Akreditasi -->
-                                <div class="form-group">
-                                    <label class="form-label">Akreditasi</label>
-                                    <select id="sekolahAkreditasi" class="form-select" disabled>
-                                        <option value="">Pilih Akreditasi</option>
-                                        <option value="A">A (Unggul)</option>
-                                        <option value="B">B (Baik)</option>
-                                        <option value="C">C (Cukup)</option>
-                                        <option value="Belum">Belum Terakreditasi</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Kurikulum -->
-                                <div class="form-group">
-                                    <label class="form-label">Kurikulum</label>
-                                    <select id="sekolahKurikulum" class="form-select" disabled>
-                                        <option value="Merdeka">Kurikulum Merdeka</option>
-                                        <option value="2013">Kurikulum 2013</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Tahun Ajaran -->
-                                <div class="form-group">
-                                    <label class="form-label">Tahun Ajaran</label>
-                                    <select id="sekolahTahunAjaran" class="form-select" disabled>
-                                        <option value="2024/2025">2024/2025</option>
-                                        <option value="2025/2026">2025/2026</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Semester -->
-                                <div class="form-group">
-                                    <label class="form-label">Semester</label>
-                                    <select id="sekolahSemester" class="form-select" disabled>
-                                        <option value="1">Semester 1 (Ganjil)</option>
-                                        <option value="2">Semester 2 (Genap)</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Telepon -->
-                                <div class="form-group">
-                                    <label class="form-label">Telepon Sekolah</label>
-                                    <input type="tel" id="sekolahTelepon" class="form-input" placeholder="(0xx) xxxxxxx" disabled>
-                                </div>
-                                
-                                <!-- Email -->
-                                <div class="form-group">
-                                    <label class="form-label">Email Sekolah</label>
-                                    <input type="email" id="sekolahEmail" class="form-input" placeholder="sekolah@email.com" disabled>
-                                </div>
-                                
-                                <!-- Alamat -->
-                                <div class="form-group md:col-span-2">
-                                    <label class="form-label">Alamat Sekolah</label>
-                                    <textarea id="sekolahAlamat" class="form-textarea" rows="3" placeholder="Alamat lengkap sekolah" disabled></textarea>
-                                </div>
-                                
-                                <!-- Kelurahan -->
-                                <div class="form-group">
-                                    <label class="form-label">Kelurahan/Desa</label>
-                                    <input type="text" id="sekolahKelurahan" class="form-input" placeholder="Kelurahan/Desa" disabled>
-                                </div>
-                                
-                                <!-- Kecamatan -->
-                                <div class="form-group">
-                                    <label class="form-label">Kecamatan</label>
-                                    <input type="text" id="sekolahKecamatan" class="form-input" placeholder="Kecamatan" disabled>
-                                </div>
-                                
-                                <!-- Kabupaten -->
-                                <div class="form-group">
-                                    <label class="form-label">Kabupaten/Kota</label>
-                                    <input type="text" id="sekolahKabupaten" class="form-input" placeholder="Kabupaten/Kota" disabled>
-                                </div>
-                                
-                                <!-- Provinsi -->
-                                <div class="form-group">
-                                    <label class="form-label">Provinsi</label>
-                                    <input type="text" id="sekolahProvinsi" class="form-input" placeholder="Provinsi" disabled>
-                                </div>
-                                
                             </div>
                             
-                            <div id="sekolahButtons" class="flex gap-3 mt-6 hidden">
-                                <button type="submit" class="btn btn-primary">
-                                    💾 Simpan
+                            <div class="form-group">
+                                <label class="form-label">Alamat Sekolah</label>
+                                <textarea id="inputSchoolAddress" class="form-textarea" rows="2" placeholder="Alamat lengkap sekolah"></textarea>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="form-group">
+                                    <label class="form-label">Kelurahan/Desa</label>
+                                    <input type="text" id="inputKelurahan" class="form-input" placeholder="Kelurahan/Desa">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Kecamatan</label>
+                                    <input type="text" id="inputKecamatan" class="form-input" placeholder="Kecamatan">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Kabupaten/Kota</label>
+                                    <input type="text" id="inputKabupaten" class="form-input" placeholder="Kabupaten/Kota">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="form-group">
+                                    <label class="form-label">Provinsi</label>
+                                    <input type="text" id="inputProvinsi" class="form-input" placeholder="Provinsi">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Kode Pos</label>
+                                    <input type="text" id="inputKodePos" class="form-input" placeholder="Kode Pos">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="form-group">
+                                    <label class="form-label">No. Telepon Sekolah</label>
+                                    <input type="tel" id="inputSchoolPhone" class="form-input" placeholder="(021) xxx-xxxx">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email Sekolah</label>
+                                    <input type="email" id="inputSchoolEmail" class="form-input" placeholder="sekolah@email.com">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Website Sekolah</label>
+                                <input type="url" id="inputSchoolWebsite" class="form-input" placeholder="https://www.sekolah.sch.id">
+                            </div>
+                            
+                            <div class="flex justify-end gap-3 pt-4">
+                                <button type="button" onclick="resetSchoolForm()" class="btn btn-secondary">
+                                    🔄 Reset
                                 </button>
-                                <button type="button" onclick="cancelEdit('sekolah')" class="btn btn-secondary">
-                                    ❌ Batal
+                                <button type="submit" class="btn btn-primary">
+                                    💾 Simpan Perubahan
                                 </button>
                             </div>
                         </form>
@@ -407,44 +357,68 @@
             </div>
             
             <!-- Tab Content: Kepala Sekolah -->
-            <div id="tabKepsek" class="tab-content">
+            <div id="contentPrincipal" class="tab-content">
                 <div class="card">
-                    <div class="card-header flex items-center justify-between">
+                    <div class="card-header">
                         <h3 class="font-bold text-gray-800">👨‍💼 Data Kepala Sekolah</h3>
-                        <button onclick="editMode('kepsek')" id="btnEditKepsek" class="btn btn-outline text-sm">
-                            ✏️ Edit
-                        </button>
                     </div>
                     <div class="card-body">
-                        <form id="formKepsek" onsubmit="saveKepsek(event)">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                
-                                <!-- Nama -->
-                                <div class="form-group md:col-span-2">
-                                    <label class="form-label">Nama Lengkap Kepala Sekolah</label>
-                                    <input type="text" id="kepsekNama" class="form-input" placeholder="Nama lengkap dengan gelar" disabled required>
-                                </div>
-                                
-                                <!-- NIP -->
+                        <form id="formPrincipal" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="form-group">
-                                    <label class="form-label">NIP</label>
-                                    <input type="text" id="kepsekNIP" class="form-input" placeholder="NIP Kepala Sekolah" disabled>
+                                    <label class="form-label">Nama Kepala Sekolah *</label>
+                                    <input type="text" id="inputPrincipalName" class="form-input" placeholder="Nama lengkap dengan gelar" required>
                                 </div>
-                                
-                                <!-- Pangkat/Golongan -->
                                 <div class="form-group">
-                                    <label class="form-label">Pangkat/Golongan</label>
-                                    <input type="text" id="kepsekPangkat" class="form-input" placeholder="Contoh: Pembina, IV/a" disabled>
+                                    <label class="form-label">NIP Kepala Sekolah</label>
+                                    <input type="text" id="inputPrincipalNip" class="form-input" placeholder="NIP Kepala Sekolah">
                                 </div>
-                                
                             </div>
                             
-                            <div id="kepsekButtons" class="flex gap-3 mt-6 hidden">
-                                <button type="submit" class="btn btn-primary">
-                                    💾 Simpan
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="form-group">
+                                    <label class="form-label">Pangkat/Golongan</label>
+                                    <select id="inputPrincipalPangkat" class="form-select">
+                                        <option value="">Pilih pangkat</option>
+                                        <option value="Penata Muda / III/a">Penata Muda / III/a</option>
+                                        <option value="Penata Muda Tk.I / III/b">Penata Muda Tk.I / III/b</option>
+                                        <option value="Penata / III/c">Penata / III/c</option>
+                                        <option value="Penata Tk.I / III/d">Penata Tk.I / III/d</option>
+                                        <option value="Pembina / IV/a">Pembina / IV/a</option>
+                                        <option value="Pembina Tk.I / IV/b">Pembina Tk.I / IV/b</option>
+                                        <option value="Pembina Utama Muda / IV/c">Pembina Utama Muda / IV/c</option>
+                                        <option value="Pembina Utama Madya / IV/d">Pembina Utama Madya / IV/d</option>
+                                        <option value="Pembina Utama / IV/e">Pembina Utama / IV/e</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Pendidikan Terakhir</label>
+                                    <select id="inputPrincipalEducation" class="form-select">
+                                        <option value="">Pilih pendidikan</option>
+                                        <option value="S1">S1</option>
+                                        <option value="S2">S2</option>
+                                        <option value="S3">S3</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">No. HP Kepala Sekolah</label>
+                                <input type="tel" id="inputPrincipalPhone" class="form-input" placeholder="08xxxxxxxxxx">
+                            </div>
+                            
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <p class="text-yellow-800 text-sm">
+                                    <span class="font-bold">ℹ️ Informasi:</span> Data kepala sekolah akan digunakan untuk tanda tangan pada dokumen ATP, Prota, Promes, dan Modul Ajar.
+                                </p>
+                            </div>
+                            
+                            <div class="flex justify-end gap-3 pt-4">
+                                <button type="button" onclick="resetPrincipalForm()" class="btn btn-secondary">
+                                    🔄 Reset
                                 </button>
-                                <button type="button" onclick="cancelEdit('kepsek')" class="btn btn-secondary">
-                                    ❌ Batal
+                                <button type="submit" class="btn btn-primary">
+                                    💾 Simpan Perubahan
                                 </button>
                             </div>
                         </form>
@@ -452,85 +426,8 @@
                 </div>
             </div>
             
-            <!-- Tab Content: Kelas Diampu -->
-            <div id="tabKelas" class="tab-content">
-                <div class="card">
-                    <div class="card-header flex items-center justify-between">
-                        <h3 class="font-bold text-gray-800">📚 Kelas yang Diampu</h3>
-                        <button onclick="openModalKelas()" class="btn btn-primary text-sm">
-                            + Tambah Kelas
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="listKelas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <!-- Kelas cards will be loaded here -->
-                            <div class="text-center py-8 text-gray-500 col-span-full">
-                                <span class="text-4xl block mb-2">📚</span>
-                                <p>Belum ada kelas yang diampu</p>
-                                <button onclick="openModalKelas()" class="text-pai-green hover:underline text-sm mt-2">
-                                    + Tambah Kelas Pertama
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
         </div>
     </main>
-    
-    <!-- Modal Tambah Kelas -->
-    <div id="modalKelas" class="modal-overlay">
-        <div class="modal-content max-w-lg">
-            <div class="modal-header">
-                <h3 class="font-bold text-lg">Tambah Kelas</h3>
-                <button onclick="closeModalKelas()" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
-            </div>
-            <form id="formKelas" onsubmit="saveKelas(event)">
-                <div class="modal-body space-y-4">
-                    
-                    <div class="form-group">
-                        <label class="form-label">Kelas</label>
-                        <select id="kelasNama" class="form-select" required>
-                            <option value="">Pilih Kelas</option>
-                            <option value="1">Kelas 1</option>
-                            <option value="2">Kelas 2</option>
-                            <option value="3">Kelas 3</option>
-                            <option value="4">Kelas 4</option>
-                            <option value="5">Kelas 5</option>
-                            <option value="6">Kelas 6</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Rombel (Opsional)</label>
-                        <input type="text" id="kelasRombel" class="form-input" placeholder="Contoh: A, B, C">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Wali Kelas</label>
-                        <input type="text" id="kelasWali" class="form-input" placeholder="Nama wali kelas">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Jumlah Siswa</label>
-                        <input type="number" id="kelasJumlahSiswa" class="form-input" min="1" placeholder="Jumlah siswa">
-                    </div>
-                    
-                    <!-- Info Fase berdasarkan Kelas -->
-                    <div id="infoFase" class="p-4 bg-pai-light rounded-lg hidden">
-                        <p class="text-sm text-gray-600">Fase pembelajaran:</p>
-                        <p id="faseText" class="font-bold text-pai-green"></p>
-                    </div>
-                    
-                </div>
-                <div class="modal-footer">
-                    <button type="button" onclick="closeModalKelas()" class="btn btn-secondary">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
     
     <!-- Toast Notification -->
     <div id="toast" class="fixed top-4 right-4 transform translate-x-full transition-transform duration-300 z-50">
@@ -544,9 +441,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/curriculum-data.js"></script>
     <script src="js/profil.js"></script>
 </body>
 </html>
