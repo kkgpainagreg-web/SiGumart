@@ -6,13 +6,14 @@
 // Konfigurasi Firebase Anda
 // PENTING: Ganti dengan konfigurasi dari Firebase Console Anda
 const firebaseConfig = {
-  apiKey: "AIzaSyCyRKvngA1EqlQmgxgxU4465qgRw8TdT08",
+  apiKey: "AIzaSyCTEbggjJ5cguXAlq-QpbY5mO2G16S7rvQ",
   authDomain: "si-gumart.firebaseapp.com",
   projectId: "si-gumart",
   storageBucket: "si-gumart.firebasestorage.app",
   messagingSenderId: "544375918988",
-  appId: "1:544375918988:web:3375b3025b7d51ea2546a9",
- };
+  appId: "1:544375918988:web:a8459825c68810f22546a9",
+  measurementId: "G-EK25QRDDZC"
+};
 
 // Inisialisasi Firebase
 firebase.initializeApp(firebaseConfig);
@@ -66,3 +67,4 @@ const collections = {
 };
 
 console.log('✅ Firebase initialized successfully');
+
