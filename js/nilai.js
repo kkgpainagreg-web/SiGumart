@@ -9,7 +9,7 @@ let students = [];
 let penilaianList = [];
 let currentNilai = [];
 let currentPenilaianId = null;
-let currentKKM = 75;
+let currentKKTP = 75;
 
 // === INITIALIZATION ===
 document.addEventListener('DOMContentLoaded', () => {
@@ -200,7 +200,7 @@ function openPenilaianModal() {
     document.getElementById('formPenilaian').reset();
     document.getElementById('penilaianId').value = '';
     document.getElementById('penilaianTanggal').value = new Date().toISOString().split('T')[0];
-    document.getElementById('penilaianKKM').value = 75;
+    document.getElementById('penilaianKKTP').value = 75;
     document.getElementById('penilaianModal').classList.add('active');
 }
 
@@ -214,7 +214,7 @@ async function savePenilaian() {
     const jenis = document.getElementById('penilaianJenis').value;
     const classId = document.getElementById('penilaianKelas').value;
     const tanggal = document.getElementById('penilaianTanggal').value;
-    const kkm = parseInt(document.getElementById('penilaianKKM').value) || 75;
+    const KKTP = parseInt(document.getElementById('penilaianKKTP').value) || 75;
     const elemen = document.getElementById('penilaianElemen').value;
     const deskripsi = document.getElementById('penilaianDeskripsi').value.trim();
     
@@ -232,7 +232,7 @@ async function savePenilaian() {
         classId,
         className: selectedClass?.name || '',
         tanggal,
-        kkm,
+        KKTP,
         elemen,
         deskripsi,
         teacherId: auth.currentUser.uid,
@@ -269,7 +269,7 @@ function editPenilaian(id) {
     document.getElementById('penilaianJenis').value = penilaian.jenis;
     document.getElementById('penilaianKelas').value = penilaian.classId;
     document.getElementById('penilaianTanggal').value = penilaian.tanggal || '';
-    document.getElementById('penilaianKKM').value = penilaian.kkm || 75;
+    document.getElementById('penilaianKKTP').value = penilaian.KKTP || 75;
     document.getElementById('penilaianElemen').value = penilaian.elemen || '';
     document.getElementById('penilaianDeskripsi').value = penilaian.deskripsi || '';
     
@@ -345,8 +345,8 @@ async function loadNilaiInput() {
     const penilaian = penilaianList.find(p => p.id === penilaianId);
     if (penilaian) {
         document.getElementById('inputJenis').value = penilaian.jenis;
-        currentKKM = penilaian.kkm || 75;
-        document.getElementById('kkm').textContent = currentKKM;
+        currentKKTP = penilaian.KKTP || 75;
+        document.getElementById('KKTP').textContent = currentKKTP;
         document.getElementById('inputNilaiTitle').textContent = `📝 ${penilaian.nama}`;
     }
     
@@ -418,7 +418,7 @@ function renderNilaiInput() {
     
     tbody.innerHTML = currentNilai.map((item, index) => {
         const nilaiNum = parseFloat(item.nilai);
-        const isTuntas = !isNaN(nilaiNum) && nilaiNum >= currentKKM;
+        const isTuntas = !isNaN(nilaiNum) && nilaiNum >= currentKKTP;
         const statusBadge = item.nilai !== '' 
             ? (isTuntas 
                 ? '<span class="badge badge-success">Tuntas</span>' 
@@ -481,7 +481,7 @@ function updateNilaiStats() {
     
     const sum = nilaiValid.reduce((acc, n) => acc + parseFloat(n.nilai), 0);
     const avg = (sum / nilaiValid.length).toFixed(1);
-    const tuntas = nilaiValid.filter(n => parseFloat(n.nilai) >= currentKKM).length;
+    const tuntas = nilaiValid.filter(n => parseFloat(n.nilai) >= currentKKTP).length;
     const belum = nilaiValid.length - tuntas;
     
     document.getElementById('avgNilai').textContent = avg;
@@ -645,8 +645,8 @@ async function loadRekapNilai() {
                 const nilai = studentNilai[p.id];
                 if (nilai !== undefined) {
                     nilaiArray.push(nilai);
-                    const kkm = p.kkm || 75;
-                    const colorClass = nilai >= kkm ? 'text-green-600' : 'text-red-600';
+                    const KKTP = p.KKTP || 75;
+                    const colorClass = nilai >= KKTP ? 'text-green-600' : 'text-red-600';
                     return `<td class="text-center ${colorClass} font-medium">${nilai}</td>`;
                 }
                 return '<td class="text-center text-gray-400">-</td>';
@@ -756,5 +756,6 @@ function toggleSidebar() {
     sidebar.classList.toggle('open');
     sidebar.classList.toggle('collapsed');
 }
+
 
 console.log('✅ Nilai module initialized');
