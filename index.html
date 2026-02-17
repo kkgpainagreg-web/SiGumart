@@ -3,163 +3,549 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Admin PAI Super App</title>
+    <title>Admin Guru Super App - PAI & Umum</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="css/styles.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'pai-green': '#1B5E20',
-                        'pai-gold': '#F9A825',
-                        'pai-light': '#E8F5E9',
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="min-h-screen bg-gradient-to-br from-pai-green to-green-800 flex items-center justify-center p-4">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <!-- Container Login -->
-    <div class="w-full max-w-md">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap');
         
-        <!-- Card Login -->
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-            
-            <!-- Header dengan Logo -->
-            <div class="bg-pai-green p-6 text-center">
-                <div class="w-20 h-20 bg-white rounded-full mx-auto flex items-center justify-center mb-4">
-                    <span class="text-4xl">🕌</span>
-                </div>
-                <h1 class="text-2xl font-bold text-white">Admin PAI Super App</h1>
-                <p class="text-green-200 text-sm mt-1">Sistem Administrasi Pendidikan Agama Islam</p>
-            </div>
-            
-            <!-- Form Login -->
-            <div class="p-6">
-                <!-- Tab Login/Register -->
-                <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
-                    <button id="tabLogin" onclick="showTab('login')" class="flex-1 py-2 px-4 rounded-lg bg-pai-green text-white font-medium transition-all">
-                        Masuk
-                    </button>
-                    <button id="tabRegister" onclick="showTab('register')" class="flex-1 py-2 px-4 rounded-lg text-gray-600 font-medium transition-all">
-                        Daftar
-                    </button>
-                </div>
-                
-                <!-- Form Login -->
-                <form id="formLogin" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" id="loginEmail" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pai-green focus:border-transparent transition-all"
-                            placeholder="guru@sekolah.sch.id">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <div class="relative">
-                            <input type="password" id="loginPassword" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pai-green focus:border-transparent transition-all"
-                                placeholder="Masukkan password">
-                            <button type="button" onclick="togglePassword('loginPassword')" 
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
-                                👁️
-                            </button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <label class="flex items-center">
-                            <input type="checkbox" class="w-4 h-4 text-pai-green border-gray-300 rounded">
-                            <span class="ml-2 text-sm text-gray-600">Ingat saya</span>
-                        </label>
-                        <a href="#" onclick="resetPassword()" class="text-sm text-pai-green hover:underline">Lupa password?</a>
-                    </div>
-                    <button type="submit" id="btnLogin"
-                        class="w-full py-3 bg-pai-green text-white rounded-lg font-semibold hover:bg-green-700 transition-all flex items-center justify-center gap-2">
-                        <span>Masuk</span>
-                        <span id="loginSpinner" class="hidden animate-spin">⏳</span>
-                    </button>
-                </form>
-                
-                <!-- Form Register -->
-                <form id="formRegister" class="space-y-4 hidden">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                        <input type="text" id="registerName" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pai-green focus:border-transparent transition-all"
-                            placeholder="Nama lengkap Anda">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" id="registerEmail" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pai-green focus:border-transparent transition-all"
-                            placeholder="guru@sekolah.sch.id">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <div class="relative">
-                            <input type="password" id="registerPassword" required minlength="6"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pai-green focus:border-transparent transition-all"
-                                placeholder="Minimal 6 karakter">
-                            <button type="button" onclick="togglePassword('registerPassword')" 
-                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
-                                👁️
-                            </button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password</label>
-                        <input type="password" id="registerConfirm" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pai-green focus:border-transparent transition-all"
-                            placeholder="Ulangi password">
-                    </div>
-                    <button type="submit" id="btnRegister"
-                        class="w-full py-3 bg-pai-gold text-gray-900 rounded-lg font-semibold hover:bg-yellow-500 transition-all flex items-center justify-center gap-2">
-                        <span>Daftar Akun</span>
-                        <span id="registerSpinner" class="hidden animate-spin">⏳</span>
-                    </button>
-                </form>
-                
-                <!-- Divider -->
-                <div class="relative my-6">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">atau</span>
-                    </div>
-                </div>
-                
-                <!-- Login Google -->
-                <button onclick="loginWithGoogle()" 
-                    class="w-full py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5">
-                    <span>Lanjutkan dengan Google</span>
-                </button>
-            </div>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .arabic-text { font-family: 'Amiri', serif; direction: rtl; }
+        
+        /* Print Styles for Documents */
+        @media print {
+            .no-print { display: none !important; }
+            .print-area { display: block !important; width: 100%; position: absolute; top: 0; left: 0; background: white; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            th, td { border: 1px solid black; padding: 5px; font-size: 12px; }
+        }
+
+        .active-nav { background-color: #10B981; color: white; }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+
+    <aside id="sidebar" class="bg-white w-64 flex-shrink-0 border-r hidden md:flex flex-col transition-all duration-300 z-20 h-full fixed md:relative">
+        <div class="p-4 bg-emerald-600 text-white flex justify-between items-center">
+            <h1 class="font-bold text-lg tracking-wider">GURU SUPER APP</h1>
+            <button onclick="toggleSidebar()" class="md:hidden text-white"><i class="fas fa-times"></i></button>
         </div>
         
-        <!-- Footer -->
-        <p class="text-center text-green-200 text-sm mt-6">
-            © 2025 Admin PAI Super App - Berbasis Kurikulum Merdeka
-        </p>
-    </div>
-    
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-4 right-4 transform translate-x-full transition-transform duration-300 z-50">
-        <div id="toastContent" class="px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
-            <span id="toastIcon">✓</span>
-            <span id="toastMessage">Pesan</span>
+        <nav class="flex-1 overflow-y-auto py-4">
+            <div class="px-4 mb-2 text-xs text-gray-400 uppercase">Menu Utama</div>
+            <a href="#" onclick="renderView('dashboard')" class="nav-item block px-4 py-2 hover:bg-emerald-50 text-gray-700 active-nav"><i class="fas fa-home w-6"></i> Dashboard</a>
+            <a href="#" onclick="renderView('profile')" class="nav-item block px-4 py-2 hover:bg-emerald-50 text-gray-700"><i class="fas fa-user-cog w-6"></i> Profil & Sekolah</a>
+            <a href="#" onclick="renderView('calendar')" class="nav-item block px-4 py-2 hover:bg-emerald-50 text-gray-700"><i class="fas fa-calendar-alt w-6"></i> Kalender & Jadwal</a>
+            
+            <div class="px-4 mt-4 mb-2 text-xs text-gray-400 uppercase">Administrasi (Output)</div>
+            <a href="#" onclick="renderView('atp')" class="nav-item block px-4 py-2 hover:bg-emerald-50 text-gray-700"><i class="fas fa-list-ol w-6"></i> ATP & CP</a>
+            <a href="#" onclick="renderView('prota')" class="nav-item block px-4 py-2 hover:bg-emerald-50 text-gray-700"><i class="fas fa-project-diagram w-6"></i> Prota & Promes</a>
+            <a href="#" onclick="renderView('journal')" class="nav-item block px-4 py-2 hover:bg-emerald-50 text-gray-700"><i class="fas fa-book-open w-6"></i> Jurnal Mengajar</a>
+            <a href="#" onclick="renderView('modul')" class="nav-item block px-4 py-2 hover:bg-emerald-50 text-gray-700"><i class="fas fa-file-alt w-6"></i> Modul Ajar & LKPD</a>
+
+            <div class="px-4 mt-4 mb-2 text-xs text-gray-400 uppercase">Tools & AI</div>
+            <a href="#" onclick="renderView('students')" class="nav-item block px-4 py-2 hover:bg-emerald-50 text-gray-700"><i class="fas fa-users w-6"></i> Data Siswa (CSV)</a>
+            <a href="#" onclick="renderView('ai-helper')" class="nav-item block px-4 py-2 hover:bg-emerald-50 text-gray-700"><i class="fas fa-robot w-6"></i> AI Assistant</a>
+        </nav>
+
+        <div class="p-4 border-t">
+            <div id="userInfo" class="text-sm text-gray-600 mb-2">Guest</div>
+            <button onclick="handleLogout()" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded text-sm">Logout</button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        <header class="bg-white shadow-sm h-16 flex items-center justify-between px-4 z-10">
+            <button onclick="toggleSidebar()" class="text-gray-600 md:hidden"><i class="fas fa-bars fa-lg"></i></button>
+            <div class="font-semibold text-gray-700" id="pageTitle">Dashboard</div>
+            <div class="flex items-center space-x-3">
+                <span id="academicYearDisplay" class="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full font-bold">2025/2026</span>
+                <span id="planBadge" class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded font-bold">FREE</span>
+                <button onclick="upgradePlan()" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1 rounded shadow animate-pulse">Upgrade Premium</button>
+            </div>
+        </header>
+
+        <div id="contentArea" class="flex-1 overflow-y-auto p-4 md:p-8">
+            </div>
+    </main>
+
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+            <h2 class="text-2xl font-bold text-center text-emerald-700 mb-6">Login Guru Super App</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                    <input type="email" id="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                    <input type="password" id="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Masuk</button>
+            </form>
+            <p class="mt-4 text-center text-xs text-gray-500">Super Admin: afifaro@gmail.com</p>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/auth.js"></script>
+    <script>
+        // --- 1. KONFIGURASI FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDpiK4F4ilnDDNEwO0djGY-ClwgwBl1eFk",
+            authDomain: "asap-1d653.firebaseapp.com",
+            projectId: "asap-1d653",
+            storageBucket: "asap-1d653.firebasestorage.app",
+            messagingSenderId: "143263188364",
+            appId: "1:143263188364:web:47b4c003972b3503e882a9",
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // --- 2. GLOBAL STATE ---
+        let currentUser = null;
+        let appData = {
+            profile: {},
+            calendar: { start: '', end: '', holidays: [] },
+            schedule: [],
+            tps: [], // Tujuan Pembelajaran
+            students: []
+        };
+        
+        // --- 3. UTILITY FUNCTIONS ---
+        
+        // Cek Tahun Ajaran Otomatis
+        function getAcademicYear() {
+            const now = new Date();
+            const month = now.getMonth(); // 0-11 (Juni = 5)
+            const year = now.getFullYear();
+            
+            // Jika bulan Juni atau lebih, tahun ajaran baru dimulai
+            if (month >= 5) {
+                return `${year}/${year + 1}`;
+            } else {
+                return `${year - 1}/${year}`;
+            }
+        }
+        
+        document.getElementById('academicYearDisplay').innerText = getAcademicYear();
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('absolute');
+            sidebar.classList.toggle('h-full');
+        }
+
+        function upgradePlan() {
+            const adminPhone = "6281234567890"; // Ganti dengan nomor WA Super Admin
+            const message = "Halo Admin, saya ingin upgrade ke akun Premium Guru Super App.";
+            window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        // --- 4. AUTHENTICATION LOGIC ---
+        
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('authModal').classList.add('hidden');
+                document.getElementById('userInfo').innerText = user.email;
+                loadUserData();
+            } else {
+                document.getElementById('authModal').classList.remove('hidden');
+            }
+        });
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                alert("Login Gagal: " + error.message);
+            }
+        }
+
+        function handleLogout() {
+            auth.signOut();
+            location.reload();
+        }
+
+        // --- 5. DATA MANAGEMENT (MOCKUP FOR SPEED, BUT STRUCTURED FOR FIRESTORE) ---
+        
+        async function loadUserData() {
+            // Simulasi load data dari Firestore berdasarkan UID
+            // Di produksi: db.collection('users').doc(currentUser.uid).get()...
+            
+            // Data Default Dummy untuk Guru PAI
+            appData.tps = [
+                { id: 1, fase: 'A', code: '1.1', text: 'Mengenal huruf Hijaiah dan harakatnya' },
+                { id: 2, fase: 'A', code: '1.2', text: 'Memahami Rukun Iman dengan sederhana' },
+                { id: 3, fase: 'A', code: '1.3', text: 'Mempraktikkan sikap jujur dan santun' }
+            ];
+            
+            appData.schedule = [
+                { day: 'Senin', timeStart: '07:00', timeEnd: '08:20', class: '1A' },
+                { day: 'Rabu', timeStart: '09:00', timeEnd: '10:20', class: '1B' }
+            ];
+
+            appData.calendar = {
+                start: '2025-07-15',
+                end: '2025-12-20',
+                holidays: ['2025-08-17', '2025-12-25']
+            };
+            
+            renderView('dashboard');
+        }
+
+        // --- 6. CORE LOGIC: SINGLE INPUT - MULTI OUTPUT ---
+
+        // Generator Promes (Jantung Aplikasi)
+        function generateScheduleMapping() {
+            if (!appData.calendar.start || !appData.calendar.end || appData.schedule.length === 0) return [];
+
+            const startDate = new Date(appData.calendar.start);
+            const endDate = new Date(appData.calendar.end);
+            const mapping = [];
+            let tpIndex = 0;
+
+            // Loop setiap hari dari start sampai end
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dayNameMap = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                const currentDayName = dayNameMap[d.getDay()];
+                const dateString = d.toISOString().split('T')[0];
+
+                // Skip jika libur
+                if (appData.calendar.holidays.includes(dateString)) continue;
+
+                // Cek apakah ada jadwal di hari ini
+                const classesToday = appData.schedule.filter(s => s.day === currentDayName);
+
+                classesToday.forEach(cls => {
+                    // Ambil TP (Looping jika TP habis untuk review/ulangan)
+                    const tp = appData.tps[tpIndex % appData.tps.length];
+                    
+                    mapping.push({
+                        date: dateString,
+                        day: currentDayName,
+                        class: cls.class,
+                        time: `${cls.timeStart} - ${cls.timeEnd}`,
+                        materi: tp.text,
+                        code: tp.code
+                    });
+                    
+                    // Increment TP index logic (sederhana: ganti TP setiap pertemuan)
+                    // Di real app, user bisa set berapa pertemuan per TP
+                    tpIndex++;
+                });
+            }
+            return mapping;
+        }
+
+        // --- 7. VIEW RENDERING ENGINE ---
+
+        function renderView(viewName) {
+            const content = document.getElementById('contentArea');
+            const title = document.getElementById('pageTitle');
+            
+            // Update Active Nav
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active-nav'));
+            // (Simple selector logic would go here)
+
+            let html = '';
+
+            switch(viewName) {
+                case 'dashboard':
+                    title.innerText = "Dashboard Guru";
+                    html = `
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div class="bg-white p-6 rounded-lg shadow border-l-4 border-emerald-500">
+                                <h3 class="text-gray-500 text-sm">Total Kelas</h3>
+                                <p class="text-2xl font-bold">2 Rombel</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow border-l-4 border-blue-500">
+                                <h3 class="text-gray-500 text-sm">Status Admin</h3>
+                                <p class="text-2xl font-bold text-green-600">Aktif</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow border-l-4 border-purple-500">
+                                <h3 class="text-gray-500 text-sm">Tahun Ajaran</h3>
+                                <p class="text-2xl font-bold">${getAcademicYear()}</p>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <h4 class="font-bold text-blue-800 mb-2">👋 Selamat Datang!</h4>
+                            <p class="text-sm text-blue-700">Mulailah dengan mengatur <b>Profil & Sekolah</b>, kemudian atur <b>Kalender & Jadwal</b>. Dokumen administrasi akan dibuat otomatis untuk Anda.</p>
+                        </div>
+                    `;
+                    break;
+
+                case 'calendar':
+                    title.innerText = "Pengaturan Kalender & Jadwal";
+                    html = `
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="bg-white p-6 rounded shadow">
+                                <h3 class="font-bold mb-4 border-b pb-2">1. Kalender Akademik</h3>
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-500">Awal Semester</label>
+                                        <input type="date" id="calStart" value="${appData.calendar.start}" class="w-full border rounded p-2 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-500">Akhir Semester</label>
+                                        <input type="date" id="calEnd" value="${appData.calendar.end}" class="w-full border rounded p-2 text-sm">
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="text-xs font-bold text-gray-500">Tanggal Libur (Format: YYYY-MM-DD, pisahkan koma)</label>
+                                    <textarea class="w-full border rounded p-2 text-sm" rows="2">${appData.calendar.holidays.join(',')}</textarea>
+                                </div>
+                                <button onclick="saveCalendar()" class="bg-emerald-600 text-white px-4 py-2 rounded text-sm w-full">Simpan Kalender</button>
+                            </div>
+
+                            <div class="bg-white p-6 rounded shadow">
+                                <h3 class="font-bold mb-4 border-b pb-2">2. Jadwal Mengajar (Anti-Bentrok)</h3>
+                                <div class="flex gap-2 mb-2">
+                                    <select id="schDay" class="border p-2 rounded text-sm flex-1">
+                                        <option>Senin</option><option>Selasa</option><option>Rabu</option><option>Kamis</option><option>Jumat</option><option>Sabtu</option>
+                                    </select>
+                                    <input type="text" id="schClass" placeholder="Kelas (mis: 7A)" class="border p-2 rounded text-sm w-24">
+                                </div>
+                                <div class="flex gap-2 mb-4">
+                                    <input type="time" id="schStart" class="border p-2 rounded text-sm flex-1">
+                                    <input type="time" id="schEnd" class="border p-2 rounded text-sm flex-1">
+                                    <button onclick="addSchedule()" class="bg-blue-600 text-white p-2 rounded text-sm"><i class="fas fa-plus"></i></button>
+                                </div>
+                                
+                                <div class="bg-gray-50 p-2 rounded h-48 overflow-y-auto">
+                                    <table class="w-full text-sm text-left">
+                                        <thead><tr class="text-gray-500 border-b"><th>Hari</th><th>Jam</th><th>Kelas</th><th>Aksi</th></tr></thead>
+                                        <tbody id="scheduleList">
+                                            ${appData.schedule.map((s, i) => `
+                                                <tr class="border-b">
+                                                    <td>${s.day}</td>
+                                                    <td>${s.timeStart}-${s.timeEnd}</td>
+                                                    <td>${s.class}</td>
+                                                    <td><button onclick="removeSchedule(${i})" class="text-red-500"><i class="fas fa-trash"></i></button></td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'journal':
+                    title.innerText = "Jurnal Mengajar Otomatis";
+                    const journalData = generateScheduleMapping();
+                    const isPremium = false; // Mock logic
+
+                    html = `
+                        <div class="flex justify-between mb-4 no-print">
+                            <p class="text-sm text-gray-600">Data ini digenerate otomatis dari Jadwal & TP Anda.</p>
+                            <button onclick="window.print()" class="bg-gray-700 text-white px-4 py-2 rounded shadow"><i class="fas fa-print"></i> Cetak PDF</button>
+                        </div>
+                        
+                        <div class="bg-white p-8 shadow print-area">
+                            <div class="text-center mb-6 border-b pb-4">
+                                <h2 class="font-bold text-xl uppercase">Jurnal Pembelajaran</h2>
+                                <p>Mata Pelajaran: Pendidikan Agama Islam dan Budi Pekerti</p>
+                                <p>Tahun Pelajaran: ${getAcademicYear()}</p>
+                            </div>
+
+                            <table class="w-full text-sm border-collapse border border-gray-300">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="border p-2">No</th>
+                                        <th class="border p-2">Hari/Tanggal</th>
+                                        <th class="border p-2">Kelas</th>
+                                        <th class="border p-2">Materi / TP</th>
+                                        <th class="border p-2">Kehadiran</th>
+                                        <th class="border p-2">Catatan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${journalData.map((row, i) => `
+                                        <tr>
+                                            <td class="border p-2 text-center">${i+1}</td>
+                                            <td class="border p-2">${row.day}, ${row.date}</td>
+                                            <td class="border p-2 text-center">${row.class}</td>
+                                            <td class="border p-2">${row.code} - ${row.materi}</td>
+                                            <td class="border p-2">H:__ S:__ I:__ A:__</td>
+                                            <td class="border p-2"></td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                            
+                            <div class="mt-12 flex justify-between px-8">
+                                <div class="text-center">
+                                    <p>Mengetahui,</p>
+                                    <p>Kepala Sekolah</p>
+                                    <br><br><br>
+                                    <p class="font-bold underline">(Nama Kepala Sekolah)</p>
+                                    <p>NIP. .......................</p>
+                                </div>
+                                <div class="text-center">
+                                    <p>Guru Mata Pelajaran</p>
+                                    <br><br><br>
+                                    <p class="font-bold underline">(Nama User)</p>
+                                    <p>NIP. .......................</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'students':
+                    title.innerText = "Import Data Siswa (.csv)";
+                    html = `
+                        <div class="bg-white p-6 rounded shadow max-w-2xl mx-auto">
+                            <h3 class="font-bold mb-4">Upload CSV Siswa</h3>
+                            <div class="bg-yellow-50 p-4 rounded text-sm text-yellow-800 mb-4">
+                                <strong>Format Wajib CSV:</strong><br>
+                                NISN, Nama Siswa, L/P, Kelas, Rombel
+                            </div>
+                            <input type="file" id="csvInput" accept=".csv" class="mb-4 block w-full text-sm text-slate-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-emerald-50 file:text-emerald-700
+                                hover:file:bg-emerald-100
+                            "/>
+                            <button onclick="processCSV()" class="bg-emerald-600 text-white px-6 py-2 rounded">Upload & Proses</button>
+                            
+                            <div id="csvResult" class="mt-6 hidden">
+                                <h4 class="font-bold mb-2">Preview Data (3 Baris Pertama):</h4>
+                                <table class="w-full text-sm border">
+                                    <tbody id="csvPreviewBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'ai-helper':
+                    title.innerText = "AI Assistant Prompt Generator";
+                    html = `
+                        <div class="bg-white p-6 rounded shadow max-w-3xl mx-auto">
+                            <h3 class="font-bold text-lg mb-2">Bantuan Format Data</h3>
+                            <p class="text-gray-600 text-sm mb-4">Gunakan prompt ini di ChatGPT/Gemini untuk mengubah materi mentah Anda menjadi file CSV yang siap diimpor ke sistem ini.</p>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-bold mb-2">Pilih Jenis Data:</label>
+                                <select id="aiType" class="border p-2 rounded w-full">
+                                    <option value="soal">Bank Soal</option>
+                                    <option value="tp">Tujuan Pembelajaran (TP)</option>
+                                </select>
+                            </div>
+
+                            <div class="bg-gray-800 text-gray-100 p-4 rounded relative">
+                                <pre id="promptResult" class="whitespace-pre-wrap text-sm font-mono">Pilih jenis data di atas...</pre>
+                                <button onclick="copyPrompt()" class="absolute top-2 right-2 bg-gray-600 hover:bg-gray-500 text-xs px-2 py-1 rounded">Copy</button>
+                            </div>
+                            
+                            <script>
+                                document.getElementById('aiType').addEventListener('change', function(e) {
+                                    const val = e.target.value;
+                                    let txt = "";
+                                    if(val === 'soal') {
+                                        txt = 'Saya memiliki materi berikut (upload materi). Tolong buatkan file CSV dengan header: "No, Pertanyaan, OpsiA, OpsiB, OpsiC, OpsiD, KunciJawaban, TingkatKesulitan". Pastikan format rapi.';
+                                    } else {
+                                        txt = 'Saya memiliki dokumen kurikulum berikut. Tolong ekstrak Tujuan Pembelajaran dan buatkan file CSV dengan header: "Fase, KodeTP, TeksTP, AlokasiWaktu".';
+                                    }
+                                    document.getElementById('promptResult').innerText = txt;
+                                });
+                            <\/script>
+                        </div>
+                    `;
+                    break;
+                
+                default:
+                    html = `<div class="p-10 text-center text-gray-500">Fitur ${viewName} tersedia di versi Premium. <br> <button onclick="upgradePlan()" class="text-emerald-600 underline">Upgrade Sekarang</button></div>`;
+            }
+
+            content.innerHTML = html;
+        }
+
+        // --- 8. LOGIC HELPERS ---
+
+        function addSchedule() {
+            const day = document.getElementById('schDay').value;
+            const start = document.getElementById('schStart').value;
+            const end = document.getElementById('schEnd').value;
+            const cls = document.getElementById('schClass').value;
+
+            if(!start || !end || !cls) { alert("Data jadwal tidak lengkap!"); return; }
+
+            // Validasi Konflik Sederhana (Same Day, Overlapping Time, Same User)
+            const conflict = appData.schedule.some(s => {
+                return s.day === day && (
+                    (start >= s.timeStart && start < s.timeEnd) || 
+                    (end > s.timeStart && end <= s.timeEnd)
+                );
+            });
+
+            if(conflict) {
+                alert("BENTROK JADWAL! Anda sudah mengajar di jam tersebut pada hari " + day);
+                return;
+            }
+
+            appData.schedule.push({ day, timeStart: start, timeEnd: end, class: cls });
+            renderView('calendar'); // Re-render to show new list
+        }
+
+        function removeSchedule(index) {
+            appData.schedule.splice(index, 1);
+            renderView('calendar');
+        }
+
+        function saveCalendar() {
+            appData.calendar.start = document.getElementById('calStart').value;
+            appData.calendar.end = document.getElementById('calEnd').value;
+            alert("Kalender disimpan! Dokumen administrasi telah diperbarui.");
+        }
+
+        function processCSV() {
+            const fileInput = document.getElementById('csvInput');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const rows = text.split('\n').slice(1); // Skip header
+                const preview = rows.slice(0, 3).map(r => {
+                    const cols = r.split(',');
+                    if(cols.length < 2) return '';
+                    return `<tr><td class="p-1 border">${cols[0]}</td><td class="p-1 border">${cols[1]}</td><td class="p-1 border">${cols[3]}</td></tr>`;
+                }).join('');
+                
+                document.getElementById('csvPreviewBody').innerHTML = preview;
+                document.getElementById('csvResult').classList.remove('hidden');
+                alert(`Berhasil membaca ${rows.length} data siswa!`);
+            };
+            reader.readAsText(file);
+        }
+
+        function copyPrompt() {
+            const text = document.getElementById('promptResult').innerText;
+            navigator.clipboard.writeText(text);
+            alert("Prompt disalin!");
+        }
+
+        // Init First View
+        if(!currentUser) {
+            // Uncomment line below to force login check on load
+            // renderView('dashboard'); 
+        }
+
+    </script>
 </body>
 </html>
