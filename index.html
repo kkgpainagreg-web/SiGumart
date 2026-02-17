@@ -1,2346 +1,719 @@
 <!DOCTYPE html>
-<html lang="id" dir="ltr">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN GURU SUPER APP</title>
+    <title>Admin Guru Super App - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
                     colors: {
-                        primary: '#2563eb',
-                        secondary: '#1e40af',
-                        accent: '#3b82f6',
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
                         success: '#10b981',
                         warning: '#f59e0b',
                         danger: '#ef4444',
-                        dark: '#1f2937',
-                        light: '#f3f4f6'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        arabic: ['Amiri', 'serif']
                     }
                 }
             }
         }
     </script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; }
-        
-        .arabic-text {
-            font-family: 'Amiri', serif;
-            direction: rtl;
-            font-size: 1.25em;
-            line-height: 2;
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        
-        .sidebar { transition: transform 0.3s ease-in-out; }
-        .sidebar.collapsed { transform: translateX(-100%); }
-        @media (min-width: 1024px) { .sidebar.collapsed { transform: translateX(0); } }
-        
-        .menu-item { transition: all 0.2s ease; }
-        .menu-item:hover { background-color: rgba(59, 130, 246, 0.1); }
-        .menu-item.active { background-color: rgba(59, 130, 246, 0.2); border-right: 3px solid #3b82f6; }
-        
-        .card { transition: all 0.3s ease; }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
-        
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .spinner {
-            border: 3px solid #f3f4f6;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
             border-top: 3px solid #3b82f6;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 24px;
+            height: 24px;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .toast { animation: toastIn 0.3s ease-out; }
-        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        
-        .modal-overlay { background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
-        
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a1a1a1; }
-        
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { font-size: 12pt; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        
-        .form-input {
-            width: 100%;
-            padding: 0.5rem 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-        }
-        .form-input:focus {
-            outline: none;
-            ring: 2px;
-            ring-color: #3b82f6;
-            border-color: transparent;
-        }
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 0.25rem;
-        }
-        
-        .btn-primary {
-            background-color: #2563eb;
-            color: white;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-primary:hover { background-color: #1e40af; }
-        
-        .btn-secondary {
-            background-color: #e5e7eb;
-            color: #1f2937;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-secondary:hover { background-color: #d1d5db; }
-        
-        .btn-success {
-            background-color: #10b981;
-            color: white;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-success:hover { background-color: #059669; }
-        
-        .btn-danger {
-            background-color: #ef4444;
-            color: white;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-danger:hover { background-color: #dc2626; }
-        
-        .btn-google {
-            background-color: white;
-            color: #374151;
-            font-weight: 500;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid #d1d5db;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-        }
-        .btn-google:hover { background-color: #f9fafb; border-color: #9ca3af; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
-        <div class="text-center">
-            <div class="spinner mx-auto mb-4"></div>
-            <p class="text-gray-600">Memuat aplikasi...</p>
+<body class="min-h-screen gradient-bg">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl p-8 flex flex-col items-center space-y-4">
+            <div class="loading-spinner"></div>
+            <p class="text-gray-600 font-medium">Memproses...</p>
         </div>
     </div>
 
-    <!-- Toast Container -->
-    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300">
+        <div id="toastContent" class="px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3">
+            <i id="toastIcon" class="text-xl"></i>
+            <span id="toastMessage" class="font-medium"></span>
+        </div>
+    </div>
 
-    <!-- Auth Screen -->
-    <div id="authScreen" class="hidden min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <!-- Auth Header -->
-            <div class="bg-gradient-to-r from-primary to-accent p-6 text-white text-center">
-                <div class="w-20 h-20 bg-white rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <i class="fas fa-chalkboard-teacher text-4xl text-primary"></i>
+    <!-- Main Container -->
+    <div class="min-h-screen flex flex-col lg:flex-row">
+        <!-- Left Side - Branding -->
+        <div class="lg:w-1/2 p-8 lg:p-16 flex flex-col justify-center text-white">
+            <div class="max-w-lg mx-auto lg:mx-0">
+                <div class="flex items-center space-x-3 mb-8">
+                    <div class="w-14 h-14 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-chalkboard-teacher text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">Admin Guru</h1>
+                        <p class="text-white text-opacity-80 text-sm">Super App</p>
+                    </div>
                 </div>
-                <h1 class="text-2xl font-bold">ADMIN GURU</h1>
-                <p class="text-blue-100">Super App</p>
+                
+                <h2 class="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+                    Otomatisasi Administrasi Mengajar
+                </h2>
+                
+                <p class="text-lg text-white text-opacity-90 mb-8">
+                    Single Input – Multi Output. Masukkan data sekali, 
+                    dapatkan ATP, Prota, Promes, dan Modul Ajar yang sinkron otomatis.
+                </p>
+
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4">
+                        <i class="fas fa-calendar-alt text-2xl mb-2"></i>
+                        <h3 class="font-semibold">Kalender Otomatis</h3>
+                        <p class="text-sm text-white text-opacity-80">Sinkron dengan jadwal</p>
+                    </div>
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4">
+                        <i class="fas fa-file-alt text-2xl mb-2"></i>
+                        <h3 class="font-semibold">Dokumen Lengkap</h3>
+                        <p class="text-sm text-white text-opacity-80">ATP, Prota, Promes</p>
+                    </div>
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4">
+                        <i class="fas fa-book-open text-2xl mb-2"></i>
+                        <h3 class="font-semibold">Modul Ajar</h3>
+                        <p class="text-sm text-white text-opacity-80">Support teks Arab</p>
+                    </div>
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4">
+                        <i class="fas fa-robot text-2xl mb-2"></i>
+                        <h3 class="font-semibold">AI Assistant</h3>
+                        <p class="text-sm text-white text-opacity-80">Bantu input data</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4 text-sm">
+                    <div class="flex -space-x-2">
+                        <div class="w-8 h-8 bg-green-400 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold">A</div>
+                        <div class="w-8 h-8 bg-blue-400 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold">B</div>
+                        <div class="w-8 h-8 bg-purple-400 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold">C</div>
+                    </div>
+                    <span class="text-white text-opacity-80">1000+ Guru sudah bergabung</span>
+                </div>
             </div>
-            
-            <!-- Login Form -->
-            <div id="loginForm" class="p-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">Masuk ke Akun Anda</h2>
-                
-                <!-- Google Login Button -->
-                <button onclick="loginWithGoogle()" class="btn-google mb-4">
-                    <svg width="20" height="20" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    Masuk dengan Google
-                </button>
-                
-                <div class="relative my-6">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">atau dengan email</span>
-                    </div>
-                </div>
-                
-                <form id="loginFormElement" class="space-y-4">
-                    <div>
-                        <label class="form-label">Email</label>
-                        <input type="email" id="loginEmail" class="form-input" placeholder="email@contoh.com" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Password</label>
-                        <div class="relative">
-                            <input type="password" id="loginPassword" class="form-input pr-10" placeholder="••••••••" required>
-                            <button type="button" onclick="togglePassword('loginPassword')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-primary w-full py-3">
-                        <i class="fas fa-sign-in-alt"></i>
+        </div>
+
+        <!-- Right Side - Auth Forms -->
+        <div class="lg:w-1/2 p-8 lg:p-16 flex items-center justify-center">
+            <div class="glass-card rounded-3xl shadow-2xl p-8 lg:p-10 w-full max-w-md">
+                <!-- Tab Buttons -->
+                <div class="flex bg-gray-100 rounded-xl p-1 mb-8">
+                    <button id="loginTab" onclick="showTab('login')" 
+                            class="flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-300 bg-white text-primary-600 shadow">
                         Masuk
                     </button>
-                </form>
-                <div class="mt-4 text-center">
-                    <p class="text-gray-600">Belum punya akun? 
-                        <button onclick="showRegister()" class="text-primary font-medium hover:underline">Daftar</button>
-                    </p>
+                    <button id="registerTab" onclick="showTab('register')" 
+                            class="flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-300 text-gray-500">
+                        Daftar
+                    </button>
                 </div>
-            </div>
-            
-            <!-- Register Form -->
-            <div id="registerForm" class="p-6 hidden">
-                <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">Buat Akun Baru</h2>
-                
-                <!-- Google Register Button -->
-                <button onclick="loginWithGoogle()" class="btn-google mb-4">
-                    <svg width="20" height="20" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    Daftar dengan Google
-                </button>
-                
-                <div class="relative my-6">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">atau dengan email</span>
-                    </div>
-                </div>
-                
-                <form id="registerFormElement" class="space-y-4">
+
+                <!-- Login Form -->
+                <form id="loginForm" class="space-y-6">
                     <div>
-                        <label class="form-label">Nama Lengkap</label>
-                        <input type="text" id="regName" class="form-input" placeholder="Nama lengkap Anda" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Email</label>
-                        <input type="email" id="regEmail" class="form-input" placeholder="email@contoh.com" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Password</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Gmail</label>
                         <div class="relative">
-                            <input type="password" id="regPassword" class="form-input pr-10" placeholder="Min. 6 karakter" required minlength="6">
-                            <button type="button" onclick="togglePassword('regPassword')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" id="loginEmail" required
+                                   class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                   placeholder="nama@gmail.com">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" id="loginPassword" required
+                                   class="w-full pl-12 pr-12 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                   placeholder="••••••••">
+                            <button type="button" onclick="togglePassword('loginPassword')" 
+                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
                     </div>
-                    <div>
-                        <label class="form-label">Konfirmasi Password</label>
-                        <input type="password" id="regPasswordConfirm" class="form-input" placeholder="Ulangi password" required>
+
+                    <div class="flex items-center justify-between text-sm">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                            <span class="text-gray-600">Ingat saya</span>
+                        </label>
+                        <a href="#" onclick="showResetPassword()" class="text-primary-600 hover:text-primary-700 font-medium">
+                            Lupa password?
+                        </a>
                     </div>
-                    <button type="submit" class="btn-primary w-full py-3">
-                        <i class="fas fa-user-plus"></i>
-                        Daftar
+
+                    <button type="submit" 
+                            class="w-full py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Masuk
+                    </button>
+
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-200"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-4 bg-white text-gray-500">atau</span>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="signInWithGoogle()"
+                            class="w-full py-4 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 flex items-center justify-center space-x-3">
+                        <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5">
+                        <span>Masuk dengan Google</span>
                     </button>
                 </form>
-                <div class="mt-4 text-center">
-                    <p class="text-gray-600">Sudah punya akun? 
-                        <button onclick="showLogin()" class="text-primary font-medium hover:underline">Masuk</button>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Main App -->
-    <div id="mainApp" class="hidden">
-        <!-- Mobile Header -->
-        <header class="lg:hidden fixed top-0 left-0 right-0 bg-white shadow-md z-40 px-4 py-3">
-            <div class="flex items-center justify-between">
-                <button onclick="toggleSidebar()" class="text-gray-600 p-2">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-                <h1 class="text-lg font-bold text-primary">ADMIN GURU</h1>
-                <button onclick="showProfile()" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
-                    <span id="headerUserInitial">U</span>
-                </button>
-            </div>
-        </header>
-
-        <!-- Sidebar Overlay -->
-        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden" onclick="toggleSidebar()"></div>
-
-        <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-72 bg-white shadow-xl z-50 overflow-y-auto collapsed lg:translate-x-0">
-            <!-- Sidebar Header -->
-            <div class="bg-gradient-to-r from-primary to-accent p-6 text-white">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                        <i class="fas fa-chalkboard-teacher text-2xl text-primary"></i>
-                    </div>
+                <!-- Register Form -->
+                <form id="registerForm" class="space-y-5 hidden">
                     <div>
-                        <h1 class="font-bold text-lg">ADMIN GURU</h1>
-                        <p class="text-sm text-blue-100">Super App</p>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Lengkap</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <input type="text" id="registerName" required
+                                   class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                   placeholder="Nama lengkap Anda">
+                        </div>
                     </div>
-                </div>
-                <div class="mt-4 p-3 bg-white bg-opacity-20 rounded-lg">
-                    <p class="text-sm" id="sidebarUserName">Memuat...</p>
-                    <p class="text-xs text-blue-100" id="sidebarUserEmail">...</p>
-                    <span id="subscriptionBadge" class="inline-block mt-2 px-2 py-1 bg-yellow-400 text-yellow-900 text-xs font-medium rounded-full">FREE</span>
-                </div>
-            </div>
 
-            <!-- Year Selector -->
-            <div class="p-4 border-b">
-                <label class="form-label">Tahun Pelajaran</label>
-                <select id="academicYearSelect" class="form-input text-sm" onchange="changeAcademicYear()">
-                </select>
-            </div>
-
-            <!-- Navigation Menu -->
-            <nav class="p-4">
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Menu Utama</p>
-                
-                <div class="space-y-1">
-                    <button onclick="navigateTo('dashboard')" class="menu-item active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="dashboard">
-                        <i class="fas fa-home w-5"></i>
-                        <span>Dashboard</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('profile')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="profile">
-                        <i class="fas fa-user w-5"></i>
-                        <span>Profil & Sekolah</span>
-                    </button>
-                </div>
-
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 mt-6">Pengaturan Dasar</p>
-                
-                <div class="space-y-1">
-                    <button onclick="navigateTo('calendar')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="calendar">
-                        <i class="fas fa-calendar-alt w-5"></i>
-                        <span>Kalender Pendidikan</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('schedule')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="schedule">
-                        <i class="fas fa-clock w-5"></i>
-                        <span>Jadwal Pelajaran</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('curriculum')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="curriculum">
-                        <i class="fas fa-book w-5"></i>
-                        <span>CP & TP</span>
-                    </button>
-                </div>
-
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 mt-6">Dokumen Mengajar</p>
-                
-                <div class="space-y-1">
-                    <button onclick="navigateTo('atp')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="atp">
-                        <i class="fas fa-route w-5"></i>
-                        <span>ATP</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('prota')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="prota">
-                        <i class="fas fa-calendar-check w-5"></i>
-                        <span>Prota</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('promes')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="promes">
-                        <i class="fas fa-tasks w-5"></i>
-                        <span>Promes</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('modul')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 premium-feature" data-menu="modul">
-                        <i class="fas fa-file-alt w-5"></i>
-                        <span>Modul Ajar</span>
-                        <span class="premium-badge ml-auto px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full">PRO</span>
-                    </button>
-                </div>
-
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 mt-6">Akademik</p>
-                
-                <div class="space-y-1">
-                    <button onclick="navigateTo('students')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="students">
-                        <i class="fas fa-users w-5"></i>
-                        <span>Data Siswa</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('attendance')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="attendance">
-                        <i class="fas fa-clipboard-check w-5"></i>
-                        <span>Absensi</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('journal')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="journal">
-                        <i class="fas fa-journal-whills w-5"></i>
-                        <span>Jurnal Pembelajaran</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('grades')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="grades">
-                        <i class="fas fa-chart-bar w-5"></i>
-                        <span>Daftar Nilai</span>
-                    </button>
-                </div>
-
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 mt-6">Sumber Belajar</p>
-                
-                <div class="space-y-1">
-                    <button onclick="navigateTo('lkpd')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 premium-feature" data-menu="lkpd">
-                        <i class="fas fa-file-signature w-5"></i>
-                        <span>LKPD</span>
-                        <span class="premium-badge ml-auto px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full">PRO</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('questionBank')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 premium-feature" data-menu="questionBank">
-                        <i class="fas fa-question-circle w-5"></i>
-                        <span>Bank Soal</span>
-                        <span class="premium-badge ml-auto px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full">PRO</span>
-                    </button>
-                </div>
-
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 mt-6">Alat Bantu</p>
-                
-                <div class="space-y-1">
-                    <button onclick="navigateTo('aiAssistant')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="aiAssistant">
-                        <i class="fas fa-robot w-5"></i>
-                        <span>AI Assistant</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('help')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="help">
-                        <i class="fas fa-question w-5"></i>
-                        <span>Bantuan</span>
-                    </button>
-                </div>
-
-                <!-- Admin Menu -->
-                <div id="adminMenu" class="hidden">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 mt-6">Admin</p>
-                    
-                    <div class="space-y-1">
-                        <button onclick="navigateTo('adminUsers')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="adminUsers">
-                            <i class="fas fa-users-cog w-5"></i>
-                            <span>Kelola Pengguna</span>
-                        </button>
-                        
-                        <button onclick="navigateTo('adminSettings')" class="menu-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700" data-menu="adminSettings">
-                            <i class="fas fa-cogs w-5"></i>
-                            <span>Pengaturan Sistem</span>
-                        </button>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Gmail <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" id="registerEmail" required
+                                   class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                   placeholder="nama@gmail.com"
+                                   pattern="[a-zA-Z0-9._%+-]+@gmail\.com$">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">* Hanya email Gmail yang dapat didaftarkan</p>
                     </div>
-                </div>
 
-                <!-- Logout -->
-                <div class="mt-8 pt-4 border-t">
-                    <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors">
-                        <i class="fas fa-sign-out-alt w-5"></i>
-                        <span>Keluar</span>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" id="registerPassword" required minlength="6"
+                                   class="w-full pl-12 pr-12 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                   placeholder="Minimal 6 karakter">
+                            <button type="button" onclick="togglePassword('registerPassword')" 
+                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi Password</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" id="registerPasswordConfirm" required minlength="6"
+                                   class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                   placeholder="Ulangi password">
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-2">
+                        <input type="checkbox" id="agreeTerms" required 
+                               class="w-4 h-4 mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <label for="agreeTerms" class="text-sm text-gray-600">
+                            Saya setuju dengan <a href="#" class="text-primary-600 hover:underline">Syarat & Ketentuan</a> 
+                            dan <a href="#" class="text-primary-600 hover:underline">Kebijakan Privasi</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" 
+                            class="w-full py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Daftar Sekarang
                     </button>
-                </div>
-            </nav>
-        </aside>
 
-        <!-- Main Content -->
-        <main id="mainContent" class="lg:ml-72 pt-16 lg:pt-0 min-h-screen">
-        </main>
-    </div>
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-200"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-4 bg-white text-gray-500">atau</span>
+                        </div>
+                    </div>
 
-    <!-- Modal Container -->
-    <div id="modalContainer" class="hidden fixed inset-0 z-50">
-        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
-        <div class="relative flex items-center justify-center min-h-screen p-4">
-            <div id="modalContent" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative z-10">
+                    <button type="button" onclick="signInWithGoogle()"
+                            class="w-full py-4 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 flex items-center justify-center space-x-3">
+                        <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5">
+                        <span>Daftar dengan Google</span>
+                    </button>
+                </form>
+
+                <!-- Reset Password Form -->
+                <form id="resetPasswordForm" class="space-y-6 hidden">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-key text-2xl text-primary-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800">Reset Password</h3>
+                        <p class="text-gray-500 text-sm mt-2">Masukkan email Anda untuk menerima link reset password</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Gmail</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" id="resetEmail" required
+                                   class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                   placeholder="nama@gmail.com">
+                        </div>
+                    </div>
+
+                    <button type="submit" 
+                            class="w-full py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-purple-700 transition-all duration-300 shadow-lg">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Kirim Link Reset
+                    </button>
+
+                    <button type="button" onclick="showTab('login')" 
+                            class="w-full py-3 text-gray-600 font-medium hover:text-gray-800 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali ke Login
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Footer -->
+    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 text-white text-opacity-80 text-sm">
+        © 2025 Admin Guru Super App. All rights reserved.
+    </div>
+
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
     <script>
-// ============================================
-// CONFIGURATION
-// ============================================
-const firebaseConfig = {
-    apiKey: "AIzaSyDpiK4F4ilnDDNEwO0djGY-ClwgwBl1eFk",
-    authDomain: "asap-1d653.firebaseapp.com",
-    projectId: "asap-1d653",
-    storageBucket: "asap-1d653.firebasestorage.app",
-    messagingSenderId: "143263188364",
-    appId: "1:143263188364:web:47b4c003972b3503e882a9",
-};
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDpiK4F4ilnDDNEwO0djGY-ClwgwBl1eFk",
+            authDomain: "asap-1d653.firebaseapp.com",
+            projectId: "asap-1d653",
+            storageBucket: "asap-1d653.firebasestorage.app",
+            messagingSenderId: "143263188364",
+            appId: "1:143263188364:web:47b4c003972b3503e882a9",
+        };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-// App Constants
-const SUPER_ADMIN_EMAIL = 'afifaro@gmail.com';
-const APP_VERSION = '1.0.1';
-let UPGRADE_WHATSAPP = '6281234567890';
+        // Super Admin Email
+        const SUPER_ADMIN_EMAIL = 'afifaro@gmail.com';
 
-// ============================================
-// GLOBAL STATE
-// ============================================
-let currentUser = null;
-let userData = null;
-let currentAcademicYear = null;
-let selectedSemester = 1;
-let isLoading = false;
-
-// ============================================
-// HELPER: Format Academic Year for Document ID
-// ============================================
-function formatAcademicYearForDoc(year) {
-    // Convert "2025/2026" to "2025-2026" for Firestore document ID
-    return year.replace('/', '-');
-}
-
-function parseAcademicYearFromDoc(docId) {
-    // Convert "2025-2026" back to "2025/2026" for display
-    return docId.replace('-', '/');
-}
-
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
-function showLoading() {
-    document.getElementById('loadingScreen').classList.remove('hidden');
-}
-
-function hideLoading() {
-    document.getElementById('loadingScreen').classList.add('hidden');
-}
-
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    
-    const colors = {
-        success: 'bg-green-500',
-        error: 'bg-red-500',
-        warning: 'bg-yellow-500',
-        info: 'bg-blue-500'
-    };
-    
-    const icons = {
-        success: 'fa-check-circle',
-        error: 'fa-times-circle',
-        warning: 'fa-exclamation-circle',
-        info: 'fa-info-circle'
-    };
-    
-    toast.className = `toast ${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px]`;
-    toast.innerHTML = `
-        <i class="fas ${icons[type]}"></i>
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()" class="ml-auto">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        if (toast.parentElement) toast.remove();
-    }, 5000);
-}
-
-function togglePassword(inputId) {
-    const input = document.getElementById(inputId);
-    const icon = input.nextElementSibling.querySelector('i');
-    
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-    } else {
-        input.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-    }
-}
-
-function formatDate(date, format = 'full') {
-    const d = date instanceof Date ? date : new Date(date);
-    if (isNaN(d.getTime())) return '-';
-    
-    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    
-    if (format === 'full') {
-        return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-    } else if (format === 'short') {
-        return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
-    } else if (format === 'iso') {
-        return d.toISOString().split('T')[0];
-    }
-    return d.toLocaleDateString('id-ID');
-}
-
-function getAcademicYears() {
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
-    
-    let years = [];
-    
-    if (currentMonth >= 6) {
-        years.push(`${currentYear}/${currentYear + 1}`);
-        years.push(`${currentYear - 1}/${currentYear}`);
-    } else {
-        years.push(`${currentYear - 1}/${currentYear}`);
-        years.push(`${currentYear - 2}/${currentYear - 1}`);
-    }
-    
-    return years;
-}
-
-function getCurrentAcademicYear() {
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
-    
-    if (currentMonth >= 7) {
-        return `${currentYear}/${currentYear + 1}`;
-    } else {
-        return `${currentYear - 1}/${currentYear}`;
-    }
-}
-
-// ============================================
-// AUTHENTICATION
-// ============================================
-function showLogin() {
-    document.getElementById('loginForm').classList.remove('hidden');
-    document.getElementById('registerForm').classList.add('hidden');
-}
-
-function showRegister() {
-    document.getElementById('loginForm').classList.add('hidden');
-    document.getElementById('registerForm').classList.remove('hidden');
-}
-
-// Google Login
-async function loginWithGoogle() {
-    showLoading();
-    
-    try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.addScope('email');
-        provider.addScope('profile');
-        
-        const result = await auth.signInWithPopup(provider);
-        const user = result.user;
-        
-        // Check if user exists in Firestore
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        
-        if (!userDoc.exists) {
-            // Create new user document
-            await db.collection('users').doc(user.uid).set({
-                name: user.displayName || 'Pengguna',
-                email: user.email,
-                photoURL: user.photoURL || '',
-                subscription: 'free',
-                subscriptionExpiry: null,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                profile: {
-                    nip: '',
-                    nuptk: '',
-                    phone: '',
-                    subjects: []
-                },
-                school: {
-                    name: '',
-                    npsn: '',
-                    address: '',
-                    city: '', // Tambah field kota
-                    principalName: '',
-                    principalNIP: '',
-                    level: 'SD'
-                }
-            });
+        // Utility Functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
         }
-        
-        showToast('Login dengan Google berhasil!', 'success');
-    } catch (error) {
-        console.error('Google login error:', error);
-        let message = 'Gagal login dengan Google.';
-        if (error.code === 'auth/popup-closed-by-user') {
-            message = 'Login dibatalkan.';
-        } else if (error.code === 'auth/popup-blocked') {
-            message = 'Popup diblokir. Izinkan popup untuk login.';
-        }
-        showToast(message, 'error');
-    } finally {
-        hideLoading();
-    }
-}
 
-// Email Login
-document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    
-    showLoading();
-    
-    try {
-        await auth.signInWithEmailAndPassword(email, password);
-        showToast('Login berhasil!', 'success');
-    } catch (error) {
-        console.error('Login error:', error);
-        let message = 'Gagal login. Silakan coba lagi.';
-        if (error.code === 'auth/user-not-found') {
-            message = 'Email tidak terdaftar.';
-        } else if (error.code === 'auth/wrong-password') {
-            message = 'Password salah.';
-        } else if (error.code === 'auth/invalid-email') {
-            message = 'Format email tidak valid.';
-        } else if (error.code === 'auth/invalid-credential') {
-            message = 'Email atau password salah.';
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
         }
-        showToast(message, 'error');
-    } finally {
-        hideLoading();
-    }
-});
 
-// Email Register
-document.getElementById('registerFormElement').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const name = document.getElementById('regName').value;
-    const email = document.getElementById('regEmail').value;
-    const password = document.getElementById('regPassword').value;
-    const passwordConfirm = document.getElementById('regPasswordConfirm').value;
-    
-    if (password !== passwordConfirm) {
-        showToast('Password tidak cocok!', 'error');
-        return;
-    }
-    
-    showLoading();
-    
-    try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        
-        await db.collection('users').doc(userCredential.user.uid).set({
-            name: name,
-            email: email,
-            subscription: 'free',
-            subscriptionExpiry: null,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            profile: {
-                nip: '',
-                nuptk: '',
-                phone: '',
-                subjects: []
-            },
-            school: {
-                name: '',
-                npsn: '',
-                address: '',
-                city: '',
-                principalName: '',
-                principalNIP: '',
-                level: 'SD'
-            }
-        });
-        
-        showToast('Registrasi berhasil! Selamat datang.', 'success');
-    } catch (error) {
-        console.error('Register error:', error);
-        let message = 'Gagal registrasi. Silakan coba lagi.';
-        if (error.code === 'auth/email-already-in-use') {
-            message = 'Email sudah terdaftar.';
-        } else if (error.code === 'auth/weak-password') {
-            message = 'Password terlalu lemah. Minimal 6 karakter.';
-        }
-        showToast(message, 'error');
-    } finally {
-        hideLoading();
-    }
-});
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastContent = document.getElementById('toastContent');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
 
-async function logout() {
-    if (confirm('Apakah Anda yakin ingin keluar?')) {
-        showLoading();
-        try {
-            await auth.signOut();
-            showToast('Logout berhasil!', 'success');
-        } catch (error) {
-            showToast('Gagal logout.', 'error');
-        } finally {
-            hideLoading();
-        }
-    }
-}
-
-// Auth state observer
-auth.onAuthStateChanged(async (user) => {
-    hideLoading();
-    
-    if (user) {
-        currentUser = user;
-        
-        try {
-            const doc = await db.collection('users').doc(user.uid).get();
-            if (doc.exists) {
-                userData = doc.data();
-            } else {
-                userData = {
-                    name: user.displayName || 'Pengguna',
-                    email: user.email,
-                    subscription: 'free',
-                    profile: { subjects: [] },
-                    school: { level: 'SD', city: '' }
-                };
-                await db.collection('users').doc(user.uid).set(userData);
-            }
-        } catch (error) {
-            console.error('Error loading user data:', error);
-            userData = {
-                name: user.displayName || 'Pengguna',
-                email: user.email,
-                subscription: 'free',
-                profile: { subjects: [] },
-                school: { level: 'SD', city: '' }
+            const types = {
+                success: { bg: 'bg-green-500', icon: 'fas fa-check-circle' },
+                error: { bg: 'bg-red-500', icon: 'fas fa-exclamation-circle' },
+                warning: { bg: 'bg-yellow-500', icon: 'fas fa-exclamation-triangle' },
+                info: { bg: 'bg-blue-500', icon: 'fas fa-info-circle' }
             };
+
+            toastContent.className = `${types[type].bg} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3`;
+            toastIcon.className = `${types[type].icon} text-xl`;
+            toastMessage.textContent = message;
+
+            toast.classList.remove('translate-x-full');
+            toast.classList.add('translate-x-0');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0');
+                toast.classList.add('translate-x-full');
+            }, 3000);
         }
-        
-        if (user.email === SUPER_ADMIN_EMAIL) {
-            userData.isAdmin = true;
-            document.getElementById('adminMenu').classList.remove('hidden');
+
+        function showTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const resetPasswordForm = document.getElementById('resetPasswordForm');
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+
+            loginForm.classList.add('hidden');
+            registerForm.classList.add('hidden');
+            resetPasswordForm.classList.add('hidden');
+
+            loginTab.classList.remove('bg-white', 'text-primary-600', 'shadow');
+            registerTab.classList.remove('bg-white', 'text-primary-600', 'shadow');
+            loginTab.classList.add('text-gray-500');
+            registerTab.classList.add('text-gray-500');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                loginTab.classList.remove('text-gray-500');
+                loginTab.classList.add('bg-white', 'text-primary-600', 'shadow');
+            } else if (tab === 'register') {
+                registerForm.classList.remove('hidden');
+                registerTab.classList.remove('text-gray-500');
+                registerTab.classList.add('bg-white', 'text-primary-600', 'shadow');
+            }
         }
-        
-        document.getElementById('authScreen').classList.add('hidden');
-        document.getElementById('mainApp').classList.remove('hidden');
-        
-        document.getElementById('headerUserInitial').textContent = (userData.name || 'U').charAt(0).toUpperCase();
-        document.getElementById('sidebarUserName').textContent = userData.name || 'Pengguna';
-        document.getElementById('sidebarUserEmail').textContent = userData.email;
-        
-        const badge = document.getElementById('subscriptionBadge');
-        if (userData.subscription === 'premium') {
-            badge.textContent = 'PREMIUM';
-            badge.className = 'inline-block mt-2 px-2 py-1 bg-green-400 text-green-900 text-xs font-medium rounded-full';
-        } else {
-            badge.textContent = 'FREE';
-            badge.className = 'inline-block mt-2 px-2 py-1 bg-yellow-400 text-yellow-900 text-xs font-medium rounded-full';
+
+        function showResetPassword() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('resetPasswordForm').classList.remove('hidden');
         }
-        
-        initAcademicYearSelector();
-        navigateTo('dashboard');
-    } else {
-        currentUser = null;
-        userData = null;
-        document.getElementById('authScreen').classList.remove('hidden');
-        document.getElementById('mainApp').classList.add('hidden');
-    }
-});
 
-// ============================================
-// NAVIGATION
-// ============================================
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    
-    sidebar.classList.toggle('collapsed');
-    overlay.classList.toggle('hidden');
-}
-
-function navigateTo(page) {
-    const premiumPages = ['modul', 'lkpd', 'questionBank'];
-    if (premiumPages.includes(page) && userData?.subscription !== 'premium' && !userData?.isAdmin) {
-        showUpgradeModal();
-        return;
-    }
-    
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    const activeItem = document.querySelector(`[data-menu="${page}"]`);
-    if (activeItem) {
-        activeItem.classList.add('active');
-    }
-    
-    if (window.innerWidth < 1024) {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        if (!sidebar.classList.contains('collapsed')) {
-            sidebar.classList.add('collapsed');
-            overlay.classList.add('hidden');
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
         }
-    }
-    
-    loadPage(page);
-}
 
-function initAcademicYearSelector() {
-    const select = document.getElementById('academicYearSelect');
-    const years = getAcademicYears();
-    
-    select.innerHTML = years.map(year => `
-        <option value="${year}">${year}</option>
-    `).join('');
-    
-    currentAcademicYear = years[0];
-    select.value = currentAcademicYear;
-}
-
-function changeAcademicYear() {
-    currentAcademicYear = document.getElementById('academicYearSelect').value;
-    const currentPage = document.querySelector('.menu-item.active')?.dataset.menu || 'dashboard';
-    loadPage(currentPage);
-}
-
-// ============================================
-// PAGE LOADER
-// ============================================
-async function loadPage(page) {
-    const mainContent = document.getElementById('mainContent');
-    mainContent.innerHTML = '<div class="flex items-center justify-center h-64"><div class="spinner"></div></div>';
-    
-    try {
-        switch(page) {
-            case 'dashboard':
-                mainContent.innerHTML = getDashboardHTML();
-                await initDashboard();
-                break;
-            case 'profile':
-                mainContent.innerHTML = getProfileHTML();
-                initProfile();
-                break;
-            case 'calendar':
-                mainContent.innerHTML = getCalendarHTML();
-                await initCalendar();
-                break;
-            case 'schedule':
-                mainContent.innerHTML = getScheduleHTML();
-                await initSchedule();
-                break;
-            case 'curriculum':
-                mainContent.innerHTML = getCurriculumHTML();
-                await initCurriculum();
-                break;
-            case 'atp':
-                mainContent.innerHTML = getATPHTML();
-                await initATP();
-                break;
-            case 'prota':
-                mainContent.innerHTML = getProtaHTML();
-                await initProta();
-                break;
-            case 'promes':
-                mainContent.innerHTML = getPromesHTML();
-                await initPromes();
-                break;
-            case 'modul':
-                mainContent.innerHTML = getModulHTML();
-                await initModul();
-                break;
-            case 'students':
-                mainContent.innerHTML = getStudentsHTML();
-                await initStudents();
-                break;
-            case 'attendance':
-                mainContent.innerHTML = getAttendanceHTML();
-                initAttendance();
-                break;
-            case 'journal':
-                mainContent.innerHTML = getJournalHTML();
-                await initJournal();
-                break;
-            case 'grades':
-                mainContent.innerHTML = getGradesHTML();
-                await initGrades();
-                break;
-            case 'lkpd':
-                mainContent.innerHTML = getLKPDHTML();
-                await initLKPD();
-                break;
-            case 'questionBank':
-                mainContent.innerHTML = getQuestionBankHTML();
-                await initQuestionBank();
-                break;
-            case 'aiAssistant':
-                mainContent.innerHTML = getAIAssistantHTML();
-                break;
-            case 'help':
-                mainContent.innerHTML = getHelpHTML();
-                break;
-            case 'adminUsers':
-                mainContent.innerHTML = getAdminUsersHTML();
-                await initAdminUsers();
-                break;
-            case 'adminSettings':
-                mainContent.innerHTML = getAdminSettingsHTML();
-                initAdminSettings();
-                break;
-            default:
-                mainContent.innerHTML = getDashboardHTML();
-                await initDashboard();
+        function isGmailEmail(email) {
+            return email.toLowerCase().endsWith('@gmail.com');
         }
-    } catch (error) {
-        console.error('Error loading page:', error);
-        mainContent.innerHTML = `
-            <div class="p-6">
-                <div class="bg-red-100 text-red-700 p-4 rounded-lg">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                    Terjadi kesalahan saat memuat halaman. Silakan coba lagi.
-                    <br><small class="text-red-500">${error.message}</small>
-                </div>
-            </div>
-        `;
-    }
-}
 
-// ============================================
-// MODAL FUNCTIONS
-// ============================================
-function showModal(content) {
-    const container = document.getElementById('modalContainer');
-    const modalContent = document.getElementById('modalContent');
-    
-    modalContent.innerHTML = content;
-    container.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-    const container = document.getElementById('modalContainer');
-    container.classList.add('hidden');
-    document.body.style.overflow = '';
-}
-
-function showUpgradeModal() {
-    const modalContent = `
-        <div class="p-6 text-center">
-            <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-crown text-4xl text-yellow-500"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">Fitur Premium</h2>
-            <p class="text-gray-600 mb-6">Upgrade ke Premium untuk mengakses semua fitur lengkap!</p>
+        function getAcademicYear() {
+            const now = new Date();
+            const month = now.getMonth() + 1;
+            const year = now.getFullYear();
             
-            <div class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
-                <h4 class="font-semibold text-gray-800 mb-3">Fitur Premium:</h4>
-                <ul class="space-y-2 text-sm text-gray-600">
-                    <li><i class="fas fa-check text-green-500 mr-2"></i>Modul Ajar lengkap</li>
-                    <li><i class="fas fa-check text-green-500 mr-2"></i>LKPD (Lembar Kerja Peserta Didik)</li>
-                    <li><i class="fas fa-check text-green-500 mr-2"></i>Bank Soal dengan dukungan teks Arab</li>
-                    <li><i class="fas fa-check text-green-500 mr-2"></i>Export semua dokumen</li>
-                    <li><i class="fas fa-check text-green-500 mr-2"></i>Support prioritas</li>
-                </ul>
-            </div>
-            
-            <div class="flex gap-3">
-                <button onclick="closeModal()" class="btn-secondary flex-1">Nanti Saja</button>
-                <a href="https://wa.me/${UPGRADE_WHATSAPP}?text=Halo,%20saya%20ingin%20upgrade%20ke%20Premium%20ADMIN%20GURU%20SUPER%20APP" target="_blank" class="btn-primary flex-1">
-                    <i class="fab fa-whatsapp"></i>
-                    Hubungi Admin
-                </a>
-            </div>
-        </div>
-    `;
-    
-    showModal(modalContent);
-}
-
-function showProfile() {
-    navigateTo('profile');
-}
-
-// ============================================
-// DASHBOARD PAGE
-// ============================================
-function getDashboardHTML() {
-    return `
-        <div class="p-4 lg:p-6 fade-in">
-            <div class="bg-gradient-to-r from-primary to-accent rounded-2xl p-6 text-white mb-6">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                        <h1 class="text-2xl lg:text-3xl font-bold mb-2">Selamat Datang, ${userData?.name || 'Guru'}! 👋</h1>
-                        <p class="text-blue-100">Tahun Pelajaran ${currentAcademicYear}</p>
-                    </div>
-                    <div class="mt-4 lg:mt-0">
-                        <p class="text-sm text-blue-100">${formatDate(new Date())}</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div class="card bg-white rounded-xl p-4 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-users text-blue-600 text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Total Siswa</p>
-                            <p class="text-xl font-bold text-gray-800" id="statTotalStudents">-</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card bg-white rounded-xl p-4 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-chalkboard text-green-600 text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Total Kelas</p>
-                            <p class="text-xl font-bold text-gray-800" id="statTotalClasses">-</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card bg-white rounded-xl p-4 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-book text-yellow-600 text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Mata Pelajaran</p>
-                            <p class="text-xl font-bold text-gray-800" id="statTotalSubjects">-</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card bg-white rounded-xl p-4 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-file-alt text-purple-600 text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Modul Ajar</p>
-                            <p class="text-xl font-bold text-gray-800" id="statTotalModules">-</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Aksi Cepat</h2>
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <button onclick="navigateTo('attendance')" class="flex flex-col items-center gap-2 p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
-                        <i class="fas fa-clipboard-check text-2xl text-blue-600"></i>
-                        <span class="text-sm font-medium text-gray-700">Input Absensi</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('journal')" class="flex flex-col items-center gap-2 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors">
-                        <i class="fas fa-journal-whills text-2xl text-green-600"></i>
-                        <span class="text-sm font-medium text-gray-700">Jurnal Hari Ini</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('grades')" class="flex flex-col items-center gap-2 p-4 bg-yellow-50 rounded-xl hover:bg-yellow-100 transition-colors">
-                        <i class="fas fa-chart-bar text-2xl text-yellow-600"></i>
-                        <span class="text-sm font-medium text-gray-700">Input Nilai</span>
-                    </button>
-                    
-                    <button onclick="navigateTo('promes')" class="flex flex-col items-center gap-2 p-4 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors">
-                        <i class="fas fa-tasks text-2xl text-purple-600"></i>
-                        <span class="text-sm font-medium text-gray-700">Lihat Promes</span>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl p-6 shadow-sm">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">
-                    <i class="fas fa-tasks text-primary mr-2"></i>
-                    Progress Pengaturan
-                </h2>
-                <div id="setupProgress" class="space-y-3">
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-async function initDashboard() {
-    await loadDashboardStats();
-    await loadSetupProgress();
-}
-
-async function loadDashboardStats() {
-    try {
-        const yearDocId = formatAcademicYearForDoc(currentAcademicYear);
-        
-        const studentsSnap = await db.collection('users').doc(currentUser.uid)
-            .collection('students')
-            .where('academicYear', '==', currentAcademicYear)
-            .get();
-        document.getElementById('statTotalStudents').textContent = studentsSnap.size;
-        
-        const classes = new Set();
-        studentsSnap.forEach(doc => {
-            const student = doc.data();
-            classes.add(`${student.kelas}-${student.rombel}`);
-        });
-        document.getElementById('statTotalClasses').textContent = classes.size;
-        
-        const subjects = userData?.profile?.subjects || [];
-        document.getElementById('statTotalSubjects').textContent = subjects.length;
-        
-        const modulesSnap = await db.collection('users').doc(currentUser.uid)
-            .collection('modules')
-            .where('academicYear', '==', currentAcademicYear)
-            .get();
-        document.getElementById('statTotalModules').textContent = modulesSnap.size;
-    } catch (error) {
-        console.error('Error loading stats:', error);
-    }
-}
-
-async function loadSetupProgress() {
-    const container = document.getElementById('setupProgress');
-    
-    const checks = [
-        { id: 'profile', name: 'Profil Lengkap', check: () => userData?.profile?.nip && userData?.school?.name },
-        { id: 'calendar', name: 'Kalender Pendidikan', check: async () => {
-            const yearDocId = formatAcademicYearForDoc(currentAcademicYear);
-            const cal = await db.collection('users').doc(currentUser.uid).collection('calendar').doc(yearDocId).get();
-            return cal.exists;
-        }},
-        { id: 'schedule', name: 'Jadwal Pelajaran', check: async () => {
-            const sch = await db.collection('users').doc(currentUser.uid).collection('schedules').where('academicYear', '==', currentAcademicYear).limit(1).get();
-            return !sch.empty;
-        }},
-        { id: 'curriculum', name: 'CP & TP', check: async () => {
-            const cp = await db.collection('users').doc(currentUser.uid).collection('curriculum').where('academicYear', '==', currentAcademicYear).limit(1).get();
-            return !cp.empty;
-        }},
-        { id: 'students', name: 'Data Siswa', check: async () => {
-            const st = await db.collection('users').doc(currentUser.uid).collection('students').where('academicYear', '==', currentAcademicYear).limit(1).get();
-            return !st.empty;
-        }}
-    ];
-    
-    let html = '';
-    let completed = 0;
-    
-    for (const item of checks) {
-        let isComplete = false;
-        try {
-            isComplete = typeof item.check === 'function' ? await item.check() : item.check;
-        } catch (e) {
-            isComplete = false;
+            if (month >= 7) {
+                return {
+                    current: `${year}/${year + 1}`,
+                    options: [`${year - 1}/${year}`, `${year}/${year + 1}`]
+                };
+            } else {
+                return {
+                    current: `${year - 1}/${year}`,
+                    options: [`${year - 1}/${year}`, `${year}/${year + 1}`]
+                };
+            }
         }
-        
-        if (isComplete) completed++;
-        
-        html += `
-            <div class="flex items-center gap-3 p-3 ${isComplete ? 'bg-green-50' : 'bg-gray-50'} rounded-lg cursor-pointer hover:bg-opacity-80" onclick="navigateTo('${item.id}')">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center ${isComplete ? 'bg-green-500' : 'bg-gray-300'}">
-                    <i class="fas ${isComplete ? 'fa-check' : 'fa-circle'} text-white text-sm"></i>
-                </div>
-                <span class="${isComplete ? 'text-green-700' : 'text-gray-600'} font-medium">${item.name}</span>
-                <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
-            </div>
-        `;
-    }
-    
-    const percentage = (completed / checks.length) * 100;
-    container.innerHTML = `
-        <div class="mb-4">
-            <div class="flex justify-between text-sm mb-2">
-                <span class="text-gray-600">Progress Pengaturan</span>
-                <span class="font-medium text-primary">${completed}/${checks.length}</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-primary h-2 rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
-            </div>
-        </div>
-        ${html}
-    `;
-}
 
-// ============================================
-// PROFILE PAGE (with City field)
-// ============================================
-function getProfileHTML() {
-    return `
-        <div class="p-4 lg:p-6 fade-in">
-            <div class="flex items-center justify-between mb-6">
-                <h1 class="text-2xl font-bold text-gray-800">Profil & Sekolah</h1>
-            </div>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white rounded-xl p-6 shadow-sm">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-user text-primary mr-2"></i>
-                        Data Pribadi
-                    </h2>
-                    <form id="profileForm" class="space-y-4">
-                        <div>
-                            <label class="form-label">Nama Lengkap</label>
-                            <input type="text" id="profileName" class="form-input" placeholder="Nama lengkap Anda" required>
-                        </div>
-                        
-                        <div>
-                            <label class="form-label">Email</label>
-                            <input type="email" id="profileEmail" class="form-input bg-gray-100" readonly>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="form-label">NIP</label>
-                                <input type="text" id="profileNIP" class="form-input" placeholder="NIP">
-                            </div>
-                            <div>
-                                <label class="form-label">NUPTK</label>
-                                <input type="text" id="profileNUPTK" class="form-input" placeholder="NUPTK">
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="form-label">No. Telepon/WA</label>
-                            <input type="tel" id="profilePhone" class="form-input" placeholder="08xxxxxxxxxx">
-                        </div>
-                        
-                        <button type="submit" class="btn-primary w-full">
-                            <i class="fas fa-save"></i>
-                            Simpan Data Pribadi
-                        </button>
-                    </form>
-                </div>
-                
-                <div class="bg-white rounded-xl p-6 shadow-sm">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-school text-primary mr-2"></i>
-                        Data Sekolah
-                    </h2>
-                    <form id="schoolForm" class="space-y-4">
-                        <div>
-                            <label class="form-label">Nama Sekolah</label>
-                            <input type="text" id="schoolName" class="form-input" placeholder="Nama sekolah" required>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="form-label">NPSN</label>
-                                <input type="text" id="schoolNPSN" class="form-input" placeholder="NPSN">
-                            </div>
-                            <div>
-                                <label class="form-label">Jenjang</label>
-                                <select id="schoolLevel" class="form-input">
-                                    <option value="SD">SD/MI</option>
-                                    <option value="SMP">SMP/MTs</option>
-                                    <option value="SMA">SMA/MA</option>
-                                    <option value="SMK">SMK</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="form-label">Kota/Kabupaten</label>
-                            <input type="text" id="schoolCity" class="form-input" placeholder="Contoh: Surabaya">
-                            <p class="text-xs text-gray-500 mt-1">Untuk label tanda tangan dokumen</p>
-                        </div>
-                        
-                        <div>
-                            <label class="form-label">Alamat Sekolah</label>
-                            <textarea id="schoolAddress" class="form-input" rows="2" placeholder="Alamat lengkap sekolah"></textarea>
-                        </div>
-                        
-                        <div>
-                            <label class="form-label">Nama Kepala Sekolah</label>
-                            <input type="text" id="schoolPrincipal" class="form-input" placeholder="Nama kepala sekolah">
-                        </div>
-                        
-                        <div>
-                            <label class="form-label">NIP Kepala Sekolah</label>
-                            <input type="text" id="schoolPrincipalNIP" class="form-input" placeholder="NIP kepala sekolah">
-                        </div>
-                        
-                        <button type="submit" class="btn-primary w-full">
-                            <i class="fas fa-save"></i>
-                            Simpan Data Sekolah
-                        </button>
-                    </form>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl p-6 shadow-sm mt-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-gray-800">
-                        <i class="fas fa-book text-primary mr-2"></i>
-                        Mata Pelajaran yang Diampu
-                    </h2>
-                    <button onclick="showAddSubjectModal()" class="btn-primary">
-                        <i class="fas fa-plus"></i>
-                        Tambah Mapel
-                    </button>
-                </div>
-                
-                <div id="subjectsList" class="space-y-3">
-                </div>
-            </div>
-        </div>
-    `;
-}
+        // Login Form Handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
 
-function initProfile() {
-    document.getElementById('profileName').value = userData?.name || '';
-    document.getElementById('profileEmail').value = userData?.email || '';
-    document.getElementById('profileNIP').value = userData?.profile?.nip || '';
-    document.getElementById('profileNUPTK').value = userData?.profile?.nuptk || '';
-    document.getElementById('profilePhone').value = userData?.profile?.phone || '';
-    
-    document.getElementById('schoolName').value = userData?.school?.name || '';
-    document.getElementById('schoolNPSN').value = userData?.school?.npsn || '';
-    document.getElementById('schoolLevel').value = userData?.school?.level || 'SD';
-    document.getElementById('schoolCity').value = userData?.school?.city || '';
-    document.getElementById('schoolAddress').value = userData?.school?.address || '';
-    document.getElementById('schoolPrincipal').value = userData?.school?.principalName || '';
-    document.getElementById('schoolPrincipalNIP').value = userData?.school?.principalNIP || '';
-    
-    loadSubjects();
-    
-    document.getElementById('profileForm').addEventListener('submit', saveProfile);
-    document.getElementById('schoolForm').addEventListener('submit', saveSchool);
-}
-
-async function saveProfile(e) {
-    e.preventDefault();
-    showLoading();
-    
-    try {
-        const data = {
-            name: document.getElementById('profileName').value,
-            'profile.nip': document.getElementById('profileNIP').value,
-            'profile.nuptk': document.getElementById('profileNUPTK').value,
-            'profile.phone': document.getElementById('profilePhone').value,
-        };
-        
-        await db.collection('users').doc(currentUser.uid).update(data);
-        
-        userData.name = data.name;
-        userData.profile = userData.profile || {};
-        userData.profile.nip = data['profile.nip'];
-        userData.profile.nuptk = data['profile.nuptk'];
-        userData.profile.phone = data['profile.phone'];
-        
-        document.getElementById('sidebarUserName').textContent = data.name;
-        document.getElementById('headerUserInitial').textContent = data.name.charAt(0).toUpperCase();
-        
-        showToast('Data pribadi berhasil disimpan!', 'success');
-    } catch (error) {
-        console.error('Error saving profile:', error);
-        showToast('Gagal menyimpan data pribadi.', 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-async function saveSchool(e) {
-    e.preventDefault();
-    showLoading();
-    
-    try {
-        const data = {
-            'school.name': document.getElementById('schoolName').value,
-            'school.npsn': document.getElementById('schoolNPSN').value,
-            'school.level': document.getElementById('schoolLevel').value,
-            'school.city': document.getElementById('schoolCity').value,
-            'school.address': document.getElementById('schoolAddress').value,
-            'school.principalName': document.getElementById('schoolPrincipal').value,
-            'school.principalNIP': document.getElementById('schoolPrincipalNIP').value,
-        };
-        
-        await db.collection('users').doc(currentUser.uid).update(data);
-        
-        userData.school = userData.school || {};
-        userData.school.name = data['school.name'];
-        userData.school.npsn = data['school.npsn'];
-        userData.school.level = data['school.level'];
-        userData.school.city = data['school.city'];
-        userData.school.address = data['school.address'];
-        userData.school.principalName = data['school.principalName'];
-        userData.school.principalNIP = data['school.principalNIP'];
-        
-        showToast('Data sekolah berhasil disimpan!', 'success');
-    } catch (error) {
-        console.error('Error saving school:', error);
-        showToast('Gagal menyimpan data sekolah.', 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-function loadSubjects() {
-    const subjects = userData?.profile?.subjects || [];
-    const container = document.getElementById('subjectsList');
-    
-    if (subjects.length === 0) {
-        container.innerHTML = `
-            <div class="text-center py-8 text-gray-500">
-                <i class="fas fa-book text-4xl mb-2"></i>
-                <p>Belum ada mata pelajaran</p>
-                <p class="text-sm">Klik tombol "Tambah Mapel" untuk menambahkan</p>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = subjects.map((subject, index) => `
-        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div>
-                <p class="font-medium text-gray-800">${subject.name}</p>
-                <p class="text-sm text-gray-500">${subject.hoursPerWeek} JP/minggu per pertemuan</p>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="editSubject(${index})" class="text-blue-600 hover:text-blue-800 p-2">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button onclick="deleteSubject(${index})" class="text-red-600 hover:text-red-800 p-2">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function showAddSubjectModal(editIndex = null) {
-    const isEdit = editIndex !== null;
-    const subject = isEdit ? userData.profile.subjects[editIndex] : null;
-    
-    const predefinedSubjects = getPredefinedSubjects(userData?.school?.level || 'SD');
-    
-    const modalContent = `
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-gray-800">${isEdit ? 'Edit' : 'Tambah'} Mata Pelajaran</h2>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            
-            <form id="subjectForm" class="space-y-4">
-                <input type="hidden" id="subjectEditIndex" value="${editIndex ?? ''}">
-                
-                <div>
-                    <label class="form-label">Pilih Mata Pelajaran</label>
-                    <select id="subjectSelect" class="form-input" onchange="onSubjectSelect()">
-                        <option value="">-- Pilih atau ketik sendiri --</option>
-                        ${predefinedSubjects.map(s => `<option value="${s}">${s}</option>`).join('')}
-                        <option value="other">Lainnya (ketik sendiri)</option>
-                    </select>
-                </div>
-                
-                <div id="customSubjectInput" class="hidden">
-                    <label class="form-label">Nama Mata Pelajaran</label>
-                    <input type="text" id="subjectName" class="form-input" placeholder="Contoh: Bahasa Indonesia" value="${subject?.name || ''}">
-                </div>
-                
-                <div>
-                    <label class="form-label">Jumlah JP per Pertemuan per Minggu</label>
-                    <input type="number" id="subjectHours" class="form-input" min="1" max="10" value="${subject?.hoursPerWeek || 2}" required>
-                    <p class="text-xs text-gray-500 mt-1">Jumlah jam pelajaran dalam setiap pertemuan</p>
-                </div>
-                
-                <div class="flex gap-3">
-                    <button type="button" onclick="closeModal()" class="btn-secondary flex-1">Batal</button>
-                    <button type="submit" class="btn-primary flex-1">
-                        <i class="fas fa-save"></i>
-                        Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    `;
-    
-    showModal(modalContent);
-    
-    if (isEdit && subject) {
-        const select = document.getElementById('subjectSelect');
-        const options = Array.from(select.options);
-        const match = options.find(o => o.value === subject.name);
-        if (match) {
-            select.value = subject.name;
-        } else {
-            select.value = 'other';
-            document.getElementById('customSubjectInput').classList.remove('hidden');
-            document.getElementById('subjectName').value = subject.name;
-        }
-    }
-    
-    document.getElementById('subjectForm').addEventListener('submit', saveSubject);
-}
-
-function getPredefinedSubjects(level) {
-    const common = [
-        'Pendidikan Agama Islam dan Budi Pekerti',
-        'Pendidikan Agama Kristen',
-        'Pendidikan Agama Katolik',
-        'Pendidikan Agama Hindu',
-        'Pendidikan Agama Buddha',
-        'Pendidikan Agama Khonghucu',
-        'Pendidikan Pancasila',
-        'Bahasa Indonesia',
-        'Matematika',
-        'Bahasa Inggris',
-        'Pendidikan Jasmani, Olahraga dan Kesehatan',
-        'Seni Budaya'
-    ];
-    
-    const sd = [...common, 'IPAS'];
-    const smp = [...common, 'IPA', 'IPS', 'Informatika', 'Prakarya'];
-    const sma = [...common, 'Fisika', 'Kimia', 'Biologi', 'Ekonomi', 'Sosiologi', 'Geografi', 'Sejarah', 'Informatika'];
-    
-    switch(level) {
-        case 'SD': return sd;
-        case 'SMP': return smp;
-        case 'SMA': case 'SMK': return sma;
-        default: return common;
-    }
-}
-
-function onSubjectSelect() {
-    const select = document.getElementById('subjectSelect');
-    const customInput = document.getElementById('customSubjectInput');
-    
-    if (select.value === 'other') {
-        customInput.classList.remove('hidden');
-        document.getElementById('subjectName').required = true;
-    } else {
-        customInput.classList.add('hidden');
-        document.getElementById('subjectName').required = false;
-    }
-}
-
-async function saveSubject(e) {
-    e.preventDefault();
-    
-    const select = document.getElementById('subjectSelect');
-    const subjectName = select.value === 'other' 
-        ? document.getElementById('subjectName').value 
-        : select.value;
-    
-    if (!subjectName) {
-        showToast('Pilih atau masukkan nama mata pelajaran', 'warning');
-        return;
-    }
-    
-    const hours = parseInt(document.getElementById('subjectHours').value);
-    const editIndex = document.getElementById('subjectEditIndex').value;
-    
-    showLoading();
-    
-    try {
-        const subjects = userData.profile?.subjects || [];
-        
-        const newSubject = {
-            name: subjectName,
-            hoursPerWeek: hours
-        };
-        
-        if (editIndex !== '') {
-            subjects[parseInt(editIndex)] = newSubject;
-        } else {
-            if (subjects.some(s => s.name === subjectName)) {
-                showToast('Mata pelajaran ini sudah ada!', 'warning');
-                hideLoading();
+            if (!isGmailEmail(email)) {
+                showToast('Hanya email Gmail yang dapat digunakan!', 'error');
                 return;
             }
-            subjects.push(newSubject);
+
+            showLoading();
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                showToast('Login berhasil!', 'success');
+                
+                // Check if Super Admin
+                if (email === SUPER_ADMIN_EMAIL) {
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 1000);
+                } else {
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error(error);
+                let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'Akun tidak ditemukan. Silakan daftar terlebih dahulu.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Password salah. Silakan coba lagi.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Format email tidak valid.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMessage = 'Terlalu banyak percobaan. Silakan coba lagi nanti.';
+                }
+                showToast(errorMessage, 'error');
+            }
+            hideLoading();
+        });
+
+        // Register Form Handler
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+
+            if (!isGmailEmail(email)) {
+                showToast('Hanya email Gmail yang dapat didaftarkan!', 'error');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                showToast('Password tidak cocok!', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showToast('Password minimal 6 karakter!', 'error');
+                return;
+            }
+
+            showLoading();
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Update profile
+                await user.updateProfile({ displayName: name });
+
+                // Create user document in Firestore
+                const academicYear = getAcademicYear();
+                await db.collection('users').doc(user.uid).set({
+                    uid: user.uid,
+                    email: email,
+                    displayName: name,
+                    photoURL: null,
+                    subscription: 'free',
+                    subscriptionExpiry: null,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                    profile: {
+                        nip: '',
+                        subjects: [],
+                        school: {
+                            name: '',
+                            npsn: '',
+                            level: 'SD',
+                            address: '',
+                            city: '',
+                            province: '',
+                            principalName: ''
+                        }
+                    },
+                    academicYear: academicYear.current,
+                    settings: {
+                        whatsappAdmin: '6281234567890'
+                    }
+                });
+
+                showToast('Registrasi berhasil! Selamat datang.', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+            } catch (error) {
+                console.error(error);
+                let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'Email sudah terdaftar. Silakan login.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Format email tidak valid.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'Password terlalu lemah. Gunakan minimal 6 karakter.';
+                }
+                showToast(errorMessage, 'error');
+            }
+            hideLoading();
+        });
+
+        // Reset Password Form Handler
+        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('resetEmail').value.trim();
+
+            if (!isGmailEmail(email)) {
+                showToast('Hanya email Gmail yang dapat digunakan!', 'error');
+                return;
+            }
+
+            showLoading();
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showToast('Link reset password telah dikirim ke email Anda.', 'success');
+                showTab('login');
+            } catch (error) {
+                console.error(error);
+                let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'Email tidak terdaftar.';
+                }
+                showToast(errorMessage, 'error');
+            }
+            hideLoading();
+        });
+
+        // Google Sign In
+        async function signInWithGoogle() {
+            showLoading();
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({
+                    hd: 'gmail.com'
+                });
+                
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+
+                if (!isGmailEmail(user.email)) {
+                    await user.delete();
+                    showToast('Hanya akun Gmail yang dapat digunakan!', 'error');
+                    hideLoading();
+                    return;
+                }
+
+                // Check if user exists
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (!userDoc.exists) {
+                    // Create new user document
+                    const academicYear = getAcademicYear();
+                    await db.collection('users').doc(user.uid).set({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName,
+                        photoURL: user.photoURL,
+                        subscription: 'free',
+                        subscriptionExpiry: null,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                        profile: {
+                            nip: '',
+                            subjects: [],
+                            school: {
+                                name: '',
+                                npsn: '',
+                                level: 'SD',
+                                address: '',
+                                city: '',
+                                province: '',
+                                principalName: ''
+                            }
+                        },
+                        academicYear: academicYear.current,
+                        settings: {
+                            whatsappAdmin: '6281234567890'
+                        }
+                    });
+                } else {
+                    // Update last login
+                    await db.collection('users').doc(user.uid).update({
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                showToast('Login berhasil!', 'success');
+                
+                if (user.email === SUPER_ADMIN_EMAIL) {
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 1000);
+                } else {
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error(error);
+                if (error.code !== 'auth/popup-closed-by-user') {
+                    showToast('Gagal login dengan Google. Silakan coba lagi.', 'error');
+                }
+            }
+            hideLoading();
         }
-        
-        await db.collection('users').doc(currentUser.uid).update({
-            'profile.subjects': subjects
+
+        // Check Auth State
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                if (user.email === SUPER_ADMIN_EMAIL) {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+            }
         });
-        
-        userData.profile.subjects = subjects;
-        
-        closeModal();
-        loadSubjects();
-        showToast('Mata pelajaran berhasil disimpan!', 'success');
-    } catch (error) {
-        console.error('Error saving subject:', error);
-        showToast('Gagal menyimpan mata pelajaran.', 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-function editSubject(index) {
-    showAddSubjectModal(index);
-}
-
-async function deleteSubject(index) {
-    if (!confirm('Hapus mata pelajaran ini?')) return;
-    
-    showLoading();
-    
-    try {
-        const subjects = userData.profile?.subjects || [];
-        subjects.splice(index, 1);
-        
-        await db.collection('users').doc(currentUser.uid).update({
-            'profile.subjects': subjects
-        });
-        
-        userData.profile.subjects = subjects;
-        loadSubjects();
-        showToast('Mata pelajaran berhasil dihapus!', 'success');
-    } catch (error) {
-        console.error('Error deleting subject:', error);
-        showToast('Gagal menghapus mata pelajaran.', 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// CALENDAR PAGE (Fixed document ID)
-// ============================================
-function getCalendarHTML() {
-    return `
-        <div class="p-4 lg:p-6 fade-in">
-            <div class="flex items-center justify-between mb-6">
-                <h1 class="text-2xl font-bold text-gray-800">Kalender Pendidikan</h1>
-                <div class="flex gap-2">
-                    <button onclick="saveCalendar()" class="btn-primary">
-                        <i class="fas fa-save"></i>
-                        Simpan Kalender
-                    </button>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">
-                    <i class="fas fa-calendar text-primary mr-2"></i>
-                    Tahun Pelajaran ${currentAcademicYear}
-                </h2>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="space-y-4">
-                        <h3 class="font-semibold text-gray-700 pb-2 border-b">Semester 1 (Ganjil)</h3>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="form-label">Awal Semester 1</label>
-                                <input type="date" id="sem1Start" class="form-input">
-                            </div>
-                            <div>
-                                <label class="form-label">Akhir Semester 1</label>
-                                <input type="date" id="sem1End" class="form-input">
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="form-label">Awal PTS 1</label>
-                                <input type="date" id="pts1Start" class="form-input">
-                            </div>
-                            <div>
-                                <label class="form-label">Akhir PTS 1</label>
-                                <input type="date" id="pts1End" class="form-input">
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="form-label">Awal PAS</label>
-                                <input type="date" id="pas1Start" class="form-input">
-                            </div>
-                            <div>
-                                <label class="form-label">Akhir PAS</label>
-                                <input type="date" id="pas1End" class="form-input">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <h3 class="font-semibold text-gray-700 pb-2 border-b">Semester 2 (Genap)</h3>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="form-label">Awal Semester 2</label>
-                                <input type="date" id="sem2Start" class="form-input">
-                            </div>
-                            <div>
-                                <label class="form-label">Akhir Semester 2</label>
-                                <input type="date" id="sem2End" class="form-input">
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="form-label">Awal PTS 2</label>
-                                <input type="date" id="pts2Start" class="form-input">
-                            </div>
-                            <div>
-                                <label class="form-label">Akhir PTS 2</label>
-                                <input type="date" id="pts2End" class="form-input">
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="form-label">Awal PAT</label>
-                                <input type="date" id="pat2Start" class="form-input">
-                            </div>
-                            <div>
-                                <label class="form-label">Akhir PAT</label>
-                                <input type="date" id="pat2End" class="form-input">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl p-6 shadow-sm mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-gray-800">
-                        <i class="fas fa-umbrella-beach text-primary mr-2"></i>
-                        Libur & Kegiatan Khusus
-                    </h2>
-                    <button onclick="addHoliday()" class="btn-secondary">
-                        <i class="fas fa-plus"></i>
-                        Tambah
-                    </button>
-                </div>
-                
-                <div id="holidaysList" class="space-y-3">
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-let holidays = [];
-let calendarData = null;
-
-async function initCalendar() {
-    try {
-        const yearDocId = formatAcademicYearForDoc(currentAcademicYear);
-        const calDoc = await db.collection('users').doc(currentUser.uid)
-            .collection('calendar').doc(yearDocId).get();
-        
-        if (calDoc.exists) {
-            const data = calDoc.data();
-            calendarData = data;
-            
-            document.getElementById('sem1Start').value = data.semester1?.start || '';
-            document.getElementById('sem1End').value = data.semester1?.end || '';
-            document.getElementById('pts1Start').value = data.pts1?.start || '';
-            document.getElementById('pts1End').value = data.pts1?.end || '';
-            document.getElementById('pas1Start').value = data.pas?.start || '';
-            document.getElementById('pas1End').value = data.pas?.end || '';
-            
-            document.getElementById('sem2Start').value = data.semester2?.start || '';
-            document.getElementById('sem2End').value = data.semester2?.end || '';
-            document.getElementById('pts2Start').value = data.pts2?.start || '';
-            document.getElementById('pts2End').value = data.pts2?.end || '';
-            document.getElementById('pat2Start').value = data.pat?.start || '';
-            document.getElementById('pat2End').value = data.pat?.end || '';
-            
-            holidays = data.holidays || [];
-        } else {
-            const [startYear, endYear] = currentAcademicYear.split('/').map(Number);
-            
-            document.getElementById('sem1Start').value = `${startYear}-07-15`;
-            document.getElementById('sem1End').value = `${startYear}-12-20`;
-            document.getElementById('pts1Start').value = `${startYear}-09-25`;
-            document.getElementById('pts1End').value = `${startYear}-09-30`;
-            document.getElementById('pas1Start').value = `${startYear}-12-05`;
-            document.getElementById('pas1End').value = `${startYear}-12-15`;
-            
-            document.getElementById('sem2Start').value = `${endYear}-01-05`;
-            document.getElementById('sem2End').value = `${endYear}-06-15`;
-            document.getElementById('pts2Start').value = `${endYear}-03-10`;
-            document.getElementById('pts2End').value = `${endYear}-03-15`;
-            document.getElementById('pat2Start').value = `${endYear}-05-25`;
-            document.getElementById('pat2End').value = `${endYear}-06-05`;
-            
-            holidays = [];
-        }
-        
-        renderHolidays();
-    } catch (error) {
-        console.error('Error loading calendar:', error);
-        showToast('Gagal memuat kalender.', 'error');
-    }
-}
-
-function renderHolidays() {
-    const container = document.getElementById('holidaysList');
-    
-    if (holidays.length === 0) {
-        container.innerHTML = `
-            <div class="text-center py-6 text-gray-500">
-                <i class="fas fa-calendar-times text-3xl mb-2"></i>
-                <p>Belum ada libur atau kegiatan khusus</p>
-            </div>
-        `;
-        return;
-    }
-    
-    container.innerHTML = holidays.map((h, index) => `
-        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center ${h.type === 'holiday' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">
-                    <i class="fas ${h.type === 'holiday' ? 'fa-umbrella-beach' : 'fa-calendar-check'}"></i>
-                </div>
-                <div>
-                    <p class="font-medium text-gray-800">${h.name}</p>
-                    <p class="text-sm text-gray-500">${formatDate(h.startDate, 'short')} - ${formatDate(h.endDate, 'short')}</p>
-                </div>
-            </div>
-            <button onclick="deleteHoliday(${index})" class="text-red-600 hover:text-red-800 p-2">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-    `).join('');
-}
-
-function addHoliday() {
-    const modalContent = `
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-gray-800">Tambah Libur/Kegiatan</h2>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            
-            <form id="holidayForm" class="space-y-4">
-                <div>
-                    <label class="form-label">Nama</label>
-                    <input type="text" id="holidayName" class="form-input" placeholder="Contoh: Libur Hari Raya" required>
-                </div>
-                
-                <div>
-                    <label class="form-label">Tipe</label>
-                    <select id="holidayType" class="form-input">
-                        <option value="holiday">Libur</option>
-                        <option value="activity">Kegiatan Khusus</option>
-                    </select>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="form-label">Tanggal Mulai</label>
-                        <input type="date" id="holidayStart" class="form-input" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Tanggal Akhir</label>
-                        <input type="date" id="holidayEnd" class="form-input" required>
-                    </div>
-                </div>
-                
-                <div class="flex gap-3">
-                    <button type="button" onclick="closeModal()" class="btn-secondary flex-1">Batal</button>
-                    <button type="submit" class="btn-primary flex-1">
-                        <i class="fas fa-save"></i>
-                        Tambah
-                    </button>
-                </div>
-            </form>
-        </div>
-    `;
-    
-    showModal(modalContent);
-    
-    document.getElementById('holidayForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        holidays.push({
-            name: document.getElementById('holidayName').value,
-            type: document.getElementById('holidayType').value,
-            startDate: document.getElementById('holidayStart').value,
-            endDate: document.getElementById('holidayEnd').value
-        });
-        
-        closeModal();
-        renderHolidays();
-        showToast('Libur/kegiatan berhasil ditambahkan!', 'success');
-    });
-}
-
-function deleteHoliday(index) {
-    if (!confirm('Hapus item ini?')) return;
-    holidays.splice(index, 1);
-    renderHolidays();
-}
-
-async function saveCalendar() {
-    showLoading();
-    
-    try {
-        const yearDocId = formatAcademicYearForDoc(currentAcademicYear);
-        
-        const calendarDataToSave = {
-            academicYear: currentAcademicYear,
-            semester1: {
-                start: document.getElementById('sem1Start').value,
-                end: document.getElementById('sem1End').value
-            },
-            semester2: {
-                start: document.getElementById('sem2Start').value,
-                end: document.getElementById('sem2End').value
-            },
-            pts1: {
-                start: document.getElementById('pts1Start').value,
-                end: document.getElementById('pts1End').value
-            },
-            pas: {
-                start: document.getElementById('pas1Start').value,
-                end: document.getElementById('pas1End').value
-            },
-            pts2: {
-                start: document.getElementById('pts2Start').value,
-                end: document.getElementById('pts2End').value
-            },
-            pat: {
-                start: document.getElementById('pat2Start').value,
-                end: document.getElementById('pat2End').value
-            },
-            holidays: holidays,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        
-        await db.collection('users').doc(currentUser.uid)
-            .collection('calendar').doc(yearDocId).set(calendarDataToSave);
-        
-        calendarData = calendarDataToSave;
-        
-        showToast('Kalender berhasil disimpan!', 'success');
-    } catch (error) {
-        console.error('Error saving calendar:', error);
-        showToast('Gagal menyimpan kalender.', 'error');
-    } finally {
-        hideLoading();
-    }
-}
-
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
-function getClassOptions() {
-    const level = userData?.school?.level || 'SD';
-    let classes = [];
-    
-    switch(level) {
-        case 'SD':
-            classes = [1, 2, 3, 4, 5, 6];
-            break;
-        case 'SMP':
-            classes = [7, 8, 9];
-            break;
-        case 'SMA':
-        case 'SMK':
-            classes = [10, 11, 12];
-            break;
-    }
-    
-    return classes.map(c => `<option value="${c}">Kelas ${c}</option>`).join('');
-}
-
-function getPhaseOptions() {
-    const level = userData?.school?.level || 'SD';
-    let phases = [];
-    
-    switch(level) {
-        case 'SD':
-            phases = [
-                { value: 'A', label: 'Fase A (Kelas 1-2)' },
-                { value: 'B', label: 'Fase B (Kelas 3-4)' },
-                { value: 'C', label: 'Fase C (Kelas 5-6)' }
-            ];
-            break;
-        case 'SMP':
-            phases = [
-                { value: 'D', label: 'Fase D (Kelas 7-9)' }
-            ];
-            break;
-        case 'SMA':
-        case 'SMK':
-            phases = [
-                { value: 'E', label: 'Fase E (Kelas 10)' },
-                { value: 'F', label: 'Fase F (Kelas 11-12)' }
-            ];
-            break;
-    }
-    
-    return phases.map(p => `<option value="${p.value}">${p.label}</option>`).join('');
-}
-
-function getPhaseFromClass(classNum) {
-    const num = parseInt(classNum);
-    if (num <= 2) return 'A';
-    if (num <= 4) return 'B';
-    if (num <= 6) return 'C';
-    if (num <= 9) return 'D';
-    if (num === 10) return 'E';
-    return 'F';
-}
-
-function getSignatureLocation() {
-    return userData?.school?.city || '..................';
-}
-
-function getSignatureDate() {
-    const now = new Date();
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    return `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-}
-
-// ============================================
-// STUB FUNCTIONS FOR OTHER PAGES
-// ============================================
-// These will be implemented with proper data handling
-
-let scheduleData = [];
-let timeSlots = [];
-let curriculumData = [];
-let studentsData = [];
-let journalData = [];
-let modulData = [];
-let lkpdData = [];
-let questionsData = [];
-let gradesData = {};
-let gradeComponents = [];
-
-function getScheduleHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">Jadwal Pelajaran</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Halaman jadwal pelajaran sedang dimuat...</p></div></div>`;
-}
-async function initSchedule() { /* Implementation */ }
-
-function getCurriculumHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">CP & TP</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Halaman kurikulum sedang dimuat...</p></div></div>`;
-}
-async function initCurriculum() { 
-    try {
-        const snap = await db.collection('users').doc(currentUser.uid)
-            .collection('curriculum')
-            .where('academicYear', '==', currentAcademicYear)
-            .get();
-        
-        curriculumData = [];
-        snap.forEach(doc => {
-            curriculumData.push({ id: doc.id, ...doc.data() });
-        });
-    } catch (error) {
-        console.error('Error loading curriculum:', error);
-    }
-}
-
-function getATPHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">ATP</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Halaman ATP sedang dimuat...</p></div></div>`;
-}
-async function initATP() { await initCurriculum(); }
-
-function getProtaHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">Program Tahunan</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Halaman Prota sedang dimuat...</p></div></div>`;
-}
-async function initProta() { 
-    const yearDocId = formatAcademicYearForDoc(currentAcademicYear);
-    try {
-        const calDoc = await db.collection('users').doc(currentUser.uid)
-            .collection('calendar').doc(yearDocId).get();
-        if (calDoc.exists) {
-            calendarData = calDoc.data();
-        }
-    } catch (error) {
-        console.error('Error loading calendar:', error);
-    }
-    await initCurriculum();
-}
-
-function getPromesHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">Program Semester</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Halaman Promes sedang dimuat...</p></div></div>`;
-}
-async function initPromes() { 
-    const yearDocId = formatAcademicYearForDoc(currentAcademicYear);
-    try {
-        const calDoc = await db.collection('users').doc(currentUser.uid)
-            .collection('calendar').doc(yearDocId).get();
-        if (calDoc.exists) {
-            calendarData = calDoc.data();
-        }
-    } catch (error) {
-        console.error('Error loading calendar for promes:', error);
-    }
-    
-    try {
-        const schedulesSnap = await db.collection('users').doc(currentUser.uid)
-            .collection('schedules')
-            .where('academicYear', '==', currentAcademicYear)
-            .get();
-        
-        scheduleData = [];
-        schedulesSnap.forEach(doc => {
-            scheduleData.push({ id: doc.id, ...doc.data() });
-        });
-    } catch (error) {
-        console.error('Error loading schedules:', error);
-    }
-    
-    await initCurriculum();
-}
-
-function getModulHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">Modul Ajar</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Halaman Modul Ajar (Premium).</p></div></div>`;
-}
-async function initModul() { /* Implementation */ }
-
-function getStudentsHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">Data Siswa</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Halaman data siswa sedang dimuat...</p></div></div>`;
-}
-async function initStudents() { /* Implementation */ }
-
-function getAttendanceHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">Absensi</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Halaman absensi sedang dimuat...</p></div></div>`;
-}
-function initAttendance() { /* Implementation */ }
-
-function getJournalHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">Jurnal Pembelajaran</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Halaman jurnal sedang dimuat...</p></div></div>`;
-}
-async function initJournal() { /* Implementation */ }
-
-function getGradesHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">Daftar Nilai</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Halaman nilai sedang dimuat...</p></div></div>`;
-}
-async function initGrades() { /* Implementation */ }
-
-function getLKPDHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">LKPD</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Halaman LKPD (Premium).</p></div></div>`;
-}
-async function initLKPD() { /* Implementation */ }
-
-function getQuestionBankHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">Bank Soal</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Halaman Bank Soal (Premium).</p></div></div>`;
-}
-async function initQuestionBank() { /* Implementation */ }
-
-function getAIAssistantHTML() {
-    return `
-        <div class="p-4 lg:p-6 fade-in">
-            <h1 class="text-2xl font-bold text-gray-800 mb-6">AI Assistant</h1>
-            <div class="bg-white rounded-xl p-6 shadow-sm">
-                <p class="mb-4">Gunakan prompt berikut untuk mengubah data menjadi format CSV:</p>
-                <textarea class="form-input" rows="8" readonly>Tolong bantu saya mengubah data siswa berikut menjadi format CSV.
-
-Format: nisn,nama,jenisKelamin,kelas,rombel
-
-Data:
-[PASTE DATA DI SINI]</textarea>
-                <button onclick="navigator.clipboard.writeText(document.querySelector('textarea').value); showToast('Prompt berhasil dicopy!', 'success')" class="btn-primary mt-4">
-                    <i class="fas fa-copy"></i> Copy Prompt
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-function getHelpHTML() {
-    return `
-        <div class="p-4 lg:p-6 fade-in">
-            <h1 class="text-2xl font-bold text-gray-800 mb-6">Panduan Penggunaan</h1>
-            <div class="bg-white rounded-xl p-6 shadow-sm">
-                <h3 class="font-semibold mb-4">Langkah Awal:</h3>
-                <ol class="list-decimal list-inside space-y-2 text-gray-600">
-                    <li>Lengkapi Profil & Data Sekolah</li>
-                    <li>Atur Kalender Pendidikan</li>
-                    <li>Buat Jadwal Pelajaran</li>
-                    <li>Input CP & TP</li>
-                    <li>Import Data Siswa</li>
-                </ol>
-            </div>
-        </div>
-    `;
-}
-
-function getAdminUsersHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">Kelola Pengguna</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Panel admin pengguna.</p></div></div>`;
-}
-async function initAdminUsers() { /* Implementation */ }
-
-function getAdminSettingsHTML() {
-    return `<div class="p-4 lg:p-6 fade-in"><h1 class="text-2xl font-bold text-gray-800 mb-6">Pengaturan Sistem</h1><div class="bg-white rounded-xl p-6 shadow-sm"><p>Pengaturan sistem admin.</p></div></div>`;
-}
-function initAdminSettings() { /* Implementation */ }
-
-// ============================================
-// INITIALIZATION
-// ============================================
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Admin Guru Super App v' + APP_VERSION);
-});
     </script>
 </body>
 </html>
