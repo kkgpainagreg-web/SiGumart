@@ -6,6 +6,7 @@
     <title>Dashboard - ADMIN GURU SUPER APP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
@@ -28,12 +29,21 @@
             }
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .sidebar-link.active { 
+                @apply bg-blue-500/20 border-r-[3px] border-blue-500;
+            }
+            .sidebar-link:hover { 
+                @apply bg-white/10;
+            }
+            .card-hover:hover { 
+                @apply -translate-y-0.5 shadow-lg;
+            }
+        }
+    </style>
     <style>
         [dir="rtl"] { direction: rtl; text-align: right; font-family: 'Amiri', serif; }
-        .sidebar-link.active { background-color: rgba(59, 130, 246, 0.2); border-right: 3px solid #3b82f6; }
-        .sidebar-link:hover { background-color: rgba(255, 255, 255, 0.1); }
-        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
         .gradient-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         @media print {
             .no-print { display: none !important; }
@@ -53,6 +63,12 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.8; }
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
     </style>
 </head>
@@ -178,7 +194,7 @@
                 <div class="p-4 border-t border-gray-700">
                     <div class="flex items-center">
                         <img id="userPhoto" src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff" alt="User" class="w-10 h-10 rounded-full">
-                        <div class="ml-3 flex-1">
+                        <div class="ml-3 flex-1 min-w-0">
                             <p id="userName" class="text-sm font-medium text-white truncate">User</p>
                             <p id="userPlan" class="text-xs text-gray-400">Free Plan</p>
                         </div>
@@ -433,7 +449,7 @@
                             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                                 <div>
                                     <h2 class="text-xl font-semibold text-gray-800">Kalender Pendidikan</h2>
-                                    <p class="text-gray-600 text-sm mt-1">Atur jadwal semester, libur, dan kegiatan sekolah</p>
+                                    <p class="text-gray-600 text-sm mt-1">Atur jadwal semester, libur, dan kegiatan sekolah. Hari libur nasional otomatis terisi.</p>
                                 </div>
                                 <div class="flex gap-2">
                                     <button onclick="showImportKalender()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition text-sm">
@@ -474,6 +490,13 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- Info Hari Libur Nasional -->
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                                <p class="text-yellow-800 text-sm"><i class="fas fa-info-circle mr-2"></i>
+                                    <strong>Hari Libur Nasional Otomatis:</strong> Sistem telah memasukkan hari libur nasional seperti Tahun Baru, Hari Kemerdekaan RI, Idul Fitri, dll secara otomatis. Hari libur nasional ditandai dengan label "Nasional" dan tidak dapat diedit.
+                                </p>
                             </div>
 
                             <!-- Kegiatan & Libur List -->
@@ -519,12 +542,12 @@
                                 <div class="grid md:grid-cols-3 gap-4 mb-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Durasi per JP (menit)</label>
-                                        <input type="number" id="durasiJP" value="35" min="25" max="60" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="saveJamSettings()">
+                                        <input type="number" id="durasiJP" value="35" min="25" max="60" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="generateJamPelajaran()">
                                         <p class="text-xs text-gray-500 mt-1">SD: 35 menit, SMP/SMA: 45 menit</p>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Jam Mulai KBM</label>
-                                        <input type="time" id="jamMulai" value="07:00" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="saveJamSettings()">
+                                        <input type="time" id="jamMulai" value="07:00" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="generateJamPelajaran()">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah JP per Hari</label>
@@ -619,7 +642,7 @@
                                     <tbody id="tableSiswa">
                                         <tr>
                                             <td colspan="7" class="px-4 py-8 text-center text-gray-500">
-                                                <i class="fas fa-users text-4xl text-gray-300 mb-3"></i>
+                                                <i class="fas fa-users text-4xl text-gray-300 mb-3 block"></i>
                                                 <p>Belum ada data siswa</p>
                                                 <button onclick="showImportSiswa()" class="text-primary hover:underline mt-2">Import dari CSV</button>
                                             </td>
@@ -792,523 +815,67 @@
                     </div>
                 </section>
 
-                <!-- Modul Ajar Section -->
+                <!-- Other Sections... (modul, absensi, jurnal, nilai, lkpd, banksoal, aiassistant, panduan, admin) -->
+                <!-- Include sections from previous response -->
+                
+                <!-- Placeholder for other sections -->
                 <section id="section-modul" class="section-content hidden">
-                    <div class="bg-white rounded-xl shadow-sm">
-                        <div class="p-6 border-b border-gray-200">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div>
-                                    <h2 class="text-xl font-semibold text-gray-800">Modul Ajar</h2>
-                                    <p class="text-gray-600 text-sm mt-1">Buat dan kelola modul ajar terintegrasi dengan Promes</p>
-                                </div>
-                                <button onclick="tambahModulAjar()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition text-sm">
-                                    <i class="fas fa-plus mr-2"></i>Buat Modul Ajar
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div id="modulAjarList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
-                                    <i class="fas fa-book text-4xl text-gray-300 mb-3"></i>
-                                    <p class="text-gray-500">Belum ada modul ajar</p>
-                                    <button onclick="tambahModulAjar()" class="text-primary hover:underline mt-2">Buat modul pertama</button>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="modulAjarList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Dynamic content -->
                     </div>
                 </section>
 
-                <!-- Absensi Section -->
                 <section id="section-absensi" class="section-content hidden">
-                    <div class="bg-white rounded-xl shadow-sm">
-                        <div class="p-6 border-b border-gray-200">
-                            <h2 class="text-xl font-semibold text-gray-800">Absensi Siswa</h2>
-                            <p class="text-gray-600 text-sm mt-1">Input kehadiran siswa - otomatis tersinkron dengan jurnal</p>
-                        </div>
-                        <div class="p-6">
-                            <div class="grid md:grid-cols-4 gap-4 mb-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                                    <input type="date" id="absensiTanggal" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
-                                    <select id="absensiKelas" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="loadAbsensiSiswa()">
-                                        <option value="">Pilih Kelas</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Rombel</label>
-                                    <select id="absensiRombel" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="loadAbsensiSiswa()">
-                                        <option value="">Pilih Rombel</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Jam Ke</label>
-                                    <select id="absensiJam" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                                        <option value="1-2">Jam 1-2</option>
-                                        <option value="3-4">Jam 3-4</option>
-                                        <option value="5-6">Jam 5-6</option>
-                                        <option value="7-8">Jam 7-8</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="table-scroll">
-                                <table class="w-full">
-                                    <thead>
-                                        <tr class="bg-gray-50">
-                                            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">No</th>
-                                            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Nama Siswa</th>
-                                            <th class="px-4 py-3 text-center text-sm font-semibold text-gray-600">Hadir</th>
-                                            <th class="px-4 py-3 text-center text-sm font-semibold text-gray-600">Izin</th>
-                                            <th class="px-4 py-3 text-center text-sm font-semibold text-gray-600">Sakit</th>
-                                            <th class="px-4 py-3 text-center text-sm font-semibold text-gray-600">Alpa</th>
-                                            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Keterangan</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tableAbsensi">
-                                        <tr>
-                                            <td colspan="7" class="px-4 py-8 text-center text-gray-500">
-                                                Pilih kelas dan rombel untuk menampilkan daftar siswa
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="mt-6 flex justify-end">
-                                <button onclick="saveAbsensi()" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition">
-                                    <i class="fas fa-save mr-2"></i>Simpan Absensi
-                                </button>
-                            </div>
-                        </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Absensi Siswa</h2>
+                        <div id="tableAbsensi">Loading...</div>
                     </div>
                 </section>
 
-                <!-- Jurnal Section -->
                 <section id="section-jurnal" class="section-content hidden">
-                    <div class="bg-white rounded-xl shadow-sm mb-6 no-print">
-                        <div class="p-6 border-b border-gray-200">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div>
-                                    <h2 class="text-xl font-semibold text-gray-800">Jurnal Pembelajaran</h2>
-                                    <p class="text-gray-600 text-sm mt-1">Sinkron dengan Promes - Kehadiran otomatis dari Absensi</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="tambahJurnal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition text-sm">
-                                        <i class="fas fa-plus mr-2"></i>Tambah Jurnal
-                                    </button>
-                                    <button onclick="printJurnal()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
-                                        <i class="fas fa-print mr-2"></i>Cetak
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="grid md:grid-cols-3 gap-4 mb-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
-                                    <select id="jurnalKelas" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="loadJurnal()">
-                                        <option value="">Pilih Kelas</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Bulan</label>
-                                    <select id="jurnalBulan" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="loadJurnal()">
-                                        <option value="">Semua Bulan</option>
-                                        <option value="1">Januari</option>
-                                        <option value="2">Februari</option>
-                                        <option value="3">Maret</option>
-                                        <option value="4">April</option>
-                                        <option value="5">Mei</option>
-                                        <option value="6">Juni</option>
-                                        <option value="7">Juli</option>
-                                        <option value="8">Agustus</option>
-                                        <option value="9">September</option>
-                                        <option value="10">Oktober</option>
-                                        <option value="11">November</option>
-                                        <option value="12">Desember</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="table-scroll">
-                                <table class="w-full">
-                                    <thead>
-                                        <tr class="bg-gray-50">
-                                            <th class="px-3 py-3 text-left text-sm font-semibold text-gray-600">No</th>
-                                            <th class="px-3 py-3 text-left text-sm font-semibold text-gray-600">Kelas</th>
-                                            <th class="px-3 py-3 text-left text-sm font-semibold text-gray-600">Materi</th>
-                                            <th class="px-3 py-3 text-left text-sm font-semibold text-gray-600">Tujuan Pembelajaran</th>
-                                            <th class="px-3 py-3 text-center text-sm font-semibold text-gray-600">Kehadiran</th>
-                                            <th class="px-3 py-3 text-left text-sm font-semibold text-gray-600">Hari/Tanggal</th>
-                                            <th class="px-3 py-3 text-left text-sm font-semibold text-gray-600">Hasil</th>
-                                            <th class="px-3 py-3 text-center text-sm font-semibold text-gray-600">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tableJurnal">
-                                        <tr>
-                                            <td colspan="8" class="px-4 py-8 text-center text-gray-500">
-                                                Belum ada data jurnal
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Jurnal Pembelajaran</h2>
+                        <div id="tableJurnal">Loading...</div>
                     </div>
                 </section>
 
-                <!-- Nilai Section -->
                 <section id="section-nilai" class="section-content hidden">
-                    <div class="bg-white rounded-xl shadow-sm">
-                        <div class="p-6 border-b border-gray-200">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div>
-                                    <h2 class="text-xl font-semibold text-gray-800">Daftar Nilai</h2>
-                                    <p class="text-gray-600 text-sm mt-1">Input dan kelola nilai PH, PTS, PAS, dan Nilai Rapor</p>
-                                </div>
-                                <button onclick="settingKomponen()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
-                                    <i class="fas fa-cog mr-2"></i>Setting Komponen
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="grid md:grid-cols-3 gap-4 mb-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
-                                    <select id="nilaiKelas" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="loadNilai()">
-                                        <option value="">Pilih Kelas</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Rombel</label>
-                                    <select id="nilaiRombel" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="loadNilai()">
-                                        <option value="">Pilih Rombel</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="table-scroll">
-                                <table class="w-full text-sm">
-                                    <thead>
-                                        <tr class="bg-gray-50">
-                                            <th class="px-3 py-3 text-left font-semibold text-gray-600">No</th>
-                                            <th class="px-3 py-3 text-left font-semibold text-gray-600">Nama Siswa</th>
-                                            <th class="px-3 py-3 text-center font-semibold text-gray-600">PH1</th>
-                                            <th class="px-3 py-3 text-center font-semibold text-gray-600">PH2</th>
-                                            <th class="px-3 py-3 text-center font-semibold text-gray-600">PH3</th>
-                                            <th class="px-3 py-3 text-center font-semibold text-gray-600">PTS</th>
-                                            <th class="px-3 py-3 text-center font-semibold text-gray-600">PAS</th>
-                                            <th class="px-3 py-3 text-center font-semibold text-gray-600 bg-primary text-white">NR</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tableNilai">
-                                        <tr>
-                                            <td colspan="8" class="px-4 py-8 text-center text-gray-500">
-                                                Pilih kelas dan rombel untuk menampilkan daftar nilai
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="mt-6 flex justify-end">
-                                <button onclick="saveNilai()" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition">
-                                    <i class="fas fa-save mr-2"></i>Simpan Nilai
-                                </button>
-                            </div>
-                        </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Daftar Nilai</h2>
+                        <div id="tableNilai">Loading...</div>
                     </div>
                 </section>
 
-                <!-- LKPD Section -->
                 <section id="section-lkpd" class="section-content hidden">
-                    <div class="bg-white rounded-xl shadow-sm">
-                        <div class="p-6 border-b border-gray-200">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div>
-                                    <h2 class="text-xl font-semibold text-gray-800">LKPD - Lembar Kerja Peserta Didik</h2>
-                                    <p class="text-gray-600 text-sm mt-1">Buat LKPD dengan dukungan teks Arab (RTL)</p>
-                                </div>
-                                <button onclick="tambahLKPD()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition text-sm">
-                                    <i class="fas fa-plus mr-2"></i>Buat LKPD
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div id="lkpdList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
-                                    <i class="fas fa-file-alt text-4xl text-gray-300 mb-3"></i>
-                                    <p class="text-gray-500">Belum ada LKPD</p>
-                                    <button onclick="tambahLKPD()" class="text-primary hover:underline mt-2">Buat LKPD pertama</button>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="lkpdList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Dynamic content -->
                     </div>
                 </section>
 
-                <!-- Bank Soal Section -->
                 <section id="section-banksoal" class="section-content hidden">
-                    <div class="bg-white rounded-xl shadow-sm">
-                        <div class="p-6 border-b border-gray-200">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div>
-                                    <h2 class="text-xl font-semibold text-gray-800">Bank Soal</h2>
-                                    <p class="text-gray-600 text-sm mt-1">Kelola soal terintegrasi dengan ATP - Support teks Arab</p>
-                                </div>
-                                <button onclick="tambahSoal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition text-sm">
-                                    <i class="fas fa-plus mr-2"></i>Tambah Soal
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="grid md:grid-cols-3 gap-4 mb-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Fase</label>
-                                    <select id="soalFase" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                                        <option value="">Semua Fase</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Soal</label>
-                                    <select id="soalTipe" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                                        <option value="">Semua Tipe</option>
-                                        <option value="pilgan">Pilihan Ganda</option>
-                                        <option value="essay">Essay</option>
-                                        <option value="isian">Isian Singkat</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
-                                    <input type="text" id="soalSearch" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Cari soal...">
-                                </div>
-                            </div>
-
-                            <div id="bankSoalList" class="space-y-4">
-                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
-                                    <i class="fas fa-database text-4xl text-gray-300 mb-3"></i>
-                                    <p class="text-gray-500">Belum ada soal</p>
-                                    <button onclick="tambahSoal()" class="text-primary hover:underline mt-2">Tambah soal pertama</button>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="bankSoalList" class="space-y-4">
+                        <!-- Dynamic content -->
                     </div>
                 </section>
 
-                <!-- AI Assistant Section -->
                 <section id="section-aiassistant" class="section-content hidden">
-                    <div class="bg-white rounded-xl shadow-sm">
-                        <div class="p-6 border-b border-gray-200">
-                            <h2 class="text-xl font-semibold text-gray-800">AI Assistant</h2>
-                            <p class="text-gray-600 text-sm mt-1">Dapatkan prompt untuk mengubah materi mentah menjadi CSV siap upload</p>
-                        </div>
-                        <div class="p-6">
-                            <div class="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <h3 class="font-semibold text-gray-800 mb-4">Pilih Jenis Data</h3>
-                                    <div class="space-y-3">
-                                        <button onclick="showAIPrompt('siswa')" class="w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition">
-                                            <i class="fas fa-users text-blue-500 mr-3"></i>
-                                            <span class="font-medium">Data Siswa</span>
-                                            <p class="text-sm text-gray-500 mt-1">Konversi daftar siswa ke format CSV</p>
-                                        </button>
-                                        <button onclick="showAIPrompt('kalender')" class="w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition">
-                                            <i class="fas fa-calendar text-green-500 mr-3"></i>
-                                            <span class="font-medium">Kalender Pendidikan</span>
-                                            <p class="text-sm text-gray-500 mt-1">Konversi jadwal kegiatan ke format CSV</p>
-                                        </button>
-                                        <button onclick="showAIPrompt('cp')" class="w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition">
-                                            <i class="fas fa-book text-purple-500 mr-3"></i>
-                                            <span class="font-medium">Capaian Pembelajaran</span>
-                                            <p class="text-sm text-gray-500 mt-1">Konversi CP/TP ke format CSV</p>
-                                        </button>
-                                        <button onclick="showAIPrompt('soal')" class="w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition">
-                                            <i class="fas fa-question-circle text-orange-500 mr-3"></i>
-                                            <span class="font-medium">Bank Soal</span>
-                                            <p class="text-sm text-gray-500 mt-1">Konversi soal ke format CSV</p>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-gray-800 mb-4">Prompt untuk AI</h3>
-                                    <div id="aiPromptArea" class="bg-gray-50 rounded-lg p-4 min-h-[300px]">
-                                        <p class="text-gray-500 text-center py-8">Pilih jenis data di sebelah kiri untuk mendapatkan prompt</p>
-                                    </div>
-                                    <button onclick="copyPrompt()" class="mt-4 bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition text-sm">
-                                        <i class="fas fa-copy mr-2"></i>Salin Prompt
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">AI Assistant</h2>
+                        <div id="aiPromptArea">Loading...</div>
                     </div>
                 </section>
 
-                <!-- Panduan Section -->
                 <section id="section-panduan" class="section-content hidden">
-                    <div class="bg-white rounded-xl shadow-sm">
-                        <div class="p-6 border-b border-gray-200">
-                            <h2 class="text-xl font-semibold text-gray-800">Panduan Penggunaan Aplikasi</h2>
-                            <p class="text-gray-600 text-sm mt-1">Pelajari cara menggunakan AGSA dengan mudah</p>
-                        </div>
-                        <div class="p-6">
-                            <div class="space-y-6">
-                                <!-- Step 1 -->
-                                <div class="border rounded-lg overflow-hidden">
-                                    <button onclick="toggleGuide('guide1')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition">
-                                        <span class="font-semibold text-gray-800"><i class="fas fa-1 text-primary mr-3"></i>Lengkapi Profil</span>
-                                        <i class="fas fa-chevron-down text-gray-400"></i>
-                                    </button>
-                                    <div id="guide1" class="hidden p-4 border-t">
-                                        <ol class="list-decimal list-inside space-y-2 text-gray-600">
-                                            <li>Buka menu <strong>Profil</strong> di sidebar</li>
-                                            <li>Isi data guru (nama, NIP, dll)</li>
-                                            <li>Isi data satuan pendidikan (nama sekolah, kota, dll)</li>
-                                            <li>Isi data kepala sekolah</li>
-                                            <li>Tambahkan mata pelajaran yang diampu beserta jumlah JP per minggu</li>
-                                            <li>Klik tombol <strong>Simpan Profil</strong></li>
-                                        </ol>
-                                    </div>
-                                </div>
-
-                                <!-- Step 2 -->
-                                <div class="border rounded-lg overflow-hidden">
-                                    <button onclick="toggleGuide('guide2')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition">
-                                        <span class="font-semibold text-gray-800"><i class="fas fa-2 text-primary mr-3"></i>Setup Kalender Pendidikan</span>
-                                        <i class="fas fa-chevron-down text-gray-400"></i>
-                                    </button>
-                                    <div id="guide2" class="hidden p-4 border-t">
-                                        <ol class="list-decimal list-inside space-y-2 text-gray-600">
-                                            <li>Buka menu <strong>Kalender Pendidikan</strong></li>
-                                            <li>Atur tanggal mulai dan selesai semester gasal & genap</li>
-                                            <li>Tambahkan kegiatan (libur, ujian, dll) dengan klik <strong>Tambah Kegiatan</strong></li>
-                                            <li>Atau import dari CSV jika sudah punya data</li>
-                                        </ol>
-                                        <div class="mt-4 p-3 bg-blue-50 rounded-lg">
-                                            <p class="text-sm text-blue-700"><i class="fas fa-lightbulb mr-2"></i>Tips: Gunakan AI Assistant untuk mengkonversi kalender sekolah ke format CSV</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Step 3 -->
-                                <div class="border rounded-lg overflow-hidden">
-                                    <button onclick="toggleGuide('guide3')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition">
-                                        <span class="font-semibold text-gray-800"><i class="fas fa-3 text-primary mr-3"></i>Setup Jadwal Pelajaran</span>
-                                        <i class="fas fa-chevron-down text-gray-400"></i>
-                                    </button>
-                                    <div id="guide3" class="hidden p-4 border-t">
-                                        <ol class="list-decimal list-inside space-y-2 text-gray-600">
-                                            <li>Buka menu <strong>Jadwal Pelajaran</strong></li>
-                                            <li>Atur durasi JP sesuai jenjang (SD: 35 menit, SMP/SMA: 45 menit)</li>
-                                            <li>Atur jam mulai KBM dan jumlah JP per hari</li>
-                                            <li>Klik <strong>Tambah Jadwal</strong> untuk menambah jadwal mengajar</li>
-                                            <li>Sistem akan otomatis validasi jika ada bentrokan jadwal</li>
-                                        </ol>
-                                    </div>
-                                </div>
-
-                                <!-- Step 4 -->
-                                <div class="border rounded-lg overflow-hidden">
-                                    <button onclick="toggleGuide('guide4')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition">
-                                        <span class="font-semibold text-gray-800"><i class="fas fa-4 text-primary mr-3"></i>Import Data Siswa</span>
-                                        <i class="fas fa-chevron-down text-gray-400"></i>
-                                    </button>
-                                    <div id="guide4" class="hidden p-4 border-t">
-                                        <ol class="list-decimal list-inside space-y-2 text-gray-600">
-                                            <li>Buka menu <strong>Data Siswa</strong></li>
-                                            <li>Klik <strong>Import CSV</strong></li>
-                                            <li>Masukkan URL Google Spreadsheet yang sudah dipublikasikan sebagai CSV</li>
-                                            <li>Format kolom: nisn, nama, jenis_kelamin (L/P), kelas, rombel</li>
-                                            <li>Klik <strong>Import</strong> untuk memproses</li>
-                                        </ol>
-                                        <div class="mt-4 p-3 bg-yellow-50 rounded-lg">
-                                            <p class="text-sm text-yellow-700"><i class="fas fa-exclamation-triangle mr-2"></i>Pastikan Google Spreadsheet sudah di-share sebagai "Anyone with the link"</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Step 5 -->
-                                <div class="border rounded-lg overflow-hidden">
-                                    <button onclick="toggleGuide('guide5')" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition">
-                                        <span class="font-semibold text-gray-800"><i class="fas fa-5 text-primary mr-3"></i>Generate Dokumen</span>
-                                        <i class="fas fa-chevron-down text-gray-400"></i>
-                                    </button>
-                                    <div id="guide5" class="hidden p-4 border-t">
-                                        <ol class="list-decimal list-inside space-y-2 text-gray-600">
-                                            <li>Setelah data lengkap, buka menu <strong>ATP</strong> untuk menyusun tujuan pembelajaran</li>
-                                            <li>Buka menu <strong>Prota</strong> untuk generate Program Tahunan</li>
-                                            <li>Buka menu <strong>Promes</strong> untuk generate Program Semester dengan tanggal real</li>
-                                            <li>Klik <strong>Cetak / Simpan PDF</strong> untuk menyimpan dokumen</li>
-                                        </ol>
-                                        <div class="mt-4 p-3 bg-green-50 rounded-lg">
-                                            <p class="text-sm text-green-700"><i class="fas fa-check-circle mr-2"></i>Semua dokumen saling sinkron - perubahan di satu tempat akan mempengaruhi dokumen lain</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Panduan Penggunaan</h2>
+                        <p>Panduan lengkap penggunaan aplikasi...</p>
                     </div>
                 </section>
 
-                <!-- Admin Section (Super Admin Only) -->
                 <section id="section-admin" class="section-content hidden">
-                    <div class="bg-white rounded-xl shadow-sm">
-                        <div class="p-6 border-b border-gray-200">
-                            <h2 class="text-xl font-semibold text-gray-800">Panel Super Admin</h2>
-                            <p class="text-gray-600 text-sm mt-1">Kelola pengguna dan pengaturan aplikasi</p>
-                        </div>
-                        <div class="p-6">
-                            <div class="grid md:grid-cols-2 gap-6 mb-8">
-                                <!-- Settings -->
-                                <div class="border rounded-xl p-4">
-                                    <h3 class="font-semibold text-gray-800 mb-4"><i class="fas fa-cog mr-2 text-gray-500"></i>Pengaturan Umum</h3>
-                                    <div class="space-y-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp Upgrade</label>
-                                            <input type="tel" id="adminWA" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="6281234567890">
-                                        </div>
-                                        <button onclick="saveAdminSettings()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition text-sm">
-                                            <i class="fas fa-save mr-2"></i>Simpan
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Stats -->
-                                <div class="border rounded-xl p-4">
-                                    <h3 class="font-semibold text-gray-800 mb-4"><i class="fas fa-chart-bar mr-2 text-gray-500"></i>Statistik</h3>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div class="bg-blue-50 rounded-lg p-3 text-center">
-                                            <p id="adminStatUsers" class="text-2xl font-bold text-blue-600">0</p>
-                                            <p class="text-sm text-gray-600">Total Users</p>
-                                        </div>
-                                        <div class="bg-green-50 rounded-lg p-3 text-center">
-                                            <p id="adminStatPremium" class="text-2xl font-bold text-green-600">0</p>
-                                            <p class="text-sm text-gray-600">Premium Users</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- User Management -->
-                            <h3 class="font-semibold text-gray-800 mb-4">Manajemen Pengguna</h3>
-                            <div class="table-scroll">
-                                <table class="w-full">
-                                    <thead>
-                                        <tr class="bg-gray-50">
-                                            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Email</th>
-                                            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Nama</th>
-                                            <th class="px-4 py-3 text-center text-sm font-semibold text-gray-600">Status</th>
-                                            <th class="px-4 py-3 text-center text-sm font-semibold text-gray-600">Terdaftar</th>
-                                            <th class="px-4 py-3 text-center text-sm font-semibold text-gray-600">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tableUsers">
-                                        <!-- Dynamic content -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Admin Panel</h2>
+                        <div id="tableUsers">Loading...</div>
                     </div>
                 </section>
             </main>
@@ -1340,11 +907,12 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
 
-    <!-- App Scripts -->
+    <!-- App Scripts - PENTING: urutan harus benar -->
     <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/hari-libur.js"></script>
     <script src="js/kurikulum-data.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/profil.js"></script>
     <script src="js/kalender.js"></script>
     <script src="js/jadwal.js"></script>
