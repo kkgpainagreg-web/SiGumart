@@ -65,12 +65,23 @@ function closeModal(modalId) {
 function formatDate(date, format = 'short') {
     if (!date) return '-';
     
-    const d = date instanceof Date ? date : date.toDate ? date.toDate() : new Date(date);
+    let d;
+    if (date instanceof Date) {
+        d = date;
+    } else if (date.toDate) {
+        d = date.toDate();
+    } else if (typeof date === 'string') {
+        d = new Date(date);
+    } else {
+        return '-';
+    }
+    
+    if (isNaN(d.getTime())) return '-';
     
     const options = {
         'short': { day: 'numeric', month: 'short', year: 'numeric' },
         'long': { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' },
-        'input': null // Return YYYY-MM-DD
+        'input': null
     };
 
     if (format === 'input') {
@@ -91,11 +102,10 @@ function formatTime(minutes) {
 function getTahunAjaranOptions() {
     const now = new Date();
     const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1; // 1-12
+    const currentMonth = now.getMonth() + 1;
     
     let options = [];
     
-    // Jika bulan Juni atau setelahnya, tahun ajaran baru dimulai
     if (currentMonth >= 6) {
         options.push(`${currentYear}/${currentYear + 1}`);
         options.push(`${currentYear - 1}/${currentYear}`);
@@ -122,35 +132,70 @@ function initTahunAjaran() {
 // Change Tahun Ajaran
 function changeTahunAjaran() {
     currentTahunAjaran = document.getElementById('tahunAjaran').value;
-    // Reload current section data
     showSection(currentSection, false);
 }
 
 // Change Semester
 function changeSemester() {
     currentSemester = document.getElementById('semester').value;
-    // Reload current section data
     showSection(currentSection, false);
 }
 
-// Parse CSV from URL
+// Parse CSV from URL - DIPERBAIKI
 async function parseCSVFromURL(url) {
     try {
+        let csvUrl = url.trim();
+        
         // Convert Google Sheets URL to CSV export URL
-        let csvUrl = url;
-        if (url.includes('docs.google.com/spreadsheets')) {
-            const sheetId = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+        if (csvUrl.includes('docs.google.com/spreadsheets')) {
+            // Handle berbagai format URL Google Sheets
+            
+            // Format: https://docs.google.com/spreadsheets/d/SHEET_ID/edit...
+            let sheetId = null;
+            
+            // Coba extract dari format /d/ID/
+            const match1 = csvUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            if (match1) {
+                sheetId = match1[1];
+            }
+            
+            // Coba extract dari format /e/ID/
+            const match2 = csvUrl.match(/\/e\/([a-zA-Z0-9-_]+)/);
+            if (match2) {
+                sheetId = match2[1];
+            }
+            
             if (sheetId) {
-                csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId[1]}/export?format=csv`;
+                // Jika URL sudah berformat pub, gunakan langsung
+                if (csvUrl.includes('/pub?') && csvUrl.includes('output=csv')) {
+                    csvUrl = csvUrl;
+                } else {
+                    // Buat URL export CSV
+                    csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`;
+                }
+            } else {
+                throw new Error('Format URL Google Sheets tidak valid. Gunakan format: https://docs.google.com/spreadsheets/d/SHEET_ID/...');
             }
         }
 
+        console.log('Fetching CSV from:', csvUrl);
+        
         const response = await fetch(csvUrl);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}. Pastikan spreadsheet sudah di-share ke "Anyone with the link"`);
+        }
+        
         const text = await response.text();
+        
+        if (!text || text.trim().length === 0) {
+            throw new Error('File CSV kosong atau tidak dapat dibaca');
+        }
+        
         return parseCSV(text);
     } catch (error) {
         console.error('Error parsing CSV:', error);
-        throw new Error('Gagal memuat CSV. Pastikan URL valid dan file dapat diakses.');
+        throw new Error('Gagal memuat CSV: ' + error.message);
     }
 }
 
@@ -159,12 +204,21 @@ function parseCSV(text) {
     const lines = text.split('\n').filter(line => line.trim());
     if (lines.length < 2) return [];
 
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+    // Clean header names
+    const headers = parseCSVLine(lines[0]).map(h => 
+        h.trim().toLowerCase()
+         .replace(/['"]/g, '')
+         .replace(/\s+/g, '_')
+         .replace(/[^a-z0-9_]/g, '')
+    );
+    
+    console.log('CSV Headers:', headers);
+    
     const data = [];
 
     for (let i = 1; i < lines.length; i++) {
         const values = parseCSVLine(lines[i]);
-        if (values.length >= headers.length) {
+        if (values.length > 0 && values.some(v => v.trim())) {
             const row = {};
             headers.forEach((header, idx) => {
                 row[header] = values[idx] ? values[idx].trim().replace(/^["']|["']$/g, '') : '';
@@ -173,6 +227,7 @@ function parseCSV(text) {
         }
     }
 
+    console.log('Parsed data count:', data.length);
     return data;
 }
 
@@ -227,7 +282,9 @@ function debounce(func, wait) {
 // Toggle Guide Section
 function toggleGuide(id) {
     const element = document.getElementById(id);
-    element.classList.toggle('hidden');
+    if (element) {
+        element.classList.toggle('hidden');
+    }
 }
 
 // Get Hari Name
@@ -263,4 +320,20 @@ function getFaseFromKelas(kelas, jenjang = 'SD') {
 function toRoman(num) {
     const roman = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
     return roman[num] || num.toString();
+}
+
+// Get Kelas Options based on Jenjang
+function getKelasOptions() {
+    const jenjang = window.profilData?.jenjang || 'SD';
+    let kelasList = [];
+    
+    if (jenjang === 'SD') {
+        kelasList = [1, 2, 3, 4, 5, 6];
+    } else if (jenjang === 'SMP') {
+        kelasList = [7, 8, 9];
+    } else {
+        kelasList = [10, 11, 12];
+    }
+
+    return kelasList.map(k => `<option value="${k}">Kelas ${k}</option>`).join('');
 }
