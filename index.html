@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Guru Super App - Login</title>
+    <title>ADMIN GURU SUPER APP - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,36 +11,26 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        'inter': ['Inter', 'sans-serif'],
-                    },
                     colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                        },
+                        primary: '#2563eb',
+                        secondary: '#1e40af',
+                        accent: '#3b82f6',
                         success: '#10b981',
                         warning: '#f59e0b',
                         danger: '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
     <style>
-        * { font-family: 'Inter', sans-serif; }
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
         }
-        .glass-card {
+        .glass-effect {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
         }
@@ -51,307 +41,431 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-20px); }
         }
-        .loading-spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
     </style>
 </head>
-<body class="min-h-screen gradient-bg">
+<body class="font-sans bg-gray-50 min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chalkboard-teacher text-white text-xl"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800">AGSA</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-primary transition">Fitur</a>
+                    <a href="#pricing" class="text-gray-600 hover:text-primary transition">Harga</a>
+                    <a href="#guide" class="text-gray-600 hover:text-primary transition">Panduan</a>
+                    <button onclick="showAuthModal('login')" class="px-4 py-2 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition">
+                        Masuk
+                    </button>
+                    <button onclick="showAuthModal('register')" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition">
+                        Daftar Gratis
+                    </button>
+                </div>
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2">
+                    <i class="fas fa-bars text-xl text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t">
+            <div class="px-4 py-4 space-y-3">
+                <a href="#features" class="block text-gray-600 hover:text-primary">Fitur</a>
+                <a href="#pricing" class="block text-gray-600 hover:text-primary">Harga</a>
+                <a href="#guide" class="block text-gray-600 hover:text-primary">Panduan</a>
+                <button onclick="showAuthModal('login')" class="w-full py-2 text-primary border border-primary rounded-lg">Masuk</button>
+                <button onclick="showAuthModal('register')" class="w-full py-2 bg-primary text-white rounded-lg">Daftar Gratis</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg pt-24 pb-16 md:pt-32 md:pb-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="text-white">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                        Admin Guru<br><span class="text-yellow-300">Super App</span>
+                    </h1>
+                    <p class="text-lg md:text-xl mb-8 text-blue-100">
+                        Satu Input, Banyak Output. Otomatisasi administrasi mengajar untuk guru PAI dan mata pelajaran lainnya dengan mudah dan cepat.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="showAuthModal('register')" class="px-8 py-4 bg-white text-primary font-semibold rounded-xl hover:bg-gray-100 transition transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-rocket mr-2"></i>Mulai Gratis Sekarang
+                        </button>
+                        <a href="#features" class="px-8 py-4 border-2 border-white text-white font-semibold rounded-xl hover:bg-white/10 transition text-center">
+                            <i class="fas fa-play-circle mr-2"></i>Lihat Demo
+                        </a>
+                    </div>
+                    <div class="mt-8 flex items-center space-x-6 text-blue-100">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            <span>Gratis Selamanya</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                            <span>Tanpa Kartu Kredit</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="relative">
+                        <div class="animate-float">
+                            <div class="bg-white/20 backdrop-blur-lg rounded-2xl p-6 shadow-2xl">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-white rounded-xl p-4 text-center">
+                                        <i class="fas fa-calendar-alt text-3xl text-primary mb-2"></i>
+                                        <p class="text-sm font-medium text-gray-700">Prota</p>
+                                    </div>
+                                    <div class="bg-white rounded-xl p-4 text-center">
+                                        <i class="fas fa-list-check text-3xl text-green-500 mb-2"></i>
+                                        <p class="text-sm font-medium text-gray-700">Promes</p>
+                                    </div>
+                                    <div class="bg-white rounded-xl p-4 text-center">
+                                        <i class="fas fa-book-open text-3xl text-purple-500 mb-2"></i>
+                                        <p class="text-sm font-medium text-gray-700">Modul Ajar</p>
+                                    </div>
+                                    <div class="bg-white rounded-xl p-4 text-center">
+                                        <i class="fas fa-clipboard-list text-3xl text-orange-500 mb-2"></i>
+                                        <p class="text-sm font-medium text-gray-700">Jurnal</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-primary font-semibold text-sm uppercase tracking-wider">Fitur Unggulan</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mt-2">Single Input, Multi Output</h2>
+                <p class="text-gray-600 mt-4 max-w-2xl mx-auto">
+                    Masukkan data sekali, dapatkan semua dokumen administrasi yang saling sinkron secara otomatis
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature Cards -->
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-lg border border-gray-100 transition-all duration-300">
+                    <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-calendar-alt text-2xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Kalender Pendidikan</h3>
+                    <p class="text-gray-600">Kustom jadwal semester, libur, dan kegiatan sekolah dengan mudah</p>
+                    <span class="inline-block mt-4 text-xs font-semibold text-green-600 bg-green-100 px-3 py-1 rounded-full">FREE</span>
+                </div>
+
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-lg border border-gray-100 transition-all duration-300">
+                    <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-clock text-2xl text-green-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Jadwal Pelajaran</h3>
+                    <p class="text-gray-600">Auto validasi anti-bentrok untuk jadwal yang sempurna</p>
+                    <span class="inline-block mt-4 text-xs font-semibold text-green-600 bg-green-100 px-3 py-1 rounded-full">FREE</span>
+                </div>
+
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-lg border border-gray-100 transition-all duration-300">
+                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-route text-2xl text-purple-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">ATP (Alur TP)</h3>
+                    <p class="text-gray-600">Susun alur tujuan pembelajaran dengan database CP lengkap</p>
+                    <span class="inline-block mt-4 text-xs font-semibold text-green-600 bg-green-100 px-3 py-1 rounded-full">FREE</span>
+                </div>
+
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-lg border border-gray-100 transition-all duration-300">
+                    <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-tasks text-2xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Prota & Promes</h3>
+                    <p class="text-gray-600">Generate otomatis dengan tanggal real dan alokasi JP tepat</p>
+                    <span class="inline-block mt-4 text-xs font-semibold text-green-600 bg-green-100 px-3 py-1 rounded-full">FREE</span>
+                </div>
+
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-lg border border-gray-100 transition-all duration-300">
+                    <div class="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-book text-2xl text-red-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Modul Ajar</h3>
+                    <p class="text-gray-600">Sinkron dengan Promes, integrasi Jurnal & LKPD</p>
+                    <span class="inline-block mt-4 text-xs font-semibold text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full">PREMIUM</span>
+                </div>
+
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-lg border border-gray-100 transition-all duration-300">
+                    <div class="w-14 h-14 bg-cyan-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-database text-2xl text-cyan-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Bank Soal</h3>
+                    <p class="text-gray-600">Terintegrasi ATP dengan dukungan teks Arab (RTL)</p>
+                    <span class="inline-block mt-4 text-xs font-semibold text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full">PREMIUM</span>
+                </div>
+
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-lg border border-gray-100 transition-all duration-300">
+                    <div class="w-14 h-14 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-clipboard-check text-2xl text-pink-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Jurnal & Absensi</h3>
+                    <p class="text-gray-600">Pencatatan otomatis sinkron dengan jadwal mengajar</p>
+                    <span class="inline-block mt-4 text-xs font-semibold text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full">PREMIUM</span>
+                </div>
+
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-lg border border-gray-100 transition-all duration-300">
+                    <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-2xl text-indigo-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Daftar Nilai</h3>
+                    <p class="text-gray-600">PH, PTS, PAS dengan perhitungan Nilai Rapor otomatis</p>
+                    <span class="inline-block mt-4 text-xs font-semibold text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full">PREMIUM</span>
+                </div>
+
+                <div class="feature-card bg-white rounded-2xl p-6 shadow-lg border border-gray-100 transition-all duration-300">
+                    <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-robot text-2xl text-emerald-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">AI Assistant</h3>
+                    <p class="text-gray-600">Bantu konversi materi mentah menjadi data siap upload</p>
+                    <span class="inline-block mt-4 text-xs font-semibold text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full">PREMIUM</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-primary font-semibold text-sm uppercase tracking-wider">Harga</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mt-2">Pilih Paket Sesuai Kebutuhan</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Free Plan -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                    <h3 class="text-xl font-bold text-gray-800">Gratis</h3>
+                    <p class="text-gray-600 mt-2">Untuk memulai</p>
+                    <div class="mt-6">
+                        <span class="text-4xl font-bold text-gray-800">Rp 0</span>
+                        <span class="text-gray-600">/selamanya</span>
+                    </div>
+                    <ul class="mt-8 space-y-4">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Kalender Pendidikan</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Jadwal Pelajaran</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>ATP Generator</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Prota Generator</li>
+                        <li class="flex items-center text-gray-400"><i class="fas fa-times text-gray-300 mr-3"></i>Promes</li>
+                        <li class="flex items-center text-gray-400"><i class="fas fa-times text-gray-300 mr-3"></i>Modul Ajar</li>
+                    </ul>
+                    <button onclick="showAuthModal('register')" class="w-full mt-8 py-3 border-2 border-primary text-primary rounded-xl font-semibold hover:bg-primary hover:text-white transition">
+                        Daftar Gratis
+                    </button>
+                </div>
+
+                <!-- Premium Plan -->
+                <div class="bg-primary rounded-2xl p-8 shadow-xl transform md:scale-105 relative">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-yellow-400 text-yellow-900 text-sm font-bold px-4 py-1 rounded-full">POPULER</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Premium</h3>
+                    <p class="text-blue-200 mt-2">Untuk guru profesional</p>
+                    <div class="mt-6">
+                        <span class="text-4xl font-bold text-white">Rp 99K</span>
+                        <span class="text-blue-200">/tahun</span>
+                    </div>
+                    <ul class="mt-8 space-y-4 text-white">
+                        <li class="flex items-center"><i class="fas fa-check text-yellow-400 mr-3"></i>Semua Fitur Gratis</li>
+                        <li class="flex items-center"><i class="fas fa-check text-yellow-400 mr-3"></i>Promes Generator</li>
+                        <li class="flex items-center"><i class="fas fa-check text-yellow-400 mr-3"></i>Modul Ajar</li>
+                        <li class="flex items-center"><i class="fas fa-check text-yellow-400 mr-3"></i>LKPD Builder</li>
+                        <li class="flex items-center"><i class="fas fa-check text-yellow-400 mr-3"></i>Bank Soal</li>
+                        <li class="flex items-center"><i class="fas fa-check text-yellow-400 mr-3"></i>Jurnal & Absensi</li>
+                        <li class="flex items-center"><i class="fas fa-check text-yellow-400 mr-3"></i>Daftar Nilai</li>
+                        <li class="flex items-center"><i class="fas fa-check text-yellow-400 mr-3"></i>AI Assistant</li>
+                    </ul>
+                    <button onclick="contactUpgrade()" class="w-full mt-8 py-3 bg-white text-primary rounded-xl font-semibold hover:bg-gray-100 transition">
+                        Upgrade Premium
+                    </button>
+                </div>
+
+                <!-- School Plan -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                    <h3 class="text-xl font-bold text-gray-800">Sekolah</h3>
+                    <p class="text-gray-600 mt-2">Untuk institusi</p>
+                    <div class="mt-6">
+                        <span class="text-4xl font-bold text-gray-800">Rp 499K</span>
+                        <span class="text-gray-600">/tahun</span>
+                    </div>
+                    <ul class="mt-8 space-y-4">
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Semua Fitur Premium</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Hingga 50 Guru</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Dashboard Admin</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Priority Support</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Training Online</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-3"></i>Custom Branding</li>
+                    </ul>
+                    <button onclick="contactUpgrade()" class="w-full mt-8 py-3 border-2 border-primary text-primary rounded-xl font-semibold hover:bg-primary hover:text-white transition">
+                        Hubungi Kami
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guide Section -->
+    <section id="guide" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-primary font-semibold text-sm uppercase tracking-wider">Panduan</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mt-2">Cara Menggunakan AGSA</h2>
+            </div>
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-white">1</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Daftar & Profil</h3>
+                    <p class="text-gray-600 text-sm">Daftar dengan Gmail dan lengkapi profil guru Anda</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-white">2</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Setup Kalender</h3>
+                    <p class="text-gray-600 text-sm">Atur kalender pendidikan sesuai kebijakan sekolah</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-white">3</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Input Jadwal & TP</h3>
+                    <p class="text-gray-600 text-sm">Masukkan jadwal mengajar dan tujuan pembelajaran</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-white">4</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mb-2">Generate & Cetak</h3>
+                    <p class="text-gray-600 text-sm">Semua dokumen siap di-generate dan dicetak</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chalkboard-teacher text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold">AGSA</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">Admin Guru Super App - Solusi administrasi mengajar modern untuk guru Indonesia.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Fitur</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li>Kalender Pendidikan</li>
+                        <li>Jadwal Pelajaran</li>
+                        <li>ATP & Prota/Promes</li>
+                        <li>Modul Ajar</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Dukungan</h4>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li>Panduan Penggunaan</li>
+                        <li>FAQ</li>
+                        <li>Hubungi Kami</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Kontak</h4>
+                    <p class="text-gray-400 text-sm">Email: afifaro@gmail.com</p>
+                    <p class="text-gray-400 text-sm mt-2">WhatsApp: <span id="waNumber">+62 xxx</span></p>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
+                © 2025 Admin Guru Super App. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="authTitle" class="text-2xl font-bold text-gray-800">Masuk</h2>
+                    <button onclick="hideAuthModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="loginForm">
+                    <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition mb-4">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5">
+                        <span class="font-medium text-gray-700">Masuk dengan Google</span>
+                    </button>
+                    <p class="text-center text-gray-500 text-sm">
+                        Belum punya akun? 
+                        <button onclick="showAuthModal('register')" class="text-primary font-semibold hover:underline">Daftar</button>
+                    </p>
+                </div>
+
+                <!-- Register Form -->
+                <div id="registerForm" class="hidden">
+                    <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition mb-4">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5">
+                        <span class="font-medium text-gray-700">Daftar dengan Google</span>
+                    </button>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                        <p class="text-blue-700 text-sm"><i class="fas fa-info-circle mr-2"></i>Pendaftaran hanya tersedia dengan akun Gmail</p>
+                    </div>
+                    <p class="text-center text-gray-500 text-sm">
+                        Sudah punya akun? 
+                        <button onclick="showAuthModal('login')" class="text-primary font-semibold hover:underline">Masuk</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl p-8 flex flex-col items-center space-y-4">
-            <div class="loading-spinner"></div>
+    <div id="loadingOverlay" class="fixed inset-0 z-[60] hidden items-center justify-center bg-white/90">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p class="text-gray-600 font-medium">Memproses...</p>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300">
-        <div id="toastContent" class="px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3">
-            <i id="toastIcon" class="text-xl"></i>
+    <div id="toast" class="fixed bottom-4 right-4 z-[70] hidden transform transition-transform duration-300">
+        <div id="toastContent" class="px-6 py-4 rounded-xl shadow-lg flex items-center space-x-3">
+            <i id="toastIcon" class="fas text-xl"></i>
             <span id="toastMessage" class="font-medium"></span>
         </div>
     </div>
 
-    <!-- Main Container -->
-    <div class="min-h-screen flex flex-col lg:flex-row">
-        <!-- Left Side - Branding -->
-        <div class="lg:w-1/2 p-8 lg:p-16 flex flex-col justify-center text-white">
-            <div class="max-w-lg mx-auto lg:mx-0">
-                <div class="flex items-center space-x-3 mb-8">
-                    <div class="w-14 h-14 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center">
-                        <i class="fas fa-chalkboard-teacher text-2xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold">Admin Guru</h1>
-                        <p class="text-white text-opacity-80 text-sm">Super App</p>
-                    </div>
-                </div>
-                
-                <h2 class="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-                    Otomatisasi Administrasi Mengajar
-                </h2>
-                
-                <p class="text-lg text-white text-opacity-90 mb-8">
-                    Single Input – Multi Output. Masukkan data sekali, 
-                    dapatkan ATP, Prota, Promes, dan Modul Ajar yang sinkron otomatis.
-                </p>
-
-                <div class="grid grid-cols-2 gap-4 mb-8">
-                    <div class="bg-white bg-opacity-10 rounded-xl p-4">
-                        <i class="fas fa-calendar-alt text-2xl mb-2"></i>
-                        <h3 class="font-semibold">Kalender Otomatis</h3>
-                        <p class="text-sm text-white text-opacity-80">Sinkron dengan jadwal</p>
-                    </div>
-                    <div class="bg-white bg-opacity-10 rounded-xl p-4">
-                        <i class="fas fa-file-alt text-2xl mb-2"></i>
-                        <h3 class="font-semibold">Dokumen Lengkap</h3>
-                        <p class="text-sm text-white text-opacity-80">ATP, Prota, Promes</p>
-                    </div>
-                    <div class="bg-white bg-opacity-10 rounded-xl p-4">
-                        <i class="fas fa-book-open text-2xl mb-2"></i>
-                        <h3 class="font-semibold">Modul Ajar</h3>
-                        <p class="text-sm text-white text-opacity-80">Support teks Arab</p>
-                    </div>
-                    <div class="bg-white bg-opacity-10 rounded-xl p-4">
-                        <i class="fas fa-robot text-2xl mb-2"></i>
-                        <h3 class="font-semibold">AI Assistant</h3>
-                        <p class="text-sm text-white text-opacity-80">Bantu input data</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-4 text-sm">
-                    <div class="flex -space-x-2">
-                        <div class="w-8 h-8 bg-green-400 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold">A</div>
-                        <div class="w-8 h-8 bg-blue-400 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold">B</div>
-                        <div class="w-8 h-8 bg-purple-400 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold">C</div>
-                    </div>
-                    <span class="text-white text-opacity-80">1000+ Guru sudah bergabung</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Side - Auth Forms -->
-        <div class="lg:w-1/2 p-8 lg:p-16 flex items-center justify-center">
-            <div class="glass-card rounded-3xl shadow-2xl p-8 lg:p-10 w-full max-w-md">
-                <!-- Tab Buttons -->
-                <div class="flex bg-gray-100 rounded-xl p-1 mb-8">
-                    <button id="loginTab" onclick="showTab('login')" 
-                            class="flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-300 bg-white text-primary-600 shadow">
-                        Masuk
-                    </button>
-                    <button id="registerTab" onclick="showTab('register')" 
-                            class="flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-300 text-gray-500">
-                        Daftar
-                    </button>
-                </div>
-
-                <!-- Login Form -->
-                <form id="loginForm" class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Gmail</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                <i class="fas fa-envelope"></i>
-                            </span>
-                            <input type="email" id="loginEmail" required
-                                   class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                   placeholder="nama@gmail.com">
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                <i class="fas fa-lock"></i>
-                            </span>
-                            <input type="password" id="loginPassword" required
-                                   class="w-full pl-12 pr-12 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                   placeholder="••••••••">
-                            <button type="button" onclick="togglePassword('loginPassword')" 
-                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between text-sm">
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                            <span class="text-gray-600">Ingat saya</span>
-                        </label>
-                        <a href="#" onclick="showResetPassword()" class="text-primary-600 hover:text-primary-700 font-medium">
-                            Lupa password?
-                        </a>
-                    </div>
-
-                    <button type="submit" 
-                            class="w-full py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                        <i class="fas fa-sign-in-alt mr-2"></i>
-                        Masuk
-                    </button>
-
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-gray-200"></div>
-                        </div>
-                        <div class="relative flex justify-center text-sm">
-                            <span class="px-4 bg-white text-gray-500">atau</span>
-                        </div>
-                    </div>
-
-                    <button type="button" onclick="signInWithGoogle()"
-                            class="w-full py-4 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 flex items-center justify-center space-x-3">
-                        <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5">
-                        <span>Masuk dengan Google</span>
-                    </button>
-                </form>
-
-                <!-- Register Form -->
-                <form id="registerForm" class="space-y-5 hidden">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Lengkap</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                <i class="fas fa-user"></i>
-                            </span>
-                            <input type="text" id="registerName" required
-                                   class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                   placeholder="Nama lengkap Anda">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Gmail <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                <i class="fas fa-envelope"></i>
-                            </span>
-                            <input type="email" id="registerEmail" required
-                                   class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                   placeholder="nama@gmail.com"
-                                   pattern="[a-zA-Z0-9._%+-]+@gmail\.com$">
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">* Hanya email Gmail yang dapat didaftarkan</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                <i class="fas fa-lock"></i>
-                            </span>
-                            <input type="password" id="registerPassword" required minlength="6"
-                                   class="w-full pl-12 pr-12 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                   placeholder="Minimal 6 karakter">
-                            <button type="button" onclick="togglePassword('registerPassword')" 
-                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Konfirmasi Password</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                <i class="fas fa-lock"></i>
-                            </span>
-                            <input type="password" id="registerPasswordConfirm" required minlength="6"
-                                   class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                   placeholder="Ulangi password">
-                        </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2">
-                        <input type="checkbox" id="agreeTerms" required 
-                               class="w-4 h-4 mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                        <label for="agreeTerms" class="text-sm text-gray-600">
-                            Saya setuju dengan <a href="#" class="text-primary-600 hover:underline">Syarat & Ketentuan</a> 
-                            dan <a href="#" class="text-primary-600 hover:underline">Kebijakan Privasi</a>
-                        </label>
-                    </div>
-
-                    <button type="submit" 
-                            class="w-full py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                        <i class="fas fa-user-plus mr-2"></i>
-                        Daftar Sekarang
-                    </button>
-
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-gray-200"></div>
-                        </div>
-                        <div class="relative flex justify-center text-sm">
-                            <span class="px-4 bg-white text-gray-500">atau</span>
-                        </div>
-                    </div>
-
-                    <button type="button" onclick="signInWithGoogle()"
-                            class="w-full py-4 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 flex items-center justify-center space-x-3">
-                        <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5">
-                        <span>Daftar dengan Google</span>
-                    </button>
-                </form>
-
-                <!-- Reset Password Form -->
-                <form id="resetPasswordForm" class="space-y-6 hidden">
-                    <div class="text-center mb-6">
-                        <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-key text-2xl text-primary-600"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-800">Reset Password</h3>
-                        <p class="text-gray-500 text-sm mt-2">Masukkan email Anda untuk menerima link reset password</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Gmail</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                <i class="fas fa-envelope"></i>
-                            </span>
-                            <input type="email" id="resetEmail" required
-                                   class="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                   placeholder="nama@gmail.com">
-                        </div>
-                    </div>
-
-                    <button type="submit" 
-                            class="w-full py-4 bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold rounded-xl hover:from-primary-700 hover:to-purple-700 transition-all duration-300 shadow-lg">
-                        <i class="fas fa-paper-plane mr-2"></i>
-                        Kirim Link Reset
-                    </button>
-
-                    <button type="button" onclick="showTab('login')" 
-                            class="w-full py-3 text-gray-600 font-medium hover:text-gray-800 transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>
-                        Kembali ke Login
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 text-white text-opacity-80 text-sm">
-        © 2025 Admin Guru Super App. All rights reserved.
-    </div>
-
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
 
     <script>
         // Firebase Configuration
@@ -361,7 +475,7 @@
             projectId: "agsa-e5b08",
             storageBucket: "agsa-e5b08.firebasestorage.app",
             messagingSenderId: "916052746331",
-            appId: "1:916052746331:web:357cbadbfd8658f1689f7e",
+            appId: "1:916052746331:web:357cbadbfd8658f1689f7e"
         };
 
         // Initialize Firebase
@@ -369,352 +483,166 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Super Admin Email
-        const SUPER_ADMIN_EMAIL = 'afifaro@gmail.com';
+        // Check auth state on page load
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // Check if user is gmail
+                if (!user.email.endsWith('@gmail.com')) {
+                    await auth.signOut();
+                    showToast('Hanya akun Gmail yang diperbolehkan', 'error');
+                    return;
+                }
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+            }
+        });
 
-        // Utility Functions
-        function showLoading() {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
         }
 
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastContent = document.getElementById('toastContent');
-            const toastIcon = document.getElementById('toastIcon');
-            const toastMessage = document.getElementById('toastMessage');
-
-            const types = {
-                success: { bg: 'bg-green-500', icon: 'fas fa-check-circle' },
-                error: { bg: 'bg-red-500', icon: 'fas fa-exclamation-circle' },
-                warning: { bg: 'bg-yellow-500', icon: 'fas fa-exclamation-triangle' },
-                info: { bg: 'bg-blue-500', icon: 'fas fa-info-circle' }
-            };
-
-            toastContent.className = `${types[type].bg} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3`;
-            toastIcon.className = `${types[type].icon} text-xl`;
-            toastMessage.textContent = message;
-
-            toast.classList.remove('translate-x-full');
-            toast.classList.add('translate-x-0');
-
-            setTimeout(() => {
-                toast.classList.remove('translate-x-0');
-                toast.classList.add('translate-x-full');
-            }, 3000);
-        }
-
-        function showTab(tab) {
+        // Auth Modal Functions
+        function showAuthModal(type) {
+            const modal = document.getElementById('authModal');
             const loginForm = document.getElementById('loginForm');
             const registerForm = document.getElementById('registerForm');
-            const resetPasswordForm = document.getElementById('resetPasswordForm');
-            const loginTab = document.getElementById('loginTab');
-            const registerTab = document.getElementById('registerTab');
+            const title = document.getElementById('authTitle');
 
-            loginForm.classList.add('hidden');
-            registerForm.classList.add('hidden');
-            resetPasswordForm.classList.add('hidden');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
 
-            loginTab.classList.remove('bg-white', 'text-primary-600', 'shadow');
-            registerTab.classList.remove('bg-white', 'text-primary-600', 'shadow');
-            loginTab.classList.add('text-gray-500');
-            registerTab.classList.add('text-gray-500');
-
-            if (tab === 'login') {
+            if (type === 'login') {
+                title.textContent = 'Masuk';
                 loginForm.classList.remove('hidden');
-                loginTab.classList.remove('text-gray-500');
-                loginTab.classList.add('bg-white', 'text-primary-600', 'shadow');
-            } else if (tab === 'register') {
+                registerForm.classList.add('hidden');
+            } else {
+                title.textContent = 'Daftar';
+                loginForm.classList.add('hidden');
                 registerForm.classList.remove('hidden');
-                registerTab.classList.remove('text-gray-500');
-                registerTab.classList.add('bg-white', 'text-primary-600', 'shadow');
             }
         }
 
-        function showResetPassword() {
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('registerForm').classList.add('hidden');
-            document.getElementById('resetPasswordForm').classList.remove('hidden');
+        function hideAuthModal() {
+            const modal = document.getElementById('authModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
 
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const icon = input.nextElementSibling.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
-
-        function isGmailEmail(email) {
-            return email.toLowerCase().endsWith('@gmail.com');
-        }
-
-        function getAcademicYear() {
-            const now = new Date();
-            const month = now.getMonth() + 1;
-            const year = now.getFullYear();
-            
-            if (month >= 7) {
-                return {
-                    current: `${year}/${year + 1}`,
-                    options: [`${year - 1}/${year}`, `${year}/${year + 1}`]
-                };
-            } else {
-                return {
-                    current: `${year - 1}/${year}`,
-                    options: [`${year - 1}/${year}`, `${year}/${year + 1}`]
-                };
-            }
-        }
-
-        // Login Form Handler
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            if (!isGmailEmail(email)) {
-                showToast('Hanya email Gmail yang dapat digunakan!', 'error');
-                return;
-            }
-
-            showLoading();
-            try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                showToast('Login berhasil!', 'success');
-                
-                // Check if Super Admin
-                if (email === SUPER_ADMIN_EMAIL) {
-                    setTimeout(() => {
-                        window.location.href = 'admin.html';
-                    }, 1000);
-                } else {
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1000);
-                }
-            } catch (error) {
-                console.error(error);
-                let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
-                if (error.code === 'auth/user-not-found') {
-                    errorMessage = 'Akun tidak ditemukan. Silakan daftar terlebih dahulu.';
-                } else if (error.code === 'auth/wrong-password') {
-                    errorMessage = 'Password salah. Silakan coba lagi.';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'Format email tidak valid.';
-                } else if (error.code === 'auth/too-many-requests') {
-                    errorMessage = 'Terlalu banyak percobaan. Silakan coba lagi nanti.';
-                }
-                showToast(errorMessage, 'error');
-            }
-            hideLoading();
-        });
-
-        // Register Form Handler
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('registerName').value.trim();
-            const email = document.getElementById('registerEmail').value.trim();
-            const password = document.getElementById('registerPassword').value;
-            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
-
-            if (!isGmailEmail(email)) {
-                showToast('Hanya email Gmail yang dapat didaftarkan!', 'error');
-                return;
-            }
-
-            if (password !== passwordConfirm) {
-                showToast('Password tidak cocok!', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                showToast('Password minimal 6 karakter!', 'error');
-                return;
-            }
-
-            showLoading();
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-
-                // Update profile
-                await user.updateProfile({ displayName: name });
-
-                // Create user document in Firestore
-                const academicYear = getAcademicYear();
-                await db.collection('users').doc(user.uid).set({
-                    uid: user.uid,
-                    email: email,
-                    displayName: name,
-                    photoURL: null,
-                    subscription: 'free',
-                    subscriptionExpiry: null,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-                    profile: {
-                        nip: '',
-                        subjects: [],
-                        school: {
-                            name: '',
-                            npsn: '',
-                            level: 'SD',
-                            address: '',
-                            city: '',
-                            province: '',
-                            principalName: ''
-                        }
-                    },
-                    academicYear: academicYear.current,
-                    settings: {
-                        whatsappAdmin: '6281234567890'
-                    }
-                });
-
-                showToast('Registrasi berhasil! Selamat datang.', 'success');
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
-            } catch (error) {
-                console.error(error);
-                let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMessage = 'Email sudah terdaftar. Silakan login.';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'Format email tidak valid.';
-                } else if (error.code === 'auth/weak-password') {
-                    errorMessage = 'Password terlalu lemah. Gunakan minimal 6 karakter.';
-                }
-                showToast(errorMessage, 'error');
-            }
-            hideLoading();
-        });
-
-        // Reset Password Form Handler
-        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('resetEmail').value.trim();
-
-            if (!isGmailEmail(email)) {
-                showToast('Hanya email Gmail yang dapat digunakan!', 'error');
-                return;
-            }
-
-            showLoading();
-            try {
-                await auth.sendPasswordResetEmail(email);
-                showToast('Link reset password telah dikirim ke email Anda.', 'success');
-                showTab('login');
-            } catch (error) {
-                console.error(error);
-                let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
-                if (error.code === 'auth/user-not-found') {
-                    errorMessage = 'Email tidak terdaftar.';
-                }
-                showToast(errorMessage, 'error');
-            }
-            hideLoading();
-        });
-
-        // Google Sign In
-        async function signInWithGoogle() {
-            showLoading();
+        // Google Login
+        async function loginWithGoogle() {
+            showLoading(true);
             try {
                 const provider = new firebase.auth.GoogleAuthProvider();
                 provider.setCustomParameters({
-                    hd: 'gmail.com'
+                    prompt: 'select_account'
                 });
                 
                 const result = await auth.signInWithPopup(provider);
                 const user = result.user;
 
-                if (!isGmailEmail(user.email)) {
-                    await user.delete();
-                    showToast('Hanya akun Gmail yang dapat digunakan!', 'error');
-                    hideLoading();
+                // Check if gmail
+                if (!user.email.endsWith('@gmail.com')) {
+                    await auth.signOut();
+                    showToast('Hanya akun Gmail yang diperbolehkan', 'error');
+                    showLoading(false);
                     return;
                 }
 
-                // Check if user exists
+                // Check if user exists in database
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 
                 if (!userDoc.exists) {
-                    // Create new user document
-                    const academicYear = getAcademicYear();
+                    // Create new user
                     await db.collection('users').doc(user.uid).set({
-                        uid: user.uid,
                         email: user.email,
                         displayName: user.displayName,
                         photoURL: user.photoURL,
+                        role: user.email === 'afifaro@gmail.com' ? 'superadmin' : 'user',
                         subscription: 'free',
                         subscriptionExpiry: null,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-                        profile: {
-                            nip: '',
-                            subjects: [],
-                            school: {
-                                name: '',
-                                npsn: '',
-                                level: 'SD',
-                                address: '',
-                                city: '',
-                                province: '',
-                                principalName: ''
-                            }
-                        },
-                        academicYear: academicYear.current,
-                        settings: {
-                            whatsappAdmin: '6281234567890'
-                        }
-                    });
-                } else {
-                    // Update last login
-                    await db.collection('users').doc(user.uid).update({
-                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 }
 
                 showToast('Login berhasil!', 'success');
+                hideAuthModal();
                 
-                if (user.email === SUPER_ADMIN_EMAIL) {
-                    setTimeout(() => {
-                        window.location.href = 'admin.html';
-                    }, 1000);
-                } else {
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1000);
-                }
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+
             } catch (error) {
-                console.error(error);
-                if (error.code !== 'auth/popup-closed-by-user') {
-                    showToast('Gagal login dengan Google. Silakan coba lagi.', 'error');
-                }
+                console.error('Login error:', error);
+                showToast('Login gagal: ' + error.message, 'error');
             }
-            hideLoading();
+            showLoading(false);
         }
 
-        // Check Auth State
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                if (user.email === SUPER_ADMIN_EMAIL) {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = 'dashboard.html';
+        // Contact for upgrade
+        function contactUpgrade() {
+            // Get WhatsApp number from settings
+            db.collection('settings').doc('general').get().then(doc => {
+                let waNumber = '6281234567890'; // Default
+                if (doc.exists && doc.data().waNumber) {
+                    waNumber = doc.data().waNumber;
                 }
+                const message = encodeURIComponent('Halo, saya ingin upgrade ke Premium AGSA');
+                window.open(`https://wa.me/${waNumber}?text=${message}`, '_blank');
+            });
+        }
+
+        // Loading overlay
+        function showLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (show) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            } else {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const content = document.getElementById('toastContent');
+            const icon = document.getElementById('toastIcon');
+            const msg = document.getElementById('toastMessage');
+
+            // Reset classes
+            content.className = 'px-6 py-4 rounded-xl shadow-lg flex items-center space-x-3';
+            icon.className = 'fas text-xl';
+
+            if (type === 'success') {
+                content.classList.add('bg-green-500', 'text-white');
+                icon.classList.add('fa-check-circle');
+            } else if (type === 'error') {
+                content.classList.add('bg-red-500', 'text-white');
+                icon.classList.add('fa-exclamation-circle');
+            } else {
+                content.classList.add('bg-blue-500', 'text-white');
+                icon.classList.add('fa-info-circle');
+            }
+
+            msg.textContent = message;
+            toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('authModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideAuthModal();
             }
         });
     </script>
 </body>
-
 </html>
