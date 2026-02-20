@@ -1,6 +1,18 @@
-// Modul Ajar Management
+// Modul Ajar Management dengan 8 Dimensi Profil Lulusan
 
 let modulAjarData = [];
+
+// 8 Dimensi Profil Lulusan
+const DIMENSI_PROFIL_LULUSAN = [
+    { kode: "keimanan", nama: "Keimanan dan Ketakwaan", icon: "fa-pray" },
+    { kode: "kewargaan", nama: "Kewargaan Global", icon: "fa-globe" },
+    { kode: "penalaran", nama: "Penalaran Kritis", icon: "fa-brain" },
+    { kode: "kreativitas", nama: "Kreativitas", icon: "fa-lightbulb" },
+    { kode: "kolaborasi", nama: "Kolaborasi", icon: "fa-hands-helping" },
+    { kode: "kemandirian", nama: "Kemandirian", icon: "fa-user-check" },
+    { kode: "kesehatan", nama: "Kesehatan", icon: "fa-heartbeat" },
+    { kode: "komunikasi", nama: "Komunikasi", icon: "fa-comments" }
+];
 
 // Load Modul Ajar Data
 async function loadModulData() {
@@ -18,10 +30,10 @@ async function loadModulData() {
     }
 
     try {
+        // Query tanpa orderBy untuk menghindari error index
         const modulSnap = await db.collection('users').doc(currentUser.uid)
             .collection('modul')
             .where('tahunAjaran', '==', currentTahunAjaran)
-            .orderBy('createdAt', 'desc')
             .get();
         
         modulAjarData = [];
@@ -29,26 +41,18 @@ async function loadModulData() {
             modulAjarData.push({ id: doc.id, ...doc.data() });
         });
 
+        // Sort di client side
+        modulAjarData.sort((a, b) => {
+            const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+            const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+            return dateB - dateA;
+        });
+
         renderModulAjarList();
 
     } catch (error) {
         console.error('Error loading modul:', error);
-        // Try without ordering
-        try {
-            const modulSnap = await db.collection('users').doc(currentUser.uid)
-                .collection('modul')
-                .where('tahunAjaran', '==', currentTahunAjaran)
-                .get();
-            
-            modulAjarData = [];
-            modulSnap.forEach(doc => {
-                modulAjarData.push({ id: doc.id, ...doc.data() });
-            });
-            
-            renderModulAjarList();
-        } catch(e) {
-            showToast('Gagal memuat modul ajar', 'error');
-        }
+        showToast('Gagal memuat modul ajar', 'error');
     }
 }
 
@@ -56,64 +60,82 @@ async function loadModulData() {
 function renderModulAjarList() {
     const container = document.getElementById('modulAjarList');
 
+    if (!container) return;
+
     if (modulAjarData.length === 0) {
         container.innerHTML = `
-            <div class="col-span-full border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
-                <i class="fas fa-book text-4xl text-gray-300 mb-3"></i>
-                <p class="text-gray-500">Belum ada modul ajar</p>
-                <button onclick="tambahModulAjar()" class="text-primary hover:underline mt-2">Buat modul pertama</button>
+            <div class="col-span-full bg-white rounded-xl shadow-sm p-6">
+                <div class="text-center py-8">
+                    <i class="fas fa-book text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500">Belum ada modul ajar</p>
+                    <button onclick="tambahModulAjar()" class="text-primary hover:underline mt-2">Buat modul pertama</button>
+                </div>
             </div>
         `;
         return;
     }
 
-    container.innerHTML = modulAjarData.map(modul => `
-        <div class="bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition">
-            <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-4 text-white">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <span class="text-xs bg-white/20 px-2 py-0.5 rounded">Kelas ${modul.kelas}</span>
-                        <h3 class="font-semibold mt-1 line-clamp-2">${modul.judul}</h3>
-                    </div>
-                    <span class="text-sm">${modul.jp || 0} JP</span>
-                </div>
-            </div>
-            <div class="p-4">
-                <p class="text-sm text-gray-600 mb-3 line-clamp-2">${modul.tujuan || '-'}</p>
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-500">${formatDate(modul.createdAt)}</span>
-                    <div class="flex gap-2">
-                        ${modul.enableLKPD ? '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs">LKPD</span>' : ''}
-                        <button onclick="viewModulAjar('${modul.id}')" class="text-blue-500 hover:text-blue-700">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button onclick="editModulAjar('${modul.id}')" class="text-yellow-500 hover:text-yellow-700">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button onclick="hapusModulAjar('${modul.id}')" class="text-red-500 hover:text-red-700">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
+    container.innerHTML = `
+        <div class="col-span-full bg-white rounded-xl shadow-sm p-6 mb-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-semibold text-gray-800">Modul Ajar</h2>
+                <button onclick="tambahModulAjar()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition text-sm">
+                    <i class="fas fa-plus mr-2"></i>Buat Modul Ajar
+                </button>
             </div>
         </div>
-    `).join('');
+        ${modulAjarData.map(modul => `
+            <div class="bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition">
+                <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-4 text-white">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs bg-white/20 px-2 py-0.5 rounded">Kelas ${modul.kelas}</span>
+                            <h3 class="font-semibold mt-1 line-clamp-2">${modul.judul}</h3>
+                        </div>
+                        <span class="text-sm">${modul.jp || 0} JP</span>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">${modul.tujuan || '-'}</p>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">${formatDate(modul.createdAt)}</span>
+                        <div class="flex gap-2">
+                            ${modul.enableLKPD ? '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs">LKPD</span>' : ''}
+                            <button onclick="viewModulAjar('${modul.id}')" class="text-blue-500 hover:text-blue-700" title="Lihat">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="editModulAjar('${modul.id}')" class="text-yellow-500 hover:text-yellow-700" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="hapusModulAjar('${modul.id}')" class="text-red-500 hover:text-red-700" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('')}
+    `;
 }
 
 // Tambah Modul Ajar
 async function tambahModulAjar() {
     // Get ATP data for selection
-    const atpSnap = await db.collection('users').doc(currentUser.uid)
-        .collection('atp')
-        .where('tahunAjaran', '==', currentTahunAjaran)
-        .where('semester', '==', currentSemester)
-        .get();
-    
-    const atpOptions = [];
-    atpSnap.forEach(doc => {
-        const data = doc.data();
-        atpOptions.push({ id: doc.id, ...data });
-    });
+    let atpOptions = [];
+    try {
+        const atpSnap = await db.collection('users').doc(currentUser.uid)
+            .collection('atp')
+            .where('tahunAjaran', '==', currentTahunAjaran)
+            .where('semester', '==', currentSemester)
+            .get();
+        
+        atpSnap.forEach(doc => {
+            const data = doc.data();
+            atpOptions.push({ id: doc.id, ...data });
+        });
+    } catch (e) {
+        console.log('Could not load ATP options');
+    }
 
     const modal = `
         <div id="modalModul" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onclick="closeModal('modalModul')">
@@ -147,13 +169,15 @@ async function tambahModulAjar() {
                             <input type="text" id="modulJudul" class="w-full border border-gray-300 rounded-lg px-3 py-2" 
                                 placeholder="Judul modul ajar..." required>
                         </div>
+                        ${atpOptions.length > 0 ? `
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Pilih dari ATP (opsional)</label>
                             <select id="modulATP" class="w-full border border-gray-300 rounded-lg px-3 py-2" onchange="loadFromATP()">
                                 <option value="">-- Pilih atau ketik manual --</option>
-                                ${atpOptions.map(a => `<option value="${a.id}" data-bab="${a.bab}" data-tp="${a.tp}" data-jp="${a.jp}">${a.bab} - ${a.tp}</option>`).join('')}
+                                ${atpOptions.map(a => `<option value="${a.id}" data-bab="${a.bab}" data-tp="${a.tp}" data-jp="${a.jp}" data-kelas="${a.kelas}">${a.bab} - ${a.tp}</option>`).join('')}
                             </select>
                         </div>
+                        ` : ''}
                     </div>
 
                     <!-- Tujuan Pembelajaran -->
@@ -163,28 +187,18 @@ async function tambahModulAjar() {
                             placeholder="Siswa dapat..."></textarea>
                     </div>
 
-                    <!-- Profil Pelajar Pancasila -->
+                    <!-- 8 Dimensi Profil Lulusan -->
                     <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                        <h4 class="font-semibold text-gray-700 mb-3">C. Profil Pelajar Pancasila</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            <label class="flex items-center">
-                                <input type="checkbox" name="p3" value="beriman" class="mr-2"> Beriman & Bertakwa
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" name="p3" value="mandiri" class="mr-2"> Mandiri
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" name="p3" value="gotong-royong" class="mr-2"> Gotong Royong
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" name="p3" value="kreatif" class="mr-2"> Kreatif
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" name="p3" value="bernalar-kritis" class="mr-2"> Bernalar Kritis
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" name="p3" value="berkebinekaan" class="mr-2"> Berkebinekaan Global
-                            </label>
+                        <h4 class="font-semibold text-gray-700 mb-3">C. Dimensi Profil Lulusan</h4>
+                        <p class="text-sm text-gray-500 mb-3">Pilih dimensi yang relevan dengan pembelajaran ini:</p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            ${DIMENSI_PROFIL_LULUSAN.map(d => `
+                                <label class="flex items-center p-2 bg-white rounded-lg border cursor-pointer hover:bg-blue-50 transition">
+                                    <input type="checkbox" name="dimensi" value="${d.kode}" class="mr-2 w-4 h-4 text-primary">
+                                    <i class="fas ${d.icon} text-primary mr-2"></i>
+                                    <span class="text-sm">${d.nama}</span>
+                                </label>
+                            `).join('')}
                         </div>
                     </div>
 
@@ -241,13 +255,13 @@ async function tambahModulAjar() {
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Teks Arab (jika ada)</label>
                             <textarea id="modulArab" rows="2" dir="rtl" 
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 font-arabic text-lg" 
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-lg" 
                                 placeholder="أدخل النص العربي هنا..." style="font-family: 'Amiri', serif;"></textarea>
                         </div>
                         
                         <div class="flex items-center gap-4">
-                            <label class="flex items-center">
-                                <input type="checkbox" id="modulEnableLKPD" class="mr-2" onchange="toggleLKPDSection()"> 
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="modulEnableLKPD" class="mr-2 w-4 h-4" onchange="toggleLKPDSection()"> 
                                 <span class="font-medium">Sertakan LKPD</span>
                             </label>
                         </div>
@@ -295,15 +309,17 @@ async function tambahModulAjar() {
 // Load From ATP Selection
 function loadFromATP() {
     const select = document.getElementById('modulATP');
+    if (!select) return;
+    
     const selected = select.options[select.selectedIndex];
     
     if (selected.value && window.atpOptionsCache) {
         const atp = window.atpOptionsCache.find(a => a.id === selected.value);
         if (atp) {
-            document.getElementById('modulJudul').value = atp.bab;
-            document.getElementById('modulTujuan').value = atp.tp;
-            document.getElementById('modulJP').value = atp.jp;
-            document.getElementById('modulKelas').value = atp.kelas;
+            document.getElementById('modulJudul').value = atp.bab || '';
+            document.getElementById('modulTujuan').value = atp.tp || '';
+            document.getElementById('modulJP').value = atp.jp || 4;
+            document.getElementById('modulKelas').value = atp.kelas || '';
         }
     }
 }
@@ -313,10 +329,12 @@ function toggleLKPDSection() {
     const checkbox = document.getElementById('modulEnableLKPD');
     const section = document.getElementById('lkpdSection');
     
-    if (checkbox.checked) {
-        section.classList.remove('hidden');
-    } else {
-        section.classList.add('hidden');
+    if (checkbox && section) {
+        if (checkbox.checked) {
+            section.classList.remove('hidden');
+        } else {
+            section.classList.add('hidden');
+        }
     }
 }
 
@@ -326,10 +344,10 @@ async function saveModulAjar(event) {
     showLoading(true);
 
     try {
-        // Collect P3 checkboxes
-        const p3Checked = [];
-        document.querySelectorAll('input[name="p3"]:checked').forEach(cb => {
-            p3Checked.push(cb.value);
+        // Collect dimensi checkboxes
+        const dimensiChecked = [];
+        document.querySelectorAll('input[name="dimensi"]:checked').forEach(cb => {
+            dimensiChecked.push(cb.value);
         });
 
         const data = {
@@ -338,7 +356,7 @@ async function saveModulAjar(event) {
             pertemuan: parseInt(document.getElementById('modulPertemuan').value) || 1,
             judul: document.getElementById('modulJudul').value.trim(),
             tujuan: document.getElementById('modulTujuan').value.trim(),
-            profilPelajar: p3Checked,
+            dimensiProfilLulusan: dimensiChecked,
             pendahuluan: document.getElementById('modulPendahuluan').value.trim(),
             inti: document.getElementById('modulInti').value.trim(),
             penutup: document.getElementById('modulPenutup').value.trim(),
@@ -347,7 +365,7 @@ async function saveModulAjar(event) {
             materi: document.getElementById('modulMateri').value.trim(),
             teksArab: document.getElementById('modulArab').value.trim(),
             enableLKPD: document.getElementById('modulEnableLKPD').checked,
-            lkpdContent: document.getElementById('modulLKPDContent').value.trim(),
+            lkpdContent: document.getElementById('modulLKPDContent')?.value.trim() || '',
             sumberBelajar: document.getElementById('modulSumber').value.trim(),
             refleksi: document.getElementById('modulRefleksi').value.trim(),
             semester: currentSemester,
@@ -383,6 +401,12 @@ function viewModulAjar(id) {
     const modul = modulAjarData.find(m => m.id === id);
     if (!modul) return;
 
+    // Get dimensi names
+    const dimensiNames = (modul.dimensiProfilLulusan || []).map(kode => {
+        const d = DIMENSI_PROFIL_LULUSAN.find(dim => dim.kode === kode);
+        return d ? d.nama : kode;
+    }).join(', ') || '-';
+
     const modal = `
         <div id="modalViewModul" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onclick="closeModal('modalViewModul')">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6" onclick="event.stopPropagation()">
@@ -414,16 +438,16 @@ function viewModulAjar(id) {
                     <h4 style="font-weight: bold; margin-top: 15px;">A. Tujuan Pembelajaran</h4>
                     <p style="margin-left: 20px;">${modul.tujuan || '-'}</p>
                     
-                    <h4 style="font-weight: bold; margin-top: 15px;">B. Profil Pelajar Pancasila</h4>
-                    <p style="margin-left: 20px;">${modul.profilPelajar?.join(', ') || '-'}</p>
+                    <h4 style="font-weight: bold; margin-top: 15px;">B. Dimensi Profil Lulusan</h4>
+                    <p style="margin-left: 20px;">${dimensiNames}</p>
                     
                     <h4 style="font-weight: bold; margin-top: 15px;">C. Kegiatan Pembelajaran</h4>
                     <p style="font-weight: bold; margin-left: 20px;">Pendahuluan:</p>
-                    <p style="margin-left: 40px;">${modul.pendahuluan || '-'}</p>
+                    <p style="margin-left: 40px; white-space: pre-line;">${modul.pendahuluan || '-'}</p>
                     <p style="font-weight: bold; margin-left: 20px;">Kegiatan Inti:</p>
-                    <p style="margin-left: 40px;">${modul.inti || '-'}</p>
+                    <p style="margin-left: 40px; white-space: pre-line;">${modul.inti || '-'}</p>
                     <p style="font-weight: bold; margin-left: 20px;">Penutup:</p>
-                    <p style="margin-left: 40px;">${modul.penutup || '-'}</p>
+                    <p style="margin-left: 40px; white-space: pre-line;">${modul.penutup || '-'}</p>
                     
                     <h4 style="font-weight: bold; margin-top: 15px;">D. Asesmen</h4>
                     <p style="margin-left: 20px;"><strong>Formatif:</strong> ${modul.asesmenFormatif || '-'}</p>
@@ -478,10 +502,10 @@ async function editModulAjar(id) {
     await tambahModulAjar();
 
     setTimeout(() => {
-        document.getElementById('modulKelas').value = modul.kelas;
-        document.getElementById('modulJP').value = modul.jp;
-        document.getElementById('modulPertemuan').value = modul.pertemuan;
-        document.getElementById('modulJudul').value = modul.judul;
+        document.getElementById('modulKelas').value = modul.kelas || '';
+        document.getElementById('modulJP').value = modul.jp || 4;
+        document.getElementById('modulPertemuan').value = modul.pertemuan || 1;
+        document.getElementById('modulJudul').value = modul.judul || '';
         document.getElementById('modulJudul').dataset.editId = id;
         document.getElementById('modulTujuan').value = modul.tujuan || '';
         document.getElementById('modulPendahuluan').value = modul.pendahuluan || '';
@@ -491,15 +515,18 @@ async function editModulAjar(id) {
         document.getElementById('modulAsesmenSumatif').value = modul.asesmenSumatif || '';
         document.getElementById('modulMateri').value = modul.materi || '';
         document.getElementById('modulArab').value = modul.teksArab || '';
-        document.getElementById('modulEnableLKPD').checked = modul.enableLKPD;
-        document.getElementById('modulLKPDContent').value = modul.lkpdContent || '';
+        document.getElementById('modulEnableLKPD').checked = modul.enableLKPD || false;
+        
+        const lkpdContent = document.getElementById('modulLKPDContent');
+        if (lkpdContent) lkpdContent.value = modul.lkpdContent || '';
+        
         document.getElementById('modulSumber').value = modul.sumberBelajar || '';
         document.getElementById('modulRefleksi').value = modul.refleksi || '';
         
-        // Set P3 checkboxes
-        if (modul.profilPelajar) {
-            modul.profilPelajar.forEach(p => {
-                const cb = document.querySelector(`input[name="p3"][value="${p}"]`);
+        // Set dimensi checkboxes
+        if (modul.dimensiProfilLulusan) {
+            modul.dimensiProfilLulusan.forEach(kode => {
+                const cb = document.querySelector(`input[name="dimensi"][value="${kode}"]`);
                 if (cb) cb.checked = true;
             });
         }
@@ -524,4 +551,30 @@ async function hapusModulAjar(id) {
         showToast('Gagal menghapus modul', 'error');
     }
     showLoading(false);
+}
+
+// Generate Signature (for print)
+function generateSignature() {
+    const kota = window.profilData?.kotaSekolah || 'Kudus';
+    const now = new Date();
+    const tanggal = `${kota}, ${now.getDate()} ${getBulanName(now.getMonth())} ${now.getFullYear()}`;
+    
+    return `
+        <div style="width: 100%; margin-top: 30px; display: flex; justify-content: space-between; page-break-inside: avoid;">
+            <div style="text-align: center; width: 45%;">
+                Mengetahui,<br>Kepala Sekolah
+                <div style="text-decoration: underline; font-weight: bold; margin-top: 70px;">
+                    ${window.profilData?.namaKepsek || '............................'}
+                </div>
+                NIP. ${window.profilData?.nipKepsek || '............................'}
+            </div>
+            <div style="text-align: center; width: 45%;">
+                ${tanggal}<br>Guru PAI & BP
+                <div style="text-decoration: underline; font-weight: bold; margin-top: 70px;">
+                    ${window.profilData?.namaGuru || '............................'}
+                </div>
+                NIP. ${window.profilData?.nipGuru || '............................'}
+            </div>
+        </div>
+    `;
 }
