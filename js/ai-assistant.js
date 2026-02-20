@@ -8,7 +8,7 @@ const AI_PROMPTS = {
 nisn,nama,jenis_kelamin,kelas,rombel
 
 Aturan:
-- nisn: Nomor Induk Siswa Nasional (10 digit)
+- nisn: Nomor Induk Siswa Nasional (10 digit), bisa kosong
 - nama: Nama lengkap siswa
 - jenis_kelamin: L untuk Laki-laki, P untuk Perempuan
 - kelas: Angka kelas (1-6 untuk SD, 7-9 untuk SMP, 10-12 untuk SMA)
@@ -35,7 +35,7 @@ Aturan:
 - nama: Nama kegiatan/libur
 - jenis: Libur, Ujian, atau Kegiatan
 - mulai: Format tanggal YYYY-MM-DD
-- selesai: Format tanggal YYYY-MM-DD
+- selesai: Format tanggal YYYY-MM-DD (sama dengan mulai jika 1 hari)
 
 Contoh output:
 nama,jenis,mulai,selesai
@@ -92,7 +92,6 @@ Aturan:
 Contoh output:
 fase,kelas,tipe,tp,teks_arab,soal,opsi_a,opsi_b,opsi_c,opsi_d,jawaban
 A,1,pilgan,Mengenal huruf hijaiyah,ا ب ت,Huruf pertama dalam hijaiyah adalah...,Alif,Ba,Ta,Tsa,0
-A,1,isian,Menghafal doa,بِسْمِ اللهِ,Tuliskan arti basmalah!,,,,,Dengan menyebut nama Allah
 
 Berikut data soal yang perlu dikonversi:
 [TEMPEL DATA SOAL DI SINI]
@@ -107,20 +106,20 @@ function showAIPrompt(type) {
     if (!promptData) return;
 
     const aiPromptArea = document.getElementById('aiPromptArea');
+    if (!aiPromptArea) return;
+    
     aiPromptArea.innerHTML = `
         <div class="mb-4">
             <h4 class="font-semibold text-gray-800">${promptData.title}</h4>
             <p class="text-sm text-gray-600">${promptData.description}</p>
         </div>
         
-        <div class="bg-white border rounded-lg p-3 text-sm" style="white-space: pre-wrap; font-family: monospace;" id="promptText">
-${promptData.prompt}
-        </div>
+        <div class="bg-white border rounded-lg p-3 text-sm" style="white-space: pre-wrap; font-family: monospace; max-height: 300px; overflow-y: auto;" id="promptText">${promptData.prompt}</div>
         
         <div class="mt-4 p-3 bg-blue-50 rounded-lg">
             <p class="text-sm text-blue-700"><i class="fas fa-info-circle mr-2"></i>
                 Salin prompt di atas, lalu tempel ke ChatGPT, Gemini, atau Claude. 
-                Ganti bagian [TEMPEL DATA...] dengan data Anda yang akan dikonversi.
+                Ganti bagian [TEMPEL DATA...] dengan data Anda.
             </p>
         </div>
     `;
@@ -139,6 +138,13 @@ function copyPrompt() {
         showToast('Prompt berhasil disalin!', 'success');
     }).catch(err => {
         console.error('Failed to copy:', err);
-        showToast('Gagal menyalin prompt', 'error');
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Prompt berhasil disalin!', 'success');
     });
 }
