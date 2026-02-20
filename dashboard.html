@@ -3635,6 +3635,236 @@ SOAL-SOAL:
             }
         });
     </script>
+    <script>
+const dataKurikulumPAI = {
+    "1": { "Gasal": [ { bab: "1. Aku Cinta Al-Qur'an", sub: [["1.1 Membaca Basmalah", 4], ["1.2 Melafalkan Al-Fatihah", 4], ["1.3 Menghafal Al-Fatihah", 4], ["1.4 Pesan Pokok Al-Fatihah", 4]] }, { bab: "2. Mengenal Rukun Iman", sub: [["2.1 Pengertian Rukun Iman", 4], ["2.2 Rukun Iman ke-1 s/d 6", 4], ["2.3 Beriman kepada Allah SWT", 4]] }, { bab: "3. Aku Suka Membaca Basmalah", sub: [["3.1 Membaca Basmalah", 4], ["3.2 Membaca Hamdalah", 4], ["3.3 Bersyukur", 4]] }, { bab: "4. Mengenal Rukun Islam", sub: [["4.1 Mengerti Rukun Islam", 4], ["4.2 Syahadat", 4], ["4.3 Shalat, Puasa, Zakat, Haji", 4]] }, { bab: "5. Nabi dan Rasul Panutanku", sub: [["5.1 Mengenal Nabi dan Rasul", 4], ["5.2 Sifat Wajib Rasul", 4], ["5.3 Teladan Nabi Adam AS", 4]] } ], "Genap": [ { bab: "6. Al-Qur'an Pedoman Hidupku", sub: [["6.1 Melafalkan QS Al-Ikhlas", 4], ["6.2 Menghafal QS Al-Ikhlas", 4], ["6.3 Pesan Pokok QS Al-Ikhlas", 4]] }, { bab: "7. Kasih Sayang Sesama", sub: [["7.1 Kasih Sayang Nabi", 4], ["7.2 Kasih Sayang Allah", 4]] }, { bab: "8. Berterima Kasih & Disiplin", sub: [["8.1 Perilaku Berterima Kasih", 4], ["8.2 Sikap Disiplin", 4]] }, { bab: "9. Membiasakan Hidup Bersih", sub: [["9.1 Bersih Jasmani Rohani", 4], ["9.2 Bersuci", 4], ["9.3 Tata Cara Wudu", 4]] }, { bab: "10. Kisah Nabi Nuh dan Hud", sub: [["10.1 Teladan Nabi Nuh AS", 6], ["10.2 Teladan Nabi Hud AS", 6]] } ] },
+    "2": { "Gasal": [ { bab: "1. Ayo Belajar Al-Qur'an", sub: [["1.1 Melafalkan QS An-Nas", 4], ["1.2 Menghafal QS An-Nas", 4], ["1.3 Pesan QS An-Nas", 4]] }, { bab: "2. Mari Mengenal Allah SWT", sub: [["2.1 Mengenal Allah", 4], ["2.2 Asmaulhusna Al-Hafiz", 8]] }, { bab: "3. Berperilaku Terpuji", sub: [["3.1 Sikap Jujur", 4], ["3.2 Sayang Sesama", 4], ["3.3 Hormat Patuh", 4]] }, { bab: "4. Ayo Praktik Wudu", sub: [["4.1 Syarat Wudu", 4], ["4.2 Sunah Wudu", 4], ["4.3 Praktik Berwudu", 6]] }, { bab: "5. Nabi Saleh & Luth", sub: [["5.1 Teladan Saleh", 4], ["5.2 Teladan Luth", 4]] } ], "Genap": [ { bab: "6. Ayo Belajar QS Al-'Asr", sub: [["6.1 Membaca QS Al-'Asr", 4], ["6.2 Menghafal QS Al-'Asr", 4]] }, { bab: "7. Mengenal Malaikat", sub: [["7.1 Beriman kepada Malaikat", 4], ["7.2 Nama Tugas Malaikat", 6]] }, { bab: "8. Senang Berbagi", sub: [["8.1 Dermawan", 4], ["8.2 Hindari Kikir", 4]] }, { bab: "9. Ayo Dirikan Salat", sub: [["9.1 Pentingnya Salat", 4], ["9.2 Gerakan dan Bacaan", 8]] }, { bab: "10. Nabi Ibrahim & Ismail", sub: [["10.1 Teladan Ibrahim", 4], ["10.2 Teladan Ismail", 4]] } ] },
+    "3": { "Gasal": [ { bab: "1. Belajar Surah Al-'Alaq", sub: [["1.1 Membaca QS. Al-'Alaq 1-5", 4], ["1.2 Hukum Qalqalah", 4], ["1.3 Menulis QS. Al-'Alaq", 4], ["1.4 Menghafal & Pesan Al-'Alaq", 8]] }, { bab: "2. Mengenal Tuhan Kita", sub: [["2.1 Sifat Wajib Allah", 4], ["2.2 Sifat Mustahil & Jaiz", 4], ["2.3 Al-Wahhab", 4], ["2.4 Al-Kabir", 4]] }, { bab: "3. Perilaku Terpuji", sub: [["3.1 Berbakti Ortu", 4], ["3.2 Berbakti Guru", 4], ["3.3 Menghormati Orang Lain", 4]] }, { bab: "4. Mampu Berpuasa", sub: [["4.1 Ketentuan Puasa", 6], ["4.2 Hikmah Puasa", 6]] }, { bab: "5. Belajar Hadis", sub: [["5.1 Membaca Hadis Berjemaah", 4], ["5.2 Menulis Hadis", 4], ["5.3 Praktik Hadis", 4]] } ], "Genap": [ { bab: "6. Beriman Kepada Kitab", sub: [["6.1 Pengertian Iman Kitab", 4], ["6.2 Kitab Wajib", 4], ["6.3 Cara Beriman", 4]] }, { bab: "7. Kalimah Tayyibah", sub: [["7.1 Subhanallah", 4], ["7.2 Insyaallah", 4]] }, { bab: "8. Senangnya Salat Rawatib", sub: [["8.1 Ketentuan Salat", 4], ["8.2 Praktik Salat", 6]] }, { bab: "9. Berperilaku Mandiri", sub: [["9.1 Percaya Diri", 4], ["9.2 Pantang Menyerah", 4]] }, { bab: "10. Keteladanan Nabi", sub: [["10.1 Nabi Yusuf AS", 4], ["10.2 Nabi Syuaib AS", 4]] } ] },
+    "4": { "Gasal": [ { bab: "1. Belajar Q.S. Al-Hujurat", sub: [["1.1 Membaca Q.S. 49:13", 4], ["1.2 Tajwid Q.S. Al-Hujurat", 4], ["1.3 Menulis & Menghafal", 4], ["1.4 Pesan Keberagaman", 4]] }, { bab: "2. Teladan Asmaulhusna", sub: [["2.1 Al-Malik, Al-Aziz", 6], ["2.2 As-Salam, Al-Mukmin", 6], ["2.3 Meneladani Asmaulhusna", 4]] }, { bab: "3. Saling Menghargai", sub: [["3.1 Keragaman Sunnatullah", 4], ["3.2 Ajaran Kebaikan", 4], ["3.3 Toleransi", 4]] }, { bab: "4. Menyambut Usia Balig", sub: [["4.1 Tanda Balig Fikih", 6], ["4.2 Tanda Balig Biologi", 6], ["4.3 Kewajiban Balig", 4]] }, { bab: "5. Hijrah Nabi Muhammad", sub: [["5.1 Sebab Hijrah", 4], ["5.2 Perjalanan Hijrah", 8], ["5.3 Hikmah Hijrah", 4]] } ], "Genap": [ { bab: "6. Belajar Q.S. At-Tin", sub: [["6.1 Membaca At-Tin", 4], ["6.2 Menghafal At-Tin", 4], ["6.3 Pesan At-Tin", 4]] }, { bab: "7. Beriman Kepada Rasul", sub: [["7.1 Pengertian Rasul", 4], ["7.2 Rasul Ulul Azmi", 4], ["7.3 Sifat Rasul", 4]] }, { bab: "8. Anak Saleh", sub: [["8.1 Salam", 4], ["8.2 Membantu Ortu & Guru", 4], ["8.3 Ciri Anak Saleh", 4]] }, { bab: "9. Salat Jumat, Duha, Tahajud", sub: [["9.1 Ketentuan Jumat", 6], ["9.2 Duha & Tahajud", 6]] }, { bab: "10. Kisah Sahabat Nabi", sub: [["10.1 Abu Bakar", 4], ["10.2 Umar Bin Khattab", 4], ["10.3 Usman & Ali", 4]] } ] },
+    "5": { "Gasal": [ { bab: "1. Surah Al-Ma'un", sub: [["1.1 Membaca & Menulis", 4], ["1.2 Menghafal", 4], ["1.3 Pesan Pokok", 6]] }, { bab: "2. Nama Allah", sub: [["2.1 Al-Mumit & Al-Hayyu", 4], ["2.2 Al-Qayyum, Al-Ahad", 4], ["2.3 Makna Penerapan", 6]] }, { bab: "3. Hidup Damai", sub: [["3.1 Saling Menghargai", 6], ["3.2 Hargai Beda Pendapat", 6]] }, { bab: "4. Haji dan Kurban", sub: [["4.1 Haji", 6], ["4.2 Kurban", 6]] }, { bab: "5. Daud, Sulaiman, Ilyas", sub: [["5.1 Daud & Sulaiman", 6], ["5.2 Ilyas & Ilyasa", 6]] } ], "Genap": [ { bab: "6. QS Al-Qadr", sub: [["6.1 Membaca Al-Qadr", 6], ["6.2 Pesan Pokok", 6]] }, { bab: "7. Hari Akhir", sub: [["7.1 Makna Hari Akhir", 4], ["7.2 Tanda Kiamat", 4], ["7.3 Hikmah", 4]] }, { bab: "8. Berbuat Baik", sub: [["8.1 Sikap Hormat", 4], ["8.2 Sopan Santun", 4], ["8.3 Membantu Tetangga", 4]] }, { bab: "9. Tarawih Tadarus", sub: [["9.1 Tarawih", 6], ["9.2 Tadarus", 6]] }, { bab: "10. Ashabul Kahfi & Yunus", sub: [["10.1 Ashabul Kahfi", 6], ["10.2 Nabi Yunus", 6]] } ] },
+    "6": { "Gasal": [ { bab: "1. Surah Al-Kafirun", sub: [["1.1 Membaca QS Al-Kafirun", 4], ["1.2 Tajwid & Menulis", 4], ["1.3 Pesan Toleransi", 6]] }, { bab: "2. Qada dan Qadar", sub: [["2.1 Takdir Muallaq & Mubram", 6], ["2.2 Hikmah Beriman", 6]] }, { bab: "3. Berakhlak Mulia", sub: [["3.1 Husnuzan", 4], ["3.2 Simpati & Toleran", 4], ["3.3 Hidup Rukun", 4]] }, { bab: "4. Zakat Fitrah & Mal", sub: [["4.1 Zakat Fitrah", 4], ["4.2 Zakat Mal", 4], ["4.3 Mustahik", 4]] }, { bab: "5. Khulafaur Rasyidin", sub: [["5.1 Abu Bakar & Umar", 6], ["5.2 Usman & Ali", 6]] } ], "Genap": [ { bab: "6. QS Al-Maidah", sub: [["6.1 Membaca QS 5:2-3", 6], ["6.2 Pesan Toleransi", 6]] }, { bab: "7. Meneladani Nabi", sub: [["7.1 Fatanah, Amanah", 4], ["7.2 Siddiq, Tablig", 4]] }, { bab: "8. Amal Saleh", sub: [["8.1 Pengertian Amal", 4], ["8.2 Macam Amal", 8]] }, { bab: "9. Puasa Sunah", sub: [["9.1 Macam Puasa", 6], ["9.2 Arafah & Syawal", 6]] }, { bab: "10. Sunan Kalijaga", sub: [["10.1 Sejarah Dakwah", 6], ["10.2 Keteladanan Wayang", 6]] } ] }
+};
+
+// Fungsi Penarik Identitas Super Lengkap
+function getIdentitasGuruTangguh() {
+    let n = "Nama Guru Belum Diisi"; let nip = "-";
+    let nSekolah = "Nama Sekolah Belum Diisi"; let nKepsek = "Nama Kepala Sekolah"; let nipKepsek = "-";
+
+    // CARA 1: Tarik dari global userData (struktur Firebase)
+    if (typeof window.userData !== 'undefined' && window.userData) {
+        let ud = window.userData; let pr = ud.profile || {}; let sc = ud.school || pr.school || {};
+        n = ud.name || pr.name || pr.namaLengkap || n;
+        nip = ud.nip || pr.nip || nip;
+        nSekolah = sc.name || sc.namaSekolah || nSekolah;
+        nKepsek = sc.principalName || sc.kepalaSekolah || sc.namaKepsek || nKepsek;
+        nipKepsek = sc.principalNip || sc.nipKepalaSekolah || sc.nipKepsek || nipKepsek;
+    }
+
+    // CARA 2: Scraping Langsung dari Elemen HTML (Jika Firebase terlambat memuat)
+    if (n === "Nama Guru Belum Diisi" || nip === "-" || nipKepsek === "-") {
+        const checkEl = (ids) => {
+            for(let id of ids) {
+                let el = document.getElementById(id);
+                if(el && (el.value || el.innerText)) return el.value || el.innerText;
+            } return null;
+        };
+        n = checkEl(['profileName', 'namaGuru', 'userNameDisplay']) || n;
+        nip = checkEl(['profileNip', 'nipGuru']) || nip;
+        nKepsek = checkEl(['principalName', 'kepsekName']) || nKepsek;
+        nipKepsek = checkEl(['principalNip', 'kepsekNip']) || nipKepsek;
+    }
+
+    return { nama: n, nip: nip, namaSekolah: nSekolah, namaKepsek: nKepsek, nipKepsek: nipKepsek };
+}
+
+window.loadProta = function() {
+    const titleEl = document.getElementById('pageTitle');
+    if(titleEl) titleEl.textContent = 'Program Tahunan (Prota)';
+    
+    const identitas = getIdentitasGuruTangguh();
+    const tahunAjaran = (typeof userData !== 'undefined' && userData.academicYear) ? userData.academicYear : '2025/2026';
+    
+    let classOpts = "";
+    if(typeof scheduleItems !== 'undefined' && scheduleItems.length > 0) {
+        const uniqueClasses = [...new Set(scheduleItems.map(s => s.class))].sort();
+        classOpts = uniqueClasses.map(c => `<option value="${c}">Kelas ${c}</option>`).join('');
+    } else {
+        classOpts = [1,2,3,4,5,6].map(c => `<option value="${c}">Kelas ${c}</option>`).join('');
+    }
+
+    const contentArea = document.getElementById('contentArea');
+    if(!contentArea) return;
+
+    contentArea.innerHTML = `
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 no-print">
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label><select id="filterKelasProta" onchange="renderProtaTable()" class="w-full p-2 border rounded-lg">${classOpts}</select></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Semester</label><select id="filterSemesterProta" onchange="renderProtaTable()" class="w-full p-2 border rounded-lg"><option value="Gasal">Gasal</option><option value="Genap">Genap</option></select></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Tahun Ajaran</label><input type="text" id="filterTahunProta" value="${tahunAjaran}" oninput="renderProtaTable()" class="w-full p-2 border rounded-lg"></div>
+            <div class="flex items-end"><button onclick="window.print()" class="w-full p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold"><i class="fas fa-print mr-2"></i> Cetak Prota</button></div>
+        </div>
+
+        <div id="printAreaProta" class="p-8 border border-gray-200 rounded-lg">
+            <div class="text-center font-bold text-xl mb-6 uppercase">PROGRAM TAHUNAN (PROTA)<br>PENDIDIKAN AGAMA ISLAM</div>
+            <table class="w-2/3 mb-6 text-sm font-semibold">
+                <tr><td width="150">Nama Sekolah</td><td width="10">:</td><td>${identitas.namaSekolah}</td></tr>
+                <tr><td>Mata Pelajaran</td><td>:</td><td>Pendidikan Agama Islam</td></tr>
+                <tr><td>Kelas / Semester</td><td>:</td><td><span id="dispKelasProta"></span> / <span id="dispSemesterProta"></span></td></tr>
+                <tr><td>Tahun Ajaran</td><td>:</td><td><span id="dispTahunProta"></span></td></tr>
+            </table>
+
+            <table class="w-full border-collapse border border-gray-800 text-sm text-center mb-8">
+                <thead class="bg-gray-100">
+                    <tr><th class="border border-gray-800 p-2 w-12">No</th><th class="border border-gray-800 p-2 w-64">Materi Pokok</th><th class="border border-gray-800 p-2">Sub Materi</th><th class="border border-gray-800 p-2 w-32">Alokasi</th></tr>
+                </thead>
+                <tbody id="protaTbody"></tbody>
+            </table>
+
+            <div class="flex justify-between mt-12 text-sm">
+                <div class="text-center"><p>Mengetahui,</p><p>Kepala Sekolah</p><p class="mt-20 font-bold underline">${identitas.namaKepsek}</p><p>NIP. ${identitas.nipKepsek}</p></div>
+                <div class="text-center"><p>Guru Mata Pelajaran</p><p class="mt-24 font-bold underline">${identitas.nama}</p><p>NIP. ${identitas.nip}</p></div>
+            </div>
+        </div>
+    </div>`;
+    renderProtaTable();
+};
+
+window.renderProtaTable = function() {
+    const kls = document.getElementById('filterKelasProta').value;
+    const smt = document.getElementById('filterSemesterProta').value;
+    document.getElementById('dispKelasProta').innerText = kls; 
+    document.getElementById('dispSemesterProta').innerText = smt; 
+    document.getElementById('dispTahunProta').innerText = document.getElementById('filterTahunProta').value;
+
+    let html = "";
+    (dataKurikulumPAI[kls][smt] || []).forEach((bab, i) => {
+        let tJP = bab.sub.reduce((s, x) => s + x[1], 0);
+        bab.sub.forEach((sub, j) => {
+            html += `<tr>`;
+            if(j === 0) { html += `<td class="border border-gray-800 p-2" rowspan="${bab.sub.length}">${i+1}</td><td class="border border-gray-800 p-2 text-left" rowspan="${bab.sub.length}">${bab.bab}</td>`; }
+            html += `<td class="border border-gray-800 p-2 text-left">${sub[0]}</td>`;
+            if(j === 0) html += `<td class="border border-gray-800 p-2" rowspan="${bab.sub.length}">${tJP} JP</td>`;
+            html += `</tr>`;
+        });
+    });
+    document.getElementById('protaTbody').innerHTML = html;
+};
+
+window.loadPromes = function() {
+    const titleEl = document.getElementById('pageTitle');
+    if(titleEl) titleEl.textContent = 'Program Semester (Promes)';
+    
+    const identitas = getIdentitasGuruTangguh();
+    
+    let optSchedules = "";
+    if(typeof scheduleItems !== 'undefined' && scheduleItems.length > 0) {
+        optSchedules = scheduleItems.map(s => `<option value="${s.day}|${s.duration}|${s.class}|${s.rombel || ''}">Kls ${s.class} ${s.rombel || ''} (Hari ${['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][s.day]})</option>`).join('');
+    } else {
+        optSchedules = `<option value="1|4|3|A">Kls 3-A (Senin, 4 JP)</option>`;
+    }
+
+    const contentArea = document.getElementById('contentArea');
+    if(!contentArea) return;
+
+    contentArea.innerHTML = `
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 overflow-x-auto">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 no-print">
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Pilih Jadwal</label><select id="filterJadwal" onchange="renderPromesTable()" class="w-full p-2 border rounded-lg">${optSchedules}</select></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Semester</label><select id="filterSemesterPromes" onchange="renderPromesTable()" class="w-full p-2 border rounded-lg"><option value="Gasal">Gasal</option><option value="Genap">Genap</option></select></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Tahun Ajaran Mulai</label><input type="number" id="filterTahunPromes" value="${new Date().getFullYear()}" oninput="renderPromesTable()" class="w-full p-2 border rounded-lg"></div>
+            <div class="flex items-end"><button onclick="window.print()" class="w-full p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold"><i class="fas fa-print mr-2"></i> Cetak Promes</button></div>
+        </div>
+
+        <div id="printAreaPromes" class="p-4 border border-gray-200 rounded-lg min-w-[1000px]">
+            <div class="text-center font-bold text-xl mb-4 uppercase">PROGRAM SEMESTER (PROMES)</div>
+            <table class="w-2/3 mb-4 text-sm font-semibold">
+                <tr><td width="150">Nama Sekolah</td><td width="10">:</td><td>${identitas.namaSekolah}</td></tr>
+                <tr><td>Mata Pelajaran</td><td>:</td><td>Pendidikan Agama Islam</td></tr>
+                <tr><td>Kelas / Rombel</td><td>:</td><td><span id="dispKelasPromes"></span> / <span id="dispRombelPromes"></span></td></tr>
+                <tr><td>Hari KBM</td><td>:</td><td class="text-red-600 font-bold"><span id="dispHariPromes"></span></td></tr>
+            </table>
+
+            <table class="w-full border-collapse border border-gray-800 text-[10px] text-center mb-8">
+                <thead class="bg-gray-100" id="promesThead"></thead>
+                <tbody id="promesTbody"></tbody>
+            </table>
+
+             <div class="flex justify-between mt-12 text-sm">
+                <div class="text-center"><p>Mengetahui,</p><p>Kepala Sekolah</p><p class="mt-20 font-bold underline">${identitas.namaKepsek}</p><p>NIP. ${identitas.nipKepsek}</p></div>
+                <div class="text-center"><p>Guru Mata Pelajaran</p><p class="mt-24 font-bold underline">${identitas.nama}</p><p>NIP. ${identitas.nip}</p></div>
+            </div>
+        </div>
+    </div>`;
+    renderPromesTable();
+};
+
+window.renderPromesTable = function() {
+    const jd = document.getElementById('filterJadwal').value.split('|');
+    const smt = document.getElementById('filterSemesterPromes').value;
+    const thn = parseInt(document.getElementById('filterTahunPromes').value);
+    
+    document.getElementById('dispKelasPromes').innerText = jd[2];
+    document.getElementById('dispRombelPromes').innerText = jd[3] || '-';
+    document.getElementById('dispHariPromes').innerText = `Setiap ${['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][parseInt(jd[0])]}`;
+    
+    let thnOpr = (smt === "Gasal") ? thn : thn + 1;
+    let tglKBM = [];
+    for (let i = 0; i < 6; i++) {
+        let blnSkg = (smt === "Gasal" ? 6 : 0) + i;
+        let jmlH = new Date(thnOpr, blnSkg + 1, 0).getDate();
+        for (let t = 1; t <= jmlH; t++) {
+            let d = new Date(thnOpr, blnSkg, t);
+            if (d.getDay() === parseInt(jd[0])) tglKBM.push(d);
+        }
+    }
+
+    let idxTgl = (smt === "Gasal") ? 2 : 1; 
+    let sisaJp = parseInt(jd[1]);
+    let rows = [];
+
+    (dataKurikulumPAI[jd[2]][smt] || []).forEach((bab, iBab) => {
+        bab.sub.forEach((sub, iSub) => {
+            let bth = sub[1]; let alok = [];
+            while (bth > 0 && idxTgl < tglKBM.length) {
+                if (sisaJp === 0) { idxTgl++; sisaJp = parseInt(jd[1]); }
+                if (idxTgl >= tglKBM.length) break;
+                let dp = Math.min(bth, sisaJp);
+                alok.push({ d: tglKBM[idxTgl], j: dp });
+                bth -= dp; sisaJp -= dp;
+            }
+            rows.push({ b: iSub === 0 ? iBab+1 : "", s: sub[0], j: sub[1], a: alok, sp: iSub === 0 ? bab.sub.length : 0 });
+        });
+    });
+
+    let thead = `<tr><th rowspan="2" class="border border-gray-800 p-1">No</th><th rowspan="2" class="border border-gray-800 p-1">Materi Pokok</th><th rowspan="2" class="border border-gray-800 p-1">JP</th>`;
+    (smt === "Gasal" ? ["Juli", "Ags", "Sep", "Okt", "Nov", "Des"] : ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun"]).forEach(b => thead += `<th colspan="5" class="border border-gray-800 p-1">${b}</th>`);
+    thead += `</tr><tr>`;
+    for(let i=0; i<6; i++) thead += `<th class="border border-gray-800">1</th><th class="border border-gray-800">2</th><th class="border border-gray-800">3</th><th class="border border-gray-800">4</th><th class="border border-gray-800">5</th>`;
+    thead += `</tr>`;
+    document.getElementById('promesThead').innerHTML = thead;
+
+    let tbody = "";
+    rows.forEach(r => {
+        tbody += `<tr>`;
+        if(r.sp > 0) tbody += `<td class="border border-gray-800 p-1" rowspan="${r.sp}">${r.b}</td>`;
+        tbody += `<td class="border border-gray-800 p-1 text-left">${r.s}</td><td class="border border-gray-800 p-1">${r.j}</td>`;
+        for (let b = 0; b < 6; b++) {
+            for (let w = 1; w <= 5; w++) {
+                let targetBulan = (smt === "Gasal" ? 6 : 0) + b;
+                let isi = r.a.filter(x => x.d.getMonth() === targetBulan && Math.ceil(x.d.getDate()/7) === (w>4?5:w));
+                if(isi.length > 0) {
+                    let tj = isi.reduce((sum, x) => sum + x.j, 0);
+                    let tt = isi.map(x => x.d.getDate()).join(',');
+                    tbody += `<td class="border border-gray-800 bg-blue-50 text-blue-700 font-bold">${tj}<br><span class="text-[8px] text-red-500">(${tt})</span></td>`;
+                } else tbody += `<td class="border border-gray-800"></td>`;
+            }
+        }
+        tbody += `</tr>`;
+    });
+    document.getElementById('promesTbody').innerHTML = tbody;
+};
+</script>
 </body>
 
 </html>
+
