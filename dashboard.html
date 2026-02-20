@@ -4185,8 +4185,37 @@ SOAL-SOAL:
                 document.getElementById('userMenu').classList.add('hidden');
             }
         });
+        // =========================================================================
+// 1. KODE PERBAIKAN FUNGSI YANG HILANG (Penyebab Error Modul Ajar, LKPD, dll)
+// =========================================================================
+function populateClassSelect(elementId) {
+    // Memastikan ID target ditemukan, jika tidak pakai ID default
+    let targetId = typeof elementId === 'string' ? elementId : 'classSelect';
+    let selectElement = document.getElementById(targetId);
+    
+    if (selectElement) {
+        selectElement.innerHTML = '';
+        // Loop untuk memunculkan Kelas 1 sampai Kelas 6
+        for (let i = 1; i <= 6; i++) {
+            let option = document.createElement('option');
+            option.value = i;
+            option.text = 'Kelas ' + i;
+            selectElement.appendChild(option);
+        }
+    }
+}
+
+// Fungsi tambahan penjaga jika ada dropdown semester yang butuh di-populate
+function populateSemesterSelect(elementId) {
+    let targetId = typeof elementId === 'string' ? elementId : 'semesterSelect';
+    let selectElement = document.getElementById(targetId);
+    if (selectElement) {
+        selectElement.innerHTML = '<option value="Gasal">Gasal</option><option value="Genap">Genap</option>';
+    }
+}
     </script>
 </body>
 
 </html>
+
 
