@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ADMIN GURU SUPER APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'jakarta': ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .sidebar-link.active {
+            background: linear-gradient(90deg, rgba(22, 163, 74, 0.1) 0%, transparent 100%);
+            border-left: 3px solid #16a34a;
+        }
+        .sidebar-link.active i, .sidebar-link.active span {
+            color: #16a34a;
+        }
+        /* RTL Support for Arabic */
+        .rtl {
+            direction: rtl;
+            text-align: right;
+            font-family: 'Traditional Arabic', 'Scheherazade New', serif;
+        }
+        .arabic-text {
+            font-family: 'Traditional Arabic', 'Scheherazade New', serif;
+            font-size: 1.5rem;
+            line-height: 2.5;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Animation */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Print styles */
+        @media print {
+            .no-print { display: none !important; }
+            .print-full { width: 100% !important; margin: 0 !important; }
+        }
+    </style>
+</head>
+<body class="font-jakarta bg-gray-50">
+    <!-- App Container -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed lg:relative inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+            <!-- Logo -->
+            <div class="h-16 flex items-center px-6 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-400 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-chalkboard-teacher text-white"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-gray-800">AGSA</span>
+                        <span id="subscriptionBadge" class="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Free</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Year Selector -->
+            <div class="p-4 border-b border-gray-100">
+                <label class="text-xs text-gray-500 mb-1 block">Tahun Pelajaran</label>
+                <select id="academicYearSelect" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary-500">
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="p-4 space-y-1 overflow-y-auto" style="max-height: calc(100vh - 200px);">
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-2 px-3">Menu Utama</p>
+                
+                <a href="#dashboard" onclick="showModule('dashboard')" class="sidebar-link active flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-home w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <p class="text-xs text-gray-400 uppercase tracking-wider mt-4 mb-2 px-3">Pengaturan Dasar</p>
+                
+                <a href="#profil" onclick="showModule('profil')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-user w-5"></i>
+                    <span>Profil</span>
+                </a>
+                
+                <a href="#kalender" onclick="showModule('kalender')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-calendar-alt w-5"></i>
+                    <span>Kalender Pendidikan</span>
+                </a>
+                
+                <a href="#jadwal" onclick="showModule('jadwal')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-clock w-5"></i>
+                    <span>Jadwal Pelajaran</span>
+                </a>
+                
+                <a href="#cp" onclick="showModule('cp')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-bullseye w-5"></i>
+                    <span>Capaian Pembelajaran</span>
+                </a>
+                
+                <a href="#siswa" onclick="showModule('siswa')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Data Siswa</span>
+                </a>
+
+                <p class="text-xs text-gray-400 uppercase tracking-wider mt-4 mb-2 px-3">Dokumen Otomatis</p>
+                
+                <a href="#atp" onclick="showModule('atp')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-route w-5"></i>
+                    <span>ATP</span>
+                </a>
+                
+                <a href="#prota" onclick="showModule('prota')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-calendar-check w-5"></i>
+                    <span>Prota</span>
+                </a>
+                
+                <a href="#promes" onclick="showModule('promes')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-calendar-week w-5"></i>
+                    <span>Promes</span>
+                    <span class="premium-badge ml-auto bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full">Premium</span>
+                </a>
+
+                <p class="text-xs text-gray-400 uppercase tracking-wider mt-4 mb-2 px-3">Pembelajaran</p>
+                
+                <a href="#modul-ajar" onclick="showModule('modul-ajar')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-book w-5"></i>
+                    <span>Modul Ajar</span>
+                    <span class="premium-badge ml-auto bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full">Premium</span>
+                </a>
+                
+                <a href="#lkpd" onclick="showModule('lkpd')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-file-alt w-5"></i>
+                    <span>LKPD</span>
+                    <span class="premium-badge ml-auto bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full">Premium</span>
+                </a>
+                
+                <a href="#bank-soal" onclick="showModule('bank-soal')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-question-circle w-5"></i>
+                    <span>Bank Soal</span>
+                    <span class="premium-badge ml-auto bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full">Premium</span>
+                </a>
+
+                <p class="text-xs text-gray-400 uppercase tracking-wider mt-4 mb-2 px-3">Penilaian</p>
+                
+                <a href="#absensi" onclick="showModule('absensi')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-clipboard-list w-5"></i>
+                    <span>Absensi</span>
+                    <span class="premium-badge ml-auto bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full">Premium</span>
+                </a>
+                
+                <a href="#jurnal" onclick="showModule('jurnal')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-book-open w-5"></i>
+                    <span>Jurnal</span>
+                    <span class="premium-badge ml-auto bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full">Premium</span>
+                </a>
+                
+                <a href="#nilai" onclick="showModule('nilai')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-star w-5"></i>
+                    <span>Daftar Nilai</span>
+                    <span class="premium-badge ml-auto bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full">Premium</span>
+                </a>
+                
+                <a href="#kktp" onclick="showModule('kktp')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-check-double w-5"></i>
+                    <span>KKTP</span>
+                    <span class="premium-badge ml-auto bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full">Premium</span>
+                </a>
+
+                <p class="text-xs text-gray-400 uppercase tracking-wider mt-4 mb-2 px-3">Lainnya</p>
+                
+                <a href="#ai-assistant" onclick="showModule('ai-assistant')" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-robot w-5"></i>
+                    <span>AI Assistant</span>
+                </a>
+                
+                <a href="docs/panduan.html" target="_blank" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition">
+                    <i class="fas fa-question-circle w-5"></i>
+                    <span>Panduan</span>
+                    <i class="fas fa-external-link-alt text-xs ml-auto"></i>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Bar -->
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6 no-print">
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleSidebar()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg">
+                        <i class="fas fa-bars text-gray-600"></i>
+                                    </button>
+                    <h1 id="pageTitle" class="text-lg font-semibold text-gray-800">Dashboard</h1>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <!-- Upgrade Button (for free users) -->
+                    <button id="upgradeBtn" onclick="redirectToWhatsApp()" class="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-amber-600 hover:to-orange-600 transition">
+                        <i class="fas fa-crown"></i>
+                        <span>Upgrade Premium</span>
+                    </button>
+                    
+                    <!-- Notifications -->
+                    <button class="p-2 hover:bg-gray-100 rounded-lg relative">
+                        <i class="fas fa-bell text-gray-600"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    
+                    <!-- User Menu -->
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded-lg">
+                            <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=22c55e&color=fff" alt="Avatar" class="w-8 h-8 rounded-full">
+                            <span id="userName" class="hidden sm:block text-sm font-medium text-gray-700">User</span>
+                            <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                            <a href="#profil" onclick="showModule('profil'); toggleUserMenu();" class="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-user w-5"></i>
+                                <span>Profil Saya</span>
+                            </a>
+                            <a href="#" onclick="toggleUserMenu();" class="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-cog w-5"></i>
+                                <span>Pengaturan</span>
+                            </a>
+                            <hr class="my-2">
+                            <a id="adminLink" href="admin.html" class="hidden items-center space-x-2 px-4 py-2 text-purple-600 hover:bg-purple-50">
+                                <i class="fas fa-shield-alt w-5"></i>
+                                <span>Super Admin</span>
+                            </a>
+                            <button onclick="logout()" class="w-full flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50">
+                                <i class="fas fa-sign-out-alt w-5"></i>
+                                <span>Keluar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div id="contentArea" class="flex-1 overflow-y-auto p-4 lg:p-6">
+                <!-- Dashboard Module -->
+                <div id="module-dashboard" class="module-content fade-in">
+                    <!-- Welcome Card -->
+                    <div class="bg-gradient-to-r from-primary-600 to-primary-500 rounded-2xl p-6 text-white mb-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-2">Selamat Datang, <span id="welcomeName">Guru</span>! 👋</h2>
+                                <p class="text-primary-100">Kelola administrasi mengajar Anda dengan mudah dan efisien.</p>
+                            </div>
+                            <div class="mt-4 md:mt-0">
+                                <div class="bg-white/20 rounded-xl px-4 py-2 text-center">
+                                    <p class="text-sm text-primary-100">Tahun Pelajaran</p>
+                                    <p id="currentYearDisplay" class="text-xl font-bold">2024/2025</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-white rounded-xl p-4 border border-gray-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-blue-600"></i>
+                                </div>
+                                <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">Aktif</span>
+                            </div>
+                            <p id="totalStudents" class="text-2xl font-bold text-gray-800">0</p>
+                            <p class="text-sm text-gray-500">Total Siswa</p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-4 border border-gray-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-chalkboard text-purple-600"></i>
+                                </div>
+                            </div>
+                            <p id="totalClasses" class="text-2xl font-bold text-gray-800">0</p>
+                            <p class="text-sm text-gray-500">Kelas Diampu</p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-4 border border-gray-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-book text-orange-600"></i>
+                                </div>
+                            </div>
+                            <p id="totalTP" class="text-2xl font-bold text-gray-800">0</p>
+                            <p class="text-sm text-gray-500">Tujuan Pembelajaran</p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-4 border border-gray-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-calendar-check text-teal-600"></i>
+                                </div>
+                            </div>
+                            <p id="effectiveDays" class="text-2xl font-bold text-gray-800">0</p>
+                            <p class="text-sm text-gray-500">Hari Efektif</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-xl border border-gray-100 p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi Cepat</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <button onclick="showModule('kalender')" class="flex flex-col items-center p-4 bg-gray-50 rounded-xl hover:bg-primary-50 hover:border-primary-200 border border-transparent transition group">
+                                <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-primary-200 transition">
+                                    <i class="fas fa-calendar-alt text-primary-600 text-xl"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">Kalender</span>
+                            </button>
+                            
+                            <button onclick="showModule('jadwal')" class="flex flex-col items-center p-4 bg-gray-50 rounded-xl hover:bg-blue-50 hover:border-blue-200 border border-transparent transition group">
+                                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-blue-200 transition">
+                                    <i class="fas fa-clock text-blue-600 text-xl"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">Jadwal</span>
+                            </button>
+                            
+                            <button onclick="showModule('atp')" class="flex flex-col items-center p-4 bg-gray-50 rounded-xl hover:bg-purple-50 hover:border-purple-200 border border-transparent transition group">
+                                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-purple-200 transition">
+                                    <i class="fas fa-route text-purple-600 text-xl"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">ATP</span>
+                            </button>
+                            
+                            <button onclick="showModule('prota')" class="flex flex-col items-center p-4 bg-gray-50 rounded-xl hover:bg-orange-50 hover:border-orange-200 border border-transparent transition group">
+                                <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-2 group-hover:bg-orange-200 transition">
+                                    <i class="fas fa-calendar-check text-orange-600 text-xl"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">Prota</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Setup Progress -->
+                    <div class="bg-white rounded-xl border border-gray-100 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Progress Setup Awal</h3>
+                        <div class="space-y-4">
+                            <div id="setupProfile" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-gray-500"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-700">Lengkapi Profil</span>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">Belum</span>
+                            </div>
+                            
+                            <div id="setupCalendar" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-calendar text-gray-500"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-700">Atur Kalender Pendidikan</span>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">Belum</span>
+                            </div>
+                            
+                            <div id="setupSchedule" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-clock text-gray-500"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-700">Buat Jadwal Pelajaran</span>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">Belum</span>
+                            </div>
+                            
+                            <div id="setupCP" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-bullseye text-gray-500"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-700">Set Capaian Pembelajaran</span>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">Belum</span>
+                            </div>
+                            
+                            <div id="setupStudents" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-users text-gray-500"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-700">Import Data Siswa</span>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">Belum</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profil Module -->
+                <div id="module-profil" class="module-content hidden fade-in">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                            <!-- Profile Header -->
+                            <div class="bg-gradient-to-r from-primary-600 to-primary-500 p-6">
+                                <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                                    <div class="relative">
+                                        <img id="profileAvatar" src="https://ui-avatars.com/api/?name=User&background=ffffff&color=22c55e&size=100" alt="Avatar" class="w-24 h-24 rounded-2xl border-4 border-white/30">
+                                    </div>
+                                    <div class="text-center sm:text-left">
+                                        <h2 id="profileDisplayName" class="text-2xl font-bold text-white">Nama Guru</h2>
+                                        <p id="profileEmail" class="text-primary-100">email@gmail.com</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Profile Form -->
+                            <form id="profileForm" class="p-6 space-y-6">
+                                <!-- Personal Info -->
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                        <i class="fas fa-user-circle mr-2 text-primary-600"></i>
+                                        Informasi Pribadi
+                                    </h3>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                                            <input type="text" id="inputDisplayName" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100" placeholder="Masukkan nama lengkap">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">NIP/NIK</label>
+                                            <input type="text" id="inputNIP" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100" placeholder="Masukkan NIP/NIK">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                            <input type="email" id="inputEmail" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">No. HP/WhatsApp</label>
+                                            <input type="tel" id="inputPhone" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100" placeholder="08xxxxxxxxxx">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- School Info -->
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                        <i class="fas fa-school mr-2 text-primary-600"></i>
+                                        Informasi Sekolah
+                                    </h3>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div class="md:col-span-2">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Satuan Pendidikan</label>
+                                            <input type="text" id="inputSchoolName" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100" placeholder="Contoh: SDN 1 Contoh">
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Sekolah</label>
+                                            <input type="text" id="inputSchoolAddress" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100" placeholder="Alamat lengkap sekolah">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Kota/Kabupaten <span class="text-gray-400 text-xs">(untuk tanda tangan)</span></label>
+                                            <input type="text" id="inputSchoolCity" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100" placeholder="Contoh: Bandung">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Provinsi</label>
+                                            <input type="text" id="inputSchoolProvince" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100" placeholder="Contoh: Jawa Barat">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Kepala Sekolah</label>
+                                            <input type="text" id="inputPrincipalName" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100" placeholder="Nama lengkap kepala sekolah">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">NIP Kepala Sekolah</label>
+                                            <input type="text" id="inputPrincipalNIP" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100" placeholder="NIP Kepala Sekolah">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Subjects -->
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                        <i class="fas fa-book mr-2 text-primary-600"></i>
+                                        Mata Pelajaran yang Diampu
+                                    </h3>
+                                    <div id="subjectsList" class="space-y-3">
+                                        <!-- Subject items will be added dynamically -->
+                                    </div>
+                                    <button type="button" onclick="addSubjectInput()" class="mt-3 flex items-center space-x-2 text-primary-600 hover:text-primary-700 text-sm font-medium">
+                                        <i class="fas fa-plus-circle"></i>
+                                        <span>Tambah Mata Pelajaran</span>
+                                    </button>
+                                </div>
+
+                                <!-- Save Button -->
+                                <div class="flex justify-end pt-4 border-t border-gray-100">
+                                    <button type="submit" class="bg-primary-600 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-primary-700 transition flex items-center space-x-2">
+                                        <i class="fas fa-save"></i>
+                                        <span>Simpan Profil</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kalender Module -->
+                <div id="module-kalender" class="module-content hidden fade-in">
+                    <div class="bg-white rounded-2xl border border-gray-100 p-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800">Kalender Pendidikan</h2>
+                                <p class="text-gray-500 text-sm">Atur tanggal semester dan hari libur</p>
+                            </div>
+                            <div class="mt-4 md:mt-0 flex space-x-2">
+                                <button onclick="importCalendarCSV()" class="px-4 py-2 border border-gray-200 rounded-xl text-sm hover:bg-gray-50 flex items-center space-x-2">
+                                    <i class="fas fa-file-import"></i>
+                                    <span>Import CSV</span>
+                                </button>
+                                <button onclick="saveCalendar()" class="px-4 py-2 bg-primary-600 text-white rounded-xl text-sm hover:bg-primary-700 flex items-center space-x-2">
+                                    <i class="fas fa-save"></i>
+                                    <span>Simpan</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Semester Settings -->
+                        <div class="grid md:grid-cols-2 gap-6 mb-8">
+                            <!-- Semester Ganjil -->
+                            <div class="bg-blue-50 rounded-xl p-5">
+                                <h3 class="font-semibold text-blue-800 mb-4 flex items-center">
+                                    <i class="fas fa-calendar-alt mr-2"></i>
+                                    Semester Ganjil
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm text-blue-700 mb-1">Tanggal Mulai</label>
+                                        <input type="date" id="sem1Start" class="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:border-blue-500 bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-blue-700 mb-1">Tanggal Selesai</label>
+                                        <input type="date" id="sem1End" class="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:border-blue-500 bg-white">
+                                    </div>
+                                    <div class="pt-2 border-t border-blue-200">
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-blue-700">Hari Efektif:</span>
+                                            <span id="sem1EffectiveDays" class="font-semibold text-blue-800">0 hari</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm mt-1">
+                                            <span class="text-blue-700">Minggu Efektif:</span>
+                                            <span id="sem1EffectiveWeeks" class="font-semibold text-blue-800">0 minggu</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Semester Genap -->
+                            <div class="bg-green-50 rounded-xl p-5">
+                                <h3 class="font-semibold text-green-800 mb-4 flex items-center">
+                                    <i class="fas fa-calendar-alt mr-2"></i>
+                                    Semester Genap
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm text-green-700 mb-1">Tanggal Mulai</label>
+                                        <input type="date" id="sem2Start" class="w-full px-3 py-2 border border-green-200 rounded-lg focus:outline-none focus:border-green-500 bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-green-700 mb-1">Tanggal Selesai</label>
+                                        <input type="date" id="sem2End" class="w-full px-3 py-2 border border-green-200 rounded-lg focus:outline-none focus:border-green-500 bg-white">
+                                    </div>
+                                    <div class="pt-2 border-t border-green-200">
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-green-700">Hari Efektif:</span>
+                                            <span id="sem2EffectiveDays" class="font-semibold text-green-800">0 hari</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm mt-1">
+                                            <span class="text-green-700">Minggu Efektif:</span>
+                                            <span id="sem2EffectiveWeeks" class="font-semibold text-green-800">0 minggu</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Holidays Section -->
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-semibold text-gray-800 flex items-center">
+                                    <i class="fas fa-umbrella-beach mr-2 text-orange-500"></i>
+                                    Hari Libur
+                                </h3>
+                                <button onclick="addHoliday()" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center space-x-1">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span>Tambah Libur</span>
+                                </button>
+                            </div>
+
+                            <!-- Fixed Holidays (Auto) -->
+                            <div class="mb-4">
+                                <p class="text-sm text-gray-500 mb-2">Libur Nasional Tetap (Otomatis)</p>
+                                <div class="bg-gray-50 rounded-lg p-3">
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs">1 Jan - Tahun Baru</span>
+                                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs">17 Ags - Kemerdekaan RI</span>
+                                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs">25 Des - Natal</span>
+                                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs">1 Mei - Hari Buruh</span>
+                                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs">1 Jun - Pancasila</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Variable Holidays -->
+                            <div>
+                                <p class="text-sm text-gray-500 mb-2">Libur Tidak Tetap / Kustom</p>
+                                <div id="holidaysList" class="space-y-2">
+                                    <!-- Holiday items will be added dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jadwal Module -->
+                <div id="module-jadwal" class="module-content hidden fade-in">
+                    <div class="bg-white rounded-2xl border border-gray-100 p-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800">Jadwal Pelajaran</h2>
+                                <p class="text-gray-500 text-sm">Kelola jadwal mengajar Anda dengan validasi anti-bentrok</p>
+                            </div>
+                            <div class="mt-4 md:mt-0 flex space-x-2">
+                                <button onclick="showTimeSlotsSettings()" class="px-4 py-2 border border-gray-200 rounded-xl text-sm hover:bg-gray-50 flex items-center space-x-2">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Atur Jam</span>
+                                </button>
+                                <button onclick="saveSchedule()" class="px-4 py-2 bg-primary-600 text-white rounded-xl text-sm hover:bg-primary-700 flex items-center space-x-2">
+                                    <i class="fas fa-save"></i>
+                                    <span>Simpan</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Class/Rombel Selection -->
+                        <div class="grid md:grid-cols-3 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
+                                <select id="scheduleClass" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">-- Pilih Kelas --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                                <select id="scheduleSubject" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">-- Pilih Mapel --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                                <select id="scheduleSemester" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="Ganjil">Ganjil</option>
+                                    <option value="Genap">Genap</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Schedule Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700 w-24">Jam Ke</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Waktu</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Senin</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Selasa</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Rabu</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Kamis</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Jumat</th>
+                                        <th class="border border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Sabtu</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scheduleTableBody">
+                                    <!-- Schedule rows will be generated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="mt-4 flex flex-wrap gap-4 text-sm">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 bg-primary-100 border border-primary-300 rounded"></div>
+                                <span class="text-gray-600">Anda mengajar</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 bg-gray-100 border border-gray-300 rounded"></div>
+                                <span class="text-gray-600">Kosong</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
+                                <span class="text-gray-600">Bentrok</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Capaian Pembelajaran Module -->
+                <div id="module-cp" class="module-content hidden fade-in">
+                    <div class="bg-white rounded-2xl border border-gray-100 p-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800">Capaian Pembelajaran (CP)</h2>
+                                <p class="text-gray-500 text-sm">Kelola CP dan Tujuan Pembelajaran per elemen</p>
+                            </div>
+                            <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
+                                <button onclick="loadDefaultCP()" class="px-4 py-2 border border-primary-200 text-primary-600 rounded-xl text-sm hover:bg-primary-50 flex items-center space-x-2">
+                                    <i class="fas fa-magic"></i>
+                                    <span>Load Default PAI</span>
+                                </button>
+                                <button onclick="showAddCPModal()" class="px-4 py-2 bg-primary-600 text-white rounded-xl text-sm hover:bg-primary-700 flex items-center space-x-2">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Tambah CP</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="grid md:grid-cols-4 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Fase</label>
+                                <select id="cpFilterFase" onchange="filterCP()" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">Semua Fase</option>
+                                    <option value="Fase A">Fase A (Kelas 1-2)</option>
+                                    <option value="Fase B">Fase B (Kelas 3-4)</option>
+                                    <option value="Fase C">Fase C (Kelas 5-6)</option>
+                                    <option value="Fase D">Fase D (Kelas 7-9)</option>
+                                    <option value="Fase E">Fase E (Kelas 10)</option>
+                                    <option value="Fase F">Fase F (Kelas 11-12)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                                <select id="cpFilterKelas" onchange="filterCP()" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">Semua Kelas</option>
+                                    <option value="1">Kelas 1</option>
+                                    <option value="2">Kelas 2</option>
+                                    <option value="3">Kelas 3</option>
+                                    <option value="4">Kelas 4</option>
+                                    <option value="5">Kelas 5</option>
+                                    <option value="6">Kelas 6</option>
+                                    <option value="7">Kelas 7</option>
+                                    <option value="8">Kelas 8</option>
+                                    <option value="9">Kelas 9</option>
+                                    <option value="10">Kelas 10</option>
+                                    <option value="11">Kelas 11</option>
+                                    <option value="12">Kelas 12</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                                <select id="cpFilterSemester" onchange="filterCP()" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">Semua Semester</option>
+                                    <option value="Ganjil">Ganjil</option>
+                                    <option value="Genap">Genap</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Elemen</label>
+                                <select id="cpFilterElemen" onchange="filterCP()" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">Semua Elemen</option>
+                                    <option value="Al-Qur'an Hadis">Al-Qur'an Hadis</option>
+                                    <option value="Akidah">Akidah</option>
+                                    <option value="Akhlak">Akhlak</option>
+                                    <option value="Fikih">Fikih</option>
+                                    <option value="Sejarah Peradaban Islam">Sejarah Peradaban Islam</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- CP List -->
+                        <div id="cpList" class="space-y-4">
+                            <!-- CP items will be loaded dynamically -->
+                            <div class="text-center py-12 text-gray-500">
+                                <i class="fas fa-bullseye text-4xl mb-4 text-gray-300"></i>
+                                <p>Belum ada data CP. Klik "Load Default PAI" untuk memuat data default atau "Tambah CP" untuk menambah manual.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Siswa Module -->
+                <div id="module-siswa" class="module-content hidden fade-in">
+                    <div class="bg-white rounded-2xl border border-gray-100 p-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800">Data Siswa</h2>
+                                <p class="text-gray-500 text-sm">Kelola data siswa per kelas/rombel</p>
+                            </div>
+                            <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
+                                <button onclick="showImportStudentsModal()" class="px-4 py-2 border border-gray-200 rounded-xl text-sm hover:bg-gray-50 flex items-center space-x-2">
+                                    <i class="fas fa-file-import"></i>
+                                    <span>Import CSV</span>
+                                </button>
+                                <button onclick="showAddStudentModal()" class="px-4 py-2 bg-primary-600 text-white rounded-xl text-sm hover:bg-primary-700 flex items-center space-x-2">
+                                    <i class="fas fa-user-plus"></i>
+                                    <span>Tambah Siswa</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Class Filter -->
+                        <div class="flex flex-wrap gap-4 mb-6">
+                            <div class="flex-1 min-w-[200px]">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Filter Kelas</label>
+                                <select id="studentFilterClass" onchange="filterStudents()" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">Semua Kelas</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 min-w-[200px]">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Filter Rombel</label>
+                                <select id="studentFilterRombel" onchange="filterStudents()" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">Semua Rombel</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 min-w-[200px]">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
+                                <div class="relative">
+                                    <input type="text" id="studentSearch" oninput="filterStudents()" class="w-full px-3 py-2 pl-10 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500" placeholder="Cari nama/NISN...">
+                                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Students Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">No</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">NISN</th>
+                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nama Siswa</th>
+                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">L/P</th>
+                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Kelas</th>
+                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Rombel</th>
+                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentsTableBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center py-12 text-gray-500">
+                                            <i class="fas fa-users text-4xl mb-4 text-gray-300"></i>
+                                            <p>Belum ada data siswa. Import dari CSV atau tambah manual.</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div id="studentsPagination" class="mt-4 flex justify-between items-center">
+                            <p class="text-sm text-gray-500">Menampilkan <span id="studentsShowCount">0</span> dari <span id="studentsTotalCount">0</span> siswa</p>
+                            <div class="flex space-x-2">
+                                <!-- Pagination buttons will be added dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ATP Module -->
+                <div id="module-atp" class="module-content hidden fade-in">
+                    <div class="bg-white rounded-2xl border border-gray-100 p-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800">Alur Tujuan Pembelajaran (ATP)</h2>
+                                <p class="text-gray-500 text-sm">ATP digenerate otomatis dari Capaian Pembelajaran</p>
+                            </div>
+                            <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
+                                <button onclick="generateATP()" class="px-4 py-2 border border-primary-200 text-primary-600 rounded-xl text-sm hover:bg-primary-50 flex items-center space-x-2">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>Generate ATP</span>
+                                </button>
+                                <button onclick="exportATP()" class="px-4 py-2 bg-primary-600 text-white rounded-xl text-sm hover:bg-primary-700 flex items-center space-x-2">
+                                    <i class="fas fa-download"></i>
+                                    <span>Export</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="grid md:grid-cols-3 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                                <select id="atpFilterKelas" onchange="filterATP()" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">Pilih Kelas</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                                <select id="atpFilterMapel" onchange="filterATP()" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">Pilih Mapel</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                                <select id="atpFilterSemester" onchange="filterATP()" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">Semua</option>
+                                    <option value="Ganjil">Ganjil</option>
+                                    <option value="Genap">Genap</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- ATP Content -->
+                        <div id="atpContent">
+                            <div class="text-center py-12 text-gray-500">
+                                <i class="fas fa-route text-4xl mb-4 text-gray-300"></i>
+                                <p>Pilih kelas dan mata pelajaran, lalu klik "Generate ATP" untuk membuat Alur Tujuan Pembelajaran.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prota Module -->
+                <div id="module-prota" class="module-content hidden fade-in">
+                    <div class="bg-white rounded-2xl border border-gray-100 p-6">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800">Program Tahunan (Prota)</h2>
+                                <p class="text-gray-500 text-sm">Prota digenerate otomatis dari ATP dan Kalender Pendidikan</p>
+                            </div>
+                            <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
+                                <button onclick="generateProta()" class="px-4 py-2 border border-primary-200 text-primary-600 rounded-xl text-sm hover:bg-primary-50 flex items-center space-x-2">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>Generate Prota</span>
+                                </button>
+                                <button onclick="exportProta()" class="px-4 py-2 bg-primary-600 text-white rounded-xl text-sm hover:bg-primary-700 flex items-center space-x-2">
+                                    <i class="fas fa-download"></i>
+                                    <span>Export</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="grid md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                                <select id="protaFilterKelas" onchange="filterProta()" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">Pilih Kelas</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                                <select id="protaFilterMapel" onchange="filterProta()" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                    <option value="">Pilih Mapel</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Prota Content -->
+                        <div id="protaContent">
+                            <div class="text-center py-12 text-gray-500">
+                                <i class="fas fa-calendar-check text-4xl mb-4 text-gray-300"></i>
+                                <p>Pilih kelas dan mata pelajaran, lalu klik "Generate Prota" untuk membuat Program Tahunan.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Promes Module (Premium) -->
+                <div id="module-promes" class="module-content hidden fade-in">
+                    <div id="promesLockedContent" class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+                        <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-lock text-amber-600 text-3xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Fitur Premium</h2>
+                        <p class="text-gray-500 mb-6">Program Semester (Promes) adalah fitur premium. Upgrade untuk mengakses fitur ini dan fitur premium lainnya.</p>
+                        <button onclick="redirectToWhatsApp()" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-3 rounded-xl font-medium hover:from-amber-600 hover:to-orange-600 transition">
+                            <i class="fas fa-crown mr-2"></i>
+                            Upgrade ke Premium
+                        </button>
+                    </div>
+
+                    <div id="promesContent" class="hidden">
+                        <!-- Promes content for premium users -->
+                    </div>
+                </div>
+
+                <!-- AI Assistant Module -->
+                <div id="module-ai-assistant" class="module-content hidden fade-in">
+                    <div class="bg-white rounded-2xl border border-gray-100 p-6">
+                        <div class="mb-6">
+                            <h2 class="text-xl font-bold text-gray-800">AI Assistant</h2>
+                            <p class="text-gray-500 text-sm">Dapatkan prompt untuk mengubah materi mentah menjadi format CSV yang siap diupload</p>
+                        </div>
+
+                        <!-- Prompt Templates -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-blue-50 rounded-xl p-5">
+                                <h3 class="font-semibold text-blue-800 mb-3 flex items-center">
+                                    <i class="fas fa-users mr-2"></i>
+                                    Data Siswa
+                                </h3>
+                                <p class="text-sm text-blue-700 mb-4">Generate prompt untuk mengubah daftar siswa menjadi format CSV.</p>
+                                <button onclick="copyPrompt('students')" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition text-sm">
+                                    <i class="fas fa-copy mr-2"></i>
+                                    Salin Prompt
+                                </button>
+                            </div>
+
+                            <div class="bg-purple-50 rounded-xl p-5">
+                                <h3 class="font-semibold text-purple-800 mb-3 flex items-center">
+                                    <i class="fas fa-bullseye mr-2"></i>
+                                    Capaian Pembelajaran
+                                </h3>
+                                <p class="text-sm text-purple-700 mb-4">Generate prompt untuk mengubah CP menjadi format CSV.</p>
+                                <button onclick="copyPrompt('cp')" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition text-sm">
+                                    <i class="fas fa-copy mr-2"></i>
+                                    Salin Prompt
+                                </button>
+                            </div>
+
+                            <div class="bg-green-50 rounded-xl p-5">
+                                <h3 class="font-semibold text-green-800 mb-3 flex items-center">
+                                    <i class="fas fa-calendar-alt mr-2"></i>
+                                    Kalender Pendidikan
+                                </h3>
+                                <p class="text-sm text-green-700 mb-4">Generate prompt untuk mengubah data kalender menjadi format CSV.</p>
+                                <button onclick="copyPrompt('calendar')" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition text-sm">
+                                    <i class="fas fa-copy mr-2"></i>
+                                    Salin Prompt
+                                </button>
+                            </div>
+
+                            <div class="bg-orange-50 rounded-xl p-5">
+                                <h3 class="font-semibold text-orange-800 mb-3 flex items-center">
+                                    <i class="fas fa-question-circle mr-2"></i>
+                                    Bank Soal
+                                </h3>
+                                <p class="text-sm text-orange-700 mb-4">Generate prompt untuk mengubah soal menjadi format CSV.</p>
+                                <button onclick="copyPrompt('questions')" class="w-full bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition text-sm">
+                                    <i class="fas fa-copy mr-2"></i>
+                                    Salin Prompt
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Prompt Output -->
+                        <div class="mt-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Prompt yang Disalin:</label>
+                            <textarea id="promptOutput" class="w-full h-48 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 text-sm" readonly placeholder="Klik salah satu tombol di atas untuk mendapatkan prompt..."></textarea>
+                        </div>
+
+                        <!-- Instructions -->
+                        <div class="mt-6 bg-gray-50 rounded-xl p-5">
+                            <h4 class="font-semibold text-gray-800 mb-3">Cara Menggunakan:</h4>
+                            <ol class="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                                <li>Pilih jenis data yang ingin Anda konversi</li>
+                                <li>Salin prompt yang muncul</li>
+                                <li>Buka ChatGPT, Claude, atau AI lainnya</li>
+                                <li>Paste prompt tersebut</li>
+                                <li>Masukkan data mentah Anda</li>
+                                <li>AI akan menghasilkan format CSV yang siap diupload</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other modules will be added similarly -->
+                <!-- Placeholder for other premium modules -->
+                <div id="module-modul-ajar" class="module-content hidden fade-in">
+                    <!-- Similar locked content for premium -->
+                </div>
+                
+                <div id="module-lkpd" class="module-content hidden fade-in">
+                    <!-- Similar locked content for premium -->
+                </div>
+                
+                <div id="module-bank-soal" class="module-content hidden fade-in">
+                    <!-- Similar locked content for premium -->
+                </div>
+                
+                <div id="module-absensi" class="module-content hidden fade-in">
+                    <!-- Similar locked content for premium -->
+                </div>
+                
+                <div id="module-jurnal" class="module-content hidden fade-in">
+                    <!-- Similar locked content for premium -->
+                </div>
+                
+                <div id="module-nilai" class="module-content hidden fade-in">
+                    <!-- Similar locked content for premium -->
+                </div>
+                
+                <div id="module-kktp" class="module-content hidden fade-in">
+                    <!-- Similar locked content for premium -->
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add CP Modal -->
+    <div id="addCPModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="hideModal('addCPModal')"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-gray-800">Tambah Capaian Pembelajaran</h3>
+                    <button onclick="hideModal('addCPModal')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="addCPForm" class="p-6 space-y-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fase</label>
+                            <select id="cpFase" required class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                <option value="">Pilih Fase</option>
+                                <option value="Fase A">Fase A</option>
+                                <option value="Fase B">Fase B</option>
+                                <option value="Fase C">Fase C</option>
+                                <option value="Fase D">Fase D</option>
+                                <option value="Fase E">Fase E</option>
+                                <option value="Fase F">Fase F</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                            <select id="cpKelas" required class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                <option value="">Pilih Kelas</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                            <select id="cpSemester" required class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                                <option value="Ganjil">Ganjil</option>
+                                <option value="Genap">Genap</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Elemen/Bab</label>
+                            <input type="text" id="cpElemen" required class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500" placeholder="Contoh: Al-Qur'an Hadis">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tujuan Pembelajaran</label>
+                        <textarea id="cpTP" required rows="4" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500" placeholder="Peserta didik mampu..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Dimensi Profil Lulusan</label>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="dimensi" value="Keimanan" class="rounded text-primary-600">
+                                <span class="text-sm">Keimanan</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="dimensi" value="Kewargaan" class="rounded text-primary-600">
+                                <span class="text-sm">Kewargaan</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="dimensi" value="Penalaran Kritis" class="rounded text-primary-600">
+                                <span class="text-sm">Penalaran Kritis</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="dimensi" value="Kreativitas" class="rounded text-primary-600">
+                                <span class="text-sm">Kreativitas</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="dimensi" value="Kolaborasi" class="rounded text-primary-600">
+                                <span class="text-sm">Kolaborasi</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="dimensi" value="Kemandirian" class="rounded text-primary-600">
+                                <span class="text-sm">Kemandirian</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="dimensi" value="Kesehatan" class="rounded text-primary-600">
+                                <span class="text-sm">Kesehatan</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="dimensi" value="Komunikasi" class="rounded text-primary-600">
+                                <span class="text-sm">Komunikasi</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="hideModal('addCPModal')" class="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">Simpan CP</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Students Modal -->
+    <div id="importStudentsModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="hideModal('importStudentsModal')"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-xl w-full">
+                <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-gray-800">Import Data Siswa</h3>
+                    <button onclick="hideModal('importStudentsModal')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">URL Google Spreadsheet (CSV)</label>
+                        <input type="url" id="csvUrl" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv">
+                        <p class="text-xs text-gray-500 mt-1">Pastikan spreadsheet dipublikasikan sebagai CSV</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-700 mb-2">Atau upload file CSV:</p>
+                        <input type="file" id="csvFile" accept=".csv" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                    </div>
+
+                    <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                        <h4 class="font-medium text-blue-800 mb-2">Format CSV yang diperlukan:</h4>
+                        <code class="text-xs text-blue-700 block bg-blue-100 p-2 rounded">nisn,nama,jenis_kelamin,kelas,rombel</code>
+                        <p class="text-xs text-blue-600 mt-2">Contoh: 1234567890,Ahmad,L,7,A</p>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hideModal('importStudentsModal')" class="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">Batal</button>
+                        <button type="button" onclick="processImportStudents()" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">Import</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Slots Settings Modal -->
+    <div id="timeSlotsModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="hideModal('timeSlotsModal')"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-gray-800">Pengaturan Jam Pelajaran</h3>
+                    <button onclick="hideModal('timeSlotsModal')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Jenjang</label>
+                        <select id="timeSlotJenjang" onchange="loadDefaultTimeSlots()" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                            <option value="SD">SD (35 menit/JP)</option>
+                            <option value="SMP">SMP (40 menit/JP)</option>
+                            <option value="SMA">SMA (45 menit/JP)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Durasi per Jam Pelajaran (menit)</label>
+                        <input type="number" id="durationPerSlot" value="40" min="30" max="60" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                    </div>
+
+                    <div id="timeSlotsContainer" class="space-y-2 mb-4">
+                        <!-- Time slots will be generated here -->
+                    </div>
+
+                    <button type="button" onclick="addTimeSlot()" class="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center space-x-1 mb-4">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Tambah Jam Pelajaran</span>
+                    </button>
+
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hideModal('timeSlotsModal')" class="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">Batal</button>
+                        <button type="button" onclick="saveTimeSlots()" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">Simpan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 z-50 hidden bg-white/90 flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-gray-600">Memproses...</p>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="data/cp-default-data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

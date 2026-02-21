@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin - AGSA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'jakarta': ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: {
+                        primary: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="font-jakarta bg-gray-50 min-h-screen">
+    <!-- Check Admin Access -->
+    <div id="accessDenied" class="hidden min-h-screen flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-ban text-red-500 text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Akses Ditolak</h1>
+            <p class="text-gray-500 mb-4">Anda tidak memiliki akses ke halaman ini.</p>
+            <a href="app.html" class="text-primary-600 hover:underline">Kembali ke Aplikasi</a>
+        </div>
+    </div>
+
+    <!-- Admin Content -->
+    <div id="adminContent" class="hidden">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-purple-700 to-purple-500 text-white">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-2xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold">Super Admin Panel</h1>
+                            <p class="text-purple-200 text-sm">Admin Guru Super App</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="app.html" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm transition">
+                            <i class="fas fa-arrow-left mr-2"></i>Kembali ke App
+                        </a>
+                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm transition">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-2xl p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-users text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <p id="statTotalUsers" class="text-3xl font-bold text-gray-800">0</p>
+                    <p class="text-gray-500 text-sm">Total Pengguna</p>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-crown text-amber-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <p id="statPremiumUsers" class="text-3xl font-bold text-gray-800">0</p>
+                    <p class="text-gray-500 text-sm">Pengguna Premium</p>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-user-clock text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <p id="statActiveToday" class="text-3xl font-bold text-gray-800">0</p>
+                    <p class="text-gray-500 text-sm">Aktif Hari Ini</p>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-school text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <p id="statSchoolPackages" class="text-3xl font-bold text-gray-800">0</p>
+                    <p class="text-gray-500 text-sm">Paket Sekolah</p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                <div class="border-b border-gray-100">
+                    <nav class="flex">
+                        <button onclick="showAdminTab('users')" class="admin-tab active px-6 py-4 text-sm font-medium border-b-2 border-primary-600 text-primary-600">
+                            <i class="fas fa-users mr-2"></i>Manajemen User
+                        </button>
+                        <button onclick="showAdminTab('settings')" class="admin-tab px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-cog mr-2"></i>Pengaturan App
+                        </button>
+                        <button onclick="showAdminTab('cp')" class="admin-tab px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-database mr-2"></i>Kelola CP Default
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Users Tab -->
+                <div id="tab-users" class="admin-tab-content p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800">Daftar Pengguna</h2>
+                        <div class="flex space-x-2">
+                            <input type="text" id="searchUser" placeholder="Cari email..." class="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500">
+                            <button onclick="searchUsers()" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nama</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Sekolah</th>
+                                    <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Status</th>
+                                    <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Berakhir</th>
+                                    <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- Users will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="tab-settings" class="admin-tab-content hidden p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-6">Pengaturan Aplikasi</h2>
+                    
+                    <form id="settingsForm" class="max-w-xl space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp (untuk upgrade)</label>
+                            <input type="text" id="settingWhatsapp" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500" placeholder="6281234567890">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Harga Premium Personal (Rp)</label>
+                            <input type="number" id="settingPremiumPrice" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500" placeholder="99000">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Versi Aplikasi</label>
+                            <input type="text" id="settingAppVersion" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500" placeholder="1.0.0">
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" id="settingMaintenance" class="rounded text-primary-600">
+                            <label for="settingMaintenance" class="text-sm text-gray-700">Mode Maintenance</label>
+                        </div>
+                        
+                        <button type="submit" class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700">
+                            <i class="fas fa-save mr-2"></i>Simpan Pengaturan
+                        </button>
+                    </form>
+                </div>
+
+                <!-- CP Management Tab -->
+                <div id="tab-cp" class="admin-tab-content hidden p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800">Kelola CP Default (PAI)</h2>
+                        <button onclick="showAddDefaultCPModal()" class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700">
+                            <i class="fas fa-plus mr-2"></i>Tambah CP
+                        </button>
+                    </div>
+
+                    <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                        <h3 class="font-medium text-blue-800 mb-2">Panduan Input CP untuk Guru Mapel Lain:</h3>
+                        <ol class="list-decimal list-inside text-sm text-blue-700 space-y-1">
+                            <li>CP harus memiliki Fase (A-F), Kelas (1-12), Semester (Ganjil/Genap)</li>
+                            <li>Setiap CP harus memiliki Elemen/Bab dan Tujuan Pembelajaran yang jelas</li>
+                            <li>Tentukan Dimensi Profil Lulusan yang relevan (8 dimensi tersedia)</li>
+                            <li>Tujuan Pembelajaran diawali dengan "Peserta didik mampu..."</li>
+                            <li>Gunakan kata kerja operasional yang terukur</li>
+                        </ol>
+                    </div>
+
+                    <div id="defaultCPList" class="space-y-4">
+                        <!-- Default CP will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Set Premium Modal -->
+    <div id="setPremiumModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/50" onclick="hideModal('setPremiumModal')"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-md w-full p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Set Status Premium</h3>
+                <form id="setPremiumForm">
+                    <input type="hidden" id="premiumUserId">
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="text" id="premiumUserEmail" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg" readonly>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Langganan</label>
+                        <select id="premiumType" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
+                            <option value="free">Free</option>
+                            <option value="premium">Premium Personal</option>
+                            <option value="school">Paket Sekolah</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Berakhir</label>
+                        <input type="date" id="premiumEndDate" class="w-full px-4 py-2 border border-gray-200 rounded-lg">
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hideModal('setPremiumModal')" class="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading & Toast -->
+    <div id="loadingOverlay" class="fixed inset-0 z-50 hidden bg-white/90 flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-gray-600">Memproses...</p>
+        </div>
+    </div>
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="data/cp-default-data.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
