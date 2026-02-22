@@ -1,4 +1,4 @@
-// Firebase Configuration
+// Firebase Configuration - FIXED VERSION
 const firebaseConfig = {
     apiKey: "AIzaSyDe4ie2wSPEpNbAgWP-q03vTuHyxc9Jj3E",
     authDomain: "agsa-e5b08.firebaseapp.com",
@@ -22,18 +22,13 @@ googleProvider.setCustomParameters({
     prompt: 'select_account'
 });
 
-// Firestore settings
-db.settings({
-    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
-});
-
-// Enable offline persistence
-db.enablePersistence()
+// Enable offline persistence (using newer API)
+db.enablePersistence({ synchronizeTabs: true })
     .catch((err) => {
         if (err.code === 'failed-precondition') {
-            console.log('Persistence failed: Multiple tabs open');
+            console.warn('Persistence failed: Multiple tabs open');
         } else if (err.code === 'unimplemented') {
-            console.log('Persistence not supported');
+            console.warn('Persistence not supported in this browser');
         }
     });
 
@@ -57,7 +52,7 @@ async function loadAppSettings() {
             APP_SETTINGS = { ...APP_SETTINGS, ...doc.data() };
         }
     } catch (error) {
-        console.error('Error loading app settings:', error);
+        console.warn('Error loading app settings:', error);
     }
 }
 
