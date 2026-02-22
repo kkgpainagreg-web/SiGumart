@@ -3,697 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN GURU SUPER APP - Otomatisasi Administrasi Mengajar</title>
+    <title>Admin Guru Super App</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'jakarta': ['Plus Jakarta Sans', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        },
-                        secondary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .gradient-bg {
-            background: linear-gradient(135deg, #166534 0%, #15803d 50%, #22c55e 100%);
-        }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
-        .float-animation {
-            animation: float 6s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="font-jakarta bg-gray-50 min-h-screen">
-    <!-- Navbar -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center space-x-2">
-                    <div class="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-400 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-chalkboard-teacher text-white text-lg"></i>
-                    </div>
-                    <span class="font-bold text-xl text-gray-800">AGSA</span>
-                </div>
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#features" class="text-gray-600 hover:text-primary-600 transition">Fitur</a>
-                    <a href="#pricing" class="text-gray-600 hover:text-primary-600 transition">Harga</a>
-                    <a href="#faq" class="text-gray-600 hover:text-primary-600 transition">FAQ</a>
-                    <button onclick="showLoginModal()" class="bg-primary-600 text-white px-6 py-2 rounded-xl hover:bg-primary-700 transition font-medium">
-                        Masuk
-                    </button>
-                </div>
-                <button onclick="toggleMobileMenu()" class="md:hidden p-2">
-                    <i class="fas fa-bars text-gray-600 text-xl"></i>
-                </button>
-            </div>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
+
+    <div id="login-screen" class="min-h-screen flex items-center justify-center">
+        <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+            <h1 class="text-3xl font-bold text-blue-600 mb-2">ADMIN GURU</h1>
+            <p class="text-gray-500 mb-8">Super App Administrasi Mengajar</p>
+            <button id="login-btn" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 transition font-medium">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                Masuk dengan Akun Google
+            </button>
+            <p class="mt-4 text-xs text-gray-400">Hanya mendukung login via Google untuk keamanan & integrasi yang optimal.</p>
         </div>
-        <!-- Mobile Menu -->
-        <div id="mobileMenu" class="hidden md:hidden bg-white border-t">
-            <div class="px-4 py-4 space-y-3">
-                <a href="#features" class="block text-gray-600 hover:text-primary-600 py-2">Fitur</a>
-                <a href="#pricing" class="block text-gray-600 hover:text-primary-600 py-2">Harga</a>
-                <a href="#faq" class="block text-gray-600 hover:text-primary-600 py-2">FAQ</a>
-                <button onclick="showLoginModal()" class="w-full bg-primary-600 text-white px-6 py-3 rounded-xl hover:bg-primary-700 transition font-medium">
-                    Masuk
-                </button>
+    </div>
+
+    <div id="app-screen" class="hidden min-h-screen flex flex-col md:flex-row">
+        
+        <aside class="w-full md:w-64 bg-blue-800 text-white flex flex-col shadow-xl">
+            <div class="p-6 text-center border-b border-blue-700">
+                <h2 class="text-xl font-bold">Admin Guru</h2>
+                <p id="school-year" class="text-sm text-blue-300 mt-1">Tahun Ajar: -</p>
             </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="gradient-bg min-h-screen flex items-center pt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
-                <div class="text-white fade-in">
-                    <div class="inline-flex items-center bg-white/20 rounded-full px-4 py-2 mb-6">
-                        <span class="text-sm font-medium">✨ Single Input - Multi Output</span>
-                    </div>
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-                        Admin Guru<br>
-                        <span class="text-primary-200">Super App</span>
-                    </h1>
-                    <p class="text-lg md:text-xl text-primary-100 mb-8 leading-relaxed">
-                        Otomatisasi administrasi mengajar untuk guru PAI dan mata pelajaran lainnya. 
-                        Input sekali, hasilkan semua dokumen administrasi secara otomatis!
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <button onclick="showLoginModal()" class="bg-white text-primary-700 px-8 py-4 rounded-xl font-bold hover:bg-primary-50 transition shadow-lg flex items-center justify-center space-x-2">
-                            <i class="fab fa-google"></i>
-                            <span>Mulai Gratis</span>
-                        </button>
-                        <a href="#features" class="border-2 border-white/50 text-white px-8 py-4 rounded-xl font-medium hover:bg-white/10 transition flex items-center justify-center space-x-2">
-                            <span>Lihat Fitur</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="mt-8 flex items-center space-x-6 text-primary-100">
-                        <div class="flex items-center space-x-2">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Gratis untuk fitur dasar</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Data aman di cloud</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="hidden lg:block float-animation">
-                    <div class="relative">
-                        <div class="absolute inset-0 bg-white/10 rounded-3xl transform rotate-6"></div>
-                        <div class="relative bg-white rounded-3xl shadow-2xl p-6">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <div class="w-3 h-3 bg-red-400 rounded-full"></div>
-                                <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                                <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="flex items-center space-x-3 p-3 bg-primary-50 rounded-xl">
-                                    <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                                        <i class="fas fa-calendar text-primary-600"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-800">Kalender Pendidikan</p>
-                                        <p class="text-sm text-gray-500">Otomatis tersinkron</p>
-                                    </div>
-                                    <i class="fas fa-check-circle text-primary-500 ml-auto"></i>
-                                </div>
-                                <div class="flex items-center space-x-3 p-3 bg-secondary-50 rounded-xl">
-                                    <div class="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center">
-                                        <i class="fas fa-clock text-secondary-600"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-800">Jadwal Pelajaran</p>
-                                        <p class="text-sm text-gray-500">Anti bentrok</p>
-                                    </div>
-                                    <i class="fas fa-check-circle text-secondary-500 ml-auto"></i>
-                                </div>
-                                <div class="flex items-center space-x-3 p-3 bg-purple-50 rounded-xl">
-                                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                        <i class="fas fa-file-alt text-purple-600"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-800">ATP, Prota, Promes</p>
-                                        <p class="text-sm text-gray-500">Generate otomatis</p>
-                                    </div>
-                                    <i class="fas fa-check-circle text-purple-500 ml-auto"></i>
-                                </div>
-                                <div class="flex items-center space-x-3 p-3 bg-orange-50 rounded-xl">
-                                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                                        <i class="fas fa-book text-orange-600"></i>
-                                    </div>
-                                    <div>
-                                        <p class="font-medium text-gray-800">Modul Ajar & LKPD</p>
-                                        <p class="text-sm text-gray-500">Support teks Arab</p>
-                                    </div>
-                                    <i class="fas fa-check-circle text-orange-500 ml-auto"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="bg-primary-100 text-primary-700 px-4 py-2 rounded-full text-sm font-medium">FITUR UNGGULAN</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mt-4 mb-4">
-                    Satu Input, Banyak Output
-                </h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">
-                    Cukup masukkan data dasar sekali, sistem akan menghasilkan semua dokumen administrasi yang Anda butuhkan secara otomatis dan sinkron.
-                </p>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Feature 1 -->
-                <div class="bg-gradient-to-br from-primary-50 to-white p-6 rounded-2xl border border-primary-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-primary-100 rounded-2xl flex items-center justify-center mb-4">
-                        <i class="fas fa-calendar-alt text-primary-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Kalender Pendidikan</h3>
-                    <p class="text-gray-600">
-                        Atur semester, libur nasional, dan hari efektif. Libur baku otomatis, yang tidak baku bisa dikustomisasi.
-                    </p>
-                </div>
-
-                <!-- Feature 2 -->
-                <div class="bg-gradient-to-br from-secondary-50 to-white p-6 rounded-2xl border border-secondary-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-secondary-100 rounded-2xl flex items-center justify-center mb-4">
-                        <i class="fas fa-table text-secondary-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Jadwal Anti Bentrok</h3>
-                    <p class="text-gray-600">
-                        Validasi otomatis! Guru tidak bisa di 2 kelas berbeda di jam sama. Satu rombel tidak bisa diisi >1 guru mapel sama.
-                    </p>
-                </div>
-
-                <!-- Feature 3 -->
-                <div class="bg-gradient-to-br from-purple-50 to-white p-6 rounded-2xl border border-purple-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-4">
-                        <i class="fas fa-route text-purple-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">ATP Otomatis</h3>
-                    <p class="text-gray-600">
-                        Alur Tujuan Pembelajaran tergenerate otomatis dari CP yang Anda masukkan, lengkap dengan 8 dimensi profil lulusan.
-                    </p>
-                </div>
-
-                <!-- Feature 4 -->
-                <div class="bg-gradient-to-br from-orange-50 to-white p-6 rounded-2xl border border-orange-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center mb-4">
-                        <i class="fas fa-book-open text-orange-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Prota & Promes Sinkron</h3>
-                    <p class="text-gray-600">
-                        Program Tahunan dan Semester tersinkron dengan kalender, jadwal, dan TP. Detail tanggal tiap pertemuan tercantum jelas.
-                    </p>
-                </div>
-
-                <!-- Feature 5 -->
-                <div class="bg-gradient-to-br from-teal-50 to-white p-6 rounded-2xl border border-teal-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-teal-100 rounded-2xl flex items-center justify-center mb-4">
-                        <i class="fas fa-file-signature text-teal-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Modul Ajar & LKPD</h3>
-                    <p class="text-gray-600">
-                        Modul untuk guru dan LKPD untuk siswa dengan dukungan penuh teks Arab (Right-to-Left). Tersedia default, bisa diedit.
-                    </p>
-                </div>
-
-                <!-- Feature 6 -->
-                <div class="bg-gradient-to-br from-pink-50 to-white p-6 rounded-2xl border border-pink-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-pink-100 rounded-2xl flex items-center justify-center mb-4">
-                        <i class="fas fa-clipboard-check text-pink-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Jurnal & Absensi</h3>
-                    <p class="text-gray-600">
-                        Jurnal otomatis sinkron dengan absensi dan promes. TP terisi otomatis dari promes, tapi tetap bisa diedit.
-                    </p>
-                </div>
-
-                <!-- Feature 7 -->
-                <div class="bg-gradient-to-br from-indigo-50 to-white p-6 rounded-2xl border border-indigo-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center mb-4">
-                        <i class="fas fa-star text-indigo-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">KKTP & Daftar Nilai</h3>
-                    <p class="text-gray-600">
-                        Kriteria Ketercapaian TP sinkron dengan promes. Nilai PH, PTS, PAS, dan Nilai Raport bisa dikustomisasi.
-                    </p>
-                </div>
-
-                <!-- Feature 8 -->
-                <div class="bg-gradient-to-br from-cyan-50 to-white p-6 rounded-2xl border border-cyan-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-cyan-100 rounded-2xl flex items-center justify-center mb-4">
-                        <i class="fas fa-database text-cyan-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Bank Soal</h3>
-                    <p class="text-gray-600">
-                        Terintegrasi dengan ATP, mendukung teks Arab. Kelola soal dengan mudah dan sistematis per materi.
-                    </p>
-                </div>
-
-                <!-- Feature 9 -->
-                <div class="bg-gradient-to-br from-amber-50 to-white p-6 rounded-2xl border border-amber-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mb-4">
-                        <i class="fas fa-robot text-amber-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">AI Assistant</h3>
-                    <p class="text-gray-600">
-                        Dapatkan prompt tepat untuk mengubah materi mentah menjadi CSV yang bisa diupload ke sistem dengan bantuan AI.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works -->
-    <section class="py-20 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="bg-secondary-100 text-secondary-700 px-4 py-2 rounded-full text-sm font-medium">CARA KERJA</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mt-4 mb-4">
-                    Semudah 1-2-3
-                </h2>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-primary-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">1</div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Input Data Dasar</h3>
-                    <p class="text-gray-600">Masukkan profil, kalender pendidikan, jadwal pelajaran, dan Capaian Pembelajaran (atau gunakan default PAI).</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-primary-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">2</div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Sistem Memproses</h3>
-                    <p class="text-gray-600">Sistem otomatis menghasilkan ATP, Prota, Promes, Modul Ajar, LKPD, dan dokumen lainnya yang saling sinkron.</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-primary-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">3</div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Download & Gunakan</h3>
-                    <p class="text-gray-600">Download dokumen dalam format yang siap cetak atau edit lebih lanjut sesuai kebutuhan Anda.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section id="pricing" class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium">HARGA</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mt-4 mb-4">
-                    Pilih Paket yang Sesuai
-                </h2>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                <!-- Free Plan -->
-                <div class="bg-white border-2 border-gray-200 rounded-3xl p-8 hover:border-primary-300 transition">
-                    <div class="text-center mb-6">
-                        <h3 class="text-xl font-bold text-gray-900">Gratis</h3>
-                        <div class="mt-4">
-                            <span class="text-4xl font-bold text-gray-900">Rp 0</span>
-                            <span class="text-gray-500">/selamanya</span>
-                        </div>
-                    </div>
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center text-gray-600">
-                            <i class="fas fa-check text-primary-500 mr-3"></i>
-                            Kalender Pendidikan
-                        </li>
-                        <li class="flex items-center text-gray-600">
-                            <i class="fas fa-check text-primary-500 mr-3"></i>
-                            Jadwal Pelajaran
-                        </li>
-                        <li class="flex items-center text-gray-600">
-                            <i class="fas fa-check text-primary-500 mr-3"></i>
-                            ATP (Alur Tujuan Pembelajaran)
-                        </li>
-                        <li class="flex items-center text-gray-600">
-                            <i class="fas fa-check text-primary-500 mr-3"></i>
-                            Prota (Program Tahunan)
-                        </li>
-                        <li class="flex items-center text-gray-400">
-                            <i class="fas fa-times text-gray-300 mr-3"></i>
-                            Promes
-                        </li>
-                        <li class="flex items-center text-gray-400">
-                            <i class="fas fa-times text-gray-300 mr-3"></i>
-                            Modul Ajar & LKPD
-                        </li>
-                        <li class="flex items-center text-gray-400">
-                            <i class="fas fa-times text-gray-300 mr-3"></i>
-                            Bank Soal
-                        </li>
-                    </ul>
-                    <button onclick="showLoginModal()" class="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-200 transition">
-                        Mulai Gratis
-                    </button>
-                </div>
-
-                <!-- Premium Personal -->
-                <div class="bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-3xl p-8 transform lg:scale-105 shadow-xl relative">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                        <span class="bg-amber-400 text-amber-900 px-4 py-1 rounded-full text-sm font-bold">POPULER</span>
-                    </div>
-                    <div class="text-center mb-6">
-                        <h3 class="text-xl font-bold">Premium Personal</h3>
-                        <div class="mt-4">
-                            <span class="text-4xl font-bold">Rp 99K</span>
-                            <span class="text-primary-200">/tahun</span>
-                        </div>
-                    </div>
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-primary-200 mr-3"></i>
-                            Semua fitur Gratis
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-primary-200 mr-3"></i>
-                            Promes Lengkap
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-primary-200 mr-3"></i>
-                            Modul Ajar
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-primary-200 mr-3"></i>
-                            LKPD
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-primary-200 mr-3"></i>
-                            Bank Soal
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-primary-200 mr-3"></i>
-                            Jurnal & Absensi
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-primary-200 mr-3"></i>
-                            KKTP & Daftar Nilai
-                        </li>
-                    </ul>
-                    <button onclick="redirectToWhatsApp()" class="w-full bg-white text-primary-700 py-3 rounded-xl font-bold hover:bg-primary-50 transition">
-                        Upgrade Sekarang
-                    </button>
-                </div>
-
-                <!-- Premium School -->
-                <div class="bg-white border-2 border-gray-200 rounded-3xl p-8 hover:border-primary-300 transition">
-                    <div class="text-center mb-6">
-                        <h3 class="text-xl font-bold text-gray-900">Paket Sekolah</h3>
-                        <div class="mt-4">
-                            <span class="text-4xl font-bold text-gray-900">Custom</span>
-                        </div>
-                        <p class="text-sm text-gray-500 mt-2">Untuk 10+ guru</p>
-                    </div>
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center text-gray-600">
-                            <i class="fas fa-check text-primary-500 mr-3"></i>
-                            Semua fitur Premium
-                        </li>
-                        <li class="flex items-center text-gray-600">
-                            <i class="fas fa-check text-primary-500 mr-3"></i>
-                            Multi-user sekolah
-                        </li>
-                        <li class="flex items-center text-gray-600">
-                            <i class="fas fa-check text-primary-500 mr-3"></i>
-                            Dashboard Admin Sekolah
-                        </li>
-                        <li class="flex items-center text-gray-600">
-                            <i class="fas fa-check text-primary-500 mr-3"></i>
-                            Prioritas Support
-                        </li>
-                        <li class="flex items-center text-gray-600">
-                            <i class="fas fa-check text-primary-500 mr-3"></i>
-                            Training Online
-                        </li>
-                        <li class="flex items-center text-gray-600">
-                            <i class="fas fa-check text-primary-500 mr-3"></i>
-                            Custom Branding
-                        </li>
-                    </ul>
-                    <button onclick="redirectToWhatsApp()" class="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-200 transition">
-                        Hubungi Kami
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FAQ Section -->
-    <section id="faq" class="py-20 bg-gray-50">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="bg-teal-100 text-teal-700 px-4 py-2 rounded-full text-sm font-medium">FAQ</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mt-4 mb-4">
-                    Pertanyaan Umum
-                </h2>
-            </div>
-
-            <div class="space-y-4">
-                <div class="bg-white rounded-2xl border border-gray-200">
-                    <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left flex justify-between items-center">
-                        <span class="font-semibold text-gray-900">Apakah benar-benar gratis?</span>
-                        <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
-                    </button>
-                    <div class="hidden px-6 pb-4 text-gray-600">
-                        Ya! Fitur dasar seperti Kalender, Jadwal, ATP, dan Prota tersedia gratis selamanya. Untuk fitur lengkap seperti Promes, Modul Ajar, LKPD, dan Bank Soal, Anda perlu upgrade ke Premium.
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl border border-gray-200">
-                    <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left flex justify-between items-center">
-                        <span class="font-semibold text-gray-900">Apakah bisa untuk mata pelajaran selain PAI?</span>
-                        <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
-                    </button>
-                    <div class="hidden px-6 pb-4 text-gray-600">
-                        Tentu! Meskipun data default tersedia untuk PAI (Fase A-F), guru mata pelajaran lain dapat memasukkan CP (Capaian Pembelajaran) sendiri dengan panduan yang jelas dari sistem.
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl border border-gray-200">
-                    <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left flex justify-between items-center">
-                        <span class="font-semibold text-gray-900">Bagaimana cara login?</span>
-                        <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
-                    </button>
-                    <div class="hidden px-6 pb-4 text-gray-600">
-                        Cukup klik tombol "Masuk" dan login menggunakan akun Gmail Anda. Kami hanya menerima registrasi melalui Gmail untuk kemudahan dan keamanan.
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl border border-gray-200">
-                    <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left flex justify-between items-center">
-                        <span class="font-semibold text-gray-900">Apakah data saya aman?</span>
-                        <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
-                    </button>
-                    <div class="hidden px-6 pb-4 text-gray-600">
-                        Data Anda disimpan dengan aman di Firebase Cloud milik Google. Kami menggunakan enkripsi dan autentikasi standar industri untuk melindungi data Anda.
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl border border-gray-200">
-                    <button onclick="toggleFaq(this)" class="w-full px-6 py-4 text-left flex justify-between items-center">
-                        <span class="font-semibold text-gray-900">Bagaimana cara upgrade ke Premium?</span>
-                        <i class="fas fa-chevron-down text-gray-400 transition-transform"></i>
-                    </button>
-                    <div class="hidden px-6 pb-4 text-gray-600">
-                        Klik tombol "Upgrade Sekarang" dan Anda akan diarahkan ke WhatsApp admin kami. Pembayaran bisa melalui transfer bank atau e-wallet.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-8">
-                <div class="col-span-2">
-                    <div class="flex items-center space-x-2 mb-4">
-                        <div class="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-400 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-chalkboard-teacher text-white"></i>
-                        </div>
-                        <span class="font-bold text-xl">AGSA</span>
-                    </div>
-                    <p class="text-gray-400 mb-4">
-                        Admin Guru Super App - Solusi otomatisasi administrasi mengajar untuk guru Indonesia.
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary-600 transition">
-                            <i class="fab fa-telegram"></i>
-                        </a>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="font-semibold mb-4">Tautan</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="#features" class="hover:text-white transition">Fitur</a></li>
-                        <li><a href="#pricing" class="hover:text-white transition">Harga</a></li>
-                        <li><a href="#faq" class="hover:text-white transition">FAQ</a></li>
-                        <li><a href="docs/panduan.html" class="hover:text-white transition">Panduan</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-semibold mb-4">Kontak</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li class="flex items-center space-x-2">
-                            <i class="fab fa-whatsapp"></i>
-                            <span id="footerWhatsapp">0812-XXXX-XXXX</span>
-                        </li>
-                        <li class="flex items-center space-x-2">
-                            <i class="fas fa-envelope"></i>
-                            <span>support@agsa.id</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2025 Admin Guru Super App. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="hideLoginModal()"></div>
-        <div class="absolute inset-0 flex items-center justify-center p-4">
-            <div class="bg-white rounded-3xl max-w-md w-full p-8 relative fade-in">
-                <button onclick="hideLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
+            
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="#" data-target="dashboard" class="nav-link block px-4 py-2 rounded bg-blue-700 hover:bg-blue-600 transition"><i class="fas fa-home w-6"></i> Dashboard</a>
+                <a href="#" data-target="profil" class="nav-link block px-4 py-2 rounded hover:bg-blue-600 transition"><i class="fas fa-user w-6"></i> Profil & Dasar</a>
+                <a href="#" data-target="jadwal" class="nav-link block px-4 py-2 rounded hover:bg-blue-600 transition"><i class="fas fa-calendar-alt w-6"></i> Jadwal & Kalender</a>
+                <a href="#" data-target="akademik" class="nav-link block px-4 py-2 rounded hover:bg-blue-600 transition"><i class="fas fa-book w-6"></i> Dokumen Output</a>
                 
-                <div class="text-center mb-8">
-                    <div class="w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-chalkboard-teacher text-white text-2xl"></i>
+                <a href="#" data-target="ai-assistant" class="nav-link block px-4 py-2 rounded hover:bg-blue-600 transition text-yellow-300"><i class="fas fa-robot w-6"></i> AI Assistant</a>
+            </nav>
+
+            <div class="p-4 border-t border-blue-700">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-sm font-bold shadow-inner" id="user-avatar"><i class="fas fa-user"></i></div>
+                    <div class="text-sm truncate" id="user-name">Loading...</div>
+                </div>
+                <button id="upgrade-btn" class="w-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-2 rounded shadow mb-2 text-sm">Upgrade Premium</button>
+                <button id="logout-btn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded shadow text-sm">Keluar</button>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+            
+            <section id="dashboard" class="app-section">
+                <h2 class="text-2xl font-bold mb-6">Selamat Datang di Admin Guru</h2>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <p class="mb-4">Sistem ini menggunakan konsep <strong>Single Input – Multi Output</strong>. Mulailah dengan melengkapi Profil dan Jadwal Anda, dan sistem akan otomatis menghasilkan dokumen ATP, Prota, Promes, Modul Ajar, dan lainnya.</p>
+                </div>
+            </section>
+
+            <section id="profil" class="app-section hidden">
+                <h2 class="text-2xl font-bold mb-6">Profil & Pengaturan Dasar</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4 border-b pb-2">Data Satuan Pendidikan</h3>
+                        <form id="form-profil" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Nama Sekolah</label>
+                                <input type="text" id="input-sekolah" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500" placeholder="SMP Negeri 1...">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Nama Kepala Sekolah</label>
+                                <input type="text" id="input-kepsek" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500" placeholder="Dr. H. Fulan, M.Pd.">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Kota/Kabupaten (Untuk Tanda Tangan)</label>
+                                <input type="text" id="input-kota" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500" placeholder="Tasikmalaya">
+                            </div>
+                            <button type="button" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition font-medium w-full">Simpan Profil</button>
+                        </form>
                     </div>
-                    <h2 class="text-2xl font-bold text-gray-900">Selamat Datang!</h2>
-                    <p class="text-gray-600 mt-2">Masuk dengan akun Gmail Anda</p>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4 border-b pb-2 text-gray-800">Manajemen Database (Default)</h3>
+                        <p class="text-sm text-gray-600 mb-4">Sistem membutuhkan basis data Capaian Pembelajaran (CP) untuk menyusun ATP & Prota. Sinkronisasi data default `pai.csv` ke dalam database Firestore Anda.</p>
+                        
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
+                            <h4 class="text-sm font-bold text-blue-800 mb-1">Status Data PAI & Budi Pekerti:</h4>
+                            <p id="cp-status" class="text-xs text-blue-600">Mengecek database...</p>
+                        </div>
+
+                        <div id="csv-alert" class="hidden text-sm p-3 rounded-md font-medium mb-4"></div>
+
+                        <button id="btn-sync-csv" class="w-full bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition font-medium flex items-center justify-center gap-2">
+                            <i class="fas fa-database"></i> Sinkronisasi pai.csv Sekarang
+                        </button>
+                        <p class="text-xs text-gray-400 mt-3 text-center">*Proses ini menggunakan Firebase Batch Write untuk efisiensi.*</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="jadwal" class="app-section hidden">
+                <h2 class="text-2xl font-bold mb-6">Kalender & Jadwal Pelajaran</h2>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-yellow-800 font-bold text-sm">Fitur Anti-Bentrok Aktif <i class="fas fa-shield-alt ml-1"></i></h3>
+                        <p class="text-xs text-yellow-700 mt-1">Sistem memvalidasi tumpang tindih jam mengajar, Rombel, dan Mata Pelajaran secara *real-time*.</p>
+                    </div>
                 </div>
 
-                <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center space-x-3 bg-white border-2 border-gray-200 py-4 rounded-xl hover:border-primary-300 hover:bg-primary-50 transition font-medium text-gray-700">
-                    <svg class="w-6 h-6" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    <span>Masuk dengan Google</span>
-                </button>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 lg:col-span-1 h-fit">
+                        <h3 class="font-bold text-lg mb-4 border-b pb-2">Tambah Jadwal Baru</h3>
+                        <form id="form-jadwal" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Hari</label>
+                                <select id="input-hari" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="Senin">Senin</option>
+                                    <option value="Selasa">Selasa</option>
+                                    <option value="Rabu">Rabu</option>
+                                    <option value="Kamis">Kamis</option>
+                                    <option value="Jumat">Jumat</option>
+                                    <option value="Sabtu">Sabtu</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Jam Mulai</label>
+                                    <input type="time" id="input-mulai" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Jam Selesai</label>
+                                    <input type="time" id="input-selesai" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Rombel (Kelas)</label>
+                                <input type="text" id="input-rombel" placeholder="Contoh: 7A" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Mata Pelajaran</label>
+                                <input type="text" id="input-mapel" placeholder="Contoh: PAI & Budi Pekerti" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            
+                            <div id="jadwal-alert" class="hidden text-sm p-3 rounded-md font-medium"></div>
 
-                <p class="text-center text-sm text-gray-500 mt-6">
-                    Dengan masuk, Anda menyetujui <a href="#" class="text-primary-600 hover:underline">Syarat & Ketentuan</a> kami.
-                </p>
-            </div>
-        </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition font-medium">
+                                <i class="fas fa-plus mr-2"></i> Simpan Jadwal
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 lg:col-span-2">
+                        <h3 class="font-bold text-lg mb-4 border-b pb-2">Jadwal Terdaftar</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-500">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3">Hari</th>
+                                        <th scope="col" class="px-4 py-3">Waktu</th>
+                                        <th scope="col" class="px-4 py-3">Rombel</th>
+                                        <th scope="col" class="px-4 py-3">Mapel</th>
+                                        <th scope="col" class="px-4 py-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabel-jadwal-body">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="akademik" class="app-section hidden">
+                <h2 class="text-2xl font-bold mb-6">Dokumen Output Otomatis</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <h3 class="font-bold text-lg mb-2">ATP & Prota</h3>
+                        <p class="text-sm text-gray-600 mb-4">Otomatis di-generate dari input kalender dan CP dasar.</p>
+                        <button class="text-blue-600 font-medium text-sm hover:underline">Lihat Dokumen &rarr;</button>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <h3 class="font-bold text-lg mb-2">Promes & Jurnal</h3>
+                        <p class="text-sm text-gray-600 mb-4">Sinkron dengan jadwal, absen, dan dilengkapi format tabel standar.</p>
+                        <button class="text-blue-600 font-medium text-sm hover:underline">Lihat Dokumen &rarr;</button>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden group">
+                        <div class="premium-lock absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 transition">
+                            <i class="fas fa-lock text-2xl text-yellow-500 mb-2"></i>
+                            <span class="text-sm font-bold text-gray-800">Fitur Premium</span>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">Modul Ajar & LKPD</h3>
+                        <p class="text-sm text-gray-600 mb-4">Support teks Arab (RTL) dan terintegrasi penuh.</p>
+                        <button class="text-blue-600 font-medium text-sm hover:underline">Generate Modul &rarr;</button>
+                    </div>
+
+                </div>
+            </section>
+
+             <section id="ai-assistant" class="app-section hidden">
+                <h2 class="text-2xl font-bold mb-6">AI Assistant - CSV Generator</h2>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <p class="mb-4 text-sm text-gray-600">Gunakan *prompt* di bawah ini pada ChatGPT/Gemini untuk mengubah data mentah Anda menjadi format CSV yang didukung sistem (Data Siswa, CP Tambahan, dll).</p>
+                    <div class="bg-gray-800 text-gray-200 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                        <p>"Saya memiliki data siswa mentah berikut: [PASTE DATA]. Tolong ubah menjadi format CSV dengan pemisah koma (,) dan kolom yang wajib ada persis seperti ini: nisn,nama_siswa,jenis_kelamin,kelas,rombel. Jangan berikan teks lain selain CSV murni."</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
     </div>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 z-50 hidden bg-white flex items-center justify-center">
-        <div class="text-center">
-            <div class="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="text-gray-600">Memproses...</p>
-        </div>
-    </div>
-
-    <!-- Toast Container -->
-    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-
-    <!-- Config & Scripts -->
-    <script src="js/firebase-config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    
-    <script>
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('hidden');
-        }
-
-        // FAQ toggle
-        function toggleFaq(button) {
-            const content = button.nextElementSibling;
-            const icon = button.querySelector('i');
-            content.classList.toggle('hidden');
-            icon.classList.toggle('rotate-180');
-        }
-
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
-                document.getElementById('mobileMenu').classList.add('hidden');
-            });
-        });
-
-        // Check auth state on load
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAuthState();
-        });
-    </script>
+    <script type="module" src="./js/app.js"></script>
 </body>
 </html>
