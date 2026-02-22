@@ -1,5 +1,6 @@
-// Authentication Module - Complete Fixed Version
+// Authentication Module - FIXED VERSION
 
+// Global variables
 let currentUser = null;
 let userProfile = null;
 
@@ -23,6 +24,7 @@ function hideLoginModal() {
 async function loginWithGoogle() {
     try {
         showLoading(true);
+        
         const result = await auth.signInWithPopup(googleProvider);
         const user = result.user;
         
@@ -34,6 +36,7 @@ async function loginWithGoogle() {
             return;
         }
 
+        currentUser = user;
         hideLoginModal();
         showToast('Login berhasil! Selamat datang.', 'success');
         
@@ -65,9 +68,13 @@ function checkAuthState() {
             currentUser = user;
             
             // If on landing page, redirect to app
-            if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '') {
+            const path = window.location.pathname;
+            if (path.endsWith('index.html') || path === '/' || path === '' || path.endsWith('/')) {
                 window.location.href = 'app.html';
             }
+        } else {
+            currentUser = null;
+            userProfile = null;
         }
     });
 }
@@ -79,10 +86,12 @@ async function logout() {
         currentUser = null;
         userProfile = null;
         showToast('Berhasil logout', 'success');
-        window.location.href = 'index.html';
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 500);
     } catch (error) {
         console.error('Logout error:', error);
-        showToast('Gagal logout', 'error');
+        showToast('Gagal logout: ' + error.message, 'error');
     }
 }
 
@@ -96,33 +105,42 @@ function isPremium() {
     
     if (sub.endDate) {
         let endDate;
-        if (sub.endDate.toDate) {
-            endDate = sub.endDate.toDate();
-        } else {
-            endDate = new Date(sub.endDate);
+        try {
+            if (sub.endDate.toDate) {
+                endDate = sub.endDate.toDate();
+            } else {
+                endDate = new Date(sub.endDate);
+            }
+            return new Date() < endDate;
+        } catch (e) {
+            return sub.isActive || false;
         }
-        return new Date() < endDate;
     }
     
-    return sub.isActive;
+    return sub.isActive || false;
 }
 
 // Check if super admin
 function isSuperAdmin() {
-    return currentUser && currentUser.email === SUPER_ADMIN_EMAIL;
+    if (!currentUser) return false;
+    const adminEmail = typeof SUPER_ADMIN_EMAIL !== 'undefined' ? SUPER_ADMIN_EMAIL : 'afifaro@gmail.com';
+    return currentUser.email === adminEmail;
 }
 
 // Redirect to WhatsApp for upgrade
 function redirectToWhatsApp() {
     const email = currentUser ? currentUser.email : '';
+    const whatsappNumber = typeof APP_SETTINGS !== 'undefined' ? APP_SETTINGS.whatsappNumber : '6281234567890';
     const message = encodeURIComponent('Halo, saya ingin upgrade ke AGSA Premium. Email: ' + email);
-    const whatsappUrl = `https://wa.me/${APP_SETTINGS.whatsappNumber}?text=${message}`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
     window.open(whatsappUrl, '_blank');
 }
 
 // Update user profile
 async function updateUserProfile(data) {
-    if (!currentUser) return;
+    if (!currentUser) {
+        throw new Error('User not logged in');
+    }
     
     try {
         await db.collection('users').doc(currentUser.uid).update({
@@ -131,7 +149,9 @@ async function updateUserProfile(data) {
         });
         
         // Update local profile
-        userProfile = { ...userProfile, ...data };
+        if (userProfile) {
+            userProfile = { ...userProfile, ...data };
+        }
         
         return true;
     } catch (error) {
