@@ -1,4 +1,6 @@
 // js/app.js
+import './jurnal.js';
+import './modul-generator.js';
 import './jadwal.js';
 import './csv-parser.js';
 import './atp-generator.js';
