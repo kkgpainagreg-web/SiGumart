@@ -3,186 +3,404 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGSA - Admin Guru Super App</title>
+    <title>ADMIN GURU SUPER APP - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { 'sans': ['Inter', 'sans-serif'] },
-                    colors: {
-                        primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
-                        accent: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' }
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .gradient-bg { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%); }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .btn-google { background: linear-gradient(to right, #4285f4, #34a853, #fbbc05, #ea4335); background-size: 300% 100%; }
-        .btn-google:hover { animation: gradient-shift 0.5s ease; }
-        @keyframes gradient-shift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
-        .floating { animation: floating 3s ease-in-out infinite; }
-        @keyframes floating { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .float-animation { animation: float 6s ease-in-out infinite; }
+        .feature-card:hover { transform: translateY(-5px); }
     </style>
 </head>
-<body class="min-h-screen gradient-bg font-sans">
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-primary-900/80 flex items-center justify-center z-50 hidden">
-        <div class="text-center">
-            <div class="w-16 h-16 border-4 border-white border-t-accent-400 rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="text-white text-lg font-medium">Memuat...</p>
+<body class="min-h-screen gradient-bg">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                    <span class="text-2xl">📚</span>
+                </div>
+                <span class="text-white font-bold text-xl hidden sm:block">AGSA</span>
+            </div>
+            <button onclick="showLoginModal()" class="bg-white text-purple-600 px-6 py-2 rounded-full font-semibold hover:shadow-lg transition-all">
+                Masuk
+            </button>
         </div>
-    </div>
+    </nav>
 
-    <!-- Main Container -->
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-md">
-            <!-- Logo & Title -->
-            <div class="text-center mb-8 floating">
-                <div class="w-24 h-24 bg-white rounded-2xl shadow-2xl flex items-center justify-center mx-auto mb-4">
-                    <span class="text-4xl">📚</span>
-                </div>
-                <h1 class="text-3xl font-bold text-white mb-2">ADMIN GURU SUPER APP</h1>
-                <p class="text-primary-200">Single Input - Multi Output</p>
-            </div>
-
-            <!-- Login Card -->
-            <div class="glass-card rounded-2xl shadow-2xl p-8">
-                <div id="authContainer">
-                    <!-- Login Form -->
-                    <div id="loginForm">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Masuk ke Akun</h2>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Gmail</label>
-                                <input type="email" id="loginEmail" placeholder="nama@gmail.com" 
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                                <div class="relative">
-                                    <input type="password" id="loginPassword" placeholder="••••••••"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition">
-                                    <button type="button" onclick="togglePassword('loginPassword')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button onclick="loginWithEmail()" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-lg mt-6 transition transform hover:scale-[1.02]">
-                            Masuk
-                        </button>
-
-                        <div class="relative my-6">
-                            <div class="absolute inset-0 flex items-center">
-                                <div class="w-full border-t border-gray-300"></div>
-                            </div>
-                            <div class="relative flex justify-center text-sm">
-                                <span class="px-4 bg-white text-gray-500">atau</span>
-                            </div>
-                        </div>
-
-                        <button onclick="loginWithGoogle()" class="w-full bg-white border-2 border-gray-200 hover:border-primary-500 text-gray-700 font-semibold py-3 rounded-lg transition flex items-center justify-center gap-3">
-                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
-                            Masuk dengan Google
-                        </button>
-
-                        <p class="text-center text-gray-600 mt-6">
-                            Belum punya akun? 
-                            <button onclick="showRegister()" class="text-primary-600 hover:text-primary-800 font-semibold">Daftar</button>
-                        </p>
-
-                        <button onclick="showForgotPassword()" class="w-full text-center text-sm text-gray-500 hover:text-primary-600 mt-3">
-                            Lupa Password?
-                        </button>
-                    </div>
-
-                    <!-- Register Form -->
-                    <div id="registerForm" class="hidden">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Buat Akun Baru</h2>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                                <input type="text" id="regName" placeholder="Nama lengkap Anda"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Gmail <span class="text-red-500">*</span></label>
-                                <input type="email" id="regEmail" placeholder="nama@gmail.com"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition">
-                                <p class="text-xs text-gray-500 mt-1">* Hanya email Gmail yang dapat digunakan</p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                                <input type="password" id="regPassword" placeholder="Min. 8 karakter"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password</label>
-                                <input type="password" id="regConfirmPassword" placeholder="Ulangi password"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition">
-                            </div>
-                        </div>
-
-                        <button onclick="registerWithEmail()" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-lg mt-6 transition transform hover:scale-[1.02]">
-                            Daftar Sekarang
-                        </button>
-
-                        <p class="text-center text-gray-600 mt-6">
-                            Sudah punya akun? 
-                            <button onclick="showLogin()" class="text-primary-600 hover:text-primary-800 font-semibold">Masuk</button>
-                        </p>
-                    </div>
-
-                    <!-- Forgot Password Form -->
-                    <div id="forgotPasswordForm" class="hidden">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Reset Password</h2>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Gmail</label>
-                                <input type="email" id="resetEmail" placeholder="nama@gmail.com"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition">
-                            </div>
-                        </div>
-
-                        <button onclick="resetPassword()" class="w-full bg-accent-500 hover:bg-accent-600 text-white font-semibold py-3 rounded-lg mt-6 transition">
-                            Kirim Link Reset
-                        </button>
-
-                        <button onclick="showLogin()" class="w-full text-center text-primary-600 hover:text-primary-800 font-semibold mt-4">
-                            ← Kembali ke Login
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Alert Container -->
-                <div id="alertContainer" class="mt-4 hidden">
-                    <div id="alertBox" class="p-4 rounded-lg"></div>
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center px-4 pt-20 pb-10">
+        <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+            <div class="text-center lg:text-left">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+                    Admin Guru<br>
+                    <span class="text-yellow-300">Super App</span>
+                </h1>
+                <p class="text-xl text-purple-100 mb-8 max-w-lg mx-auto lg:mx-0">
+                    Otomatisasi administrasi mengajar dengan konsep <strong class="text-yellow-300">Single Input – Multi Output</strong>. 
+                    Satu kali input, semua dokumen tergenerate otomatis!
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <button onclick="showLoginModal()" class="bg-yellow-400 text-purple-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-yellow-300 transition-all shadow-lg hover:shadow-xl">
+                        🚀 Mulai Gratis
+                    </button>
+                    <a href="#features" class="bg-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/30 transition-all border border-white/30">
+                        Lihat Fitur
+                    </a>
                 </div>
             </div>
+            <div class="hidden lg:block float-animation">
+                <div class="relative">
+                    <div class="absolute -top-10 -left-10 w-32 h-32 bg-yellow-400/20 rounded-full blur-3xl"></div>
+                    <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-purple-400/20 rounded-full blur-3xl"></div>
+                    <div class="glass-effect rounded-2xl p-8 shadow-2xl">
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3 p-3 bg-green-100 rounded-lg">
+                                <span class="text-2xl">✅</span>
+                                <span class="font-medium text-green-800">ATP Generated!</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 bg-blue-100 rounded-lg">
+                                <span class="text-2xl">✅</span>
+                                <span class="font-medium text-blue-800">Prota Generated!</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 bg-purple-100 rounded-lg">
+                                <span class="text-2xl">✅</span>
+                                <span class="font-medium text-purple-800">Promes Generated!</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 bg-orange-100 rounded-lg">
+                                <span class="text-2xl">✅</span>
+                                <span class="font-medium text-orange-800">Modul Ajar Generated!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-            <!-- Footer -->
-            <p class="text-center text-primary-200 text-sm mt-6">
-                © 2024 AGSA - Admin Guru Super App. All rights reserved.
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-4 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-4">
+                Fitur Unggulan
+            </h2>
+            <p class="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+                Didesain khusus untuk guru yang ingin fokus mengajar, bukan sibuk dengan administrasi
             </p>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature Cards -->
+                <div class="feature-card bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl transition-all duration-300 border border-blue-200">
+                    <div class="w-14 h-14 bg-blue-500 rounded-xl flex items-center justify-center mb-4">
+                        <span class="text-2xl">📅</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Kalender Pendidikan</h3>
+                    <p class="text-gray-600">Custom semester, hari libur nasional otomatis, dan pengaturan khusus untuk kelas akhir.</p>
+                    <span class="inline-block mt-3 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">FREE</span>
+                </div>
+
+                <div class="feature-card bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl transition-all duration-300 border border-purple-200">
+                    <div class="w-14 h-14 bg-purple-500 rounded-xl flex items-center justify-center mb-4">
+                        <span class="text-2xl">🕐</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Jadwal Pelajaran</h3>
+                    <p class="text-gray-600">Validasi anti-bentrok otomatis. Guru tidak bisa di dua kelas sekaligus.</p>
+                    <span class="inline-block mt-3 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">FREE</span>
+                </div>
+
+                <div class="feature-card bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl transition-all duration-300 border border-green-200">
+                    <div class="w-14 h-14 bg-green-500 rounded-xl flex items-center justify-center mb-4">
+                        <span class="text-2xl">📊</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">ATP & Prota</h3>
+                    <p class="text-gray-600">Generate otomatis Alur Tujuan Pembelajaran dan Program Tahunan.</p>
+                    <span class="inline-block mt-3 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">FREE</span>
+                </div>
+
+                <div class="feature-card bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-2xl transition-all duration-300 border border-orange-200">
+                    <div class="w-14 h-14 bg-orange-500 rounded-xl flex items-center justify-center mb-4">
+                        <span class="text-2xl">📝</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Promes Sinkron</h3>
+                    <p class="text-gray-600">Program Semester yang sinkron dengan Prota, Jadwal, dan Kalender lengkap dengan tanggal.</p>
+                    <span class="inline-block mt-3 px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded-full">PREMIUM</span>
+                </div>
+
+                <div class="feature-card bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-2xl transition-all duration-300 border border-red-200">
+                    <div class="w-14 h-14 bg-red-500 rounded-xl flex items-center justify-center mb-4">
+                        <span class="text-2xl">📖</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Modul Ajar</h3>
+                    <p class="text-gray-600">Terintegrasi dengan Promes, Jurnal, dan LKPD. Support teks Arab (RTL).</p>
+                    <span class="inline-block mt-3 px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded-full">PREMIUM</span>
+                </div>
+
+                <div class="feature-card bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-2xl transition-all duration-300 border border-indigo-200">
+                    <div class="w-14 h-14 bg-indigo-500 rounded-xl flex items-center justify-center mb-4">
+                        <span class="text-2xl">🤖</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">AI Assistant</h3>
+                    <p class="text-gray-600">Dapatkan prompt yang tepat untuk mengubah materi mentah menjadi CSV siap upload.</p>
+                    <span class="inline-block mt-3 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">FREE</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="py-20 px-4 bg-gray-50">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-4">
+                Pilihan Paket
+            </h2>
+            <p class="text-gray-600 text-center mb-12">
+                Pilih paket yang sesuai dengan kebutuhan Anda
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Free Plan -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg border-2 border-gray-200">
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-800">FREE</h3>
+                        <div class="text-4xl font-bold text-gray-800 mt-4">Rp 0</div>
+                        <p class="text-gray-500">Selamanya gratis</p>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Kalender Pendidikan
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Jadwal Pelajaran
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            ATP (Alur Tujuan Pembelajaran)
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Prota (Program Tahunan)
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <svg class="w-5 h-5 text-gray-300 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                            Promes, Modul Ajar, LKPD
+                        </li>
+                    </ul>
+                    <button onclick="showLoginModal()" class="w-full py-3 border-2 border-purple-600 text-purple-600 rounded-xl font-semibold hover:bg-purple-50 transition-all">
+                        Daftar Gratis
+                    </button>
+                </div>
+
+                <!-- Premium Plan -->
+                <div class="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl p-8 shadow-xl text-white relative overflow-hidden">
+                    <div class="absolute top-4 right-4 bg-yellow-400 text-purple-900 px-3 py-1 rounded-full text-sm font-bold">
+                        POPULER
+                    </div>
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold">PREMIUM</h3>
+                        <div class="text-4xl font-bold mt-4">Rp 99.000</div>
+                        <p class="text-purple-200">per tahun</p>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Semua fitur FREE
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Promes Lengkap dengan Tanggal
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Modul Ajar Terintegrasi
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            LKPD Generator
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Bank Soal
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Support Teks Arab (RTL)
+                        </li>
+                    </ul>
+                    <button onclick="redirectToWhatsApp()" class="w-full py-3 bg-yellow-400 text-purple-900 rounded-xl font-bold hover:bg-yellow-300 transition-all">
+                        Upgrade Sekarang
+                    </button>
+                </div>
+            </div>
+
+            <!-- School Package -->
+            <div class="mt-8 text-center">
+                <p class="text-gray-600 mb-2">Butuh untuk seluruh sekolah?</p>
+                <button onclick="redirectToWhatsApp()" class="text-purple-600 font-semibold hover:underline">
+                    Hubungi kami untuk Paket Sekolah (Bulk) →
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-10 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
+                    <span class="text-2xl">📚</span>
+                </div>
+                <span class="font-bold text-xl">Admin Guru Super App</span>
+            </div>
+            <p class="text-gray-400 mb-4">
+                Single Input – Multi Output untuk Administrasi Guru
+            </p>
+            <p class="text-gray-500 text-sm">
+                © 2024 AGSA. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-8 relative">
+            <button onclick="hideLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-3xl">📚</span>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Selamat Datang!</h2>
+                <p class="text-gray-500 mt-2">Masuk dengan akun Gmail untuk melanjutkan</p>
+            </div>
+
+            <button id="googleLoginBtn" onclick="loginWithGoogle()" class="w-full flex items-center justify-center space-x-3 bg-white border-2 border-gray-200 px-6 py-3 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all">
+                <svg class="w-6 h-6" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span class="font-semibold text-gray-700">Masuk dengan Google</span>
+            </button>
+
+            <p class="text-center text-gray-400 text-sm mt-6">
+                Hanya akun Gmail yang dapat digunakan
+            </p>
+
+            <div id="loginError" class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            </div>
         </div>
     </div>
 
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
+    <script>
+        // Check if already logged in
+        auth.onAuthStateChanged((user) => {
+            if (user && user.providerData[0].providerId === 'google.com') {
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('loginModal').classList.add('flex');
+        }
+
+        function hideLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('flex');
+        }
+
+        async function loginWithGoogle() {
+            const btn = document.getElementById('googleLoginBtn');
+            const errorDiv = document.getElementById('loginError');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div><span class="ml-2">Memproses...</span>';
+            errorDiv.classList.add('hidden');
+
+            try {
+                await Auth.loginWithGoogle();
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = `
+                    <svg class="w-6 h-6" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    <span class="font-semibold text-gray-700">Masuk dengan Google</span>
+                `;
+            }
+        }
+
+        async function redirectToWhatsApp() {
+            // Default number, akan diambil dari settings jika ada
+            let waNumber = '6281234567890';
+            try {
+                const settingsDoc = await db.collection('settings').doc('general').get();
+                if (settingsDoc.exists && settingsDoc.data().whatsappNumber) {
+                    waNumber = settingsDoc.data().whatsappNumber;
+                }
+            } catch (e) {
+                console.log('Using default WA number');
+            }
+            window.open(`https://wa.me/${waNumber}?text=Halo, saya ingin upgrade ke Premium ADMIN GURU SUPER APP`, '_blank');
+        }
+
+        // Close modal on outside click
+        document.getElementById('loginModal').addEventListener('click', (e) => {
+            if (e.target.id === 'loginModal') {
+                hideLoginModal();
+            }
+        });
+    </script>
 </body>
 </html>

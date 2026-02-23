@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant - Admin Guru Super App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>* { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="max-w-4xl mx-auto p-4 lg:p-8">
+        <!-- Back Button -->
+        <a href="dashboard.html" class="inline-flex items-center text-purple-600 hover:text-purple-700 mb-6">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Kembali ke Dashboard
+        </a>
+
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                <span class="text-3xl">🤖</span>
+            </div>
+            <h1 class="text-2xl lg:text-3xl font-bold text-gray-800">AI Assistant</h1>
+            <p class="text-gray-600 mt-2">Dapatkan prompt yang tepat untuk mengubah materi mentah menjadi CSV yang bisa diupload ke sistem</p>
+        </div>
+
+        <!-- Prompt Templates -->
+        <div class="space-y-4">
+            <!-- CP/TP Generator -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border">
+                <div class="flex items-start mb-4">
+                    <span class="text-2xl mr-3">📚</span>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-800">Generator CP & TP</h2>
+                        <p class="text-sm text-gray-500">Prompt untuk membuat file cp-mapel-jenjang.csv</p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                    <input type="text" id="inputMapelPrompt" value="Pendidikan Agama Islam dan Budi Pekerti" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jenjang</label>
+                    <select id="inputJenjangPrompt" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="SD/MI">SD/MI (Kelas 1-6)</option>
+                        <option value="SMP/MTs">SMP/MTs (Kelas 7-9)</option>
+                        <option value="SMA/MA/SMK">SMA/MA/SMK (Kelas 10-12)</option>
+                    </select>
+                </div>
+
+                <button onclick="generateCPPrompt()" class="w-full px-4 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                    Generate Prompt
+                </button>
+
+                <div id="promptResultCP" class="mt-4 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Prompt (Copy ke ChatGPT/Claude):</label>
+                    <div class="relative">
+                        <textarea id="promptTextCP" rows="10" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-gray-50" readonly></textarea>
+                        <button onclick="copyPrompt('promptTextCP')" class="absolute top-2 right-2 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">
+                            📋 Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Siswa Data Generator -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border">
+                <div class="flex items-start mb-4">
+                    <span class="text-2xl mr-3">👨‍🎓</span>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-800">Generator Data Siswa</h2>
+                        <p class="text-sm text-gray-500">Prompt untuk merapikan data siswa menjadi CSV</p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Paste Data Siswa (dari Excel/Word):</label>
+                    <textarea id="inputDataSiswa" rows="5" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm" placeholder="Contoh:
+1. Ahmad Fauzi (L) - Kelas 6A
+2. Siti Aminah (P) - Kelas 6A
+..."></textarea>
+                </div>
+
+                <button onclick="generateSiswaPrompt()" class="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                    Generate Prompt
+                </button>
+
+                <div id="promptResultSiswa" class="mt-4 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Prompt (Copy ke ChatGPT/Claude):</label>
+                    <div class="relative">
+                        <textarea id="promptTextSiswa" rows="10" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-gray-50" readonly></textarea>
+                        <button onclick="copyPrompt('promptTextSiswa')" class="absolute top-2 right-2 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">
+                            📋 Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kalender Generator -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border">
+                <div class="flex items-start mb-4">
+                    <span class="text-2xl mr-3">📅</span>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-800">Generator Kalender Pendidikan</h2>
+                        <p class="text-sm text-gray-500">Prompt untuk membuat kalender akademik</p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Ajaran</label>
+                    <input type="text" id="inputTahunKalender" value="2024/2025" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+
+                <button onclick="generateKalenderPrompt()" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                    Generate Prompt
+                </button>
+
+                <div id="promptResultKalender" class="mt-4 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Prompt (Copy ke ChatGPT/Claude):</label>
+                    <div class="relative">
+                        <textarea id="promptTextKalender" rows="8" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-gray-50" readonly></textarea>
+                        <button onclick="copyPrompt('promptTextKalender')" class="absolute top-2 right-2 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">
+                            📋 Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Format Info -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+                <h3 class="font-semibold text-yellow-800 mb-2">⚠️ Format CSV yang Diterima Sistem</h3>
+                <p class="text-sm text-yellow-700 mb-3">Pastikan output AI mengikuti format berikut:</p>
+                
+                <div class="bg-white rounded-lg p-4 text-sm overflow-x-auto">
+                    <p class="font-mono text-xs">
+                        <strong>CP/TP:</strong><br>
+                        Fase;Kelas;Semester;Elemen/Bab;Capaian Pembelajaran;Tujuan Pembelajaran;Dimensi Profil Lulusan<br><br>
+                        
+                        <strong>Siswa:</strong><br>
+                        NISN;Nama;Jenis Kelamin;Kelas;Rombel<br><br>
+                        
+                        <strong>Penting:</strong> Gunakan titik koma (;) sebagai pemisah, BUKAN koma (,)
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 hidden"></div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        Auth.checkAuth(() => {});
+
+        function generateCPPrompt() {
+            const mapel = document.getElementById('inputMapelPrompt').value;
+            const jenjang = document.getElementById('inputJenjangPrompt').value;
+
+            const prompt = `Tolong buatkan data Capaian Pembelajaran (CP) dan Tujuan Pembelajaran (TP) untuk:
+
+Mata Pelajaran: ${mapel}
+Jenjang: ${jenjang}
+Kurikulum: Merdeka
+
+Format output yang saya butuhkan adalah CSV dengan pemisah titik koma (;) dengan kolom:
+1. Fase (A/B/C/D/E/F)
+2. Kelas (1-12)
+3. Semester (Ganjil/Genap)
+4. Elemen/Bab (nama bab atau elemen)
+5. Capaian Pembelajaran (CP panjang/lengkap)
+6. Tujuan Pembelajaran (TP yang lebih spesifik)
+7. 8 Dimensi Profil Lulusan yang relevan (pilih dari: Keimanan, Kewargaan, Penalaran Kritis, Kreativitas, Kolaborasi, Kemandirian, Kesehatan, Komunikasi - pisahkan dengan koma)
+
+Contoh format output:
+Fase A;1;Ganjil;Al-Qur'an Hadis / Bab 1;Peserta didik mengenal huruf hijaiyah dan harakatnya;Peserta didik mampu melafalkan huruf hijaiyah dengan makharijul huruf yang benar;Keimanan, Komunikasi
+
+Aturan:
+- Baris pertama adalah header
+- Setiap bab/elemen bisa memiliki beberapa TP
+- JANGAN gunakan tanda koma di dalam teks CP dan TP (gunakan "dan" atau kata hubung lain)
+- Tanda koma HANYA digunakan di kolom Dimensi Profil Lulusan untuk memisahkan dimensi
+
+Buatkan minimal 10 TP untuk semester ganjil dan 10 TP untuk semester genap, mencakup semua bab yang biasanya diajarkan di jenjang ${jenjang}.`;
+
+            document.getElementById('promptTextCP').value = prompt;
+            document.getElementById('promptResultCP').classList.remove('hidden');
+        }
+
+        function generateSiswaPrompt() {
+            const data = document.getElementById('inputDataSiswa').value;
+
+            const prompt = `Tolong ubah data siswa berikut menjadi format CSV:
+
+DATA MENTAH:
+${data}
+
+Format output CSV yang saya butuhkan (gunakan titik koma sebagai pemisah):
+NISN;Nama Siswa;Jenis Kelamin;Kelas;Rombel
+
+Aturan:
+- NISN: jika tidak ada, buat kosong
+- Jenis Kelamin: L atau P
+- Kelas: angka saja (1, 2, 3, dst)
+- Rombel: A, B, C, dst
+
+Berikan output dalam format CSV yang siap digunakan.`;
+
+            document.getElementById('promptTextSiswa').value = prompt;
+            document.getElementById('promptResultSiswa').classList.remove('hidden');
+        }
+
+        function generateKalenderPrompt() {
+            const tahun = document.getElementById('inputTahunKalender').value;
+
+            const prompt = `Tolong buatkan kalender pendidikan untuk tahun ajaran ${tahun} dengan format CSV:
+
+Format output (gunakan titik koma sebagai pemisah):
+Tanggal;Keterangan;Jenis
+
+Kolom Jenis diisi dengan salah satu:
+- LIBUR_NASIONAL
+- LIBUR_SEKOLAH
+- KEGIATAN_SEKOLAH
+- UTS
+- UAS
+- PEMBAGIAN_RAPOR
+
+Contoh:
+2024-08-17;Hari Kemerdekaan RI;LIBUR_NASIONAL
+2024-07-15;Hari pertama masuk sekolah;KEGIATAN_SEKOLAH
+
+Sertakan:
+1. Semua hari libur nasional di Indonesia tahun ${tahun.split('/')[0]} dan ${tahun.split('/')[1]}
+2. Hari libur keagamaan (Idul Fitri, Idul Adha, Natal, dll)
+3. Perkiraan jadwal UTS dan UAS
+4. Pembagian rapor semester ganjil dan genap
+
+Format tanggal: YYYY-MM-DD`;
+
+            document.getElementById('promptTextKalender').value = prompt;
+            document.getElementById('promptResultKalender').classList.remove('hidden');
+        }
+
+        function copyPrompt(elementId) {
+            const textarea = document.getElementById(elementId);
+            textarea.select();
+            document.execCommand('copy');
+            showToast('Prompt berhasil dicopy!', 'success');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+    </script>
+</body>
+</html>

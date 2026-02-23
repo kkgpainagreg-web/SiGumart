@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Admin Guru Super App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .sidebar-link.active { background: linear-gradient(90deg, rgba(124,58,237,0.1) 0%, transparent 100%); border-left: 3px solid #7c3aed; }
+        .sidebar-link:hover { background: rgba(124,58,237,0.05); }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Mobile Header -->
+    <header class="lg:hidden fixed top-0 left-0 right-0 bg-white border-b z-40 px-4 py-3">
+        <div class="flex items-center justify-between">
+            <button id="mobileMenuBtn" class="p-2 hover:bg-gray-100 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            <span class="font-bold text-purple-600">AGSA</span>
+            <img id="userPhotoMobile" src="https://via.placeholder.com/32" class="w-8 h-8 rounded-full">
+        </div>
+    </header>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+            <div class="flex flex-col h-full">
+                <!-- Logo -->
+                <div class="p-4 border-b">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
+                            <span class="text-xl text-white">📚</span>
+                        </div>
+                        <div>
+                            <span class="font-bold text-gray-800">AGSA</span>
+                            <span id="subscriptionBadge" class="ml-2 px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded">FREE</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Info -->
+                <div class="p-4 border-b">
+                    <div class="flex items-center space-x-3">
+                        <img id="userPhoto" src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full">
+                        <div class="flex-1 min-w-0">
+                            <p id="userName" class="text-sm font-medium text-gray-800 truncate">Loading...</p>
+                            <p id="userEmail" class="text-xs text-gray-500 truncate">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                    <p class="text-xs font-semibold text-gray-400 uppercase mb-2">Menu Utama</p>
+                    
+                    <a href="dashboard.html" class="sidebar-link active flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700">
+                        <span class="text-lg">🏠</span>
+                        <span class="font-medium">Dashboard</span>
+                    </a>
+                    
+                    <a href="profile.html" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700">
+                        <span class="text-lg">👤</span>
+                        <span class="font-medium">Profil</span>
+                    </a>
+
+                    <p class="text-xs font-semibold text-gray-400 uppercase mt-6 mb-2">Pengaturan Dasar</p>
+                    
+                    <a href="calendar.html" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700">
+                        <span class="text-lg">📅</span>
+                        <span class="font-medium">Kalender</span>
+                    </a>
+                    
+                    <a href="schedule.html" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700">
+                        <span class="text-lg">🕐</span>
+                        <span class="font-medium">Jadwal</span>
+                    </a>
+
+                    <p class="text-xs font-semibold text-gray-400 uppercase mt-6 mb-2">Dokumen</p>
+                    
+                    <a href="documents.html" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700">
+                        <span class="text-lg">📄</span>
+                        <span class="font-medium">Generator Dokumen</span>
+                    </a>
+
+                    <p class="text-xs font-semibold text-gray-400 uppercase mt-6 mb-2">Akademik</p>
+                    
+                    <a href="absensi.html" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700">
+                        <span class="text-lg">✋</span>
+                        <span class="font-medium">Absensi</span>
+                    </a>
+                    
+                    <a href="jurnal.html" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700">
+                        <span class="text-lg">📝</span>
+                        <span class="font-medium">Jurnal</span>
+                    </a>
+                    
+                    <a href="nilai.html" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700">
+                        <span class="text-lg">📊</span>
+                        <span class="font-medium">Nilai</span>
+                    </a>
+
+                    <p class="text-xs font-semibold text-gray-400 uppercase mt-6 mb-2">Tools</p>
+                    
+                    <a href="ai-assistant.html" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700">
+                        <span class="text-lg">🤖</span>
+                        <span class="font-medium">AI Assistant</span>
+                    </a>
+                    
+                    <a href="docs.html" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700">
+                        <span class="text-lg">📖</span>
+                        <span class="font-medium">Panduan</span>
+                    </a>
+
+                    <!-- Admin Menu (Hidden by default) -->
+                    <div id="adminMenu" class="hidden">
+                        <p class="text-xs font-semibold text-red-400 uppercase mt-6 mb-2">Super Admin</p>
+                        <a href="admin.html" class="sidebar-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-red-600 bg-red-50">
+                            <span class="text-lg">⚙️</span>
+                            <span class="font-medium">Admin Panel</span>
+                        </a>
+                    </div>
+                </nav>
+
+                <!-- Logout -->
+                <div class="p-4 border-t">
+                    <button id="logoutBtn" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        <span class="font-medium">Keluar</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden" onclick="closeSidebar()"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 lg:ml-0 pt-16 lg:pt-0">
+            <div class="p-4 lg:p-8">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-6 lg:p-8 text-white mb-8">
+                    <h1 class="text-2xl lg:text-3xl font-bold mb-2">Selamat Datang! 👋</h1>
+                    <p class="text-purple-100 mb-4">Siap mengotomatisasi administrasi mengajar Anda hari ini?</p>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="documents.html" class="inline-flex items-center px-4 py-2 bg-white text-purple-600 rounded-lg font-semibold hover:bg-purple-50 transition-colors">
+                            <span class="mr-2">📄</span> Buat Dokumen
+                        </a>
+                        <a href="docs.html" class="inline-flex items-center px-4 py-2 bg-purple-500 text-white rounded-lg font-semibold hover:bg-purple-400 transition-colors">
+                            <span class="mr-2">📖</span> Panduan
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white rounded-xl p-4 lg:p-6 shadow-sm border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-2xl">📅</span>
+                            <span class="text-xs text-gray-400">Tahun Ajaran</span>
+                        </div>
+                        <p id="tahunAjaran" class="text-lg lg:text-xl font-bold text-gray-800">Loading...</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-4 lg:p-6 shadow-sm border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-2xl">📝</span>
+                            <span class="text-xs text-gray-400">Dokumen</span>
+                        </div>
+                        <p id="totalDocs" class="text-lg lg:text-xl font-bold text-gray-800">0</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-4 lg:p-6 shadow-sm border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-2xl">👨‍🎓</span>
+                            <span class="text-xs text-gray-400">Siswa</span>
+                        </div>
+                        <p id="totalSiswa" class="text-lg lg:text-xl font-bold text-gray-800">0</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl p-4 lg:p-6 shadow-sm border">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-2xl">📚</span>
+                            <span class="text-xs text-gray-400">Kelas</span>
+                        </div>
+                        <p id="totalKelas" class="text-lg lg:text-xl font-bold text-gray-800">0</p>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Akses Cepat</h2>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <a href="documents.html?doc=atp" class="bg-white rounded-xl p-4 border hover:border-purple-300 hover:shadow-md transition-all group">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <span class="text-2xl">📊</span>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">ATP</h3>
+                            <p class="text-xs text-gray-500">Alur Tujuan Pembelajaran</p>
+                        </a>
+
+                        <a href="documents.html?doc=prota" class="bg-white rounded-xl p-4 border hover:border-purple-300 hover:shadow-md transition-all group">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <span class="text-2xl">📅</span>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">Prota</h3>
+                            <p class="text-xs text-gray-500">Program Tahunan</p>
+                        </a>
+
+                        <a href="documents.html?doc=promes" class="bg-white rounded-xl p-4 border hover:border-purple-300 hover:shadow-md transition-all group premium-only">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <span class="text-2xl">📝</span>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">Promes</h3>
+                            <p class="text-xs text-gray-500">Program Semester</p>
+                            <span class="inline-block mt-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded">PREMIUM</span>
+                        </a>
+
+                        <a href="documents.html?doc=modul" class="bg-white rounded-xl p-4 border hover:border-purple-300 hover:shadow-md transition-all group premium-only">
+                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <span class="text-2xl">📖</span>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">Modul Ajar</h3>
+                            <p class="text-xs text-gray-500">Terintegrasi LKPD</p>
+                            <span class="inline-block mt-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded">PREMIUM</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Upgrade Banner (for free users) -->
+                <div id="upgradeBanner" class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl p-6 text-white hidden">
+                    <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Upgrade ke Premium! 🚀</h3>
+                            <p class="text-yellow-100">Dapatkan akses ke semua fitur termasuk Promes, Modul Ajar, LKPD, dan Bank Soal.</p>
+                        </div>
+                        <button onclick="redirectToWhatsApp()" class="whitespace-nowrap px-6 py-3 bg-white text-orange-600 rounded-xl font-bold hover:bg-yellow-50 transition-colors">
+                            Upgrade Sekarang
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Aktivitas Terakhir</h2>
+                    <div class="bg-white rounded-xl border overflow-hidden">
+                        <div id="recentActivity" class="divide-y">
+                            <div class="p-4 text-center text-gray-500">
+                                <p>Belum ada aktivitas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Mobile sidebar functions
+        function openSidebar() {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.remove('hidden');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('sidebarOverlay').classList.add('hidden');
+        }
+
+        document.getElementById('mobileMenuBtn').addEventListener('click', openSidebar);
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            Auth.checkAuth(async (user) => {
+                // Set user info
+                document.getElementById('userName').textContent = user.displayName;
+                document.getElementById('userEmail').textContent = user.email;
+                document.getElementById('userPhoto').src = user.photoURL || 'https://via.placeholder.com/40';
+                document.getElementById('userPhotoMobile').src = user.photoURL || 'https://via.placeholder.com/32';
+
+                // Set tahun ajaran
+                const tahunAjaran = getTahunAjaran();
+                document.getElementById('tahunAjaran').textContent = tahunAjaran.current;
+
+                // Check subscription
+                const subscription = await Auth.checkSubscription();
+                const badge = document.getElementById('subscriptionBadge');
+                if (subscription === 'premium') {
+                    badge.textContent = 'PREMIUM';
+                    badge.className = 'ml-2 px-2 py-0.5 bg-yellow-500 text-black text-xs font-bold rounded';
+                } else {
+                    badge.textContent = 'FREE';
+                    document.getElementById('upgradeBanner').classList.remove('hidden');
+                    document.querySelectorAll('.premium-only').forEach(el => {
+                        el.classList.add('opacity-60');
+                    });
+                }
+
+                // Check super admin
+                if (Auth.isSuperAdmin(user.email)) {
+                    document.getElementById('adminMenu').classList.remove('hidden');
+                }
+
+                // Load stats
+                loadDashboardStats(user.uid);
+
+                // Logout handler
+                document.getElementById('logoutBtn').addEventListener('click', () => Auth.logout());
+            });
+        });
+
+        async function loadDashboardStats(userId) {
+            try {
+                // Count documents
+                const docsSnapshot = await db.collection('users').doc(userId).collection('documents').get();
+                document.getElementById('totalDocs').textContent = docsSnapshot.size;
+
+                // Count students
+                const studentsSnapshot = await db.collection('users').doc(userId).collection('students').get();
+                document.getElementById('totalSiswa').textContent = studentsSnapshot.size;
+
+                // Count classes (unique)
+                const classes = new Set();
+                studentsSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.kelas) classes.add(data.kelas);
+                });
+                document.getElementById('totalKelas').textContent = classes.size;
+
+                // Load recent activity
+                loadRecentActivity(userId);
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadRecentActivity(userId) {
+            try {
+                const activitySnapshot = await db.collection('users').doc(userId)
+                    .collection('activity')
+                    .orderBy('timestamp', 'desc')
+                    .limit(5)
+                    .get();
+
+                const container = document.getElementById('recentActivity');
+                
+                if (activitySnapshot.empty) {
+                    container.innerHTML = '<div class="p-4 text-center text-gray-500"><p>Belum ada aktivitas</p></div>';
+                    return;
+                }
+
+                let html = '';
+                activitySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const timestamp = data.timestamp?.toDate() || new Date();
+                    html += `
+                        <div class="p-4 flex items-center space-x-3 hover:bg-gray-50">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <span class="text-lg">${data.icon || '📄'}</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-800">${data.message}</p>
+                                <p class="text-xs text-gray-500">${formatTanggalIndo(timestamp)}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading activity:', error);
+            }
+        }
+
+        async function redirectToWhatsApp() {
+            let waNumber = '6281234567890';
+            try {
+                const settingsDoc = await db.collection('settings').doc('general').get();
+                if (settingsDoc.exists && settingsDoc.data().whatsappNumber) {
+                    waNumber = settingsDoc.data().whatsappNumber;
+                }
+            } catch (e) {
+                console.log('Using default WA number');
+            }
+            window.open(`https://wa.me/${waNumber}?text=Halo, saya ingin upgrade ke Premium ADMIN GURU SUPER APP`, '_blank');
+        }
+    </script>
+</body>
+</html>
