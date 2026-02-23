@@ -1379,4 +1379,1024 @@ async function saveJamPelajaran() {
         hideLoading();
         showToast('Gagal menyimpan: ' + error.message, 'error');
     }
+
 }
+// ===== PREMIUM FEATURE FUNCTIONS =====
+
+// Check and unlock premium features
+function checkPremiumAccess() {
+    const isPremium = userData?.subscription === 'premium';
+    
+    const premiumSections = ['modul-ajar', 'lkpd', 'kktp', 'jurnal', 'absensi', 'nilai'];
+    
+    premiumSections.forEach(section => {
+        const locked = document.getElementById(`${section.replace('-', '')}Locked`) || 
+                       document.getElementById(`${section}Locked`);
+        const content = document.getElementById(`${section.replace('-', '')}Content`) ||
+                       document.getElementById(`${section}Content`);
+        
+        // Handle different ID formats
+        const lockedEl = document.getElementById(`modulAjarLocked`) ||
+                        document.getElementById(`lkpdLocked`) ||
+                        document.getElementById(`kktpLocked`) ||
+                        document.getElementById(`jurnalLocked`) ||
+                        document.getElementById(`absensiLocked`) ||
+                        document.getElementById(`nilaiLocked`);
+        
+        if (isPremium) {
+            // Hide locked, show content
+            document.querySelectorAll('[id$="Locked"]').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('[id$="Content"]').forEach(el => el.classList.remove('hidden'));
+        } else {
+            // Show locked, hide content
+            document.querySelectorAll('[id$="Locked"]').forEach(el => el.classList.remove('hidden'));
+            document.querySelectorAll('[id$="Content"]').forEach(el => el.classList.add('hidden'));
+        }
+    });
+    
+    // Update premium selects
+    if (isPremium) {
+        updatePremiumSelects();
+    }
+}
+
+function updatePremiumSelects() {
+    const selects = [
+        'modulMapel', 'modulKelas', 
+        'lkpdMapel', 'lkpdKelas',
+        'kktpMapel', 'kktpKelas',
+        'jurnalMapel', 'jurnalKelas',
+        'absensiMapel', 'absensiKelas',
+        'nilaiMapel', 'nilaiKelas'
+    ];
+    
+    // Copy options from existing selects
+    selects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        
+        if (selectId.includes('Mapel')) {
+            // Copy from cpMapel or atpMapel
+            const source = document.getElementById('atpMapel');
+            if (source) {
+                select.innerHTML = source.innerHTML;
+            }
+        } else if (selectId.includes('Kelas')) {
+            // Copy from atpKelas
+            const source = document.getElementById('atpKelas');
+            if (source) {
+                select.innerHTML = source.innerHTML;
+            }
+        }
+    });
+}
+
+// ===== MODUL AJAR =====
+async function generateModulAjar() {
+    const mapelId = document.getElementById('modulMapel').value;
+    const kelas = document.getElementById('modulKelas').value;
+    const semester = document.getElementById('modulSemester').value;
+    const bab = document.getElementById('modulBab').value;
+    
+    if (!mapelId || !kelas || !bab) {
+        showToast('Lengkapi semua pilihan terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Generating Modul Ajar...');
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (!cpDoc.exists) {
+            hideLoading();
+            showToast('Data CP tidak ditemukan!', 'error');
+            return;
+        }
+        
+        const cpDataDoc = cpDoc.data();
+        const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
+        
+        if (!dataKelas || !dataKelas.babs[bab]) {
+            hideLoading();
+            showToast('Data bab tidak ditemukan!', 'error');
+            return;
+        }
+        
+        const babData = dataKelas.babs[bab];
+        const tps = babData.tps || [];
+        
+        // Get mapel info
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.data();
+        const jpPerTp = mapelData?.jp || 2;
+        const needArabic = mapelData?.needArabic || false;
+        
+        const tahunAjar = document.getElementById('selectTahunAjar').value;
+        
+        // Update document values
+        updateDocumentValues({
+            tahun: tahunAjar,
+            sekolah: userData?.sekolah || '',
+            mapel: mapelData?.nama || cpDataDoc.mapelNama,
+            kelas: kelas,
+            semester: semester,
+            fase: getFaseByKelas(kelas),
+            kepsek: userData?.kepsek || '',
+            nipKepsek: userData?.nipKepsek || '',
+            guru: userData?.nama || '',
+            nipGuru: userData?.nip || '',
+            kota: userData?.kota || '',
+            tanggal: formatTanggalIndonesia(new Date())
+        });
+        
+        // Set topik dan JP
+        document.getElementById('modulTopik').textContent = bab;
+        document.getElementById('modulJp').textContent = tps.length * jpPerTp;
+        
+        // Dimensi Profil
+        const profilSet = new Set();
+        tps.forEach(tp => {
+            if (tp.profil) {
+                tp.profil.split(',').forEach(p => profilSet.add(p.trim()));
+            }
+        });
+        document.getElementById('modulProfil').innerHTML = `
+            <ul class="list-disc ml-4">
+                ${Array.from(profilSet).map(p => `<li><strong>${p}</strong></li>`).join('')}
+            </ul>
+        `;
+        
+        // Tujuan Pembelajaran
+        let tpHtml = '<ol class="list-decimal ml-4 space-y-2">';
+        tps.forEach((tp, i) => {
+            tpHtml += `<li><strong>Pertemuan ${i + 1}:</strong> ${tp.tp}</li>`;
+        });
+        tpHtml += '</ol>';
+        document.getElementById('modulTP').innerHTML = tpHtml;
+        
+        // Pemahaman Bermakna
+        document.getElementById('modulPemahaman').innerHTML = `
+            <p>Melalui pembelajaran materi <strong>${bab}</strong>, peserta didik diharapkan dapat:</p>
+            <ul class="list-disc ml-4 mt-2">
+                <li>Memahami konsep dasar dan penerapannya dalam kehidupan sehari-hari.</li>
+                <li>Mengembangkan sikap positif sesuai dengan nilai-nilai yang terkandung dalam materi.</li>
+                <li>Menerapkan pemahaman untuk menyelesaikan permasalahan yang relevan.</li>
+            </ul>
+        `;
+        
+        // Pertanyaan Pemantik
+        document.getElementById('modulPertanyaan').innerHTML = `
+            <ol class="list-decimal ml-4 space-y-1">
+                <li>Apa yang kalian ketahui tentang ${bab}?</li>
+                <li>Pernahkah kalian mengalami atau melihat contoh terkait materi ini?</li>
+                <li>Mengapa materi ini penting untuk dipelajari?</li>
+            </ol>
+        `;
+        
+        // Kegiatan Pembelajaran
+        let kegiatanHtml = '';
+        tps.forEach((tp, i) => {
+            kegiatanHtml += `
+                <div class="mb-4 p-3 bg-gray-50 rounded">
+                    <h5 class="font-bold text-primary mb-2">Pertemuan ${i + 1} (${jpPerTp} JP)</h5>
+                    <p class="text-xs text-gray-600 mb-2"><em>TP: ${tp.tp}</em></p>
+                    <ul class="list-disc ml-4 space-y-1">
+                        <li><strong>Pendahuluan (10 menit):</strong> Salam, doa, presensi, apersepsi dengan pertanyaan pemantik.</li>
+                        <li><strong>Kegiatan Inti (${(jpPerTp * 35) - 20} menit):</strong>
+                            <ul class="list-circle ml-4 mt-1">
+                                <li>Eksplorasi: Siswa mengamati/membaca materi secara mandiri.</li>
+                                <li>Elaborasi: Diskusi kelompok dan pengerjaan LKPD.</li>
+                                <li>Konfirmasi: Presentasi hasil dan penguatan dari guru.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Penutup (10 menit):</strong> Refleksi, kesimpulan bersama, informasi pertemuan selanjutnya, doa penutup.</li>
+                    </ul>
+                </div>
+            `;
+        });
+        document.getElementById('modulKegiatan').innerHTML = kegiatanHtml;
+        
+        // Show/hide Arabic section
+        if (needArabic) {
+            document.getElementById('modulArabSection').classList.remove('hidden');
+        } else {
+            document.getElementById('modulArabSection').classList.add('hidden');
+        }
+        
+        hideLoading();
+        showToast('Modul Ajar berhasil di-generate!', 'success');
+    } catch (error) {
+        hideLoading();
+        showToast('Error: ' + error.message, 'error');
+        console.error(error);
+    }
+}
+
+// Event listener untuk update bab options
+document.getElementById('modulMapel')?.addEventListener('change', updateModulBabOptions);
+document.getElementById('modulKelas')?.addEventListener('change', updateModulBabOptions);
+document.getElementById('modulSemester')?.addEventListener('change', updateModulBabOptions);
+
+async function updateModulBabOptions() {
+    const mapelId = document.getElementById('modulMapel').value;
+    const kelas = document.getElementById('modulKelas').value;
+    const semester = document.getElementById('modulSemester').value;
+    const babSelect = document.getElementById('modulBab');
+    
+    babSelect.innerHTML = '<option value="">Pilih Bab</option>';
+    
+    if (!mapelId || !kelas) return;
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (cpDoc.exists) {
+            const data = cpDoc.data().data[`${kelas}-${semester}`];
+            if (data && data.babs) {
+                Object.keys(data.babs).forEach(bab => {
+                    const option = document.createElement('option');
+                    option.value = bab;
+                    option.textContent = bab;
+                    babSelect.appendChild(option);
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error loading bab options:', error);
+    }
+}
+
+// ===== LKPD =====
+async function generateLKPD() {
+    const mapelId = document.getElementById('lkpdMapel').value;
+    const kelas = document.getElementById('lkpdKelas').value;
+    const semester = document.getElementById('lkpdSemester').value;
+    const bab = document.getElementById('lkpdBab').value;
+    const pertemuan = parseInt(document.getElementById('lkpdPertemuan').value) || 1;
+    
+    if (!mapelId || !kelas || !bab) {
+        showToast('Lengkapi semua pilihan terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Generating LKPD...');
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (!cpDoc.exists) {
+            hideLoading();
+            showToast('Data CP tidak ditemukan!', 'error');
+            return;
+        }
+        
+        const cpDataDoc = cpDoc.data();
+        const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
+        const babData = dataKelas?.babs[bab];
+        
+        if (!babData) {
+            hideLoading();
+            showToast('Data bab tidak ditemukan!', 'error');
+            return;
+        }
+        
+        const tps = babData.tps || [];
+        const selectedTP = tps[pertemuan - 1] || tps[0];
+        
+        // Get mapel info
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.data();
+        const needArabic = mapelData?.needArabic || false;
+        
+        // Update values
+        updateDocumentValues({
+            mapel: mapelData?.nama || cpDataDoc.mapelNama,
+            kelas: kelas
+        });
+        
+        // Set TP
+        document.getElementById('lkpdTP').innerHTML = `
+            <strong>Pertemuan ${pertemuan}:</strong> ${selectedTP.tp}
+        `;
+        
+        // Set Materi
+        document.getElementById('lkpdMateri').textContent = bab;
+        
+        // Show/hide Arabic section
+        if (needArabic) {
+            document.getElementById('lkpdArabSection').classList.remove('hidden');
+        } else {
+            document.getElementById('lkpdArabSection').classList.add('hidden');
+        }
+        
+        hideLoading();
+        showToast('LKPD berhasil di-generate!', 'success');
+    } catch (error) {
+        hideLoading();
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+// ===== KKTP =====
+async function generateKKTP() {
+    const mapelId = document.getElementById('kktpMapel').value;
+    const kelas = document.getElementById('kktpKelas').value;
+    
+    if (!mapelId || !kelas) {
+        showToast('Pilih mapel dan kelas terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Generating KKTP...');
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (!cpDoc.exists) {
+            hideLoading();
+            showToast('Data CP tidak ditemukan!', 'error');
+            return;
+        }
+        
+        const cpDataDoc = cpDoc.data();
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.data();
+        
+        const tahunAjar = document.getElementById('selectTahunAjar').value;
+        
+        updateDocumentValues({
+            tahun: tahunAjar,
+            sekolah: userData?.sekolah || '',
+            mapel: mapelData?.nama || cpDataDoc.mapelNama,
+            kelas: kelas,
+            fase: getFaseByKelas(kelas),
+            kepsek: userData?.kepsek || '',
+            nipKepsek: userData?.nipKepsek || '',
+            guru: userData?.nama || '',
+            nipGuru: userData?.nip || '',
+            kota: userData?.kota || '',
+            tanggal: formatTanggalIndonesia(new Date())
+        });
+        
+        let html = '';
+        let no = 0;
+        
+        ['Ganjil', 'Genap'].forEach(semester => {
+            const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
+            if (!dataKelas) return;
+            
+            Object.keys(dataKelas.babs).forEach(babName => {
+                const bab = dataKelas.babs[babName];
+                const tps = bab.tps || [];
+                
+                tps.forEach((tp, iTp) => {
+                    no++;
+                    html += `
+                        <tr>
+                            ${iTp === 0 ? `
+                                <td rowspan="${tps.length}" class="border border-black p-2 text-center">${Math.ceil(no / tps.length)}</td>
+                                <td rowspan="${tps.length}" class="border border-black p-2 text-center">${semester}</td>
+                                <td rowspan="${tps.length}" class="border border-black p-2 text-center bg-gray-50">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 9px;">${babName}</div>
+                                </td>
+                            ` : ''}
+                            <td class="border border-black p-2 text-left">${tp.tp}</td>
+                            <td class="border border-black p-2 text-center bg-yellow-50" contenteditable="true" oninput="hitungKKTP(this)">75</td>
+                            <td class="border border-black p-2 text-center bg-yellow-50" contenteditable="true" oninput="hitungKKTP(this)">75</td>
+                            <td class="border border-black p-2 text-center bg-yellow-50" contenteditable="true" oninput="hitungKKTP(this)">75</td>
+                            <td class="border border-black p-2 text-center bg-blue-100 font-bold kktp-result">75</td>
+                        </tr>
+                    `;
+                    no = iTp === 0 ? no : no - 1;
+                });
+                no++;
+            });
+        });
+        
+        document.getElementById('bodyKktp').innerHTML = html;
+        
+        hideLoading();
+        showToast('KKTP berhasil di-generate!', 'success');
+    } catch (error) {
+        hideLoading();
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+function hitungKKTP(element) {
+    const row = element.closest('tr');
+    const inputs = row.querySelectorAll('[contenteditable="true"]');
+    const result = row.querySelector('.kktp-result');
+    
+    if (inputs.length === 3 && result) {
+        let total = 0;
+        inputs.forEach(input => {
+            total += parseInt(input.textContent) || 0;
+        });
+        result.textContent = Math.round(total / 3);
+    }
+}
+
+// ===== JURNAL =====
+async function generateJurnal() {
+    const mapelId = document.getElementById('jurnalMapel').value;
+    const kelas = document.getElementById('jurnalKelas').value;
+    const semester = document.getElementById('jurnalSemester').value;
+    
+    if (!mapelId || !kelas) {
+        showToast('Pilih mapel dan kelas terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Generating Jurnal...');
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (!cpDoc.exists) {
+            hideLoading();
+            showToast('Data CP tidak ditemukan!', 'error');
+            return;
+        }
+        
+        const cpDataDoc = cpDoc.data();
+        const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
+        
+        if (!dataKelas) {
+            hideLoading();
+            showToast(`Data untuk kelas ${kelas} semester ${semester} tidak ditemukan!`, 'error');
+            return;
+        }
+        
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.data();
+        const jpPerTp = mapelData?.jp || 2;
+        
+        const tahunAjar = document.getElementById('selectTahunAjar').value;
+        
+        updateDocumentValues({
+            tahun: tahunAjar,
+            sekolah: userData?.sekolah || '',
+            mapel: mapelData?.nama || cpDataDoc.mapelNama,
+            semester: semester,
+            kepsek: userData?.kepsek || '',
+            nipKepsek: userData?.nipKepsek || '',
+            guru: userData?.nama || '',
+            nipGuru: userData?.nip || '',
+            kota: userData?.kota || '',
+            tanggal: formatTanggalIndonesia(new Date())
+        });
+        
+        // Get absensi data for this class
+        const absensiSnapshot = await db.collection('users').doc(currentUser.uid)
+            .collection('absensi')
+            .where('kelas', '==', kelas)
+            .where('mapelId', '==', mapelId)
+            .orderBy('tanggal', 'asc')
+            .get();
+        
+        const absensiData = {};
+        absensiSnapshot.forEach(doc => {
+            const data = doc.data();
+            absensiData[data.tanggal] = data;
+        });
+        
+        // Calculate teaching dates
+        const tahunParts = tahunAjar.split('/');
+        const tahunOperasional = semester === 'Ganjil' ? parseInt(tahunParts[0]) : parseInt(tahunParts[1]);
+        const bulanAwal = semester === 'Ganjil' ? 6 : 0;
+        
+        const tanggalMengajar = calculateTanggalMengajar(tahunOperasional, bulanAwal, 1, semester, {});
+        
+        let html = '';
+        let no = 0;
+        let dateIndex = 0;
+        
+        Object.keys(dataKelas.babs).forEach(babName => {
+            const bab = dataKelas.babs[babName];
+            const tps = bab.tps || [];
+            
+            tps.forEach((tp, iTp) => {
+                no++;
+                const tglObj = tanggalMengajar[dateIndex];
+                const tanggalStr = tglObj ? formatTanggalIndonesia(tglObj.dateObj) : '...';
+                const hariStr = tglObj ? HARI[tglObj.dateObj.getDay()] : '...';
+                
+                // Get absensi for this date
+                let kehadiranStr = '... / ...';
+                if (tglObj) {
+                    const dateKey = tglObj.dateObj.toISOString().split('T')[0];
+                    const absensi = absensiData[dateKey];
+                    if (absensi) {
+                        kehadiranStr = `${absensi.hadir || 0} / ${absensi.total || 0}`;
+                    }
+                }
+                
+                html += `
+                    <tr>
+                        <td class="border border-black p-2 text-center">${no}</td>
+                        <td class="border border-black p-2 text-center">${kelas} / ${getFaseByKelas(kelas)}</td>
+                        <td class="border border-black p-2 text-left">${babName}</td>
+                        <td class="border border-black p-2 text-left">${tp.tp}</td>
+                        <td class="border border-black p-2 text-center">${kehadiranStr}</td>
+                        <td class="border border-black p-2 text-center" contenteditable="true">${hariStr}, ${tanggalStr}</td>
+                        <td class="border border-black p-2" contenteditable="true">
+                            <select class="w-full border-0 bg-transparent text-xs">
+                                <option>Tersampaikan dengan baik</option>
+                                <option>Perlu diulang</option>
+                                <option>Sebagian tersampaikan</option>
+                            </select>
+                        </td>
+                        <td class="border border-black p-2" contenteditable="true">
+                            <select class="w-full border-0 bg-transparent text-xs">
+                                <option>Terlaksana sesuai jadwal</option>
+                                <option>Terlaksana di hari berikutnya</option>
+                                <option>Tidak terlaksana</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+                
+                dateIndex++;
+            });
+        });
+        
+        document.getElementById('bodyJurnal').innerHTML = html;
+        
+        hideLoading();
+        showToast('Jurnal berhasil di-generate!', 'success');
+    } catch (error) {
+        hideLoading();
+        showToast('Error: ' + error.message, 'error');
+        console.error(error);
+    }
+}
+
+// ===== ABSENSI =====
+async function loadAbsensi() {
+    const mapelId = document.getElementById('absensiMapel').value;
+    const kelas = document.getElementById('absensiKelas').value;
+    const tanggal = document.getElementById('absensiTanggal').value;
+    
+    if (!kelas || !tanggal) {
+        showToast('Pilih kelas dan tanggal terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Memuat data siswa...');
+    
+    try {
+        // Get students
+        const siswaSnapshot = await db.collection('users').doc(currentUser.uid)
+            .collection('siswa')
+            .where('kelas', '==', kelas)
+            .orderBy('nama', 'asc')
+            .get();
+        
+        // Get existing absensi
+        const absensiDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('absensi')
+            .doc(`${kelas}-${mapelId}-${tanggal}`)
+            .get();
+        
+        const existingAbsensi = absensiDoc.exists ? absensiDoc.data().detail || {} : {};
+        
+        let html = '';
+        let no = 0;
+        
+        siswaSnapshot.forEach(doc => {
+            no++;
+            const siswa = doc.data();
+            const status = existingAbsensi[doc.id] || 'H';
+            
+            html += `
+                <tr>
+                    <td class="text-center">${no}</td>
+                    <td>${siswa.nisn || '-'}</td>
+                    <td>${siswa.nama}</td>
+                    <td class="text-center">${siswa.jenisKelamin || '-'}</td>
+                    <td>
+                        <div class="flex gap-2 justify-center" data-siswa-id="${doc.id}">
+                            <label class="flex items-center gap-1 px-3 py-1 rounded ${status === 'H' ? 'bg-green-500 text-white' : 'bg-gray-100'} cursor-pointer">
+                                <input type="radio" name="absen_${doc.id}" value="H" ${status === 'H' ? 'checked' : ''} class="hidden" onchange="updateAbsensiUI(this)">
+                                <span>H</span>
+                            </label>
+                            <label class="flex items-center gap-1 px-3 py-1 rounded ${status === 'I' ? 'bg-yellow-500 text-white' : 'bg-gray-100'} cursor-pointer">
+                                <input type="radio" name="absen_${doc.id}" value="I" ${status === 'I' ? 'checked' : ''} class="hidden" onchange="updateAbsensiUI(this)">
+                                <span>I</span>
+                            </label>
+                            <label class="flex items-center gap-1 px-3 py-1 rounded ${status === 'S' ? 'bg-blue-500 text-white' : 'bg-gray-100'} cursor-pointer">
+                                <input type="radio" name="absen_${doc.id}" value="S" ${status === 'S' ? 'checked' : ''} class="hidden" onchange="updateAbsensiUI(this)">
+                                <span>S</span>
+                            </label>
+                            <label class="flex items-center gap-1 px-3 py-1 rounded ${status === 'A' ? 'bg-red-500 text-white' : 'bg-gray-100'} cursor-pointer">
+                                <input type="radio" name="absen_${doc.id}" value="A" ${status === 'A' ? 'checked' : ''} class="hidden" onchange="updateAbsensiUI(this)">
+                                <span>A</span>
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        if (no === 0) {
+            html = '<tr><td colspan="5" class="text-center text-gray-500 py-8">Tidak ada data siswa untuk kelas ini</td></tr>';
+        }
+        
+        document.getElementById('bodyAbsensi').innerHTML = html;
+        updateAbsensiStats();
+        
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        showToast('Error: ' + error.message, 'error');
+        console.error(error);
+    }
+}
+
+function updateAbsensiUI(input) {
+    const label = input.closest('label');
+    const container = input.closest('[data-siswa-id]');
+    
+    // Reset all labels in this container
+    container.querySelectorAll('label').forEach(l => {
+        l.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-blue-500', 'bg-red-500', 'text-white');
+        l.classList.add('bg-gray-100');
+    });
+    
+    // Highlight selected
+    const colorMap = { 'H': 'bg-green-500', 'I': 'bg-yellow-500', 'S': 'bg-blue-500', 'A': 'bg-red-500' };
+    label.classList.remove('bg-gray-100');
+    label.classList.add(colorMap[input.value], 'text-white');
+    
+    updateAbsensiStats();
+}
+
+function updateAbsensiStats() {
+    let h = 0, i = 0, s = 0, a = 0;
+    
+    document.querySelectorAll('#bodyAbsensi input[type="radio"]:checked').forEach(input => {
+        if (input.value === 'H') h++;
+        else if (input.value === 'I') i++;
+        else if (input.value === 'S') s++;
+        else if (input.value === 'A') a++;
+    });
+    
+    document.getElementById('absensiHadir').textContent = h;
+    document.getElementById('absensiIzin').textContent = i;
+    document.getElementById('absensiSakit').textContent = s;
+    document.getElementById('absensiAlpha').textContent = a;
+}
+
+async function saveAbsensi() {
+    const mapelId = document.getElementById('absensiMapel').value;
+    const kelas = document.getElementById('absensiKelas').value;
+    const tanggal = document.getElementById('absensiTanggal').value;
+    
+    if (!kelas || !tanggal) {
+        showToast('Pilih kelas dan tanggal terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Menyimpan absensi...');
+    
+    try {
+        const detail = {};
+        let hadir = 0, total = 0;
+        
+        document.querySelectorAll('#bodyAbsensi [data-siswa-id]').forEach(container => {
+            const siswaId = container.dataset.siswaId;
+            const checked = container.querySelector('input:checked');
+            if (checked) {
+                detail[siswaId] = checked.value;
+                if (checked.value === 'H') hadir++;
+                total++;
+            }
+        });
+        
+        await db.collection('users').doc(currentUser.uid)
+            .collection('absensi')
+            .doc(`${kelas}-${mapelId}-${tanggal}`)
+            .set({
+                kelas,
+                mapelId,
+                tanggal,
+                detail,
+                hadir,
+                total,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        
+        hideLoading();
+        showToast('Absensi berhasil disimpan!', 'success');
+    } catch (error) {
+        hideLoading();
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+// ===== DAFTAR NILAI =====
+async function loadNilai() {
+    const mapelId = document.getElementById('nilaiMapel').value;
+    const kelas = document.getElementById('nilaiKelas').value;
+    const semester = document.getElementById('nilaiSemester').value;
+    
+    if (!mapelId || !kelas) {
+        showToast('Pilih mapel dan kelas terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Memuat data nilai...');
+    
+    try {
+        // Get students
+        const siswaSnapshot = await db.collection('users').doc(currentUser.uid)
+            .collection('siswa')
+            .where('kelas', '==', kelas)
+            .orderBy('nama', 'asc')
+            .get();
+        
+        // Get existing nilai
+        const nilaiDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('nilai')
+            .doc(`${kelas}-${mapelId}-${semester}`)
+            .get();
+        
+        const existingNilai = nilaiDoc.exists ? nilaiDoc.data().detail || {} : {};
+        
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.data();
+        
+        const tahunAjar = document.getElementById('selectTahunAjar').value;
+        
+        updateDocumentValues({
+            tahun: tahunAjar,
+            mapel: mapelData?.nama || '',
+            kelas: kelas,
+            semester: semester,
+            kepsek: userData?.kepsek || '',
+            nipKepsek: userData?.nipKepsek || '',
+            guru: userData?.nama || '',
+            nipGuru: userData?.nip || '',
+            kota: userData?.kota || '',
+            tanggal: formatTanggalIndonesia(new Date())
+        });
+        
+        let html = '';
+        let no = 0;
+        
+        siswaSnapshot.forEach(doc => {
+            no++;
+            const siswa = doc.data();
+            const nilai = existingNilai[doc.id] || {};
+            
+            const sum1 = nilai.sum1 || '';
+            const sum2 = nilai.sum2 || '';
+            const ats = nilai.ats || '';
+            const asas = nilai.asas || '';
+            
+            // Calculate NA
+            let na = '';
+            let predikat = '';
+            const nilaiArr = [sum1, sum2, ats, asas].filter(n => n !== '');
+            if (nilaiArr.length > 0) {
+                na = Math.round(nilaiArr.reduce((a, b) => a + parseInt(b), 0) / nilaiArr.length);
+                if (na >= 90) predikat = 'A';
+                else if (na >= 80) predikat = 'B';
+                else if (na >= 70) predikat = 'C';
+                else predikat = 'D';
+            }
+            
+            html += `
+                <tr data-siswa-id="${doc.id}">
+                    <td class="border border-black p-2 text-center">${no}</td>
+                    <td class="border border-black p-2">${siswa.nisn || '-'}</td>
+                    <td class="border border-black p-2">${siswa.nama}</td>
+                    <td class="border border-black p-2 text-center">${siswa.jenisKelamin || '-'}</td>
+                    <td class="border border-black p-2 text-center bg-blue-50" contenteditable="true" data-field="sum1" oninput="hitungNA(this)">${sum1}</td>
+                    <td class="border border-black p-2 text-center bg-blue-50" contenteditable="true" data-field="sum2" oninput="hitungNA(this)">${sum2}</td>
+                    <td class="border border-black p-2 text-center bg-yellow-50" contenteditable="true" data-field="ats" oninput="hitungNA(this)">${ats}</td>
+                    <td class="border border-black p-2 text-center bg-yellow-50" contenteditable="true" data-field="asas" oninput="hitungNA(this)">${asas}</td>
+                    <td class="border border-black p-2 text-center bg-green-100 font-bold nilai-na">${na}</td>
+                    <td class="border border-black p-2 text-center bg-green-100 font-bold nilai-predikat">${predikat}</td>
+                    <td class="border border-black p-2 text-center" contenteditable="true">${predikat === 'D' ? 'Perlu bimbingan' : ''}</td>
+                </tr>
+            `;
+        });
+        
+        if (no === 0) {
+            html = '<tr><td colspan="11" class="border border-black p-4 text-center text-gray-500">Tidak ada data siswa</td></tr>';
+        }
+        
+        document.getElementById('bodyNilai').innerHTML = html;
+        
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        showToast('Error: ' + error.message, 'error');
+        console.error(error);
+    }
+}
+
+function hitungNA(element) {
+    const row = element.closest('tr');
+    const fields = row.querySelectorAll('[data-field]');
+    const naCell = row.querySelector('.nilai-na');
+    const predikatCell = row.querySelector('.nilai-predikat');
+    
+    let total = 0;
+    let count = 0;
+    
+    fields.forEach(field => {
+        const val = parseInt(field.textContent);
+        if (!isNaN(val) && val > 0) {
+            total += val;
+            count++;
+        }
+    });
+    
+    if (count > 0) {
+        const na = Math.round(total / count);
+        naCell.textContent = na;
+        
+        let predikat = '';
+        if (na >= 90) predikat = 'A';
+        else if (na >= 80) predikat = 'B';
+        else if (na >= 70) predikat = 'C';
+        else predikat = 'D';
+        predikatCell.textContent = predikat;
+    } else {
+        naCell.textContent = '';
+        predikatCell.textContent = '';
+    }
+}
+
+async function saveNilai() {
+    const mapelId = document.getElementById('nilaiMapel').value;
+    const kelas = document.getElementById('nilaiKelas').value;
+    const semester = document.getElementById('nilaiSemester').value;
+    
+    if (!mapelId || !kelas) {
+        showToast('Pilih mapel dan kelas terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Menyimpan nilai...');
+    
+    try {
+        const detail = {};
+        
+        document.querySelectorAll('#bodyNilai tr[data-siswa-id]').forEach(row => {
+            const siswaId = row.dataset.siswaId;
+            detail[siswaId] = {
+                sum1: parseInt(row.querySelector('[data-field="sum1"]').textContent) || 0,
+                sum2: parseInt(row.querySelector('[data-field="sum2"]').textContent) || 0,
+                ats: parseInt(row.querySelector('[data-field="ats"]').textContent) || 0,
+                asas: parseInt(row.querySelector('[data-field="asas"]').textContent) || 0
+            };
+        });
+        
+        await db.collection('users').doc(currentUser.uid)
+            .collection('nilai')
+            .doc(`${kelas}-${mapelId}-${semester}`)
+            .set({
+                kelas,
+                mapelId,
+                semester,
+                detail,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        
+        hideLoading();
+        showToast('Nilai berhasil disimpan!', 'success');
+    } catch (error) {
+        hideLoading();
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+// ===== INITIALIZATION FOR PREMIUM =====
+// Call this after user data is loaded
+function initPremiumFeatures() {
+    checkPremiumAccess();
+    
+    // Set today's date for absensi
+    const today = new Date().toISOString().split('T')[0];
+    const absensiTanggal = document.getElementById('absensiTanggal');
+    if (absensiTanggal) {
+        absensiTanggal.value = today;
+    }
+    
+    // Setup event listeners for LKPD bab selection
+    ['lkpdMapel', 'lkpdKelas', 'lkpdSemester'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', updateLkpdBabOptions);
+        }
+    });
+    
+    document.getElementById('lkpdBab')?.addEventListener('change', updateLkpdPertemuanOptions);
+}
+
+async function updateLkpdBabOptions() {
+    const mapelId = document.getElementById('lkpdMapel').value;
+    const kelas = document.getElementById('lkpdKelas').value;
+    const semester = document.getElementById('lkpdSemester').value;
+    const babSelect = document.getElementById('lkpdBab');
+    const pertemuanSelect = document.getElementById('lkpdPertemuan');
+    
+    babSelect.innerHTML = '<option value="">Pilih Bab</option>';
+    pertemuanSelect.innerHTML = '<option value="">Pilih Pertemuan</option>';
+    
+    if (!mapelId || !kelas) return;
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (cpDoc.exists) {
+            const data = cpDoc.data().data[`${kelas}-${semester}`];
+            if (data && data.babs) {
+                Object.keys(data.babs).forEach(bab => {
+                    const option = document.createElement('option');
+                    option.value = bab;
+                    option.textContent = bab;
+                    babSelect.appendChild(option);
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error loading bab options:', error);
+    }
+}
+
+async function updateLkpdPertemuanOptions() {
+    const mapelId = document.getElementById('lkpdMapel').value;
+    const kelas = document.getElementById('lkpdKelas').value;
+    const semester = document.getElementById('lkpdSemester').value;
+    const bab = document.getElementById('lkpdBab').value;
+    const pertemuanSelect = document.getElementById('lkpdPertemuan');
+    
+    pertemuanSelect.innerHTML = '<option value="">Pilih Pertemuan</option>';
+    
+    if (!mapelId || !kelas || !bab) return;
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (cpDoc.exists) {
+            const data = cpDoc.data().data[`${kelas}-${semester}`];
+            if (data && data.babs && data.babs[bab]) {
+                const tps = data.babs[bab].tps || [];
+                tps.forEach((tp, i) => {
+                    const option = document.createElement('option');
+                    option.value = i + 1;
+                    option.textContent = `Pertemuan ${i + 1}`;
+                    pertemuanSelect.appendChild(option);
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error loading pertemuan options:', error);
+    }
+}
+
+// Update initializeUI to include premium features
+const originalInitializeUI = initializeUI;
+initializeUI = function() {
+    originalInitializeUI();
+    setTimeout(initPremiumFeatures, 500);
+};
+
+// Make functions global
+window.generateModulAjar = generateModulAjar;
+window.generateLKPD = generateLKPD;
+window.generateKKTP = generateKKTP;
+window.generateJurnal = generateJurnal;
+window.loadAbsensi = loadAbsensi;
+window.saveAbsensi = saveAbsensi;
+window.loadNilai = loadNilai;
+window.saveNilai = saveNilai;
+window.hitungKKTP = hitungKKTP;
+window.hitungNA = hitungNA;
+window.updateAbsensiUI = updateAbsensiUI;
+window.checkPremiumAccess = checkPremiumAccess;
