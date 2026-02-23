@@ -33,62 +33,142 @@ async function loadUserData() {
         
         if (doc.exists) {
             userData = doc.data();
-            
-            // Ensure profile structure exists
-            if (!userData.profile) {
-                userData.profile = {
-                    nip: '',
-                    phone: '',
-                    subjects: [],
-                    school: {
-                        name: '',
-                        npsn: '',
-                        address: '',
-                        city: '',
-                        province: '',
-                        level: 'SD',
-                        headmaster: '',
-                        headmasterNip: ''
-                    }
-                };
-            }
-            
-            // Ensure subjects array exists
-            if (!userData.profile.subjects) {
-                userData.profile.subjects = [];
-            }
-            
-            // Ensure school object exists
-            if (!userData.profile.school) {
-                userData.profile.school = {
-                    name: '',
-                    npsn: '',
-                    address: '',
-                    city: '',
-                    province: '',
-                    level: 'SD',
-                    headmaster: '',
-                    headmasterNip: ''
-                };
-            }
-            
-            // Ensure settings exists
-            if (!userData.settings) {
-                userData.settings = {
-                    academicYear: getCurrentAcademicYear().current,
-                    lessonDuration: 35,
-                    theme: 'light'
-                };
-            }
         } else {
-            // Create new user document
-            userData = getDefaultUserData(currentUser);
+            // Create new user document with defaults
+            userData = createDefaultUserData();
             await db.collection('users').doc(currentUser.uid).set(userData);
         }
+        
+        // Always ensure complete structure
+        ensureUserDataStructure();
+        
     } catch (error) {
         console.error('Error loading user data:', error);
-        // Set default data on error
-        userData = getDefaultUserData(currentUser);
+        userData = createDefaultUserData();
+        ensureUserDataStructure();
+    }
+}
+
+// Create default user data structure
+function createDefaultUserData() {
+    const isSuperAdmin = currentUser.email === APP_CONFIG.superAdminEmail;
+    return {
+        uid: currentUser.uid,
+        email: currentUser.email || '',
+        name: currentUser.displayName || 'Pengguna',
+        photoURL: currentUser.photoURL || '',
+        role: isSuperAdmin ? 'super_admin' : 'user',
+        subscription: isSuperAdmin ? 'premium' : 'free',
+        subscriptionExpiry: null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        profile: {
+            nip: '',
+            phone: '',
+            subjects: [],
+            school: {
+                name: '',
+                npsn: '',
+                address: '',
+                city: '',
+                province: '',
+                level: 'SD',
+                headmaster: '',
+                headmasterNip: ''
+            }
+        },
+        settings: {
+            academicYear: getCurrentAcademicYear().current,
+            lessonDuration: 35,
+            theme: 'light'
+        }
+    };
+}
+
+// Ensure all nested objects exist
+function ensureUserDataStructure() {
+    if (!userData) {
+        userData = createDefaultUserData();
+    }
+    
+    // Ensure name exists
+    if (!userData.name) {
+        userData.name = currentUser.displayName || 'Pengguna';
+    }
+    
+    // Ensure profile exists
+    if (!userData.profile) {
+        userData.profile = {
+            nip: '',
+            phone: '',
+            subjects: [],
+            school: {
+                name: '',
+                npsn: '',
+                address: '',
+                city: '',
+                province: '',
+                level: 'SD',
+                headmaster: '',
+                headmasterNip: ''
+            }
+        };
+    }
+    
+    // Ensure subjects array exists
+    if (!Array.isArray(userData.profile.subjects)) {
+        userData.profile.subjects = [];
+    }
+    
+    // Ensure school object exists with all fields
+    if (!userData.profile.school) {
+        userData.profile.school = {
+            name: '',
+            npsn: '',
+            address: '',
+            city: '',
+            province: '',
+            level: 'SD',
+            headmaster: '',
+            headmasterNip: ''
+        };
+    }
+    
+    // Ensure all school fields exist
+    const schoolDefaults = {
+        name: '',
+        npsn: '',
+        address: '',
+        city: '',
+        province: '',
+        level: 'SD',
+        headmaster: '',
+        headmasterNip: ''
+    };
+    
+    Object.keys(schoolDefaults).forEach(key => {
+        if (userData.profile.school[key] === undefined || userData.profile.school[key] === null) {
+            userData.profile.school[key] = schoolDefaults[key];
+        }
+    });
+    
+    // Ensure settings exists
+    if (!userData.settings) {
+        userData.settings = {
+            academicYear: getCurrentAcademicYear().current,
+            lessonDuration: 35,
+            theme: 'light'
+        };
+    }
+    
+    // Ensure NIP exists
+    if (userData.profile.nip === undefined || userData.profile.nip === null) {
+        userData.profile.nip = '';
+    }
+    
+    // Ensure phone exists
+    if (userData.profile.phone === undefined || userData.profile.phone === null) {
+        userData.profile.phone = '';
     }
 }
 
@@ -113,17 +193,18 @@ function updateUI() {
     const upgradeBtnEl = document.getElementById('upgradeBtn');
     
     if (userNameEl) {
-        userNameEl.textContent = userData?.name || currentUser.displayName || 'Pengguna';
+        userNameEl.textContent = userData.name || currentUser.displayName || 'Pengguna';
     }
     
     if (userAvatarEl) {
+        const name = userData.name || currentUser.displayName || 'User';
         userAvatarEl.src = currentUser.photoURL || 
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(userData?.name || 'User')}&background=3b82f6&color=fff`;
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff`;
     }
     
     // Update subscription badge
     if (userBadgeEl) {
-        if (userData?.subscription === 'premium') {
+        if (userData.subscription === 'premium') {
             userBadgeEl.className = 'inline-flex items-center px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded-full';
             userBadgeEl.textContent = 'PREMIUM';
         } else {
@@ -133,7 +214,7 @@ function updateUI() {
     }
     
     if (upgradeBtnEl) {
-        if (userData?.subscription === 'premium') {
+        if (userData.subscription === 'premium') {
             upgradeBtnEl.classList.add('hidden');
         } else {
             upgradeBtnEl.classList.remove('hidden');
@@ -149,20 +230,26 @@ function updateUI() {
 
 // Update Profile Form
 function updateProfileForm() {
+    // Helper function to safely get value
+    const safeValue = (value) => {
+        if (value === undefined || value === null) return '';
+        return value;
+    };
+    
     const fields = {
-        'profileName': userData?.name || '',
-        'profileNip': userData?.profile?.nip || '',
-        'profileEmail': currentUser?.email || '',
-        'profilePhone': userData?.profile?.phone || '',
-        'schoolName': userData?.profile?.school?.name || '',
-        'schoolNpsn': userData?.profile?.school?.npsn || '',
-        'schoolLevel': userData?.profile?.school?.level || 'SD',
-        'schoolCity': userData?.profile?.school?.city || '',
-        'schoolProvince': userData?.profile?.school?.province || '',
-        'schoolAddress': userData?.profile?.school?.address || '',
-        'headmasterName': userData?.profile?.school?.headmaster || '',
-        'headmasterNip': userData?.profile?.school?.headmasterNip || '',
-        'lessonDuration': userData?.settings?.lessonDuration || 35
+        'profileName': safeValue(userData.name),
+        'profileNip': safeValue(userData.profile?.nip),
+        'profileEmail': safeValue(currentUser?.email),
+        'profilePhone': safeValue(userData.profile?.phone),
+        'schoolName': safeValue(userData.profile?.school?.name),
+        'schoolNpsn': safeValue(userData.profile?.school?.npsn),
+        'schoolLevel': safeValue(userData.profile?.school?.level) || 'SD',
+        'schoolCity': safeValue(userData.profile?.school?.city),
+        'schoolProvince': safeValue(userData.profile?.school?.province),
+        'schoolAddress': safeValue(userData.profile?.school?.address),
+        'headmasterName': safeValue(userData.profile?.school?.headmaster),
+        'headmasterNip': safeValue(userData.profile?.school?.headmasterNip),
+        'lessonDuration': safeValue(userData.settings?.lessonDuration) || 35
     };
     
     Object.entries(fields).forEach(([id, value]) => {
@@ -178,7 +265,7 @@ function showSection(sectionId) {
     // Check premium features
     const premiumFeatures = ['promes', 'modul', 'lkpd', 'kktp', 'attendance', 'journal', 'grades'];
     
-    if (premiumFeatures.includes(sectionId) && userData?.subscription !== 'premium') {
+    if (premiumFeatures.includes(sectionId) && userData.subscription !== 'premium') {
         sectionId = 'locked';
     }
     
@@ -254,7 +341,7 @@ function loadAcademicYearOptions() {
         const option = document.createElement('option');
         option.value = year;
         option.textContent = year;
-        if (year === userData?.settings?.academicYear || year === years.current) {
+        if (year === (userData.settings?.academicYear || years.current)) {
             option.selected = true;
         }
         select.appendChild(option);
@@ -265,12 +352,12 @@ function loadAcademicYearOptions() {
             await db.collection('users').doc(currentUser.uid).update({
                 'settings.academicYear': e.target.value
             });
-            if (userData.settings) {
-                userData.settings.academicYear = e.target.value;
-            }
+            if (!userData.settings) userData.settings = {};
+            userData.settings.academicYear = e.target.value;
             showAlert('Tahun ajaran berhasil diubah', 'success');
         } catch (error) {
             console.error('Error updating academic year:', error);
+            showAlert('Gagal mengubah tahun ajaran', 'error');
         }
     });
 }
@@ -292,7 +379,7 @@ function loadSubjectsUI() {
     const container = document.getElementById('subjectsContainer');
     if (!container) return;
     
-    const subjects = userData?.profile?.subjects || [];
+    const subjects = userData.profile?.subjects || [];
     
     if (subjects.length === 0) {
         container.innerHTML = `
@@ -333,16 +420,8 @@ function loadSubjectsUI() {
 }
 
 function addSubject() {
-    // Ensure userData and profile exist
-    if (!userData) {
-        userData = getDefaultUserData(currentUser);
-    }
-    if (!userData.profile) {
-        userData.profile = { subjects: [], school: {}, nip: '', phone: '' };
-    }
-    if (!userData.profile.subjects) {
-        userData.profile.subjects = [];
-    }
+    // Ensure structure exists
+    ensureUserDataStructure();
     
     userData.profile.subjects.push({
         name: '',
@@ -355,9 +434,11 @@ function addSubject() {
 }
 
 function updateSubject(index, field, value) {
-    if (userData?.profile?.subjects?.[index]) {
+    ensureUserDataStructure();
+    
+    if (userData.profile.subjects[index]) {
         if (field === 'name') {
-            userData.profile.subjects[index][field] = value;
+            userData.profile.subjects[index][field] = value || '';
         } else {
             userData.profile.subjects[index][field] = parseInt(value) || 4;
         }
@@ -365,11 +446,44 @@ function updateSubject(index, field, value) {
 }
 
 function removeSubject(index) {
-    if (userData?.profile?.subjects) {
+    ensureUserDataStructure();
+    
+    if (userData.profile.subjects && userData.profile.subjects[index] !== undefined) {
         userData.profile.subjects.splice(index, 1);
         loadSubjectsUI();
         showAlert('Mata pelajaran dihapus. Jangan lupa simpan!', 'info');
     }
+}
+
+// Helper function to clean object (remove undefined values)
+function cleanObject(obj) {
+    const cleaned = {};
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            const value = obj[key];
+            if (value === undefined) {
+                cleaned[key] = ''; // Replace undefined with empty string
+            } else if (value === null) {
+                cleaned[key] = null; // Keep null as is
+            } else if (typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date) && !(value.constructor && value.constructor.name === 'Timestamp')) {
+                cleaned[key] = cleanObject(value); // Recursively clean nested objects
+            } else {
+                cleaned[key] = value;
+            }
+        }
+    }
+    return cleaned;
+}
+
+// Get value from input with fallback
+function getInputValue(elementId, fallback = '') {
+    const el = document.getElementById(elementId);
+    if (!el) return fallback;
+    const value = el.value;
+    if (value === undefined || value === null || value === '') {
+        return fallback;
+    }
+    return value;
 }
 
 // Save Profile
@@ -377,49 +491,65 @@ async function saveProfile() {
     showLoading();
     
     try {
-        // Ensure profile structure
-        if (!userData.profile) {
-            userData.profile = { subjects: [], school: {}, nip: '', phone: '' };
-        }
-        if (!userData.profile.school) {
-            userData.profile.school = {};
-        }
-        if (!userData.settings) {
-            userData.settings = {};
-        }
+        // Ensure structure exists
+        ensureUserDataStructure();
         
+        // Get all values with proper fallbacks
+        const name = getInputValue('profileName', userData.name || 'Pengguna');
+        const nip = getInputValue('profileNip', '');
+        const phone = getInputValue('profilePhone', '');
+        const schoolName = getInputValue('schoolName', '');
+        const schoolNpsn = getInputValue('schoolNpsn', '');
+        const schoolLevel = getInputValue('schoolLevel', 'SD');
+        const schoolCity = getInputValue('schoolCity', '');
+        const schoolProvince = getInputValue('schoolProvince', '');
+        const schoolAddress = getInputValue('schoolAddress', '');
+        const headmasterName = getInputValue('headmasterName', '');
+        const headmasterNip = getInputValue('headmasterNip', '');
+        const lessonDuration = parseInt(getInputValue('lessonDuration', '35')) || 35;
+        
+        // Build clean profile data
         const profileData = {
-            name: document.getElementById('profileName')?.value || userData.name,
+            name: name,
             profile: {
-                nip: document.getElementById('profileNip')?.value || '',
-                phone: document.getElementById('profilePhone')?.value || '',
+                nip: nip,
+                phone: phone,
                 subjects: userData.profile.subjects || [],
                 school: {
-                    name: document.getElementById('schoolName')?.value || '',
-                    npsn: document.getElementById('schoolNpsn')?.value || '',
-                    level: document.getElementById('schoolLevel')?.value || 'SD',
-                    city: document.getElementById('schoolCity')?.value || '',
-                    province: document.getElementById('schoolProvince')?.value || '',
-                    address: document.getElementById('schoolAddress')?.value || '',
-                    headmaster: document.getElementById('headmasterName')?.value || '',
-                    headmasterNip: document.getElementById('headmasterNip')?.value || ''
+                    name: schoolName,
+                    npsn: schoolNpsn,
+                    level: schoolLevel,
+                    city: schoolCity,
+                    province: schoolProvince,
+                    address: schoolAddress,
+                    headmaster: headmasterName,
+                    headmasterNip: headmasterNip
                 }
             },
             settings: {
-                ...userData.settings,
-                lessonDuration: parseInt(document.getElementById('lessonDuration')?.value) || 35
+                academicYear: userData.settings?.academicYear || getCurrentAcademicYear().current,
+                lessonDuration: lessonDuration,
+                theme: userData.settings?.theme || 'light'
             },
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
-        await db.collection('users').doc(currentUser.uid).update(profileData);
+        // Clean the object to remove any undefined values
+        const cleanedData = cleanObject(profileData);
+        
+        console.log('Saving profile data:', cleanedData);
+        
+        await db.collection('users').doc(currentUser.uid).update(cleanedData);
         
         // Update local userData
-        userData = { ...userData, ...profileData };
+        userData.name = cleanedData.name;
+        userData.profile = cleanedData.profile;
+        userData.settings = cleanedData.settings;
         
         hideLoading();
         showAlert('Profil berhasil disimpan!', 'success');
         loadSubjectOptions();
+        updateUI();
     } catch (error) {
         hideLoading();
         console.error('Error saving profile:', error);
@@ -429,7 +559,7 @@ async function saveProfile() {
 
 // Subject Options for Dropdowns
 function loadSubjectOptions() {
-    const subjects = userData?.profile?.subjects || [];
+    const subjects = userData.profile?.subjects || [];
     const selects = ['atpSubject', 'protaSubject', 'promesSubject', 'modulSubject', 'lkpdSubject', 'kktpSubject'];
     
     selects.forEach(selectId => {
@@ -437,7 +567,7 @@ function loadSubjectOptions() {
         if (select) {
             if (subjects.length > 0) {
                 select.innerHTML = subjects.map(s => 
-                    `<option value="${s.name}">${s.name}</option>`
+                    `<option value="${s.name || ''}">${s.name || 'Tanpa Nama'}</option>`
                 ).join('');
             } else {
                 select.innerHTML = '<option value="">Tambahkan mapel di Profil</option>';
@@ -454,8 +584,10 @@ function showUpgradeModal() {
         
         // Set WhatsApp link
         const waNumber = (APP_CONFIG.whatsappNumber || '6281234567890').replace(/\D/g, '');
+        const userName = userData.name || currentUser.displayName || 'Pengguna';
+        const userEmail = currentUser.email || '';
         const waMessage = encodeURIComponent(
-            `Halo, saya ingin upgrade ke AGSA Premium.\n\nEmail: ${currentUser?.email}\nNama: ${userData?.name || currentUser?.displayName}`
+            `Halo, saya ingin upgrade ke AGSA Premium.\n\nEmail: ${userEmail}\nNama: ${userName}`
         );
         
         const waLink = document.getElementById('waUpgradeLink');
@@ -485,6 +617,12 @@ function closeImportModal() {
     if (modal) {
         modal.classList.add('hidden');
     }
+    
+    // Clear inputs
+    const urlInput = document.getElementById('csvUrl');
+    const fileInput = document.getElementById('csvFile');
+    if (urlInput) urlInput.value = '';
+    if (fileInput) fileInput.value = '';
 }
 
 // Copy Prompt
@@ -496,7 +634,18 @@ function copyPrompt(elementId) {
             showAlert('Prompt berhasil disalin!', 'success');
         }).catch(err => {
             console.error('Failed to copy:', err);
-            showAlert('Gagal menyalin. Coba manual select dan copy.', 'error');
+            // Fallback method
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showAlert('Prompt berhasil disalin!', 'success');
+            } catch (e) {
+                showAlert('Gagal menyalin. Coba manual select dan copy.', 'error');
+            }
+            document.body.removeChild(textArea);
         });
     }
 }
@@ -526,25 +675,32 @@ function updateDashboardStats() {
     const totalJPEl = document.getElementById('totalJP');
     
     if (totalStudentsEl) {
-        totalStudentsEl.textContent = studentsData?.length || 0;
+        totalStudentsEl.textContent = (studentsData && studentsData.length) || 0;
     }
     
     if (totalDocsEl) {
-        totalDocsEl.textContent = '0'; // Will be updated when docs are generated
+        totalDocsEl.textContent = '0';
     }
     
     // Calculate effective weeks from calendar
-    if (totalWeeksEl && calendarData?.ganjil?.start && calendarData?.ganjil?.end) {
-        const start = new Date(calendarData.ganjil.start);
-        const end = new Date(calendarData.ganjil.end);
-        const weeks = Math.ceil((end - start) / (7 * 24 * 60 * 60 * 1000));
+    if (totalWeeksEl) {
+        let weeks = 0;
+        if (calendarData?.ganjil?.start && calendarData?.ganjil?.end) {
+            try {
+                const start = new Date(calendarData.ganjil.start);
+                const end = new Date(calendarData.ganjil.end);
+                weeks = Math.ceil((end - start) / (7 * 24 * 60 * 60 * 1000));
+            } catch (e) {
+                weeks = 0;
+            }
+        }
         totalWeeksEl.textContent = weeks || 0;
     }
     
-    // Calculate total JP
+    // Calculate total JP per week
     if (totalJPEl) {
-        const subjects = userData?.profile?.subjects || [];
-        const totalJP = subjects.reduce((sum, s) => sum + (s.jpPerWeek || 0), 0);
+        const subjects = userData.profile?.subjects || [];
+        const totalJP = subjects.reduce((sum, s) => sum + (parseInt(s.jpPerWeek) || 0), 0);
         totalJPEl.textContent = totalJP;
     }
 }
