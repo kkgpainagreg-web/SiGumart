@@ -9,19 +9,17 @@ const FIXED_HOLIDAYS = [
     { date: '12-25', name: 'Hari Natal' }
 ];
 
-// Default Non-Fixed Holidays (can be edited)
+// Default Non-Fixed Holidays
 const DEFAULT_CUSTOM_HOLIDAYS = [
-    { date: '2024-01-22', name: 'Isra Mi\'raj (Perkiraan)' },
-    { date: '2024-03-11', name: 'Awal Ramadhan (Perkiraan)' },
-    { date: '2024-04-10', name: 'Idul Fitri (Perkiraan)' },
-    { date: '2024-04-11', name: 'Idul Fitri (Perkiraan)' },
-    { date: '2024-06-17', name: 'Idul Adha (Perkiraan)' },
-    { date: '2024-07-07', name: 'Tahun Baru Islam (Perkiraan)' },
-    { date: '2025-02-12', name: 'Tahun Baru Imlek (Perkiraan)' },
-    { date: '2025-03-29', name: 'Nyepi (Perkiraan)' },
-    { date: '2025-04-18', name: 'Wafat Isa Almasih (Perkiraan)' },
-    { date: '2025-05-12', name: 'Waisak (Perkiraan)' },
-    { date: '2025-05-29', name: 'Kenaikan Isa Almasih (Perkiraan)' }
+    { date: '2025-01-29', name: 'Tahun Baru Imlek' },
+    { date: '2025-03-29', name: 'Hari Raya Nyepi' },
+    { date: '2025-03-31', name: 'Idul Fitri (Perkiraan)' },
+    { date: '2025-04-01', name: 'Idul Fitri (Perkiraan)' },
+    { date: '2025-04-18', name: 'Wafat Isa Almasih' },
+    { date: '2025-05-12', name: 'Hari Raya Waisak' },
+    { date: '2025-05-29', name: 'Kenaikan Isa Almasih' },
+    { date: '2025-06-06', name: 'Idul Adha (Perkiraan)' },
+    { date: '2025-06-27', name: 'Tahun Baru Islam' }
 ];
 
 // Load Calendar Data
@@ -31,7 +29,6 @@ async function loadCalendarData() {
         if (doc.exists) {
             calendarData = doc.data();
         } else {
-            // Initialize with defaults
             calendarData = getDefaultCalendarData();
         }
         populateCalendarForm();
@@ -43,45 +40,49 @@ async function loadCalendarData() {
 }
 
 function getDefaultCalendarData() {
-    const year = getCurrentAcademicYear().current.split('/')[0];
-    const nextYear = parseInt(year) + 1;
+    const yearData = getCurrentAcademicYear();
+    const year = parseInt(yearData.current.split('/')[0]);
+    const nextYear = year + 1;
     
     return {
         ganjil: {
-            start: `${year}-07-15`,
+            start: `${year}-07-14`,
             end: `${year}-12-20`
         },
         genap: {
-            start: `${nextYear}-01-02`,
-            end: `${nextYear}-06-20`
+            start: `${nextYear}-01-06`,
+            end: `${nextYear}-06-21`
         },
-        genapEndKls6: `${nextYear}-06-01`,
-        genapEndKls9: `${nextYear}-05-25`,
-        genapEndKls12: `${nextYear}-05-20`,
+        genapEndKls6: `${nextYear}-06-07`,
+        genapEndKls9: `${nextYear}-05-31`,
+        genapEndKls12: `${nextYear}-05-24`,
         customHolidays: DEFAULT_CUSTOM_HOLIDAYS
     };
 }
 
 function populateCalendarForm() {
-    document.getElementById('ganjilStart').value = calendarData.ganjil?.start || '';
-    document.getElementById('ganjilEnd').value = calendarData.ganjil?.end || '';
-    document.getElementById('genapStart').value = calendarData.genap?.start || '';
-    document.getElementById('genapEnd').value = calendarData.genap?.end || '';
-    document.getElementById('genapEndKls6').value = calendarData.genapEndKls6 || '';
-    document.getElementById('genapEndKls9').value = calendarData.genapEndKls9 || '';
-    document.getElementById('genapEndKls12').value = calendarData.genapEndKls12 || '';
+    const fields = {
+        'ganjilStart': calendarData?.ganjil?.start || '',
+        'ganjilEnd': calendarData?.ganjil?.end || '',
+        'genapStart': calendarData?.genap?.start || '',
+        'genapEnd': calendarData?.genap?.end || '',
+        'genapEndKls6': calendarData?.genapEndKls6 || '',
+        'genapEndKls9': calendarData?.genapEndKls9 || '',
+        'genapEndKls12': calendarData?.genapEndKls12 || ''
+    };
     
-    // Fixed holidays
+    Object.entries(fields).forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value;
+    });
+    
+    // Fixed holidays display
     const fixedContainer = document.getElementById('fixedHolidaysContainer');
-    const year = calendarData.ganjil?.start?.split('-')[0] || new Date().getFullYear();
-    const nextYear = parseInt(year) + 1;
-    
-    fixedContainer.innerHTML = FIXED_HOLIDAYS.map(h => {
-        const displayYear = h.date.startsWith('01') || h.date.startsWith('02') || 
-                           h.date.startsWith('03') || h.date.startsWith('04') || 
-                           h.date.startsWith('05') || h.date.startsWith('06') ? nextYear : year;
-        return `<span class="px-3 py-1 bg-gray-200 rounded-full text-sm">${h.date.replace('-','/')}: ${h.name}</span>`;
-    }).join('');
+    if (fixedContainer) {
+        fixedContainer.innerHTML = FIXED_HOLIDAYS.map(h => 
+            `<span class="px-3 py-1 bg-gray-200 rounded-full text-sm">${h.date.replace('-','/')}: ${h.name}</span>`
+        ).join('');
+    }
     
     // Custom holidays
     loadCustomHolidays();
@@ -89,20 +90,30 @@ function populateCalendarForm() {
 
 function loadCustomHolidays() {
     const container = document.getElementById('customHolidaysContainer');
-    const holidays = calendarData.customHolidays || [];
+    if (!container) return;
+    
+    const holidays = calendarData?.customHolidays || [];
+    
+    if (holidays.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-500">Belum ada hari libur khusus</p>';
+        return;
+    }
     
     container.innerHTML = holidays.map((h, idx) => `
         <div class="flex items-center gap-2">
-            <input type="date" value="${h.date}" class="input-field flex-shrink-0 w-40" 
+            <input type="date" value="${h.date || ''}" class="flex-shrink-0 w-40 px-3 py-2 border border-gray-300 rounded-lg text-sm" 
                 onchange="updateCustomHoliday(${idx}, 'date', this.value)">
-            <input type="text" value="${h.name}" placeholder="Nama libur" class="input-field flex-1"
+            <input type="text" value="${h.name || ''}" placeholder="Nama libur" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
                 onchange="updateCustomHoliday(${idx}, 'name', this.value)">
-            <button onclick="removeCustomHoliday(${idx})" class="text-red-500 hover:text-red-700 p-2">✕</button>
+            <button onclick="removeCustomHoliday(${idx})" class="text-red-500 hover:text-red-700 p-2 text-xl">✕</button>
         </div>
     `).join('');
 }
 
 function addCustomHoliday() {
+    if (!calendarData) {
+        calendarData = getDefaultCalendarData();
+    }
     if (!calendarData.customHolidays) {
         calendarData.customHolidays = [];
     }
@@ -111,14 +122,16 @@ function addCustomHoliday() {
 }
 
 function updateCustomHoliday(idx, field, value) {
-    if (calendarData.customHolidays[idx]) {
+    if (calendarData?.customHolidays?.[idx]) {
         calendarData.customHolidays[idx][field] = value;
     }
 }
 
 function removeCustomHoliday(idx) {
-    calendarData.customHolidays.splice(idx, 1);
-    loadCustomHolidays();
+    if (calendarData?.customHolidays) {
+        calendarData.customHolidays.splice(idx, 1);
+        loadCustomHolidays();
+    }
 }
 
 async function saveCalendar() {
@@ -126,17 +139,18 @@ async function saveCalendar() {
     
     calendarData = {
         ganjil: {
-            start: document.getElementById('ganjilStart').value,
-            end: document.getElementById('ganjilEnd').value
+            start: document.getElementById('ganjilStart')?.value || '',
+            end: document.getElementById('ganjilEnd')?.value || ''
         },
         genap: {
-            start: document.getElementById('genapStart').value,
-            end: document.getElementById('genapEnd').value
+            start: document.getElementById('genapStart')?.value || '',
+            end: document.getElementById('genapEnd')?.value || ''
         },
-        genapEndKls6: document.getElementById('genapEndKls6').value,
-        genapEndKls9: document.getElementById('genapEndKls9').value,
-        genapEndKls12: document.getElementById('genapEndKls12').value,
-        customHolidays: calendarData.customHolidays || [],
+        genapEndKls6: document.getElementById('genapEndKls6')?.value || '',
+        genapEndKls9: document.getElementById('genapEndKls9')?.value || '',
+        genapEndKls12: document.getElementById('genapEndKls12')?.value || '',
+        customHolidays: calendarData?.customHolidays || [],
+        userId: currentUser.uid,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     
@@ -144,8 +158,10 @@ async function saveCalendar() {
         await db.collection('calendars').doc(currentUser.uid).set(calendarData);
         hideLoading();
         showAlert('Kalender berhasil disimpan!', 'success');
+        updateDashboardStats();
     } catch (error) {
         hideLoading();
+        console.error('Error saving calendar:', error);
         showAlert('Gagal menyimpan kalender: ' + error.message, 'error');
     }
 }
@@ -156,25 +172,31 @@ async function loadScheduleData() {
         const doc = await db.collection('schedules').doc(currentUser.uid).get();
         if (doc.exists) {
             scheduleData = doc.data();
+        } else {
+            scheduleData = { grid: {} };
         }
         initializeScheduleGrid();
     } catch (error) {
         console.error('Error loading schedule:', error);
+        scheduleData = { grid: {} };
+        initializeScheduleGrid();
     }
 }
 
 function initializeScheduleGrid() {
     const container = document.getElementById('scheduleGrid');
+    if (!container) return;
+    
     const jpDuration = userData?.settings?.lessonDuration || 35;
-    const startTime = '07:00';
+    const startTimeStr = '07:00';
     const maxJP = 10;
     
     let html = '';
-    let currentTime = parseTime(startTime);
+    let currentTime = parseTime(startTimeStr);
     
     for (let jp = 1; jp <= maxJP; jp++) {
         const endTime = addMinutes(currentTime, jpDuration);
-        const timeLabel = `${formatTime(currentTime)} - ${formatTime(endTime)}`;
+        const timeLabel = `${formatTimeStr(currentTime)} - ${formatTimeStr(endTime)}`;
         
         html += `<tr>`;
         html += `<td class="border p-2 bg-gray-50 font-medium text-sm">
@@ -203,14 +225,15 @@ function initializeScheduleGrid() {
         
         currentTime = endTime;
         
-        // Add break row after JP 3 (istirahat)
+        // Add break row
         if (jp === 3 || jp === 6) {
+            const breakDuration = jp === 3 ? 15 : 30;
             html += `<tr class="bg-yellow-50">
                 <td colspan="7" class="border p-2 text-center text-sm text-yellow-800 font-medium">
-                    ☕ Istirahat (${jp === 3 ? '15' : '30'} menit)
+                    ☕ Istirahat (${breakDuration} menit)
                 </td>
             </tr>`;
-            currentTime = addMinutes(currentTime, jp === 3 ? 15 : 30);
+            currentTime = addMinutes(currentTime, breakDuration);
         }
     }
     
@@ -219,38 +242,51 @@ function initializeScheduleGrid() {
 
 function parseTime(timeStr) {
     const [h, m] = timeStr.split(':').map(Number);
-    return { hours: h, minutes: m };
+    return { hours: h || 0, minutes: m || 0 };
 }
 
 function addMinutes(time, mins) {
-    let totalMins = time.hours * 60 + time.minutes + mins;
+    let totalMins = (time.hours * 60) + time.minutes + mins;
     return {
-        hours: Math.floor(totalMins / 60),
+        hours: Math.floor(totalMins / 60) % 24,
         minutes: totalMins % 60
     };
 }
 
-function formatTime(time) {
+function formatTimeStr(time) {
     return `${String(time.hours).padStart(2, '0')}:${String(time.minutes).padStart(2, '0')}`;
 }
 
 function getClassOptions(selected) {
     const level = userData?.profile?.school?.level || 'SD';
-    const classes = level === 'SD' ? [1,2,3,4,5,6] : 
-                   level === 'SMP' ? [7,8,9] : [10,11,12];
-    return classes.map(c => `<option value="${c}" ${selected == c ? 'selected' : ''}>Kelas ${c}</option>`).join('');
+    let classes = [];
+    
+    if (level === 'SD') classes = [1, 2, 3, 4, 5, 6];
+    else if (level === 'SMP') classes = [7, 8, 9];
+    else classes = [10, 11, 12];
+    
+    return classes.map(c => 
+        `<option value="${c}" ${selected == c ? 'selected' : ''}>Kelas ${c}</option>`
+    ).join('');
 }
 
 function getRombelOptions(selected) {
     const rombels = ['A', 'B', 'C', 'D', 'E', 'F'];
-    return rombels.map(r => `<option value="${r}" ${selected == r ? 'selected' : ''}>${r}</option>`).join('');
+    return rombels.map(r => 
+        `<option value="${r}" ${selected === r ? 'selected' : ''}>${r}</option>`
+    ).join('');
 }
 
 function updateScheduleCell(day, jp) {
-    const kelas = document.getElementById(`schedule-${day}-${jp}-class`).value;
-    const rombel = document.getElementById(`schedule-${day}-${jp}-rombel`).value;
+    const kelasEl = document.getElementById(`schedule-${day}-${jp}-class`);
+    const rombelEl = document.getElementById(`schedule-${day}-${jp}-rombel`);
     
+    const kelas = kelasEl?.value || '';
+    const rombel = rombelEl?.value || '';
+    
+    if (!scheduleData) scheduleData = { grid: {} };
     if (!scheduleData.grid) scheduleData.grid = {};
+    
     scheduleData.grid[`${day}-${jp}`] = { class: kelas, rombel: rombel };
 }
 
@@ -258,53 +294,65 @@ function validateSchedule() {
     const errors = [];
     const grid = scheduleData?.grid || {};
     
-    // Check for conflicts
-    const daySchedule = {};
+    // Group by day
+    const daySchedules = {};
     
     Object.entries(grid).forEach(([key, val]) => {
         if (!val.class || !val.rombel) return;
         
         const [day, jp] = key.split('-');
-        const roomKey = `${day}-${val.class}${val.rombel}`;
+        const roomKey = `${day}-${jp}`;
         
-        if (!daySchedule[roomKey]) {
-            daySchedule[roomKey] = [];
+        // Check if guru (current user) is teaching multiple classes at same time
+        // This is always invalid
+        if (!daySchedules[roomKey]) {
+            daySchedules[roomKey] = [];
         }
-        
-        // Check if same class-rombel already has schedule at same time
-        if (daySchedule[roomKey].includes(jp)) {
-            errors.push(`Konflik: Kelas ${val.class}${val.rombel} sudah dijadwalkan di JP ${jp} hari ${getDayName(day)}`);
+        daySchedules[roomKey].push(`${val.class}${val.rombel}`);
+    });
+    
+    // Check for duplicate schedules at same time
+    Object.entries(daySchedules).forEach(([key, classes]) => {
+        if (classes.length > 1) {
+            const [day, jp] = key.split('-');
+            errors.push(`Konflik: Anda mengajar ${classes.length} kelas di JP ${jp} hari ${getDayName(day)}`);
         }
-        daySchedule[roomKey].push(jp);
     });
     
     const validationDiv = document.getElementById('scheduleValidation');
     const errorsList = document.getElementById('validationErrors');
     
-    if (errors.length > 0) {
-        validationDiv.classList.remove('hidden');
-        errorsList.innerHTML = errors.map(e => `<li>• ${e}</li>`).join('');
-    } else {
-        validationDiv.classList.add('hidden');
-        showAlert('✅ Jadwal valid, tidak ada konflik!', 'success');
+    if (validationDiv && errorsList) {
+        if (errors.length > 0) {
+            validationDiv.classList.remove('hidden');
+            errorsList.innerHTML = errors.map(e => `<li>• ${e}</li>`).join('');
+        } else {
+            validationDiv.classList.add('hidden');
+            showAlert('✅ Jadwal valid, tidak ada konflik!', 'success');
+        }
     }
 }
 
 function getDayName(day) {
     const days = ['', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    return days[day] || '';
+    return days[parseInt(day)] || '';
 }
 
 async function saveSchedule() {
     showLoading();
     
     try {
+        if (!scheduleData) scheduleData = { grid: {} };
+        
+        scheduleData.userId = currentUser.uid;
         scheduleData.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+        
         await db.collection('schedules').doc(currentUser.uid).set(scheduleData);
         hideLoading();
         showAlert('Jadwal berhasil disimpan!', 'success');
     } catch (error) {
         hideLoading();
+        console.error('Error saving schedule:', error);
         showAlert('Gagal menyimpan jadwal: ' + error.message, 'error');
     }
 }
@@ -326,13 +374,15 @@ async function loadStudentsData() {
         updateDashboardStats();
     } catch (error) {
         console.error('Error loading students:', error);
+        studentsData = [];
     }
 }
 
 function populateStudentsTable() {
     const tbody = document.getElementById('studentsTable');
+    if (!tbody) return;
     
-    if (studentsData.length === 0) {
+    if (!studentsData || studentsData.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="7" class="border p-4 text-center text-gray-500">
@@ -346,11 +396,11 @@ function populateStudentsTable() {
     tbody.innerHTML = studentsData.map((s, idx) => `
         <tr class="hover:bg-gray-50">
             <td class="border p-2 text-center">${idx + 1}</td>
-            <td class="border p-2">${s.nisn}</td>
-            <td class="border p-2">${s.nama}</td>
-            <td class="border p-2 text-center">${s.jenis_kelamin}</td>
-            <td class="border p-2 text-center">${s.kelas}</td>
-            <td class="border p-2 text-center">${s.rombel}</td>
+            <td class="border p-2">${s.nisn || '-'}</td>
+            <td class="border p-2">${s.nama || '-'}</td>
+            <td class="border p-2 text-center">${s.jenis_kelamin || '-'}</td>
+            <td class="border p-2 text-center">${s.kelas || '-'}</td>
+            <td class="border p-2 text-center">${s.rombel || '-'}</td>
             <td class="border p-2 text-center">
                 <button onclick="deleteStudent('${s.id}')" class="text-red-500 hover:text-red-700">🗑️</button>
             </td>
@@ -359,41 +409,57 @@ function populateStudentsTable() {
 }
 
 function updateFilters() {
-    const classes = [...new Set(studentsData.map(s => s.kelas))].sort((a,b) => a-b);
-    const rombels = [...new Set(studentsData.map(s => s.rombel))].sort();
+    const filterClassEl = document.getElementById('filterClass');
+    const filterRombelEl = document.getElementById('filterRombel');
     
-    document.getElementById('filterClass').innerHTML = 
-        '<option value="">Semua Kelas</option>' + 
-        classes.map(c => `<option value="${c}">Kelas ${c}</option>`).join('');
+    if (!studentsData || studentsData.length === 0) return;
     
-    document.getElementById('filterRombel').innerHTML = 
-        '<option value="">Semua Rombel</option>' + 
-        rombels.map(r => `<option value="${r}">${r}</option>`).join('');
+    const classes = [...new Set(studentsData.map(s => s.kelas).filter(Boolean))].sort((a, b) => a - b);
+    const rombels = [...new Set(studentsData.map(s => s.rombel).filter(Boolean))].sort();
+    
+    if (filterClassEl) {
+        filterClassEl.innerHTML = 
+            '<option value="">Semua Kelas</option>' + 
+            classes.map(c => `<option value="${c}">Kelas ${c}</option>`).join('');
+    }
+    
+    if (filterRombelEl) {
+        filterRombelEl.innerHTML = 
+            '<option value="">Semua Rombel</option>' + 
+            rombels.map(r => `<option value="${r}">${r}</option>`).join('');
+    }
 }
 
 function filterStudents() {
-    const filterClass = document.getElementById('filterClass').value;
-    const filterRombel = document.getElementById('filterRombel').value;
-    const filterGender = document.getElementById('filterGender').value;
-    const search = document.getElementById('searchStudent').value.toLowerCase();
+    const filterClass = document.getElementById('filterClass')?.value || '';
+    const filterRombel = document.getElementById('filterRombel')?.value || '';
+    const filterGender = document.getElementById('filterGender')?.value || '';
+    const search = (document.getElementById('searchStudent')?.value || '').toLowerCase();
     
     let filtered = studentsData.filter(s => {
         if (filterClass && s.kelas != filterClass) return false;
         if (filterRombel && s.rombel !== filterRombel) return false;
         if (filterGender && s.jenis_kelamin !== filterGender) return false;
-        if (search && !s.nama.toLowerCase().includes(search) && !s.nisn.includes(search)) return false;
+        if (search && !(s.nama || '').toLowerCase().includes(search) && !(s.nisn || '').includes(search)) return false;
         return true;
     });
     
     const tbody = document.getElementById('studentsTable');
+    if (!tbody) return;
+    
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="border p-4 text-center text-gray-500">Tidak ada data yang cocok</td></tr>`;
+        return;
+    }
+    
     tbody.innerHTML = filtered.map((s, idx) => `
         <tr class="hover:bg-gray-50">
             <td class="border p-2 text-center">${idx + 1}</td>
-            <td class="border p-2">${s.nisn}</td>
-            <td class="border p-2">${s.nama}</td>
-            <td class="border p-2 text-center">${s.jenis_kelamin}</td>
-            <td class="border p-2 text-center">${s.kelas}</td>
-            <td class="border p-2 text-center">${s.rombel}</td>
+            <td class="border p-2">${s.nisn || '-'}</td>
+            <td class="border p-2">${s.nama || '-'}</td>
+            <td class="border p-2 text-center">${s.jenis_kelamin || '-'}</td>
+            <td class="border p-2 text-center">${s.kelas || '-'}</td>
+            <td class="border p-2 text-center">${s.rombel || '-'}</td>
             <td class="border p-2 text-center">
                 <button onclick="deleteStudent('${s.id}')" class="text-red-500 hover:text-red-700">🗑️</button>
             </td>
@@ -402,8 +468,9 @@ function filterStudents() {
 }
 
 async function importStudents() {
-    const csvUrl = document.getElementById('csvUrl').value.trim();
-    const csvFile = document.getElementById('csvFile').files[0];
+    const csvUrl = (document.getElementById('csvUrl')?.value || '').trim();
+    const csvFileInput = document.getElementById('csvFile');
+    const csvFile = csvFileInput?.files?.[0];
     
     if (!csvUrl && !csvFile) {
         showAlert('Masukkan URL atau pilih file CSV', 'warning');
@@ -419,10 +486,17 @@ async function importStudents() {
             csvText = await csvFile.text();
         } else {
             const response = await fetch(csvUrl);
+            if (!response.ok) throw new Error('Gagal mengambil data dari URL');
             csvText = await response.text();
         }
         
         const students = parseStudentCSV(csvText);
+        
+        if (students.length === 0) {
+            hideLoading();
+            showAlert('Tidak ada data valid dalam file CSV', 'warning');
+            return;
+        }
         
         // Save to Firestore
         const batch = db.batch();
@@ -443,6 +517,7 @@ async function importStudents() {
         showAlert(`Berhasil import ${students.length} siswa!`, 'success');
     } catch (error) {
         hideLoading();
+        console.error('Error importing students:', error);
         showAlert('Gagal import: ' + error.message, 'error');
     }
 }
@@ -455,13 +530,18 @@ function parseStudentCSV(csvText) {
         const line = lines[i].trim();
         if (!line) continue;
         
-        const parts = line.split(';');
+        // Try semicolon first, then comma
+        let parts = line.split(';');
+        if (parts.length < 5) {
+            parts = line.split(',');
+        }
+        
         if (parts.length >= 5) {
             students.push({
                 nisn: parts[0].trim(),
                 nama: parts[1].trim(),
                 jenis_kelamin: parts[2].trim().toUpperCase(),
-                kelas: parseInt(parts[3].trim()),
+                kelas: parseInt(parts[3].trim()) || 0,
                 rombel: parts[4].trim().toUpperCase()
             });
         }
@@ -481,27 +561,55 @@ async function deleteStudent(id) {
         showAlert('Data siswa berhasil dihapus', 'success');
     } catch (error) {
         hideLoading();
+        console.error('Error deleting student:', error);
         showAlert('Gagal menghapus: ' + error.message, 'error');
     }
 }
 
-function updateDashboardStats() {
-    document.getElementById('totalStudents').textContent = studentsData.length;
-    // Other stats can be calculated based on available data
+function exportStudents() {
+    if (!studentsData || studentsData.length === 0) {
+        showAlert('Tidak ada data untuk diekspor', 'warning');
+        return;
+    }
+    
+    let csv = 'nisn;nama;jenis_kelamin;kelas;rombel\n';
+    studentsData.forEach(s => {
+        csv += `${s.nisn || ''};${s.nama || ''};${s.jenis_kelamin || ''};${s.kelas || ''};${s.rombel || ''}\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `data_siswa_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    
+    showAlert('Data siswa berhasil diekspor', 'success');
 }
 
 // Load CP Data from CSV
 async function loadCPData(subject, level) {
-    const fileName = `cp-${subject.toLowerCase().replace(/\s+/g, '-')}-${level.toLowerCase()}.csv`;
+    const subjectSlug = subject.toLowerCase()
+        .replace(/pendidikan agama islam dan budi pekerti/gi, 'pai')
+        .replace(/pendidikan agama islam/gi, 'pai')
+        .replace(/bahasa indonesia/gi, 'bindo')
+        .replace(/bahasa inggris/gi, 'bing')
+        .replace(/matematika/gi, 'mtk')
+        .replace(/\s+/g, '-');
+    
+    const levelSlug = level.toLowerCase();
+    const fileName = `cp-${subjectSlug}-${levelSlug}.csv`;
     
     try {
         const response = await fetch(`data/${fileName}`);
-        if (!response.ok) throw new Error('File not found');
+        if (!response.ok) {
+            console.log(`CP file not found: ${fileName}`);
+            return [];
+        }
         
         const csvText = await response.text();
         return parseCPCSV(csvText);
     } catch (error) {
-        console.log(`CP data not found: ${fileName}`);
+        console.log(`Error loading CP data: ${fileName}`, error);
         return [];
     }
 }
