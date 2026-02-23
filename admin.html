@@ -5,28 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - AGSA</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { 'sans': ['Inter', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
     <style>
-        .admin-nav-link { @apply flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200; }
-        .admin-nav-link:hover { @apply bg-gray-700; }
-        .admin-nav-link.active { @apply bg-yellow-600; }
+        .admin-nav-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.5rem; transition: all 0.2s; color: white; }
+        .admin-nav-link:hover { background-color: #374151; }
+        .admin-nav-link.active { background-color: #d97706; }
     </style>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen">
+<body class="bg-gray-100 min-h-screen">
     <!-- Loading -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-gray-900/90 flex items-center justify-center z-50">
+    <div id="loadingOverlay" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-50">
         <div class="text-center">
             <div class="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p class="text-white text-lg">Memuat Admin Panel...</p>
@@ -40,323 +30,195 @@
             <div class="text-6xl mb-4">🚫</div>
             <h1 class="text-2xl font-bold mb-2">Akses Ditolak</h1>
             <p class="mb-4">Anda tidak memiliki akses ke halaman ini.</p>
-            <a href="app.html" class="bg-white text-red-900 px-6 py-2 rounded-lg font-bold hover:bg-gray-200 transition">
-                Kembali ke Dashboard
-            </a>
+            <a href="app.html" class="bg-white text-red-900 px-6 py-2 rounded-lg font-bold">Kembali</a>
         </div>
     </div>
 
-    <!-- Main Admin Panel -->
+    <!-- Admin Panel -->
     <div id="adminPanel" class="hidden">
         <div class="flex min-h-screen">
             <!-- Sidebar -->
-            <aside class="w-64 bg-gray-900 text-white fixed h-full overflow-y-auto">
+            <aside class="w-64 bg-gray-800 text-white fixed h-full overflow-y-auto">
                 <div class="p-4 border-b border-gray-700">
                     <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-yellow-500 rounded-xl flex items-center justify-center">
-                            <span class="text-2xl">👑</span>
-                        </div>
+                        <div class="w-12 h-12 bg-yellow-500 rounded-xl flex items-center justify-center text-2xl">👑</div>
                         <div>
                             <h1 class="font-bold text-lg">AGSA Admin</h1>
                             <p class="text-xs text-gray-400">Super Admin Panel</p>
                         </div>
                     </div>
                 </div>
-
                 <div class="p-4 border-b border-gray-700">
                     <div class="flex items-center gap-3">
-                        <img id="adminAvatar" src="https://ui-avatars.com/api/?name=Admin&background=f59e0b&color=fff" class="w-10 h-10 rounded-full">
+                        <img id="adminAvatar" src="" class="w-10 h-10 rounded-full">
                         <div>
                             <p id="adminName" class="font-medium text-sm">Admin</p>
                             <p id="adminEmail" class="text-xs text-gray-400">admin@gmail.com</p>
                         </div>
                     </div>
                 </div>
-
                 <nav class="p-4 space-y-2">
-                    <a href="#" onclick="showAdminSection('dashboard'); return false;" class="admin-nav-link active" data-section="dashboard">
-                        <span>📊</span> Dashboard
-                    </a>
-                    <a href="#" onclick="showAdminSection('users'); return false;" class="admin-nav-link" data-section="users">
-                        <span>👥</span> Kelola User
-                    </a>
-                    <a href="#" onclick="showAdminSection('subscriptions'); return false;" class="admin-nav-link" data-section="subscriptions">
-                        <span>💎</span> Langganan
-                    </a>
-                    <a href="#" onclick="showAdminSection('data'); return false;" class="admin-nav-link" data-section="data">
-                        <span>📁</span> Data CP/TP
-                    </a>
-                    <a href="#" onclick="showAdminSection('settings'); return false;" class="admin-nav-link" data-section="settings">
-                        <span>⚙️</span> Pengaturan
-                    </a>
+                    <a href="#" onclick="showAdminSection('dashboard'); return false;" class="admin-nav-link active" data-section="dashboard">📊 Dashboard</a>
+                    <a href="#" onclick="showAdminSection('users'); return false;" class="admin-nav-link" data-section="users">👥 Kelola User</a>
+                    <a href="#" onclick="showAdminSection('subscriptions'); return false;" class="admin-nav-link" data-section="subscriptions">💎 Langganan</a>
+                    <a href="#" onclick="showAdminSection('settings'); return false;" class="admin-nav-link" data-section="settings">⚙️ Pengaturan</a>
                 </nav>
-
                 <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
-                    <a href="app.html" class="admin-nav-link text-blue-400 hover:text-blue-300 mb-2">
-                        <span>📱</span> Buka App User
-                    </a>
-                    <button onclick="adminLogout()" class="w-full admin-nav-link text-red-400 hover:bg-red-600 hover:text-white">
-                        <span>🚪</span> Keluar
-                    </button>
+                    <a href="app.html" class="admin-nav-link text-blue-400 mb-2">📱 Buka App User</a>
+                    <button onclick="adminLogout()" class="w-full admin-nav-link text-red-400 hover:bg-red-600 hover:text-white">🚪 Keluar</button>
                 </div>
             </aside>
 
-            <!-- Main Content -->
+            <!-- Main -->
             <main class="flex-1 ml-64 p-6">
-                <!-- Dashboard Section -->
+                <!-- Dashboard -->
                 <section id="admin-dashboard" class="admin-section">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Dashboard Admin</h2>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-gray-500 text-sm">Total User</p>
-                                    <p id="statTotalUsers" class="text-3xl font-bold text-blue-600">0</p>
-                                </div>
-                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <span class="text-2xl">👥</span>
-                                </div>
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-blue-500">
+                            <p class="text-gray-500 text-sm">Total User</p>
+                            <p id="statTotalUsers" class="text-3xl font-bold text-blue-600">0</p>
                         </div>
-                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-yellow-500">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-gray-500 text-sm">User Premium</p>
-                                    <p id="statPremiumUsers" class="text-3xl font-bold text-yellow-600">0</p>
-                                </div>
-                                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                                    <span class="text-2xl">💎</span>
-                                </div>
-                            </div>
+                        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-yellow-500">
+                            <p class="text-gray-500 text-sm">User Premium</p>
+                            <p id="statPremiumUsers" class="text-3xl font-bold text-yellow-600">0</p>
                         </div>
-                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-gray-500">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-gray-500 text-sm">User Free</p>
-                                    <p id="statFreeUsers" class="text-3xl font-bold text-gray-600">0</p>
-                                </div>
-                                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                                    <span class="text-2xl">🆓</span>
-                                </div>
-                            </div>
+                        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-gray-500">
+                            <p class="text-gray-500 text-sm">User Free</p>
+                            <p id="statFreeUsers" class="text-3xl font-bold text-gray-600">0</p>
                         </div>
-                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-gray-500 text-sm">User Baru (Bulan Ini)</p>
-                                    <p id="statNewUsers" class="text-3xl font-bold text-green-600">0</p>
-                                </div>
-                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                                    <span class="text-2xl">📈</span>
-                                </div>
-                            </div>
+                        <div class="bg-white rounded-xl shadow p-6 border-l-4 border-green-500">
+                            <p class="text-gray-500 text-sm">User Baru (Bulan Ini)</p>
+                            <p id="statNewUsers" class="text-3xl font-bold text-green-600">0</p>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white rounded-xl shadow-lg p-6">
-                            <h3 class="text-lg font-bold text-gray-800 mb-4">🕐 Aktivitas Terbaru</h3>
-                            <div id="recentActivity" class="space-y-3 max-h-96 overflow-y-auto">
-                                <p class="text-gray-500">Memuat aktivitas...</p>
-                            </div>
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <h3 class="font-bold text-gray-800 mb-4">🕐 Aktivitas Terbaru</h3>
+                            <div id="recentActivity" class="space-y-3 max-h-96 overflow-y-auto"></div>
                         </div>
-                        
-                        <div class="bg-white rounded-xl shadow-lg p-6">
-                            <h3 class="text-lg font-bold text-gray-800 mb-4">🏫 Sekolah Terdaftar</h3>
-                            <div id="schoolsList" class="space-y-3 max-h-96 overflow-y-auto">
-                                <p class="text-gray-500">Memuat data sekolah...</p>
-                            </div>
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <h3 class="font-bold text-gray-800 mb-4">🏫 Sekolah Terdaftar</h3>
+                            <div id="schoolsList" class="space-y-3 max-h-96 overflow-y-auto"></div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Users Section -->
+                <!-- Users -->
                 <section id="admin-users" class="admin-section hidden">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-2xl font-bold text-gray-800">👥 Kelola User</h2>
                         <div class="flex gap-4">
-                            <input type="text" id="searchUser" placeholder="Cari nama/email..." 
-                                class="px-4 py-2 border rounded-lg w-64" oninput="searchUsers()">
+                            <input type="text" id="searchUser" placeholder="Cari nama/email..." class="px-4 py-2 border rounded-lg w-64" oninput="searchUsers()">
                             <select id="filterSubscription" class="px-4 py-2 border rounded-lg" onchange="filterUsers()">
-                                <option value="">Semua Status</option>
+                                <option value="">Semua</option>
                                 <option value="free">Free</option>
                                 <option value="premium">Premium</option>
                             </select>
-                            <button onclick="loadAllUsers()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
-                                🔄 Refresh
-                            </button>
+                            <button onclick="loadAllUsers()" class="bg-blue-500 text-white px-4 py-2 rounded-lg">🔄 Refresh</button>
                         </div>
                     </div>
-
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-50 border-b">
-                                    <tr>
-                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
-                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
-                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Sekolah</th>
-                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Status</th>
-                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Terdaftar</th>
-                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="usersTable" class="divide-y divide-gray-200">
-                                    <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Memuat data user...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="bg-white rounded-xl shadow overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Sekolah</th>
+                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Status</th>
+                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Terdaftar</th>
+                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable"></tbody>
+                        </table>
                     </div>
                 </section>
 
-                <!-- Subscriptions Section -->
+                <!-- Subscriptions -->
                 <section id="admin-subscriptions" class="admin-section hidden">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6">💎 Kelola Langganan</h2>
-                    
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white rounded-xl shadow-lg p-6">
-                            <h3 class="text-lg font-bold text-gray-800 mb-4">⭐ Upgrade User Individual</h3>
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <h3 class="font-bold text-gray-800 mb-4">⭐ Upgrade User Individual</h3>
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Email User</label>
-                                    <input type="email" id="upgradeEmail" class="w-full px-4 py-2 border rounded-lg" 
-                                        placeholder="user@gmail.com">
+                                    <input type="email" id="upgradeEmail" class="w-full px-4 py-2 border rounded-lg" placeholder="user@gmail.com">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Durasi</label>
                                     <select id="upgradeDuration" class="w-full px-4 py-2 border rounded-lg">
-                                        <option value="30">30 Hari (1 Bulan)</option>
-                                        <option value="90">90 Hari (3 Bulan)</option>
-                                        <option value="180">180 Hari (6 Bulan)</option>
-                                        <option value="365" selected>365 Hari (1 Tahun)</option>
-                                        <option value="unlimited">Unlimited (Selamanya)</option>
+                                        <option value="30">30 Hari</option>
+                                        <option value="90">90 Hari</option>
+                                        <option value="180">180 Hari</option>
+                                        <option value="365" selected>365 Hari</option>
+                                        <option value="unlimited">Unlimited</option>
                                     </select>
                                 </div>
-                                <button onclick="upgradeUserByEmail()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-lg transition">
-                                    ⭐ Upgrade ke Premium
-                                </button>
+                                <button onclick="upgradeUserByEmail()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-lg">⭐ Upgrade</button>
                             </div>
                         </div>
-
-                        <div class="bg-white rounded-xl shadow-lg p-6">
-                            <h3 class="text-lg font-bold text-gray-800 mb-4">🏫 Upgrade Sekolah (Bulk)</h3>
+                        <div class="bg-white rounded-xl shadow p-6">
+                            <h3 class="font-bold text-gray-800 mb-4">🏫 Upgrade Sekolah (Bulk)</h3>
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama Sekolah</label>
-                                    <input type="text" id="upgradeSchoolName" class="w-full px-4 py-2 border rounded-lg" 
-                                        placeholder="SD Negeri 1 ...">
-                                    <p class="text-xs text-gray-500 mt-1">Nama harus persis sama dengan yang terdaftar</p>
+                                    <input type="text" id="upgradeSchoolName" class="w-full px-4 py-2 border rounded-lg" placeholder="SD Negeri 1 ...">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Durasi</label>
                                     <select id="upgradeSchoolDuration" class="w-full px-4 py-2 border rounded-lg">
-                                        <option value="365" selected>365 Hari (1 Tahun)</option>
-                                        <option value="unlimited">Unlimited (Selamanya)</option>
+                                        <option value="365" selected>365 Hari</option>
+                                        <option value="unlimited">Unlimited</option>
                                     </select>
                                 </div>
-                                <button onclick="upgradeSchool()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition">
-                                    🏫 Upgrade Seluruh Guru
-                                </button>
+                                <button onclick="upgradeSchool()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg">🏫 Upgrade Sekolah</button>
                             </div>
                         </div>
                     </div>
-
-                    <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">📋 User Premium Aktif</h3>
-                        <div id="premiumUsersList" class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-yellow-50">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nama</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Sekolah</th>
-                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Kadaluarsa</th>
-                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="premiumUsersTable" class="divide-y">
-                                    <tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Memuat...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="bg-white rounded-xl shadow p-6 mt-6">
+                        <h3 class="font-bold text-gray-800 mb-4">📋 User Premium Aktif</h3>
+                        <table class="w-full">
+                            <thead class="bg-yellow-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold">Nama</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold">Email</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold">Sekolah</th>
+                                    <th class="px-4 py-3 text-center text-sm font-semibold">Kadaluarsa</th>
+                                    <th class="px-4 py-3 text-center text-sm font-semibold">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="premiumUsersTable"></tbody>
+                        </table>
                     </div>
                 </section>
 
-                <!-- Data CP/TP Section -->
-                <section id="admin-data" class="admin-section hidden">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">📁 Data Capaian Pembelajaran</h2>
-                    
-                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">📤 Upload Data CP/TP</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
-                                <input type="text" id="cpSubject" class="w-full px-4 py-2 border rounded-lg" placeholder="PAI, Matematika, dll">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Jenjang</label>
-                                <select id="cpLevel" class="w-full px-4 py-2 border rounded-lg">
-                                    <option value="sd">SD/MI</option>
-                                    <option value="smp">SMP/MTs</option>
-                                    <option value="sma">SMA/MA</option>
-                                    <option value="smk">SMK</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">File CSV</label>
-                                <input type="file" id="cpFile" accept=".csv" class="w-full px-4 py-2 border rounded-lg">
-                            </div>
-                        </div>
-                        <button onclick="uploadCPData()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">
-                            📤 Upload Data
-                        </button>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">📋 Data CP/TP Tersedia</h3>
-                        <div id="cpDataList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <p class="text-gray-500">Memuat data...</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Settings Section -->
+                <!-- Settings -->
                 <section id="admin-settings" class="admin-section hidden">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6">⚙️ Pengaturan Aplikasi</h2>
-                    
-                    <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="bg-white rounded-xl shadow p-6 max-w-2xl">
                         <div class="space-y-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp untuk Upgrade</label>
-                                <input type="tel" id="settingWhatsApp" class="w-full px-4 py-2 border rounded-lg" 
-                                    placeholder="6281234567890">
-                                <p class="text-xs text-gray-500 mt-1">Format: 62xxxxxxxxxx (kode negara tanpa +)</p>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp</label>
+                                <input type="tel" id="settingWhatsApp" class="w-full px-4 py-2 border rounded-lg" placeholder="6281234567890">
+                                <p class="text-xs text-gray-500 mt-1">Format: 62xxxxxxxxxx</p>
                             </div>
-                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Template Pesan WhatsApp</label>
-                                <textarea id="settingWAMessage" rows="4" class="w-full px-4 py-2 border rounded-lg"
-                                    placeholder="Halo, saya ingin upgrade ke AGSA Premium..."></textarea>
+                                <textarea id="settingWAMessage" rows="3" class="w-full px-4 py-2 border rounded-lg" placeholder="Halo, saya ingin upgrade..."></textarea>
                             </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Harga Premium (untuk info)</label>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="text-xs text-gray-500">Per Bulan</label>
-                                        <input type="text" id="settingPriceMonth" class="w-full px-4 py-2 border rounded-lg" placeholder="Rp 50.000">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs text-gray-500">Per Tahun</label>
-                                        <input type="text" id="settingPriceYear" class="w-full px-4 py-2 border rounded-lg" placeholder="Rp 300.000">
-                                    </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Harga/Bulan</label>
+                                    <input type="text" id="settingPriceMonth" class="w-full px-4 py-2 border rounded-lg" placeholder="Rp 50.000">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Harga/Tahun</label>
+                                    <input type="text" id="settingPriceYear" class="w-full px-4 py-2 border rounded-lg" placeholder="Rp 300.000">
                                 </div>
                             </div>
-
-                            <button onclick="saveAdminSettings()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">
-                                💾 Simpan Pengaturan
-                            </button>
+                            <button onclick="saveAdminSettings()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg">💾 Simpan</button>
                         </div>
                     </div>
                 </section>
@@ -364,9 +226,9 @@
         </div>
     </div>
 
-    <!-- Alert Container -->
+    <!-- Alert -->
     <div id="alertContainer" class="fixed bottom-4 right-4 z-50 hidden">
-        <div id="alertBox" class="p-4 rounded-lg shadow-lg max-w-md"></div>
+        <div id="alertBox" class="p-4 rounded-lg shadow-lg"></div>
     </div>
 
     <script src="js/firebase-config.js"></script>
