@@ -586,18 +586,59 @@ function exportStudents() {
     showAlert('Data siswa berhasil diekspor', 'success');
 }
 
-// Load CP Data from CSV
+// ============================================
+// LOAD CP DATA FROM CSV
+// ============================================
 async function loadCPData(subject, level) {
-    const subjectSlug = subject.toLowerCase()
-        .replace(/pendidikan agama islam dan budi pekerti/gi, 'pai')
-        .replace(/pendidikan agama islam/gi, 'pai')
-        .replace(/bahasa indonesia/gi, 'bindo')
-        .replace(/bahasa inggris/gi, 'bing')
-        .replace(/matematika/gi, 'mtk')
-        .replace(/\s+/g, '-');
+    // Normalize subject name to file name
+    const subjectMap = {
+        'pendidikan agama islam dan budi pekerti': 'pai',
+        'pendidikan agama islam': 'pai',
+        'pai dan budi pekerti': 'pai',
+        'pai': 'pai',
+        'agama islam': 'pai',
+        'bahasa indonesia': 'bindo',
+        'bahasa inggris': 'bing',
+        'matematika': 'mtk',
+        'ilmu pengetahuan alam': 'ipa',
+        'ipa': 'ipa',
+        'ilmu pengetahuan sosial': 'ips',
+        'ips': 'ips',
+        'pendidikan kewarganegaraan': 'pkn',
+        'pkn': 'pkn',
+        'ppkn': 'pkn',
+        'seni budaya': 'senbud',
+        'pjok': 'pjok',
+        'penjas': 'pjok',
+        'pendidikan jasmani': 'pjok',
+        'informatika': 'info',
+        'bahasa arab': 'arab',
+        'sejarah kebudayaan islam': 'ski',
+        'ski': 'ski',
+        'akidah akhlak': 'akidah',
+        'fiqih': 'fiqih',
+        'quran hadis': 'quran',
+        'al-quran hadis': 'quran'
+    };
     
-    const levelSlug = level.toLowerCase();
+    // Find matching subject
+    const subjectLower = (subject || '').toLowerCase().trim();
+    let subjectSlug = subjectMap[subjectLower];
+    
+    // If not found in map, create slug from subject name
+    if (!subjectSlug) {
+        subjectSlug = subjectLower
+            .replace(/pendidikan\s+/gi, '')
+            .replace(/dan\s+/gi, '')
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9-]/gi, '')
+            .substring(0, 20);
+    }
+    
+    const levelSlug = (level || 'sd').toLowerCase();
     const fileName = `cp-${subjectSlug}-${levelSlug}.csv`;
+    
+    console.log(`Loading CP data: ${fileName} for subject: ${subject}`);
     
     try {
         const response = await fetch(`data/${fileName}`);
@@ -638,5 +679,5 @@ function parseCPCSV(csvText) {
     
     return data;
 }
-
 console.log('Data Loader Module Loaded');
+
