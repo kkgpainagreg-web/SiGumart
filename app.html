@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN GURU SUPER APP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#1e40af',
+                        accent: '#fbbf24',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        dark: '#0f172a',
+                        sidebar: '#0f172a'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        
+        .sidebar-item {
+            @apply flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white transition-all duration-200 cursor-pointer;
+        }
+        .sidebar-item.active {
+            @apply bg-primary text-white;
+        }
+        .sidebar-item.premium {
+            @apply opacity-60;
+        }
+        .sidebar-item.premium:hover {
+            @apply opacity-100;
+        }
+        
+        .card {
+            @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+        }
+        
+        .input-field {
+            @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-sm;
+        }
+        
+        .btn-primary {
+            @apply bg-primary hover:bg-secondary text-white font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 inline-flex items-center gap-2;
+        }
+        
+        .btn-secondary {
+            @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 inline-flex items-center gap-2;
+        }
+        
+        .btn-success {
+            @apply bg-success hover:bg-green-600 text-white font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 inline-flex items-center gap-2;
+        }
+        
+        .btn-warning {
+            @apply bg-accent hover:bg-yellow-500 text-dark font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 inline-flex items-center gap-2;
+        }
+        
+        .btn-danger {
+            @apply bg-danger hover:bg-red-600 text-white font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 inline-flex items-center gap-2;
+        }
+        
+        .section-title {
+            @apply text-lg font-bold text-gray-800 mb-4 flex items-center gap-2;
+        }
+        
+        .badge {
+            @apply px-2 py-1 rounded-full text-xs font-semibold;
+        }
+        
+        .badge-free {
+            @apply bg-gray-100 text-gray-600;
+        }
+        
+        .badge-premium {
+            @apply bg-gradient-to-r from-yellow-400 to-orange-500 text-white;
+        }
+        
+        .table-auto {
+            @apply w-full text-sm text-left;
+        }
+        
+        .table-auto th {
+            @apply bg-gray-50 px-4 py-3 font-semibold text-gray-700 border-b;
+        }
+        
+        .table-auto td {
+            @apply px-4 py-3 border-b border-gray-100;
+        }
+        
+        /* RTL Support for Arabic */
+        .rtl-text {
+            direction: rtl;
+            text-align: right;
+            font-family: 'Traditional Arabic', 'Scheherazade', serif;
+        }
+        
+        /* Print Styles */
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+        }
+        
+        /* Mobile Sidebar */
+        @media (max-width: 1024px) {
+            .sidebar-mobile-hidden {
+                transform: translateX(-100%);
+            }
+            .sidebar-mobile-show {
+                transform: translateX(0);
+            }
+        }
+        
+        /* Document Preview */
+        .document-preview {
+            @apply bg-white border border-gray-200 rounded-lg shadow-inner;
+            min-height: 500px;
+        }
+        
+        .document-page {
+            @apply bg-white p-8;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+        }
+        
+        .document-page.landscape {
+            width: 297mm;
+            min-height: 210mm;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Menu Button -->
+    <button id="mobileMenuBtn" class="lg:hidden fixed top-4 left-4 z-50 bg-dark text-white p-3 rounded-lg shadow-lg no-print">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed lg:static w-72 h-screen bg-sidebar overflow-y-auto z-40 transition-transform duration-300 lg:translate-x-0 -translate-x-full no-print">
+            <!-- Header -->
+            <div class="p-5 border-b border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-accent rounded-xl flex items-center justify-center">
+                        <i class="fas fa-chalkboard-teacher text-2xl text-dark"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-white font-bold">ADMIN GURU</h1>
+                        <p class="text-accent text-sm font-semibold">SUPER APP</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Info -->
+            <div class="p-5 border-b border-gray-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p id="userName" class="text-white font-medium truncate">Loading...</p>
+                        <span id="userBadge" class="badge badge-free">FREE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="p-4 space-y-2">
+                <!-- Dashboard -->
+                <div class="sidebar-item active" data-section="dashboard">
+                    <i class="fas fa-home w-5"></i>
+                    <span>Dashboard</span>
+                </div>
+
+                <!-- Modul B: Profil & Dasar -->
+                <p class="text-gray-500 text-xs font-bold uppercase mt-6 mb-2 px-4">Profil & Dasar</p>
+                
+                <div class="sidebar-item" data-section="profil">
+                    <i class="fas fa-user-cog w-5"></i>
+                    <span>Profil Saya</span>
+                </div>
+                
+                <div class="sidebar-item" data-section="kalender">
+                    <i class="fas fa-calendar-alt w-5"></i>
+                    <span>Kalender Pendidikan</span>
+                </div>
+                
+                <div class="sidebar-item" data-section="jadwal">
+                    <i class="fas fa-clock w-5"></i>
+                    <span>Jadwal Pelajaran</span>
+                </div>
+                
+                <div class="sidebar-item" data-section="siswa">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Data Siswa</span>
+                </div>
+                
+                <div class="sidebar-item" data-section="cp">
+                    <i class="fas fa-book-open w-5"></i>
+                    <span>Data CP/TP</span>
+                </div>
+
+                <!-- Dokumen (Free) -->
+                <p class="text-gray-500 text-xs font-bold uppercase mt-6 mb-2 px-4">Dokumen (FREE)</p>
+                
+                <div class="sidebar-item" data-section="atp">
+                    <i class="fas fa-route w-5"></i>
+                    <span>ATP</span>
+                </div>
+                
+                <div class="sidebar-item" data-section="prota">
+                    <i class="fas fa-calendar-check w-5"></i>
+                    <span>Prota</span>
+                </div>
+                
+                <div class="sidebar-item" data-section="promes">
+                    <i class="fas fa-table w-5"></i>
+                    <span>Promes</span>
+                </div>
+
+                <!-- Dokumen (Premium) -->
+                <p class="text-gray-500 text-xs font-bold uppercase mt-6 mb-2 px-4">Dokumen (PREMIUM)</p>
+                
+                <div class="sidebar-item premium" data-section="modul-ajar" data-premium="true">
+                    <i class="fas fa-book w-5"></i>
+                    <span>Modul Ajar</span>
+                    <i class="fas fa-crown text-accent ml-auto text-xs"></i>
+                </div>
+                
+                <div class="sidebar-item premium" data-section="lkpd" data-premium="true">
+                    <i class="fas fa-file-alt w-5"></i>
+                    <span>LKPD</span>
+                    <i class="fas fa-crown text-accent ml-auto text-xs"></i>
+                </div>
+                
+                <div class="sidebar-item premium" data-section="kktp" data-premium="true">
+                    <i class="fas fa-tasks w-5"></i>
+                    <span>KKTP</span>
+                    <i class="fas fa-crown text-accent ml-auto text-xs"></i>
+                </div>
+                
+                <div class="sidebar-item premium" data-section="jurnal" data-premium="true">
+                    <i class="fas fa-journal-whills w-5"></i>
+                    <span>Jurnal</span>
+                    <i class="fas fa-crown text-accent ml-auto text-xs"></i>
+                </div>
+                
+                <div class="sidebar-item premium" data-section="absensi" data-premium="true">
+                    <i class="fas fa-clipboard-check w-5"></i>
+                    <span>Absensi</span>
+                    <i class="fas fa-crown text-accent ml-auto text-xs"></i>
+                </div>
+                
+                <div class="sidebar-item premium" data-section="nilai" data-premium="true">
+                    <i class="fas fa-star w-5"></i>
+                    <span>Daftar Nilai</span>
+                    <i class="fas fa-crown text-accent ml-auto text-xs"></i>
+                </div>
+
+                <!-- Tools -->
+                <p class="text-gray-500 text-xs font-bold uppercase mt-6 mb-2 px-4">Tools</p>
+                
+                <div class="sidebar-item" data-section="ai-assistant">
+                    <i class="fas fa-robot w-5"></i>
+                    <span>AI Assistant</span>
+                </div>
+                
+                <div class="sidebar-item" data-section="panduan">
+                    <i class="fas fa-question-circle w-5"></i>
+                    <span>Panduan</span>
+                </div>
+
+                <!-- Logout -->
+                <div class="mt-6 pt-6 border-t border-gray-700">
+                    <div class="sidebar-item text-red-400 hover:text-red-300 hover:bg-red-900/30" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt w-5"></i>
+                        <span>Keluar</span>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="mainContent" class="flex-1 lg:ml-0 p-4 lg:p-8">
+            <!-- Top Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-8 no-print">
+                <div class="ml-12 lg:ml-0">
+                    <h2 id="pageTitle" class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                    <p id="pageSubtitle" class="text-gray-500">Selamat datang di Admin Guru Super App</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <select id="selectTahunAjar" class="input-field w-auto">
+                        <!-- Populated by JS -->
+                    </select>
+                    <button onclick="showUpgradeModal()" class="btn-warning" id="btnUpgrade">
+                        <i class="fas fa-crown"></i>
+                        <span class="hidden sm:inline">Upgrade Premium</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Sections -->
+            <div id="contentSections">
+                <!-- Dashboard Section -->
+                <section id="section-dashboard" class="section-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <!-- Stats Cards -->
+                        <div class="card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-blue-100 text-sm">Total Siswa</p>
+                                    <p id="statSiswa" class="text-3xl font-bold">0</p>
+                                </div>
+                                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card bg-gradient-to-br from-green-500 to-green-600 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-green-100 text-sm">Mapel Diampu</p>
+                                    <p id="statMapel" class="text-3xl font-bold">0</p>
+                                </div>
+                                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-book text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-purple-100 text-sm">Dokumen Dibuat</p>
+                                    <p id="statDokumen" class="text-3xl font-bold">0</p>
+                                </div>
+                                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-file-alt text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card bg-gradient-to-br from-orange-500 to-orange-600 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-orange-100 text-sm">Pertemuan Bulan Ini</p>
+                                    <p id="statPertemuan" class="text-3xl font-bold">0</p>
+                                </div>
+                                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-calendar-check text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card mb-8">
+                        <h3 class="section-title"><i class="fas fa-bolt text-accent"></i> Aksi Cepat</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <button onclick="navigateTo('profil')" class="p-4 bg-gray-50 hover:bg-gray-100 rounded-xl text-center transition-all">
+                                <i class="fas fa-user-edit text-2xl text-primary mb-2"></i>
+                                <p class="text-sm font-medium text-gray-700">Edit Profil</p>
+                            </button>
+                            <button onclick="navigateTo('cp')" class="p-4 bg-gray-50 hover:bg-gray-100 rounded-xl text-center transition-all">
+                                <i class="fas fa-upload text-2xl text-green-500 mb-2"></i>
+                                <p class="text-sm font-medium text-gray-700">Upload CP</p>
+                            </button>
+                            <button onclick="navigateTo('promes')" class="p-4 bg-gray-50 hover:bg-gray-100 rounded-xl text-center transition-all">
+                                <i class="fas fa-file-export text-2xl text-purple-500 mb-2"></i>
+                                <p class="text-sm font-medium text-gray-700">Buat Promes</p>
+                            </button>
+                            <button onclick="navigateTo('ai-assistant')" class="p-4 bg-gray-50 hover:bg-gray-100 rounded-xl text-center transition-all">
+                                <i class="fas fa-robot text-2xl text-orange-500 mb-2"></i>
+                                <p class="text-sm font-medium text-gray-700">AI Assistant</p>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Getting Started Guide -->
+                    <div class="card" id="gettingStarted">
+                        <h3 class="section-title"><i class="fas fa-flag-checkered text-success"></i> Panduan Memulai</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg" id="step1">
+                                <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800">Lengkapi Profil</h4>
+                                    <p class="text-gray-600 text-sm">Isi data diri, sekolah, dan mata pelajaran yang diampu.</p>
+                                </div>
+                                <span class="badge" id="step1Badge">Belum</span>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg" id="step2">
+                                <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800">Atur Kalender Pendidikan</h4>
+                                    <p class="text-gray-600 text-sm">Set tanggal awal-akhir semester dan hari libur.</p>
+                                </div>
+                                <span class="badge" id="step2Badge">Belum</span>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg" id="step3">
+                                <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800">Upload Data CP/TP</h4>
+                                    <p class="text-gray-600 text-sm">Import data Capaian Pembelajaran dari file CSV.</p>
+                                </div>
+                                <span class="badge" id="step3Badge">Belum</span>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg" id="step4">
+                                <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">4</div>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800">Buat Jadwal Pelajaran</h4>
+                                    <p class="text-gray-600 text-sm">Tentukan jadwal mengajar untuk setiap kelas.</p>
+                                </div>
+                                <span class="badge" id="step4Badge">Belum</span>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-green-50 rounded-lg border-2 border-green-200">
+                                <div class="w-8 h-8 bg-success text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-green-800">Siap Generate Dokumen!</h4>
+                                    <p class="text-green-600 text-sm">Setelah 4 langkah di atas selesai, sistem akan otomatis generate ATP, Prota, Promes, dan dokumen lainnya.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Profil Section -->
+                <section id="section-profil" class="section-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Data Diri -->
+                        <div class="card lg:col-span-2">
+                            <h3 class="section-title"><i class="fas fa-user text-primary"></i> Data Diri</h3>
+                            <form id="formProfil" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                                        <input type="text" id="profilNama" class="input-field" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">NIP</label>
+                                        <input type="text" id="profilNip" class="input-field" placeholder="Kosongkan jika tidak ada">
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                        <input type="email" id="profilEmail" class="input-field bg-gray-100" readonly>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">No. HP/WA</label>
+                                        <input type="tel" id="profilPhone" class="input-field" placeholder="08xxxxxxxxxx">
+                                    </div>
+                                </div>
+
+                                <hr class="my-6">
+
+                                <h4 class="font-semibold text-gray-800 mb-4">
+                                    <i class="fas fa-school mr-2 text-primary"></i>Data Satuan Pendidikan
+                                </h4>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Sekolah</label>
+                                        <input type="text" id="profilSekolah" class="input-field" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenjang</label>
+                                        <select id="profilJenjang" class="input-field" required>
+                                            <option value="">Pilih Jenjang</option>
+                                            <option value="SD">SD / MI</option>
+                                            <option value="SMP">SMP / MTs</option>
+                                            <option value="SMA">SMA / MA</option>
+                                            <option value="SMK">SMK</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Kota/Kabupaten (untuk Tanda Tangan)</label>
+                                        <input type="text" id="profilKota" class="input-field" placeholder="Contoh: Jakarta" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Sekolah</label>
+                                        <input type="text" id="profilAlamat" class="input-field">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Kepala Sekolah</label>
+                                        <input type="text" id="profilKepsek" class="input-field" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">NIP Kepala Sekolah</label>
+                                        <input type="text" id="profilNipKepsek" class="input-field">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn-success mt-6">
+                                    <i class="fas fa-save"></i> Simpan Profil
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Mata Pelajaran Diampu -->
+                        <div class="card">
+                            <h3 class="section-title"><i class="fas fa-book text-success"></i> Mata Pelajaran Diampu</h3>
+                            <div id="listMapelDiampu" class="space-y-3 mb-4">
+                                <!-- Populated by JS -->
+                            </div>
+                            <button onclick="showAddMapelModal()" class="btn-primary w-full">
+                                <i class="fas fa-plus"></i> Tambah Mapel
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Kalender Section -->
+                <section id="section-kalender" class="section-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Setting Semester -->
+                        <div class="card">
+                            <h3 class="section-title"><i class="fas fa-calendar text-primary"></i> Pengaturan Semester</h3>
+                            <form id="formKalender" class="space-y-4">
+                                <div class="p-4 bg-blue-50 rounded-lg mb-4">
+                                    <p class="text-blue-800 text-sm">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        Tahun Ajar: <strong id="kalenderTahunAjar"></strong>
+                                    </p>
+                                </div>
+                                
+                                <h4 class="font-semibold text-gray-700">Semester Ganjil</h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm text-gray-600 mb-1">Tanggal Mulai</label>
+                                        <input type="date" id="ganjilMulai" class="input-field" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-gray-600 mb-1">Tanggal Selesai</label>
+                                        <input type="date" id="ganjilSelesai" class="input-field" required>
+                                    </div>
+                                </div>
+
+                                <h4 class="font-semibold text-gray-700 mt-6">Semester Genap</h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm text-gray-600 mb-1">Tanggal Mulai</label>
+                                        <input type="date" id="genapMulai" class="input-field" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-gray-600 mb-1">Tanggal Selesai</label>
+                                        <input type="date" id="genapSelesai" class="input-field" required>
+                                    </div>
+                                </div>
+
+                                <!-- Khusus Kelas Akhir -->
+                                <div class="p-4 bg-yellow-50 rounded-lg mt-6">
+                                    <h4 class="font-semibold text-yellow-800 mb-3">
+                                        <i class="fas fa-graduation-cap mr-2"></i>Kelas Akhir (6, 9, 12)
+                                    </h4>
+                                    <p class="text-yellow-700 text-sm mb-3">
+                                        Semester genap kelas akhir biasanya lebih pendek karena ujian/kelulusan.
+                                    </p>
+                                    <div>
+                                        <label class="block text-sm text-gray-600 mb-1">Tanggal Selesai Kelas Akhir</label>
+                                        <input type="date" id="genapSelesaiKelasAkhir" class="input-field">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn-success w-full mt-6">
+                                    <i class="fas fa-save"></i> Simpan Kalender
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Hari Libur -->
+                        <div class="card">
+                            <h3 class="section-title"><i class="fas fa-umbrella-beach text-accent"></i> Hari Libur</h3>
+                            
+                            <!-- Libur Nasional Baku -->
+                            <div class="mb-6">
+                                <h4 class="font-semibold text-gray-700 mb-3">Libur Nasional (Baku)</h4>
+                                <div class="bg-gray-50 rounded-lg p-4 max-h-40 overflow-y-auto">
+                                    <ul id="liburBaku" class="text-sm text-gray-600 space-y-1">
+                                        <!-- Populated by JS -->
+                                    </ul>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">* Tidak dapat diubah</p>
+                            </div>
+
+                            <!-- Libur Tidak Baku (Editable) -->
+                            <div>
+                                <h4 class="font-semibold text-gray-700 mb-3">Libur Tambahan (Dapat Diubah)</h4>
+                                <div id="liburTambahan" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
+                                    <!-- Populated by JS -->
+                                </div>
+                                <button onclick="showAddLiburModal()" class="btn-secondary w-full">
+                                    <i class="fas fa-plus"></i> Tambah Libur
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Jadwal Section -->
+                <section id="section-jadwal" class="section-content hidden">
+                    <div class="card mb-6">
+                        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0"><i class="fas fa-clock text-primary"></i> Jadwal Pelajaran</h3>
+                            <div class="flex gap-3">
+                                <select id="jadwalKelas" class="input-field w-auto">
+                                    <option value="">Pilih Kelas</option>
+                                </select>
+                                <button onclick="showAddJadwalModal()" class="btn-primary">
+                                    <i class="fas fa-plus"></i> Tambah Jadwal
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Setting Jam Pelajaran -->
+                        <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                            <h4 class="font-semibold text-blue-800 mb-3">
+                                <i class="fas fa-cog mr-2"></i>Pengaturan Jam Pelajaran
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Durasi per JP (menit)</label>
+                                    <input type="number" id="durasiJp" class="input-field" value="35">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Jam Mulai</label>
+                                    <input type="time" id="jamMulai" class="input-field" value="07:00">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Istirahat (menit)</label>
+                                    <input type="number" id="durasiIstirahat" class="input-field" value="15">
+                                </div>
+                            </div>
+                            <button onclick="saveJamPelajaran()" class="btn-success mt-4">
+                                <i class="fas fa-save"></i> Simpan Pengaturan
+                            </button>
+                        </div>
+
+                        <!-- Jadwal Table -->
+                        <div class="overflow-x-auto">
+                            <table class="table-auto" id="tableJadwal">
+                                <thead>
+                                    <tr>
+                                        <th>Jam Ke</th>
+                                        <th>Waktu</th>
+                                        <th>Senin</th>
+                                        <th>Selasa</th>
+                                        <th>Rabu</th>
+                                        <th>Kamis</th>
+                                        <th>Jumat</th>
+                                        <th>Sabtu</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyJadwal">
+                                    <tr>
+                                        <td colspan="8" class="text-center text-gray-500 py-8">
+                                            Pilih kelas untuk melihat jadwal
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Data Siswa Section -->
+                <section id="section-siswa" class="section-content hidden">
+                    <div class="card">
+                        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0"><i class="fas fa-users text-primary"></i> Data Siswa</h3>
+                            <div class="flex gap-3">
+                                <select id="siswaKelas" class="input-field w-auto">
+                                    <option value="">Semua Kelas</option>
+                                </select>
+                                <button onclick="showImportSiswaModal()" class="btn-success">
+                                    <i class="fas fa-file-import"></i> Import CSV
+                                </button>
+                                <button onclick="showAddSiswaModal()" class="btn-primary">
+                                    <i class="fas fa-plus"></i> Tambah Siswa
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="table-auto" id="tableSiswa">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>NISN</th>
+                                        <th>Nama Siswa</th>
+                                        <th>L/P</th>
+                                        <th>Kelas</th>
+                                        <th>Rombel</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodySiswa">
+                                    <tr>
+                                        <td colspan="7" class="text-center text-gray-500 py-8">
+                                            Belum ada data siswa
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CP/TP Section -->
+                <section id="section-cp" class="section-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Upload & Data CP -->
+                        <div class="lg:col-span-2">
+                            <div class="card mb-6">
+                                <h3 class="section-title"><i class="fas fa-upload text-success"></i> Upload Data CP/TP</h3>
+                                
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                                    <p class="text-yellow-800 text-sm">
+                                        <strong>Format CSV yang diperlukan:</strong><br>
+                                        Fase;Kelas;Semester;Elemen/Bab;Capaian Pembelajaran;Tujuan Pembelajaran;Dimensi Profil
+                                    </p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                                        <select id="cpMapel" class="input-field">
+                                            <option value="">Pilih Mapel</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenjang</label>
+                                        <select id="cpJenjang" class="input-field">
+                                            <option value="">Pilih Jenjang</option>
+                                            <option value="SD">SD / MI</option>
+                                            <option value="SMP">SMP / MTs</option>
+                                            <option value="SMA">SMA / MA / SMK</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors mb-4" id="dropZoneCP">
+                                    <input type="file" id="inputFileCP" accept=".csv" class="hidden">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                                    <p class="text-gray-600 mb-2">Drag & drop file CSV atau</p>
+                                    <button onclick="document.getElementById('inputFileCP').click()" class="btn-primary">
+                                        <i class="fas fa-folder-open"></i> Pilih File
+                                    </button>
+                                </div>
+
+                                <div class="text-center">
+                                    <p class="text-gray-500 text-sm mb-2">atau gunakan link Google Spreadsheet (CSV)</p>
+                                    <div class="flex gap-2">
+                                        <input type="url" id="cpCsvUrl" class="input-field" placeholder="https://docs.google.com/spreadsheets/.../export?format=csv">
+                                        <button onclick="loadCPFromUrl()" class="btn-secondary">
+                                            <i class="fas fa-link"></i> Load
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Preview CP -->
+                            <div class="card">
+                                <h3 class="section-title"><i class="fas fa-eye text-primary"></i> Preview Data CP/TP</h3>
+                                <div class="overflow-x-auto max-h-96">
+                                    <table class="table-auto text-xs" id="tableCPPreview">
+                                        <thead>
+                                            <tr>
+                                                <th>Fase</th>
+                                                <th>Kelas</th>
+                                                <th>Smt</th>
+                                                <th>Elemen/Bab</th>
+                                                <th>CP</th>
+                                                <th>TP</th>
+                                                <th>Profil</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="bodyCPPreview">
+                                            <tr>
+                                                <td colspan="7" class="text-center text-gray-500 py-8">
+                                                    Upload file CSV untuk melihat preview
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data CP Tersimpan -->
+                        <div class="card">
+                            <h3 class="section-title"><i class="fas fa-database text-primary"></i> Data CP Tersimpan</h3>
+                            <div id="listCPTersimpan" class="space-y-2 max-h-96 overflow-y-auto">
+                                <p class="text-gray-500 text-sm text-center py-4">Belum ada data tersimpan</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ATP Section -->
+                <section id="section-atp" class="section-content hidden">
+                    <div class="card mb-6 no-print">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <h3 class="section-title mb-0"><i class="fas fa-route text-primary"></i> Alur Tujuan Pembelajaran (ATP)</h3>
+                            <div class="flex flex-wrap gap-3">
+                                <select id="atpMapel" class="input-field w-auto">
+                                    <option value="">Pilih Mapel</option>
+                                </select>
+                                <select id="atpKelas" class="input-field w-auto">
+                                    <option value="">Pilih Kelas</option>
+                                </select>
+                                <select id="atpSemester" class="input-field w-auto">
+                                    <option value="Ganjil">Ganjil</option>
+                                    <option value="Genap">Genap</option>
+                                </select>
+                                <button onclick="generateATP()" class="btn-success">
+                                    <i class="fas fa-sync-alt"></i> Generate
+                                </button>
+                                <button onclick="printDocument('atp')" class="btn-primary">
+                                    <i class="fas fa-print"></i> Cetak
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ATP Preview -->
+                    <div class="document-preview overflow-x-auto p-4" id="previewATP">
+                        <div class="document-page landscape" id="documentATP">
+                            <div class="text-center font-bold text-sm mb-4" style="text-transform: uppercase;">
+                                ALUR TUJUAN PEMBELAJARAN (ATP)<br>
+                                TAHUN PELAJARAN <span class="val-tahun"></span>
+                            </div>
+                            
+                            <table class="w-full text-xs mb-4">
+                                <tr>
+                                    <td width="150">NAMA SEKOLAH</td>
+                                    <td>: <span class="val-sekolah"></span></td>
+                                    <td width="100">KELAS</td>
+                                    <td>: <span class="val-kelas"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>MATA PELAJARAN</td>
+                                    <td>: <span class="val-mapel"></span></td>
+                                    <td>SEMESTER</td>
+                                    <td>: <span class="val-semester"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>FASE</td>
+                                    <td>: <span class="val-fase"></span></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </table>
+
+                            <table class="w-full border-collapse border border-black text-xs" id="tableATP">
+                                <thead>
+                                    <tr>
+                                        <th class="border border-black p-2 bg-gray-100" width="3%">NO</th>
+                                        <th class="border border-black p-2 bg-gray-100" width="17%">ELEMEN DAN CAPAIAN PEMBELAJARAN</th>
+                                        <th class="border border-black p-2 bg-gray-100" width="12%">TUJUAN PEMBELAJARAN</th>
+                                        <th class="border border-black p-2 bg-gray-100" width="22%">ALUR TUJUAN PEMBELAJARAN</th>
+                                        <th class="border border-black p-2 bg-gray-100" width="14%">DIMENSI PROFIL LULUSAN</th>
+                                        <th class="border border-black p-2 bg-gray-100" width="10%">KOMPETENSI</th>
+                                        <th class="border border-black p-2 bg-gray-100" width="10%">LINGKUP MATERI</th>
+                                        <th class="border border-black p-2 bg-gray-100" width="6%">WAKTU</th>
+                                        <th class="border border-black p-2 bg-gray-100" width="6%">KET.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyATP">
+                                    <tr>
+                                        <td colspan="9" class="border border-black p-4 text-center text-gray-500">
+                                            Klik "Generate" untuk membuat ATP
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="flex justify-between mt-8 text-xs">
+                                <div class="text-center">
+                                    <p>Mengetahui,</p>
+                                    <p>Kepala Sekolah</p>
+                                    <br><br><br>
+                                    <p class="font-bold underline val-kepsek"></p>
+                                    <p>NIP. <span class="val-nip-kepsek"></span></p>
+                                </div>
+                                <div class="text-center">
+                                    <p><span class="val-kota"></span>, <span class="val-tanggal"></span></p>
+                                    <p>Guru Mata Pelajaran</p>
+                                    <br><br><br>
+                                    <p class="font-bold underline val-guru"></p>
+                                    <p>NIP. <span class="val-nip-guru"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Prota Section -->
+                <section id="section-prota" class="section-content hidden">
+                    <div class="card mb-6 no-print">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <h3 class="section-title mb-0"><i class="fas fa-calendar-check text-primary"></i> Program Tahunan (Prota)</h3>
+                            <div class="flex flex-wrap gap-3">
+                                <select id="protaMapel" class="input-field w-auto">
+                                    <option value="">Pilih Mapel</option>
+                                </select>
+                                <select id="protaKelas" class="input-field w-auto">
+                                    <option value="">Pilih Kelas</option>
+                                </select>
+                                <button onclick="generateProta()" class="btn-success">
+                                    <i class="fas fa-sync-alt"></i> Generate
+                                </button>
+                                <button onclick="printDocument('prota')" class="btn-primary">
+                                    <i class="fas fa-print"></i> Cetak
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="document-preview overflow-x-auto p-4" id="previewProta">
+                        <div class="document-page" id="documentProta">
+                            <div class="text-center font-bold text-sm mb-6" style="text-transform: uppercase;">
+                                PROGRAM TAHUNAN (PROTA)<br>
+                                <span class="val-mapel"></span>
+                            </div>
+                            
+                            <table class="w-full text-sm mb-6">
+                                <tr>
+                                    <td width="180">Satuan Pendidikan</td>
+                                    <td width="10">:</td>
+                                    <td><span class="val-sekolah"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>Mata Pelajaran</td>
+                                    <td>:</td>
+                                    <td><span class="val-mapel"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>Fase / Kelas</td>
+                                    <td>:</td>
+                                    <td><span class="val-fase"></span> / <span class="val-kelas"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>Tahun Pelajaran</td>
+                                    <td>:</td>
+                                    <td><span class="val-tahun"></span></td>
+                                </tr>
+                            </table>
+
+                            <table class="w-full border-collapse border border-black text-sm" id="tableProta">
+                                <thead>
+                                    <tr>
+                                        <th class="border border-black p-2 bg-gray-100" width="10%">Semester</th>
+                                        <th class="border border-black p-2 bg-gray-100" width="15%">Bab / Elemen</th>
+                                        <th class="border border-black p-2 bg-gray-100" width="65%">Tujuan Pembelajaran</th>
+                                        <th class="border border-black p-2 bg-gray-100" width="10%">JP</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyProta">
+                                    <tr>
+                                        <td colspan="4" class="border border-black p-4 text-center text-gray-500">
+                                            Klik "Generate" untuk membuat Prota
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="flex justify-between mt-8 text-sm">
+                                <div class="text-center">
+                                    <p>Mengetahui,</p>
+                                    <p>Kepala Sekolah</p>
+                                    <br><br><br>
+                                    <p class="font-bold underline val-kepsek"></p>
+                                    <p>NIP. <span class="val-nip-kepsek"></span></p>
+                                </div>
+                                <div class="text-center">
+                                    <p><span class="val-kota"></span>, <span class="val-tanggal"></span></p>
+                                    <p>Guru Mata Pelajaran</p>
+                                    <br><br><br>
+                                    <p class="font-bold underline val-guru"></p>
+                                    <p>NIP. <span class="val-nip-guru"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Promes Section -->
+                <section id="section-promes" class="section-content hidden">
+                    <div class="card mb-6 no-print">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <h3 class="section-title mb-0"><i class="fas fa-table text-primary"></i> Program Semester (Promes)</h3>
+                            <div class="flex flex-wrap gap-3">
+                                <select id="promesMapel" class="input-field w-auto">
+                                    <option value="">Pilih Mapel</option>
+                                </select>
+                                <select id="promesKelas" class="input-field w-auto">
+                                    <option value="">Pilih Kelas</option>
+                                </select>
+                                <select id="promesSemester" class="input-field w-auto">
+                                    <option value="Ganjil">Ganjil</option>
+                                    <option value="Genap">Genap</option>
+                                </select>
+                                <button onclick="generatePromes()" class="btn-success">
+                                    <i class="fas fa-sync-alt"></i> Generate
+                                </button>
+                                <button onclick="printDocument('promes')" class="btn-primary">
+                                    <i class="fas fa-print"></i> Cetak
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="document-preview overflow-x-auto p-4" id="previewPromes">
+                        <div class="document-page landscape" id="documentPromes" style="width: 100%; max-width: none;">
+                            <div class="text-center font-bold text-sm mb-4" style="text-transform: uppercase;">
+                                PROGRAM SEMESTER (PROMES)<br>
+                                SEMESTER <span class="val-semester"></span>
+                            </div>
+                            
+                            <table class="text-xs mb-4">
+                                <tr>
+                                    <td width="150">Satuan Pendidikan</td>
+                                    <td>: <span class="val-sekolah"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>Mata Pelajaran</td>
+                                    <td>: <span class="val-mapel"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>Fase / Kelas</td>
+                                    <td>: <span class="val-fase"></span> / <span class="val-kelas"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>Tahun Pelajaran</td>
+                                    <td>: <span class="val-tahun"></span></td>
+                                </tr>
+                            </table>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full border-collapse border border-black text-xs" id="tablePromes">
+                                    <thead id="headPromes">
+                                        <!-- Generated by JS -->
+                                    </thead>
+                                    <tbody id="bodyPromes">
+                                        <tr>
+                                            <td colspan="33" class="border border-black p-4 text-center text-gray-500">
+                                                Klik "Generate" untuk membuat Promes
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="flex justify-between mt-8 text-xs">
+                                <div class="text-center">
+                                    <p>Mengetahui,</p>
+                                    <p>Kepala Sekolah</p>
+                                    <br><br><br>
+                                    <p class="font-bold underline val-kepsek"></p>
+                                    <p>NIP. <span class="val-nip-kepsek"></span></p>
+                                </div>
+                                <div class="text-center">
+                                    <p><span class="val-kota"></span>, <span class="val-tanggal"></span></p>
+                                    <p>Guru Mata Pelajaran</p>
+                                    <br><br><br>
+                                    <p class="font-bold underline val-guru"></p>
+                                    <p>NIP. <span class="val-nip-guru"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- AI Assistant Section -->
+                <section id="section-ai-assistant" class="section-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="card">
+                            <h3 class="section-title"><i class="fas fa-robot text-accent"></i> AI Assistant</h3>
+                            <p class="text-gray-600 mb-4">
+                                Gunakan prompt di bawah ini untuk membantu AI (ChatGPT/Gemini/Claude) mengubah materi mentah menjadi format CSV yang bisa diupload ke sistem.
+                            </p>
+
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h4 class="font-semibold text-gray-800 mb-2">
+                                        <i class="fas fa-file-csv mr-2 text-green-500"></i>
+                                        Prompt untuk Membuat CP-Mapel-Jenjang.csv
+                                    </h4>
+                                    <div class="bg-white rounded border p-3 text-sm font-mono text-gray-700 max-h-40 overflow-y-auto" id="promptCP">
+Buatkan data Capaian Pembelajaran (CP) dan Tujuan Pembelajaran (TP) untuk mata pelajaran [NAMA MAPEL] jenjang [SD/SMP/SMA] dalam format CSV dengan delimiter titik koma (;).
+
+Format kolom: Fase;Kelas;Semester;Elemen/Bab;Capaian Pembelajaran (CP);Tujuan Pembelajaran (TP);Dimensi Profil Lulusan
+
+Ketentuan:
+1. Fase sesuai jenjang: SD (Fase A=Kls 1-2, B=Kls 3-4, C=Kls 5-6), SMP (Fase D=Kls 7-9), SMA (Fase E=Kls 10, F=Kls 11-12)
+2. Semester: Ganjil atau Genap
+3. Dimensi Profil Lulusan pilih dari: Keimanan, Kewargaan, Penalaran Kritis, Kreativitas, Kolaborasi, Kemandirian, Kesehatan, Komunikasi
+4. JANGAN gunakan tanda koma dalam teks CP dan TP
+5. Setiap bab/elemen bisa memiliki beberapa TP
+
+Contoh output:
+Fase A;1;Ganjil;Al-Qur'an Hadis / Bab 1;Peserta didik mengenal huruf hijaiyah...;Peserta didik mampu melafalkan huruf hijaiyah...;Keimanan, Komunikasi
+                                    </div>
+                                    <button onclick="copyPrompt('promptCP')" class="btn-secondary mt-3">
+                                        <i class="fas fa-copy"></i> Salin Prompt
+                                    </button>
+                                </div>
+
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h4 class="font-semibold text-gray-800 mb-2">
+                                        <i class="fas fa-users mr-2 text-blue-500"></i>
+                                        Prompt untuk Data Siswa
+                                    </h4>
+                                    <div class="bg-white rounded border p-3 text-sm font-mono text-gray-700" id="promptSiswa">
+Format CSV data siswa (delimiter koma):
+nisn,nama,jenis_kelamin,kelas,rombel
+
+Contoh:
+0012345678,Ahmad Fauzi,L,7,A
+0012345679,Siti Aisyah,P,7,A
+                                    </div>
+                                    <button onclick="copyPrompt('promptSiswa')" class="btn-secondary mt-3">
+                                        <i class="fas fa-copy"></i> Salin Format
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3 class="section-title"><i class="fas fa-lightbulb text-accent"></i> Tips Penggunaan</h3>
+                            <div class="space-y-4 text-sm text-gray-700">
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-blue-600 font-bold">1</span>
+                                    </div>
+                                    <p>Salin prompt di atas dan paste ke ChatGPT, Gemini, atau Claude.</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-blue-600 font-bold">2</span>
+                                    </div>
+                                    <p>Ganti [NAMA MAPEL] dan [JENJANG] sesuai kebutuhan Anda.</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-blue-600 font-bold">3</span>
+                                    </div>
+                                    <p>Copy hasil output AI ke notepad/text editor.</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-blue-600 font-bold">4</span>
+                                    </div>
+                                    <p>Save file dengan ekstensi .csv (contoh: cp-pai-sd.csv)</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-blue-600 font-bold">5</span>
+                                    </div>
+                                    <p>Upload file tersebut di menu "Data CP/TP".</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Panduan Section -->
+                <section id="section-panduan" class="section-content hidden">
+                    <div class="card">
+                        <h3 class="section-title"><i class="fas fa-book-reader text-primary"></i> Panduan Lengkap Penggunaan Aplikasi</h3>
+                        
+                        <div class="prose max-w-none">
+                            <div class="bg-blue-50 rounded-lg p-6 mb-6">
+                                <h4 class="text-lg font-bold text-blue-800 mb-3">🎯 Konsep Single Input - Multi Output</h4>
+                                <p class="text-blue-700">
+                                    Aplikasi ini dirancang untuk memudahkan guru dalam membuat dokumen administrasi mengajar. 
+                                    Cukup dengan memasukkan data dasar (Kalender, Jadwal, CP/TP), sistem akan otomatis 
+                                    menghasilkan semua dokumen yang dibutuhkan seperti ATP, Prota, Promes, Modul Ajar, dan lainnya.
+                                </p>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3">📋 Langkah 1: Lengkapi Profil</h4>
+                                    <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                                        <li>Buka menu <strong>Profil Saya</strong></li>
+                                        <li>Isi data diri (Nama, NIP, No. HP)</li>
+                                        <li>Isi data sekolah (Nama Sekolah, Jenjang, Kota, Kepala Sekolah)</li>
+                                        <li>Tambahkan mata pelajaran yang diampu beserta jumlah JP per pertemuan</li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3">📅 Langkah 2: Atur Kalender Pendidikan</h4>
+                                    <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                                        <li>Buka menu <strong>Kalender Pendidikan</strong></li>
+                                        <li>Set tanggal mulai dan selesai untuk semester ganjil dan genap</li>
+                                        <li>Untuk kelas akhir (6, 9, 12), set tanggal selesai yang berbeda</li>
+                                        <li>Tambahkan hari libur khusus jika ada</li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3">📚 Langkah 3: Upload Data CP/TP</h4>
+                                    <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                                        <li>Buka menu <strong>Data CP/TP</strong></li>
+                                        <li>Pilih mata pelajaran dan jenjang</li>
+                                        <li>Upload file CSV sesuai format yang ditentukan</li>
+                                        <li>Gunakan <strong>AI Assistant</strong> untuk membantu membuat file CSV</li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3">⏰ Langkah 4: Buat Jadwal Pelajaran</h4>
+                                    <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                                        <li>Buka menu <strong>Jadwal Pelajaran</strong></li>
+                                        <li>Set durasi JP dan jam mulai</li>
+                                        <li>Pilih kelas dan tambahkan jadwal mengajar</li>
+                                        <li>Sistem akan otomatis validasi agar tidak bentrok</li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3">📄 Langkah 5: Generate Dokumen</h4>
+                                    <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                                        <li>Buka menu dokumen yang diinginkan (ATP, Prota, Promes, dll)</li>
+                                        <li>Pilih mapel, kelas, dan semester</li>
+                                        <li>Klik tombol <strong>Generate</strong></li>
+                                        <li>Dokumen akan otomatis terisi dan bisa dicetak/disimpan PDF</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="bg-yellow-50 rounded-lg p-6 mt-6">
+                                <h4 class="text-lg font-bold text-yellow-800 mb-3">⭐ Fitur Premium</h4>
+                                <p class="text-yellow-700 mb-3">
+                                    Upgrade ke Premium untuk mendapatkan akses penuh ke semua fitur:
+                                </p>
+                                <ul class="list-disc list-inside text-yellow-700 space-y-1 ml-4">
+                                    <li>Modul Ajar dengan dukungan teks Arab (RTL)</li>
+                                    <li>LKPD (Lembar Kerja Peserta Didik)</li>
+                                    <li>KKTP (Kriteria Ketercapaian Tujuan Pembelajaran)</li>
+                                    <li>Jurnal Pembelajaran terintegrasi dengan Absensi</li>
+                                    <li>Daftar Nilai dengan berbagai komponen penilaian</li>
+                                    <li>Bank Soal</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Premium Sections (Modul Ajar, LKPD, KKTP, Jurnal, Absensi, Nilai) -->
+                <!-- These sections would show upgrade prompt for free users -->
+                <section id="section-modul-ajar" class="section-content hidden">
+                    <div class="card text-center py-16" id="modulAjarLocked">
+                        <i class="fas fa-lock text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2">Fitur Premium</h3>
+                        <p class="text-gray-500 mb-6">Upgrade ke Premium untuk mengakses Modul Ajar</p>
+                        <button onclick="showUpgradeModal()" class="btn-warning">
+                            <i class="fas fa-crown"></i> Upgrade Sekarang
+                        </button>
+                    </div>
+                    <div id="modulAjarContent" class="hidden">
+                        <!-- Premium content here -->
+                    </div>
+                </section>
+
+                <!-- Similar locked sections for other premium features -->
+                <section id="section-lkpd" class="section-content hidden">
+                    <div class="card text-center py-16">
+                        <i class="fas fa-lock text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2">Fitur Premium</h3>
+                        <p class="text-gray-500 mb-6">Upgrade ke Premium untuk mengakses LKPD</p>
+                        <button onclick="showUpgradeModal()" class="btn-warning">
+                            <i class="fas fa-crown"></i> Upgrade Sekarang
+                        </button>
+                    </div>
+                </section>
+
+                <section id="section-kktp" class="section-content hidden">
+                    <div class="card text-center py-16">
+                        <i class="fas fa-lock text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2">Fitur Premium</h3>
+                        <p class="text-gray-500 mb-6">Upgrade ke Premium untuk mengakses KKTP</p>
+                        <button onclick="showUpgradeModal()" class="btn-warning">
+                            <i class="fas fa-crown"></i> Upgrade Sekarang
+                        </button>
+                    </div>
+                </section>
+
+                <section id="section-jurnal" class="section-content hidden">
+                    <div class="card text-center py-16">
+                        <i class="fas fa-lock text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2">Fitur Premium</h3>
+                        <p class="text-gray-500 mb-6">Upgrade ke Premium untuk mengakses Jurnal Pembelajaran</p>
+                        <button onclick="showUpgradeModal()" class="btn-warning">
+                            <i class="fas fa-crown"></i> Upgrade Sekarang
+                        </button>
+                    </div>
+                </section>
+
+                <section id="section-absensi" class="section-content hidden">
+                    <div class="card text-center py-16">
+                        <i class="fas fa-lock text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2">Fitur Premium</h3>
+                        <p class="text-gray-500 mb-6">Upgrade ke Premium untuk mengakses Absensi</p>
+                        <button onclick="showUpgradeModal()" class="btn-warning">
+                            <i class="fas fa-crown"></i> Upgrade Sekarang
+                        </button>
+                    </div>
+                </section>
+
+                <section id="section-nilai" class="section-content hidden">
+                    <div class="card text-center py-16">
+                        <i class="fas fa-lock text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2">Fitur Premium</h3>
+                        <p class="text-gray-500 mb-6">Upgrade ke Premium untuk mengakses Daftar Nilai</p>
+                        <button onclick="showUpgradeModal()" class="btn-warning">
+                            <i class="fas fa-crown"></i> Upgrade Sekarang
+                        </button>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Upgrade Modal -->
+    <div id="modalUpgrade" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden">
+            <div class="bg-gradient-to-r from-yellow-400 to-orange-500 p-6 text-center">
+                <i class="fas fa-crown text-5xl text-white mb-3"></i>
+                <h3 class="text-2xl font-bold text-white">Upgrade ke Premium</h3>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 mb-4">Dapatkan akses penuh ke semua fitur dengan upgrade ke Premium!</p>
+                <ul class="space-y-2 mb-6">
+                    <li class="flex items-center gap-2 text-gray-700">
+                        <i class="fas fa-check text-green-500"></i> Modul Ajar + LKPD
+                    </li>
+                    <li class="flex items-center gap-2 text-gray-700">
+                        <i class="fas fa-check text-green-500"></i> Jurnal & Absensi Terintegrasi
+                    </li>
+                    <li class="flex items-center gap-2 text-gray-700">
+                        <i class="fas fa-check text-green-500"></i> KKTP & Daftar Nilai
+                    </li>
+                    <li class="flex items-center gap-2 text-gray-700">
+                        <i class="fas fa-check text-green-500"></i> Dukungan Teks Arab (RTL)
+                    </li>
+                    <li class="flex items-center gap-2 text-gray-700">
+                        <i class="fas fa-check text-green-500"></i> Bank Soal
+                    </li>
+                </ul>
+                <a id="linkWhatsappUpgrade" href="#" target="_blank" class="btn-success w-full justify-center mb-3">
+                    <i class="fab fa-whatsapp"></i> Hubungi Admin via WhatsApp
+                </a>
+                <button onclick="closeModal('modalUpgrade')" class="btn-secondary w-full justify-center">
+                    Nanti Saja
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Mapel Modal -->
+    <div id="modalAddMapel" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-md p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">
+                <i class="fas fa-book mr-2 text-primary"></i>Tambah Mata Pelajaran
+            </h3>
+            <form id="formAddMapel" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Mata Pelajaran</label>
+                    <input type="text" id="mapelNama" class="input-field" placeholder="Contoh: Pendidikan Agama Islam" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah JP per Pertemuan</label>
+                    <input type="number" id="mapelJp" class="input-field" value="2" min="1" max="8" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pertemuan per Minggu</label>
+                    <input type="number" id="mapelPertemuan" class="input-field" value="1" min="1" max="5" required>
+                </div>
+                <div>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" id="mapelArabic" class="w-4 h-4 text-primary">
+                        <span class="text-sm text-gray-700">Butuh dukungan teks Arab (RTL)</span>
+                    </label>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeModal('modalAddMapel')" class="btn-secondary flex-1 justify-center">
+                        Batal
+                    </button>
+                    <button type="submit" class="btn-success flex-1 justify-center">
+                        <i class="fas fa-plus"></i> Tambah
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl p-8 flex flex-col items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mb-4"></div>
+            <p class="text-gray-700 font-medium" id="loadingText">Memproses...</p>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="hidden fixed bottom-4 right-4 z-50 max-w-sm">
+        <div class="bg-white rounded-lg shadow-lg border-l-4 p-4 flex items-center gap-3">
+            <i id="toastIcon" class="fas text-xl"></i>
+            <p id="toastMessage" class="text-gray-700"></p>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app-core.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Super Admin
+    function isSuperAdmin() {
+      return request.auth != null && request.auth.token.email == 'afifaro@gmail.com';
+    }
+    
+    // Owner check
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Settings - read all, write super admin only
+    match /settings/{document} {
+      allow read: if request.auth != null;
+      allow write: if isSuperAdmin();
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isSuperAdmin();
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if isOwner(userId) || isSuperAdmin();
+      allow delete: if isSuperAdmin();
+      
+      // Subcollections
+      match /{subcollection}/{document} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // Public data (CP templates)
+    match /cpTemplates/{document} {
+      allow read: if request.auth != null;
+      allow write: if isSuperAdmin();
+    }
+  }
+}
