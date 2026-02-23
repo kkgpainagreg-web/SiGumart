@@ -140,6 +140,51 @@
             width: 297mm;
             min-height: 210mm;
         }
+        /* RTL Support for Arabic Text */
+.rtl-text {
+    direction: rtl;
+    text-align: right;
+    font-family: 'Traditional Arabic', 'Scheherazade New', 'Amiri', 'Noto Naskh Arabic', serif;
+    line-height: 2;
+}
+
+/* Arabic input styling */
+[contenteditable].rtl-text:focus {
+    outline: 2px solid #10b981;
+    border-radius: 4px;
+}
+
+/* Improve table cell editing */
+td[contenteditable="true"]:focus {
+    background-color: #fef9c3 !important;
+    outline: 2px solid #eab308;
+}
+
+/* LKPD styles */
+.lkpd-box {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+/* Emoji support */
+.emoji-large {
+    font-size: 2rem;
+}
+
+/* Print improvements */
+@media print {
+    .document-page {
+        padding: 10mm !important;
+    }
+    
+    [contenteditable="true"] {
+        border: none !important;
+    }
+    
+    .bg-yellow-50, .bg-blue-50, .bg-green-50 {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -2052,4 +2097,5 @@ Contoh:
     <script src="js/firebase-config.js"></script>
     <script src="js/app-core.js"></script>
 </body>
+
 </html>
