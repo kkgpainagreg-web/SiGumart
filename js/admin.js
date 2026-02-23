@@ -1,109 +1,80 @@
-// Admin Panel Functions
+// ============================================
+// ADMIN PANEL - AGSA
+// ============================================
 
 let adminUser = null;
 let adminUserData = null;
 let allUsers = [];
-let filteredUsers = [];
 
-// Firebase Config (inline untuk admin)
-const firebaseConfig = {
-    apiKey: "AIzaSyDe4ie2wSPEpNbAgWP-q03vTuHyxc9Jj3E",
-    authDomain: "agsa-e5b08.firebaseapp.com",
-    projectId: "agsa-e5b08",
-    storageBucket: "agsa-e5b08.firebasestorage.app",
-    messagingSenderId: "916052746331",
-    appId: "1:916052746331:web:357cbadbfd8658f1689f7e",
-};
+// Auth State Listener for Admin
+auth.onAuthStateChanged(async (user) => {
+    updateStatus('Memeriksa autentikasi...');
+    
+    if (!user) {
+        updateStatus('Tidak ada sesi login');
+        setTimeout(() => window.location.href = 'index.html', 1500);
+        return;
+    }
+    
+    adminUser = user;
+    updateStatus('Memverifikasi hak akses...');
+    
+    try {
+        await checkAdminAccess();
+    } catch (error) {
+        console.error('Admin access error:', error);
+        showAccessDenied();
+    }
+});
 
-const SUPER_ADMIN_EMAIL = 'afifaro@gmail.com';
-
-// Update loading status
-function updateLoadingStatus(text) {
+function updateStatus(text) {
     const el = document.getElementById('loadingStatus');
     if (el) el.textContent = text;
 }
 
-// Check Admin Access on Load
-document.addEventListener('DOMContentLoaded', function() {
-    updateLoadingStatus('Memeriksa autentikasi...');
+async function checkAdminAccess() {
+    const userDoc = await db.collection('users').doc(adminUser.uid).get();
     
-    auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-            updateLoadingStatus('Tidak ada sesi login...');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1000);
+    if (!userDoc.exists) {
+        // Create super admin doc if email matches
+        if (adminUser.email === APP_CONFIG.superAdminEmail) {
+            updateStatus('Membuat akun Super Admin...');
+            await createSuperAdminDocument();
+            adminUserData = (await db.collection('users').doc(adminUser.uid).get()).data();
+        } else {
+            showAccessDenied();
             return;
         }
-        
-        adminUser = user;
-        updateLoadingStatus('Memeriksa hak akses...');
-        
-        try {
-            // Check if user document exists
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            
-            if (!userDoc.exists) {
-                // Create user document if not exists
-                if (user.email === SUPER_ADMIN_EMAIL) {
-                    updateLoadingStatus('Membuat akun Super Admin...');
-                    await createSuperAdminDoc(user);
-                    adminUserData = (await db.collection('users').doc(user.uid).get()).data();
-                } else {
-                    showAccessDenied();
-                    return;
-                }
-            } else {
-                adminUserData = userDoc.data();
-            }
-            
-            // Check if super admin
-            if (adminUserData.role !== 'super_admin' && user.email !== SUPER_ADMIN_EMAIL) {
-                // Maybe role not set, check email
-                if (user.email === SUPER_ADMIN_EMAIL) {
-                    // Update to super admin
-                    await db.collection('users').doc(user.uid).update({
-                        role: 'super_admin',
-                        subscription: 'premium'
-                    });
-                    adminUserData.role = 'super_admin';
-                    adminUserData.subscription = 'premium';
-                } else {
-                    showAccessDenied();
-                    return;
-                }
-            }
-            
-            // All good, initialize admin
-            updateLoadingStatus('Memuat dashboard...');
-            await initAdmin();
-            
-        } catch (error) {
-            console.error('Error checking admin access:', error);
-            updateLoadingStatus('Error: ' + error.message);
-            
-            // If error and email matches, try to continue
-            if (user.email === SUPER_ADMIN_EMAIL) {
-                try {
-                    await createSuperAdminDoc(user);
-                    await initAdmin();
-                } catch (e) {
-                    showAccessDenied();
-                }
-            } else {
-                showAccessDenied();
-            }
-        }
-    });
-});
+    } else {
+        adminUserData = userDoc.data();
+    }
+    
+    // Verify role
+    if (adminUserData.role !== 'super_admin' && adminUser.email !== APP_CONFIG.superAdminEmail) {
+        showAccessDenied();
+        return;
+    }
+    
+    // Fix role if email matches but role is wrong
+    if (adminUser.email === APP_CONFIG.superAdminEmail && adminUserData.role !== 'super_admin') {
+        await db.collection('users').doc(adminUser.uid).update({
+            role: 'super_admin',
+            subscription: 'premium'
+        });
+        adminUserData.role = 'super_admin';
+        adminUserData.subscription = 'premium';
+    }
+    
+    updateStatus('Memuat dashboard...');
+    await initializeAdmin();
+}
 
-// Create Super Admin Document
-async function createSuperAdminDoc(user) {
-    const adminData = {
-        uid: user.uid,
-        email: user.email,
-        name: user.displayName || 'Super Admin',
-        photoURL: user.photoURL || '',
+async function createSuperAdminDocument() {
+    await db.collection('users').doc(adminUser.uid).set({
+        uid: adminUser.uid,
+        email: adminUser.email,
+        name: adminUser.displayName || 'Super Admin',
+        photoURL: adminUser.photoURL || '',
         role: 'super_admin',
         subscription: 'premium',
         subscriptionExpiry: null,
@@ -113,49 +84,32 @@ async function createSuperAdminDoc(user) {
             nip: '',
             phone: '',
             subjects: [],
-            school: {
-                name: '',
-                npsn: '',
-                address: '',
-                city: '',
-                province: '',
-                level: 'SD',
-                headmaster: '',
-                headmasterNip: ''
-            }
+            school: { name: '', npsn: '', address: '', city: '', province: '', level: 'SD', headmaster: '', headmasterNip: '' }
         },
-        settings: {
-            academicYear: '2024/2025',
-            lessonDuration: 35,
-            theme: 'light'
-        }
-    };
-    
-    await db.collection('users').doc(user.uid).set(adminData);
+        settings: { academicYear: getCurrentAcademicYear().current, lessonDuration: 35, theme: 'light' }
+    });
 }
 
-// Show Access Denied
 function showAccessDenied() {
     document.getElementById('loadingOverlay').classList.add('hidden');
     document.getElementById('accessDenied').classList.remove('hidden');
 }
 
-// Initialize Admin Panel
-async function initAdmin() {
-    // Update admin info
-    document.getElementById('adminName').textContent = adminUserData.name || adminUser.displayName || 'Admin';
-    document.getElementById('adminEmail').textContent = adminUser.email;
+async function initializeAdmin() {
+    // Update admin info in sidebar
+    const nameEl = document.getElementById('adminName');
+    const emailEl = document.getElementById('adminEmail');
+    const avatarEl = document.getElementById('adminAvatar');
     
-    const avatarUrl = adminUser.photoURL || 
-        `https://ui-avatars.com/api/?name=${encodeURIComponent(adminUserData.name || 'Admin')}&background=f59e0b&color=fff`;
-    document.getElementById('adminAvatar').src = avatarUrl;
+    if (nameEl) nameEl.textContent = adminUserData.name || adminUser.displayName || 'Admin';
+    if (emailEl) emailEl.textContent = adminUser.email;
+    if (avatarEl) avatarEl.src = adminUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(adminUserData.name || 'A')}&background=f59e0b&color=fff`;
     
     // Load data
     await loadAllUsers();
     await loadAdminSettings();
-    loadCPDataList();
     
-    // Show admin panel
+    // Show panel
     document.getElementById('loadingOverlay').classList.add('hidden');
     document.getElementById('adminPanel').classList.remove('hidden');
 }
@@ -165,86 +119,79 @@ async function loadAllUsers() {
     try {
         const snapshot = await db.collection('users').orderBy('createdAt', 'desc').get();
         allUsers = [];
-        snapshot.forEach(doc => {
-            allUsers.push({ id: doc.id, ...doc.data() });
-        });
-        filteredUsers = [...allUsers];
-        renderUsersTable(filteredUsers);
-        updateStats();
-        loadRecentActivity();
-        loadSchoolsList();
-        loadPremiumUsersList();
+        snapshot.forEach(doc => allUsers.push({ id: doc.id, ...doc.data() }));
+        
+        renderUsersTable(allUsers);
+        updateStatistics();
+        renderRecentActivity();
+        renderSchoolsList();
+        renderPremiumUsers();
     } catch (error) {
         console.error('Error loading users:', error);
-        showAlert('Gagal memuat data user: ' + error.message, 'error');
+        showAlert('Gagal memuat data user', 'error');
     }
 }
 
-// Render Users Table
 function renderUsersTable(users) {
     const tbody = document.getElementById('usersTable');
     if (!tbody) return;
     
-    if (!users || users.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Tidak ada user ditemukan</td></tr>`;
+    if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Tidak ada user</td></tr>';
         return;
     }
     
     tbody.innerHTML = users.map(user => {
-        const createdAt = formatTimestamp(user.createdAt);
-        const avatarUrl = user.photoURL || 
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=3b82f6&color=fff`;
-        const schoolName = user.profile?.school?.name || '-';
-        const roleLabel = user.role === 'super_admin' ? '👑' : '';
-        
-        const statusBadge = user.subscription === 'premium' 
-            ? '<span class="px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded-full">PREMIUM</span>'
-            : '<span class="px-3 py-1 bg-gray-200 text-gray-600 text-xs font-bold rounded-full">FREE</span>';
+        const created = user.createdAt?.toDate ? user.createdAt.toDate().toLocaleDateString('id-ID') : '-';
+        const avatar = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=3b82f6&color=fff`;
+        const badge = user.subscription === 'premium' 
+            ? '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full">PREMIUM</span>'
+            : '<span class="px-2 py-1 bg-gray-200 text-gray-600 text-xs font-bold rounded-full">FREE</span>';
+        const role = user.role === 'super_admin' ? '👑 ' : '';
         
         return `
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-gray-50 border-b">
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
-                        <img src="${avatarUrl}" class="w-10 h-10 rounded-full" onerror="this.src='https://ui-avatars.com/api/?name=U&background=3b82f6&color=fff'">
+                        <img src="${avatar}" class="w-10 h-10 rounded-full" onerror="this.src='https://ui-avatars.com/api/?name=U'">
                         <div>
-                            <p class="font-medium text-gray-800">${roleLabel} ${user.name || 'Tanpa Nama'}</p>
+                            <p class="font-medium">${role}${user.name || 'Tanpa Nama'}</p>
                             <p class="text-xs text-gray-500">${user.profile?.nip || ''}</p>
                         </div>
                     </div>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-600">${user.email || '-'}</td>
-                <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">${schoolName}</td>
-                <td class="px-6 py-4 text-center">${statusBadge}</td>
-                <td class="px-6 py-4 text-center text-sm text-gray-500">${createdAt}</td>
+                <td class="px-6 py-4 text-sm text-gray-600">${user.profile?.school?.name || '-'}</td>
+                <td class="px-6 py-4 text-center">${badge}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-500">${created}</td>
                 <td class="px-6 py-4 text-center">
-                    <div class="flex items-center justify-center gap-1">
-                        ${user.subscription !== 'premium' ? `
-                            <button onclick="quickUpgrade('${user.id}')" class="p-2 text-yellow-500 hover:bg-yellow-50 rounded-lg" title="Upgrade Premium">⭐</button>
-                        ` : `
-                            <button onclick="downgradeUser('${user.id}')" class="p-2 text-gray-400 hover:bg-gray-100 rounded-lg" title="Downgrade">⬇️</button>
-                        `}
-                        ${user.role !== 'super_admin' ? `
-                            <button onclick="deleteUser('${user.id}')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg" title="Hapus">🗑️</button>
-                        ` : ''}
-                    </div>
+                    ${user.subscription !== 'premium' 
+                        ? `<button onclick="quickUpgrade('${user.id}')" class="p-2 text-yellow-500 hover:bg-yellow-50 rounded" title="Upgrade">⭐</button>`
+                        : `<button onclick="downgradeUser('${user.id}')" class="p-2 text-gray-400 hover:bg-gray-100 rounded" title="Downgrade">⬇️</button>`
+                    }
+                    ${user.role !== 'super_admin' 
+                        ? `<button onclick="deleteUser('${user.id}')" class="p-2 text-red-500 hover:bg-red-50 rounded" title="Hapus">🗑️</button>`
+                        : ''
+                    }
                 </td>
             </tr>
         `;
     }).join('');
 }
 
-// Update Statistics
-function updateStats() {
+function updateStatistics() {
     const total = allUsers.length;
     const premium = allUsers.filter(u => u.subscription === 'premium').length;
     const free = total - premium;
     
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    
     const newUsers = allUsers.filter(u => {
         if (!u.createdAt) return false;
-        const date = u.createdAt.toDate ? u.createdAt.toDate() : new Date(u.createdAt);
-        return date >= startOfMonth;
+        const d = u.createdAt.toDate ? u.createdAt.toDate() : new Date(u.createdAt);
+        return d >= startOfMonth;
     }).length;
     
     document.getElementById('statTotalUsers').textContent = total;
@@ -253,255 +200,217 @@ function updateStats() {
     document.getElementById('statNewUsers').textContent = newUsers;
 }
 
-// Load Recent Activity
-function loadRecentActivity() {
+function renderRecentActivity() {
     const container = document.getElementById('recentActivity');
     if (!container) return;
     
     const recent = allUsers.slice(0, 10);
-    
-    if (recent.length === 0) {
+    if (!recent.length) {
         container.innerHTML = '<p class="text-gray-500 text-center py-4">Belum ada aktivitas</p>';
         return;
     }
     
     container.innerHTML = recent.map(user => {
-        const timestamp = user.lastLogin || user.createdAt;
-        const timeStr = formatTimestamp(timestamp, true);
-        const activityType = user.lastLogin ? 'Login' : 'Daftar';
-        const avatarUrl = user.photoURL || 
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=3b82f6&color=fff&size=32`;
+        const time = (user.lastLogin || user.createdAt)?.toDate?.()?.toLocaleString('id-ID') || '-';
+        const avatar = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&size=32`;
+        const badge = user.subscription === 'premium' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-200 text-gray-600';
         
         return `
-            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div class="flex items-center gap-3">
-                    <img src="${avatarUrl}" class="w-8 h-8 rounded-full">
+                    <img src="${avatar}" class="w-8 h-8 rounded-full">
                     <div>
-                        <p class="font-medium text-sm text-gray-800">${user.name || user.email}</p>
-                        <p class="text-xs text-gray-500">${activityType}: ${timeStr}</p>
+                        <p class="font-medium text-sm">${user.name || user.email}</p>
+                        <p class="text-xs text-gray-500">${time}</p>
                     </div>
                 </div>
-                <span class="text-xs px-2 py-1 rounded ${user.subscription === 'premium' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-200 text-gray-600'}">
-                    ${user.subscription === 'premium' ? 'PRO' : 'FREE'}
-                </span>
+                <span class="text-xs px-2 py-1 rounded ${badge}">${user.subscription === 'premium' ? 'PRO' : 'FREE'}</span>
             </div>
         `;
     }).join('');
 }
 
-// Load Schools List
-function loadSchoolsList() {
+function renderSchoolsList() {
     const container = document.getElementById('schoolsList');
     if (!container) return;
     
     const schools = {};
-    allUsers.forEach(user => {
-        const schoolName = user.profile?.school?.name;
-        if (schoolName) {
-            if (!schools[schoolName]) {
-                schools[schoolName] = { total: 0, premium: 0 };
-            }
-            schools[schoolName].total++;
-            if (user.subscription === 'premium') {
-                schools[schoolName].premium++;
-            }
+    allUsers.forEach(u => {
+        const name = u.profile?.school?.name;
+        if (name) {
+            if (!schools[name]) schools[name] = { total: 0, premium: 0 };
+            schools[name].total++;
+            if (u.subscription === 'premium') schools[name].premium++;
         }
     });
     
-    const schoolList = Object.entries(schools).sort((a, b) => b[1].total - a[1].total);
+    const list = Object.entries(schools).sort((a, b) => b[1].total - a[1].total).slice(0, 15);
     
-    if (schoolList.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 text-center py-4">Belum ada sekolah terdaftar</p>';
+    if (!list.length) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-4">Belum ada sekolah</p>';
         return;
     }
     
-    container.innerHTML = schoolList.slice(0, 15).map(([name, data]) => `
+    container.innerHTML = list.map(([name, data]) => `
         <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div>
-                <p class="font-medium text-sm text-gray-800">${name}</p>
+                <p class="font-medium text-sm">${name}</p>
                 <p class="text-xs text-gray-500">${data.total} guru</p>
             </div>
-            <div class="text-right">
-                <span class="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded">${data.premium} premium</span>
-            </div>
+            <span class="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded">${data.premium} premium</span>
         </div>
     `).join('');
 }
 
-// Load Premium Users List
-function loadPremiumUsersList() {
+function renderPremiumUsers() {
     const tbody = document.getElementById('premiumUsersTable');
     if (!tbody) return;
     
-    const premiumUsers = allUsers.filter(u => u.subscription === 'premium');
+    const premium = allUsers.filter(u => u.subscription === 'premium');
     
-    if (premiumUsers.length === 0) {
+    if (!premium.length) {
         tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Belum ada user premium</td></tr>';
         return;
     }
     
-    tbody.innerHTML = premiumUsers.map(user => {
-        const expiry = user.subscriptionExpiry ? formatTimestamp(user.subscriptionExpiry) : 'Unlimited';
+    tbody.innerHTML = premium.map(user => {
+        const expiry = user.subscriptionExpiry?.toDate?.()?.toLocaleDateString('id-ID') || 'Unlimited';
         return `
-            <tr class="hover:bg-yellow-50">
+            <tr class="hover:bg-yellow-50 border-b">
                 <td class="px-4 py-3 text-sm">${user.name || '-'}</td>
                 <td class="px-4 py-3 text-sm text-gray-600">${user.email}</td>
                 <td class="px-4 py-3 text-sm text-gray-600">${user.profile?.school?.name || '-'}</td>
                 <td class="px-4 py-3 text-sm text-center">${expiry}</td>
                 <td class="px-4 py-3 text-center">
-                    <button onclick="downgradeUser('${user.id}')" class="text-sm text-red-500 hover:text-red-700">Downgrade</button>
+                    <button onclick="downgradeUser('${user.id}')" class="text-sm text-red-500 hover:underline">Downgrade</button>
                 </td>
             </tr>
         `;
     }).join('');
 }
 
-// Search Users
+// Search & Filter
 function searchUsers() {
-    const query = (document.getElementById('searchUser')?.value || '').toLowerCase().trim();
-    const filter = document.getElementById('filterSubscription')?.value || '';
+    const q = (document.getElementById('searchUser')?.value || '').toLowerCase();
+    const f = document.getElementById('filterSubscription')?.value || '';
     
-    filteredUsers = allUsers.filter(u => {
-        const matchesSearch = !query || 
-            (u.name || '').toLowerCase().includes(query) ||
-            (u.email || '').toLowerCase().includes(query) ||
-            (u.profile?.school?.name || '').toLowerCase().includes(query);
-        
-        const matchesFilter = !filter || u.subscription === filter;
-        
-        return matchesSearch && matchesFilter;
+    const filtered = allUsers.filter(u => {
+        const matchSearch = !q || 
+            (u.name || '').toLowerCase().includes(q) ||
+            (u.email || '').toLowerCase().includes(q) ||
+            (u.profile?.school?.name || '').toLowerCase().includes(q);
+        const matchFilter = !f || u.subscription === f;
+        return matchSearch && matchFilter;
     });
     
-    renderUsersTable(filteredUsers);
+    renderUsersTable(filtered);
 }
 
-function filterUsers() {
-    searchUsers();
-}
+function filterUsers() { searchUsers(); }
 
-// Quick Upgrade
+// User Management
 async function quickUpgrade(userId) {
-    if (!confirm('Upgrade user ini ke Premium untuk 30 hari?')) return;
+    if (!confirm('Upgrade user ini ke Premium (30 hari)?')) return;
     
     showLoading();
     try {
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 30);
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + 30);
         
         await db.collection('users').doc(userId).update({
             subscription: 'premium',
-            subscriptionExpiry: firebase.firestore.Timestamp.fromDate(expiryDate),
+            subscriptionExpiry: firebase.firestore.Timestamp.fromDate(expiry),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
         await loadAllUsers();
         hideLoading();
-        showAlert('User berhasil di-upgrade ke Premium!', 'success');
+        showAlert('User berhasil di-upgrade!', 'success');
     } catch (error) {
         hideLoading();
-        showAlert('Gagal upgrade: ' + error.message, 'error');
+        showAlert('Gagal: ' + error.message, 'error');
     }
 }
 
-// Upgrade by Email
 async function upgradeUserByEmail() {
     const email = (document.getElementById('upgradeEmail')?.value || '').trim();
     const duration = document.getElementById('upgradeDuration')?.value || '30';
     
-    if (!email) {
-        showAlert('Masukkan email user', 'warning');
-        return;
-    }
+    if (!email) return showAlert('Masukkan email', 'warning');
     
     showLoading();
-    
     try {
-        const snapshot = await db.collection('users').where('email', '==', email).get();
-        
-        if (snapshot.empty) {
+        const snap = await db.collection('users').where('email', '==', email).get();
+        if (snap.empty) {
             hideLoading();
-            showAlert('User dengan email tersebut tidak ditemukan', 'error');
-            return;
+            return showAlert('User tidak ditemukan', 'error');
         }
         
-        const userDoc = snapshot.docs[0];
-        let expiryDate = null;
-        
+        let expiry = null;
         if (duration !== 'unlimited') {
-            expiryDate = new Date();
-            expiryDate.setDate(expiryDate.getDate() + parseInt(duration));
+            expiry = new Date();
+            expiry.setDate(expiry.getDate() + parseInt(duration));
         }
         
-        await db.collection('users').doc(userDoc.id).update({
+        await db.collection('users').doc(snap.docs[0].id).update({
             subscription: 'premium',
-            subscriptionExpiry: expiryDate ? firebase.firestore.Timestamp.fromDate(expiryDate) : null,
+            subscriptionExpiry: expiry ? firebase.firestore.Timestamp.fromDate(expiry) : null,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
         document.getElementById('upgradeEmail').value = '';
         await loadAllUsers();
         hideLoading();
-        
-        const durationText = duration === 'unlimited' ? 'Unlimited' : `${duration} hari`;
-        showAlert(`${email} berhasil di-upgrade ke Premium (${durationText})!`, 'success');
+        showAlert(`${email} berhasil di-upgrade!`, 'success');
     } catch (error) {
         hideLoading();
-        showAlert('Gagal upgrade: ' + error.message, 'error');
+        showAlert('Gagal: ' + error.message, 'error');
     }
 }
 
-// Upgrade School
 async function upgradeSchool() {
-    const schoolName = (document.getElementById('upgradeSchoolName')?.value || '').trim();
+    const name = (document.getElementById('upgradeSchoolName')?.value || '').trim();
     const duration = document.getElementById('upgradeSchoolDuration')?.value || '365';
     
-    if (!schoolName) {
-        showAlert('Masukkan nama sekolah', 'warning');
-        return;
-    }
+    if (!name) return showAlert('Masukkan nama sekolah', 'warning');
     
     showLoading();
-    
     try {
-        const matchingUsers = allUsers.filter(u => 
-            (u.profile?.school?.name || '').toLowerCase() === schoolName.toLowerCase()
+        const matched = allUsers.filter(u => 
+            (u.profile?.school?.name || '').toLowerCase() === name.toLowerCase()
         );
         
-        if (matchingUsers.length === 0) {
+        if (!matched.length) {
             hideLoading();
-            showAlert('Tidak ada user dari sekolah tersebut', 'error');
-            return;
+            return showAlert('Tidak ada user dari sekolah tersebut', 'error');
         }
         
-        let expiryDate = null;
+        let expiry = null;
         if (duration !== 'unlimited') {
-            expiryDate = new Date();
-            expiryDate.setDate(expiryDate.getDate() + parseInt(duration));
+            expiry = new Date();
+            expiry.setDate(expiry.getDate() + parseInt(duration));
         }
         
         const batch = db.batch();
-        matchingUsers.forEach(user => {
-            const ref = db.collection('users').doc(user.id);
-            batch.update(ref, {
+        matched.forEach(u => {
+            batch.update(db.collection('users').doc(u.id), {
                 subscription: 'premium',
-                subscriptionExpiry: expiryDate ? firebase.firestore.Timestamp.fromDate(expiryDate) : null,
+                subscriptionExpiry: expiry ? firebase.firestore.Timestamp.fromDate(expiry) : null,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         });
-        
         await batch.commit();
         
         document.getElementById('upgradeSchoolName').value = '';
         await loadAllUsers();
         hideLoading();
-        showAlert(`${matchingUsers.length} guru dari "${schoolName}" berhasil di-upgrade!`, 'success');
+        showAlert(`${matched.length} guru dari "${name}" berhasil di-upgrade!`, 'success');
     } catch (error) {
         hideLoading();
-        showAlert('Gagal upgrade: ' + error.message, 'error');
+        showAlert('Gagal: ' + error.message, 'error');
     }
 }
 
-// Downgrade User
 async function downgradeUser(userId) {
     if (!confirm('Turunkan user ini ke FREE?')) return;
     
@@ -512,74 +421,56 @@ async function downgradeUser(userId) {
             subscriptionExpiry: null,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        
         await loadAllUsers();
         hideLoading();
-        showAlert('User berhasil di-downgrade ke FREE', 'success');
+        showAlert('User di-downgrade ke FREE', 'success');
     } catch (error) {
         hideLoading();
-        showAlert('Gagal downgrade: ' + error.message, 'error');
+        showAlert('Gagal: ' + error.message, 'error');
     }
 }
 
-// Delete User
 async function deleteUser(userId) {
     const user = allUsers.find(u => u.id === userId);
-    if (!user) return;
-    
-    if (!confirm(`Hapus user "${user.name || user.email}"?\n\nSemua data user akan dihapus permanen!`)) return;
-    if (!confirm('KONFIRMASI TERAKHIR: Yakin hapus user ini?')) return;
+    if (!confirm(`Hapus user "${user?.name || user?.email}"? Data akan hilang permanen!`)) return;
+    if (!confirm('KONFIRMASI: Yakin hapus?')) return;
     
     showLoading();
     try {
         await db.collection('users').doc(userId).delete();
-        
-        // Try delete related data
         try { await db.collection('calendars').doc(userId).delete(); } catch(e) {}
         try { await db.collection('schedules').doc(userId).delete(); } catch(e) {}
         
-        // Delete students
-        const studentsSnapshot = await db.collection('students').where('userId', '==', userId).get();
-        const batch = db.batch();
-        studentsSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
-        
         await loadAllUsers();
         hideLoading();
-        showAlert('User berhasil dihapus', 'success');
+        showAlert('User dihapus', 'success');
     } catch (error) {
         hideLoading();
-        showAlert('Gagal menghapus: ' + error.message, 'error');
+        showAlert('Gagal: ' + error.message, 'error');
     }
 }
 
-// Admin Settings
+// Settings
 async function loadAdminSettings() {
     try {
         const doc = await db.collection('settings').doc('app').get();
         if (doc.exists) {
-            const data = doc.data();
-            if (document.getElementById('settingWhatsApp')) {
-                document.getElementById('settingWhatsApp').value = data.whatsappNumber || '';
-            }
-            if (document.getElementById('settingWAMessage')) {
-                document.getElementById('settingWAMessage').value = data.whatsappMessage || '';
-            }
-            if (document.getElementById('settingPriceMonth')) {
-                document.getElementById('settingPriceMonth').value = data.priceMonth || '';
-            }
-            if (document.getElementById('settingPriceYear')) {
-                document.getElementById('settingPriceYear').value = data.priceYear || '';
-            }
+            const d = doc.data();
+            const wa = document.getElementById('settingWhatsApp');
+            const msg = document.getElementById('settingWAMessage');
+            const pm = document.getElementById('settingPriceMonth');
+            const py = document.getElementById('settingPriceYear');
+            
+            if (wa) wa.value = d.whatsappNumber || '';
+            if (msg) msg.value = d.whatsappMessage || '';
+            if (pm) pm.value = d.priceMonth || '';
+            if (py) py.value = d.priceYear || '';
         }
-    } catch (error) {
-        console.error('Error loading settings:', error);
-    }
+    } catch (e) { console.error('Load settings error:', e); }
 }
 
 async function saveAdminSettings() {
     showLoading();
-    
     try {
         await db.collection('settings').doc('app').set({
             whatsappNumber: document.getElementById('settingWhatsApp')?.value || '',
@@ -591,144 +482,35 @@ async function saveAdminSettings() {
         }, { merge: true });
         
         hideLoading();
-        showAlert('Pengaturan berhasil disimpan!', 'success');
+        showAlert('Pengaturan disimpan!', 'success');
     } catch (error) {
         hideLoading();
-        showAlert('Gagal menyimpan: ' + error.message, 'error');
+        showAlert('Gagal: ' + error.message, 'error');
     }
-}
-
-// CP Data Management
-function loadCPDataList() {
-    const container = document.getElementById('cpDataList');
-    if (!container) return;
-    
-    // This would normally load from Firestore or check local files
-    const defaultData = [
-        { name: 'PAI SD', file: 'cp-pai-sd.csv', status: 'default' },
-        { name: 'PAI SMP', file: 'cp-pai-smp.csv', status: 'default' },
-        { name: 'PAI SMA', file: 'cp-pai-sma.csv', status: 'default' }
-    ];
-    
-    container.innerHTML = defaultData.map(d => `
-        <div class="bg-gray-50 rounded-lg p-4 border hover:border-blue-300 transition">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="font-medium text-gray-800">${d.name}</p>
-                    <p class="text-xs text-gray-500">${d.file}</p>
-                </div>
-                <span class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded">${d.status}</span>
-            </div>
-        </div>
-    `).join('');
-}
-
-async function uploadCPData() {
-    const subject = document.getElementById('cpSubject')?.value?.trim();
-    const level = document.getElementById('cpLevel')?.value;
-    const fileInput = document.getElementById('cpFile');
-    const file = fileInput?.files?.[0];
-    
-    if (!subject || !file) {
-        showAlert('Lengkapi mata pelajaran dan pilih file', 'warning');
-        return;
-    }
-    
-    showAlert('Fitur upload ke Firestore dalam pengembangan. Untuk sementara, simpan file CSV di folder data/', 'info');
 }
 
 // Navigation
 function showAdminSection(sectionId) {
-    document.querySelectorAll('.admin-section').forEach(section => {
-        section.classList.add('hidden');
-    });
-    
-    const targetSection = document.getElementById(`admin-${sectionId}`);
-    if (targetSection) {
-        targetSection.classList.remove('hidden');
-    }
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.add('hidden'));
+    document.getElementById(`admin-${sectionId}`)?.classList.remove('hidden');
     
     document.querySelectorAll('.admin-nav-link').forEach(link => {
         link.classList.remove('active', 'bg-yellow-600');
-        if (link.dataset.section === sectionId) {
-            link.classList.add('active', 'bg-yellow-600');
-        }
+        if (link.dataset.section === sectionId) link.classList.add('active', 'bg-yellow-600');
     });
 }
 
 // Logout
 async function adminLogout() {
     if (!confirm('Keluar dari Admin Panel?')) return;
-    
     showLoading();
     try {
         await auth.signOut();
         window.location.href = 'index.html';
     } catch (error) {
         hideLoading();
-        showAlert('Gagal keluar: ' + error.message, 'error');
+        showAlert('Gagal keluar', 'error');
     }
-}
-
-// Helper Functions
-function formatTimestamp(timestamp, includeTime = false) {
-    if (!timestamp) return '-';
-    
-    try {
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        if (includeTime) {
-            return date.toLocaleString('id-ID');
-        }
-        return date.toLocaleDateString('id-ID');
-    } catch (e) {
-        return '-';
-    }
-}
-
-function showLoading() {
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) {
-        overlay.classList.remove('hidden');
-    }
-}
-
-function hideLoading() {
-    const overlay = document.getElementById('loadingOverlay');
-    if (overlay) {
-        overlay.classList.add('hidden');
-    }
-}
-
-function showAlert(message, type = 'info') {
-    const container = document.getElementById('alertContainer');
-    const box = document.getElementById('alertBox');
-    
-    if (!container || !box) {
-        alert(message);
-        return;
-    }
-    
-    const colors = {
-        success: 'bg-green-500 text-white',
-        error: 'bg-red-500 text-white',
-        warning: 'bg-yellow-500 text-white',
-        info: 'bg-blue-500 text-white'
-    };
-    
-    const icons = {
-        success: '✅',
-        error: '❌',
-        warning: '⚠️',
-        info: 'ℹ️'
-    };
-    
-    box.className = `p-4 rounded-lg shadow-lg max-w-md ${colors[type]}`;
-    box.innerHTML = `<div class="flex items-center gap-3"><span>${icons[type]}</span><span>${message}</span></div>`;
-    container.classList.remove('hidden');
-    
-    setTimeout(() => {
-        container.classList.add('hidden');
-    }, 5000);
 }
 
 console.log('Admin Module Loaded');
