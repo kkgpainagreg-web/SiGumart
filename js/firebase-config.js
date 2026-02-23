@@ -16,7 +16,7 @@ const db = firebase.firestore();
 // App Configuration
 const APP_CONFIG = {
     superAdminEmail: 'afifaro@gmail.com',
-    whatsappNumber: '6281234567890', // Editable by super admin
+    whatsappNumber: '6281234567890',
     appVersion: '1.0.0',
     freeFeatures: ['calendar', 'schedule', 'atp', 'prota'],
     premiumFeatures: ['promes', 'modul_ajar', 'lkpd', 'bank_soal', 'kktp', 'jurnal', 'absensi', 'nilai']
@@ -25,11 +25,10 @@ const APP_CONFIG = {
 // Get Current Academic Year
 function getCurrentAcademicYear() {
     const now = new Date();
-    const month = now.getMonth(); // 0-11
+    const month = now.getMonth();
     const year = now.getFullYear();
     
-    // If June or later, new academic year starts
-    if (month >= 5) { // June = 5
+    if (month >= 5) {
         return {
             current: `${year}/${year + 1}`,
             options: [`${year}/${year + 1}`, `${year + 1}/${year + 2}`]
@@ -44,16 +43,27 @@ function getCurrentAcademicYear() {
 
 // Helper Functions
 function showLoading() {
-    document.getElementById('loadingOverlay').classList.remove('hidden');
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.classList.remove('hidden');
+    }
 }
 
 function hideLoading() {
-    document.getElementById('loadingOverlay').classList.add('hidden');
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+    }
 }
 
 function showAlert(message, type = 'info') {
     const container = document.getElementById('alertContainer');
     const box = document.getElementById('alertBox');
+    
+    if (!container || !box) {
+        console.log(`Alert (${type}): ${message}`);
+        return;
+    }
     
     const colors = {
         success: 'bg-green-100 text-green-800 border border-green-200',
@@ -88,6 +98,41 @@ function formatDate(date, format = 'long') {
     return d.toLocaleDateString('id-ID');
 }
 
-// Console log for debugging
+// Default User Data Structure
+function getDefaultUserData(user) {
+    const isSuperAdmin = user.email === APP_CONFIG.superAdminEmail;
+    return {
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName || 'Pengguna',
+        photoURL: user.photoURL || null,
+        role: isSuperAdmin ? 'super_admin' : 'user',
+        subscription: isSuperAdmin ? 'premium' : 'free',
+        subscriptionExpiry: null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        profile: {
+            nip: '',
+            phone: '',
+            subjects: [],
+            school: {
+                name: '',
+                npsn: '',
+                address: '',
+                city: '',
+                province: '',
+                level: 'SD',
+                headmaster: '',
+                headmasterNip: ''
+            }
+        },
+        settings: {
+            academicYear: getCurrentAcademicYear().current,
+            lessonDuration: 35,
+            theme: 'light'
+        }
+    };
+}
+
 console.log('Firebase Config Loaded');
 console.log('Current Academic Year:', getCurrentAcademicYear());
