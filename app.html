@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - AGSA</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -14,7 +14,10 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { 'sans': ['Inter', 'sans-serif'] },
+                    fontFamily: { 
+                        'sans': ['Inter', 'sans-serif'],
+                        'arabic': ['Amiri', 'serif']
+                    },
                     colors: {
                         primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
                         accent: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' }
@@ -24,38 +27,49 @@
         }
     </script>
     <style>
-        [dir="rtl"] { direction: rtl; text-align: right; }
-        .sidebar-link { @apply flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200; }
-        .sidebar-link:hover { @apply bg-primary-700; }
-        .sidebar-link.active { @apply bg-primary-600 shadow-lg; }
+        .sidebar-link { @apply flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-white/80 hover:text-white hover:bg-primary-700; }
+        .sidebar-link.active { @apply bg-primary-600 text-white shadow-lg; }
         .card { @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6; }
-        .btn-primary { @apply bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-lg transition; }
+        .btn-primary { @apply bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-lg transition transform hover:scale-[1.02]; }
         .btn-secondary { @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition; }
+        .btn-success { @apply bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition; }
+        .btn-warning { @apply bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition; }
         .input-field { @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition; }
-        .premium-badge { @apply inline-flex items-center px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded-full; }
-        .free-badge { @apply inline-flex items-center px-2 py-1 bg-gray-500 text-white text-xs font-bold rounded-full; }
+        .premium-badge { @apply inline-flex items-center px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded-full; }
+        .free-badge { @apply inline-flex items-center px-2 py-0.5 bg-gray-500 text-white text-xs font-bold rounded-full; }
+        .section-title { @apply text-lg font-bold text-gray-800 mb-4 flex items-center gap-2; }
+        
+        /* Arabic Text Support */
+        .arabic-text { font-family: 'Amiri', serif; direction: rtl; text-align: right; font-size: 1.4em; line-height: 2.2; }
         
         /* Print Styles */
         @media print {
             .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background: white; }
-            .main-content { margin: 0; padding: 0; }
+            body { background: white !important; }
+            .print-area { 
+                margin: 0 !important; 
+                padding: 15mm !important; 
+                box-shadow: none !important;
+                max-width: 100% !important;
+            }
+            @page { size: A4; margin: 0; }
         }
         
-        /* RTL Support for Arabic */
-        .arabic-text {
-            font-family: 'Traditional Arabic', 'Scheherazade New', serif;
-            direction: rtl;
-            text-align: right;
-            font-size: 1.4em;
-            line-height: 2;
-        }
+        /* Document Styles */
+        .doc-table { @apply w-full border-collapse text-sm; }
+        .doc-table th, .doc-table td { @apply border border-gray-400 p-2; }
+        .doc-table th { @apply bg-gray-100 font-semibold text-center; }
+        .doc-header { @apply text-center font-bold text-base mb-4; }
+        .doc-identity { @apply mb-4; }
+        .doc-identity td { @apply py-1; }
+        .signature-area { @apply flex justify-between mt-8 text-sm; }
+        .signature-box { @apply text-center w-64; }
+        .signature-name { @apply font-bold underline mt-16; }
     </style>
 </head>
 <body class="bg-gray-50 font-sans min-h-screen">
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-primary-900/80 flex items-center justify-center z-50">
+    <div id="loadingOverlay" class="fixed inset-0 bg-primary-900/90 flex items-center justify-center z-50">
         <div class="text-center">
             <div class="w-16 h-16 border-4 border-white border-t-accent-400 rounded-full animate-spin mx-auto mb-4"></div>
             <p class="text-white text-lg font-medium">Memuat Dashboard...</p>
@@ -64,7 +78,7 @@
 
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside id="sidebar" class="w-64 bg-primary-800 text-white fixed h-full z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 no-print">
+        <aside id="sidebar" class="w-64 bg-primary-800 text-white fixed h-full z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 no-print overflow-y-auto">
             <div class="p-4 border-b border-primary-700">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
@@ -89,69 +103,69 @@
             </div>
 
             <!-- Navigation -->
-            <nav class="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-200px)]">
-                <a href="#" onclick="showSection('dashboard')" class="sidebar-link active" data-section="dashboard">
-                    <span>🏠</span> Dashboard
+            <nav class="p-4 space-y-1">
+                <a href="#" onclick="showSection('dashboard'); return false;" class="sidebar-link active" data-section="dashboard">
+                    <span>🏠</span> <span>Dashboard</span>
                 </a>
-                <a href="#" onclick="showSection('profile')" class="sidebar-link" data-section="profile">
-                    <span>👤</span> Profil
-                </a>
-                
-                <div class="pt-4 pb-2 text-xs font-semibold text-primary-400 uppercase">Data Dasar</div>
-                <a href="#" onclick="showSection('calendar')" class="sidebar-link" data-section="calendar">
-                    <span>📅</span> Kalender Pendidikan
-                </a>
-                <a href="#" onclick="showSection('schedule')" class="sidebar-link" data-section="schedule">
-                    <span>⏰</span> Jadwal Pelajaran
-                </a>
-                <a href="#" onclick="showSection('students')" class="sidebar-link" data-section="students">
-                    <span>👨‍🎓</span> Data Siswa
+                <a href="#" onclick="showSection('profile'); return false;" class="sidebar-link" data-section="profile">
+                    <span>👤</span> <span>Profil</span>
                 </a>
                 
-                <div class="pt-4 pb-2 text-xs font-semibold text-primary-400 uppercase">Dokumen</div>
-                <a href="#" onclick="showSection('atp')" class="sidebar-link" data-section="atp">
-                    <span>📋</span> ATP
+                <div class="pt-4 pb-2 text-xs font-semibold text-primary-400 uppercase tracking-wider">Data Dasar</div>
+                <a href="#" onclick="showSection('calendar'); return false;" class="sidebar-link" data-section="calendar">
+                    <span>📅</span> <span>Kalender Pendidikan</span>
                 </a>
-                <a href="#" onclick="showSection('prota')" class="sidebar-link" data-section="prota">
-                    <span>📘</span> Prota
+                <a href="#" onclick="showSection('schedule'); return false;" class="sidebar-link" data-section="schedule">
+                    <span>⏰</span> <span>Jadwal Pelajaran</span>
                 </a>
-                <a href="#" onclick="showSection('promes')" class="sidebar-link premium-feature" data-section="promes">
-                    <span>📗</span> Promes <span class="premium-badge ml-auto">PRO</span>
-                </a>
-                <a href="#" onclick="showSection('modul')" class="sidebar-link premium-feature" data-section="modul">
-                    <span>📕</span> Modul Ajar <span class="premium-badge ml-auto">PRO</span>
-                </a>
-                <a href="#" onclick="showSection('lkpd')" class="sidebar-link premium-feature" data-section="lkpd">
-                    <span>📝</span> LKPD <span class="premium-badge ml-auto">PRO</span>
-                </a>
-                <a href="#" onclick="showSection('kktp')" class="sidebar-link premium-feature" data-section="kktp">
-                    <span>🎯</span> KKTP <span class="premium-badge ml-auto">PRO</span>
+                <a href="#" onclick="showSection('students'); return false;" class="sidebar-link" data-section="students">
+                    <span>👨‍🎓</span> <span>Data Siswa</span>
                 </a>
                 
-                <div class="pt-4 pb-2 text-xs font-semibold text-primary-400 uppercase">Administrasi</div>
-                <a href="#" onclick="showSection('attendance')" class="sidebar-link premium-feature" data-section="attendance">
-                    <span>✅</span> Absensi <span class="premium-badge ml-auto">PRO</span>
+                <div class="pt-4 pb-2 text-xs font-semibold text-primary-400 uppercase tracking-wider">Dokumen</div>
+                <a href="#" onclick="showSection('atp'); return false;" class="sidebar-link" data-section="atp">
+                    <span>📋</span> <span>ATP</span>
                 </a>
-                <a href="#" onclick="showSection('journal')" class="sidebar-link premium-feature" data-section="journal">
-                    <span>📓</span> Jurnal <span class="premium-badge ml-auto">PRO</span>
+                <a href="#" onclick="showSection('prota'); return false;" class="sidebar-link" data-section="prota">
+                    <span>📘</span> <span>Prota</span>
                 </a>
-                <a href="#" onclick="showSection('grades')" class="sidebar-link premium-feature" data-section="grades">
-                    <span>📊</span> Daftar Nilai <span class="premium-badge ml-auto">PRO</span>
+                <a href="#" onclick="showSection('promes'); return false;" class="sidebar-link" data-section="promes">
+                    <span>📗</span> <span>Promes</span> <span class="premium-badge ml-auto text-[10px]">PRO</span>
+                </a>
+                <a href="#" onclick="showSection('modul'); return false;" class="sidebar-link" data-section="modul">
+                    <span>📕</span> <span>Modul Ajar</span> <span class="premium-badge ml-auto text-[10px]">PRO</span>
+                </a>
+                <a href="#" onclick="showSection('lkpd'); return false;" class="sidebar-link" data-section="lkpd">
+                    <span>📝</span> <span>LKPD</span> <span class="premium-badge ml-auto text-[10px]">PRO</span>
+                </a>
+                <a href="#" onclick="showSection('kktp'); return false;" class="sidebar-link" data-section="kktp">
+                    <span>🎯</span> <span>KKTP</span> <span class="premium-badge ml-auto text-[10px]">PRO</span>
                 </a>
                 
-                <div class="pt-4 pb-2 text-xs font-semibold text-primary-400 uppercase">Lainnya</div>
-                <a href="#" onclick="showSection('ai-assistant')" class="sidebar-link" data-section="ai-assistant">
-                    <span>🤖</span> AI Assistant
+                <div class="pt-4 pb-2 text-xs font-semibold text-primary-400 uppercase tracking-wider">Administrasi</div>
+                <a href="#" onclick="showSection('attendance'); return false;" class="sidebar-link" data-section="attendance">
+                    <span>✅</span> <span>Absensi</span> <span class="premium-badge ml-auto text-[10px]">PRO</span>
                 </a>
-                <a href="#" onclick="showSection('help')" class="sidebar-link" data-section="help">
-                    <span>❓</span> Panduan
+                <a href="#" onclick="showSection('journal'); return false;" class="sidebar-link" data-section="journal">
+                    <span>📓</span> <span>Jurnal</span> <span class="premium-badge ml-auto text-[10px]">PRO</span>
+                </a>
+                <a href="#" onclick="showSection('grades'); return false;" class="sidebar-link" data-section="grades">
+                    <span>📊</span> <span>Daftar Nilai</span> <span class="premium-badge ml-auto text-[10px]">PRO</span>
+                </a>
+                
+                <div class="pt-4 pb-2 text-xs font-semibold text-primary-400 uppercase tracking-wider">Lainnya</div>
+                <a href="#" onclick="showSection('ai-assistant'); return false;" class="sidebar-link" data-section="ai-assistant">
+                    <span>🤖</span> <span>AI Assistant</span>
+                </a>
+                <a href="#" onclick="showSection('help'); return false;" class="sidebar-link" data-section="help">
+                    <span>❓</span> <span>Panduan</span>
                 </a>
             </nav>
 
             <!-- Logout Button -->
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-primary-700">
-                <button onclick="logout()" class="w-full sidebar-link hover:bg-red-600">
-                    <span>🚪</span> Keluar
+            <div class="p-4 border-t border-primary-700 mt-4">
+                <button onclick="logout()" class="w-full sidebar-link hover:bg-red-600 justify-center">
+                    <span>🚪</span> <span>Keluar</span>
                 </button>
             </div>
         </aside>
@@ -164,36 +178,35 @@
         </button>
 
         <!-- Main Content -->
-        <main class="flex-1 md:ml-64 main-content">
+        <main class="flex-1 md:ml-64">
             <!-- Top Bar -->
             <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4 sticky top-0 z-30 no-print">
                 <div class="flex items-center justify-between">
-                    <div>
+                    <div class="ml-10 md:ml-0">
                         <h2 id="pageTitle" class="text-xl font-bold text-gray-800">Dashboard</h2>
                         <p id="pageSubtitle" class="text-sm text-gray-500">Selamat datang di Admin Guru Super App</p>
                     </div>
                     <div class="flex items-center gap-4">
-                        <div class="text-right">
+                        <div class="text-right hidden sm:block">
                             <p class="text-sm font-medium text-gray-700">Tahun Ajaran</p>
-                            <select id="academicYearSelect" class="text-sm border-0 bg-transparent text-primary-600 font-semibold cursor-pointer focus:ring-0">
-                            </select>
+                            <select id="academicYearSelect" class="text-sm border-0 bg-transparent text-primary-600 font-semibold cursor-pointer focus:ring-0"></select>
                         </div>
-                        <button onclick="showUpgradeModal()" class="btn-primary text-sm hidden" id="upgradeBtn">
-                            ⭐ Upgrade Premium
+                        <button onclick="showUpgradeModal()" class="btn-warning text-sm hidden" id="upgradeBtn">
+                            ⭐ Upgrade
                         </button>
                     </div>
                 </div>
             </header>
 
             <!-- Content Container -->
-            <div class="p-6">
-                <!-- Dashboard Section -->
+            <div class="p-4 md:p-6">
+                                <!-- Dashboard Section -->
                 <section id="section-dashboard" class="section-content">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
                         <div class="card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-blue-100">Total Siswa</p>
+                                    <p class="text-blue-100 text-sm">Total Siswa</p>
                                     <p id="totalStudents" class="text-3xl font-bold">0</p>
                                 </div>
                                 <span class="text-4xl opacity-80">👨‍🎓</span>
@@ -202,16 +215,16 @@
                         <div class="card bg-gradient-to-br from-green-500 to-green-600 text-white">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-green-100">Dokumen Dibuat</p>
-                                    <p id="totalDocs" class="text-3xl font-bold">0</p>
+                                    <p class="text-green-100 text-sm">Mata Pelajaran</p>
+                                    <p id="totalSubjects" class="text-3xl font-bold">0</p>
                                 </div>
-                                <span class="text-4xl opacity-80">📄</span>
+                                <span class="text-4xl opacity-80">📚</span>
                             </div>
                         </div>
                         <div class="card bg-gradient-to-br from-purple-500 to-purple-600 text-white">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-purple-100">Minggu Efektif</p>
+                                    <p class="text-purple-100 text-sm">Minggu Efektif</p>
                                     <p id="totalWeeks" class="text-3xl font-bold">0</p>
                                 </div>
                                 <span class="text-4xl opacity-80">📅</span>
@@ -220,7 +233,7 @@
                         <div class="card bg-gradient-to-br from-orange-500 to-orange-600 text-white">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-orange-100">Total JP</p>
+                                    <p class="text-orange-100 text-sm">Total JP/Minggu</p>
                                     <p id="totalJP" class="text-3xl font-bold">0</p>
                                 </div>
                                 <span class="text-4xl opacity-80">⏰</span>
@@ -230,22 +243,22 @@
 
                     <!-- Quick Actions -->
                     <div class="card mb-8">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">🚀 Aksi Cepat</h3>
+                        <h3 class="section-title">🚀 Aksi Cepat</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <button onclick="showSection('profile')" class="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg text-center transition">
-                                <span class="text-2xl block mb-2">👤</span>
+                            <button onclick="showSection('profile')" class="p-4 bg-gray-50 hover:bg-blue-50 hover:border-blue-200 border-2 border-transparent rounded-xl text-center transition">
+                                <span class="text-3xl block mb-2">👤</span>
                                 <span class="text-sm font-medium text-gray-700">Lengkapi Profil</span>
                             </button>
-                            <button onclick="showSection('calendar')" class="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg text-center transition">
-                                <span class="text-2xl block mb-2">📅</span>
+                            <button onclick="showSection('calendar')" class="p-4 bg-gray-50 hover:bg-green-50 hover:border-green-200 border-2 border-transparent rounded-xl text-center transition">
+                                <span class="text-3xl block mb-2">📅</span>
                                 <span class="text-sm font-medium text-gray-700">Atur Kalender</span>
                             </button>
-                            <button onclick="showSection('schedule')" class="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg text-center transition">
-                                <span class="text-2xl block mb-2">⏰</span>
+                            <button onclick="showSection('schedule')" class="p-4 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 border-2 border-transparent rounded-xl text-center transition">
+                                <span class="text-3xl block mb-2">⏰</span>
                                 <span class="text-sm font-medium text-gray-700">Buat Jadwal</span>
                             </button>
-                            <button onclick="showSection('atp')" class="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg text-center transition">
-                                <span class="text-2xl block mb-2">📋</span>
+                            <button onclick="showSection('atp')" class="p-4 bg-gray-50 hover:bg-orange-50 hover:border-orange-200 border-2 border-transparent rounded-xl text-center transition">
+                                <span class="text-3xl block mb-2">📋</span>
                                 <span class="text-sm font-medium text-gray-700">Generate ATP</span>
                             </button>
                         </div>
@@ -253,30 +266,30 @@
 
                     <!-- Getting Started Guide -->
                     <div class="card">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">📖 Langkah Memulai</h3>
-                        <div class="space-y-4">
-                            <div class="flex items-start gap-4 p-4 bg-blue-50 rounded-lg">
+                        <h3 class="section-title">📖 Langkah Memulai</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
                                 <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
                                 <div>
                                     <h4 class="font-semibold text-gray-800">Lengkapi Profil</h4>
                                     <p class="text-sm text-gray-600">Isi data diri, sekolah, dan mata pelajaran yang diampu.</p>
                                 </div>
                             </div>
-                            <div class="flex items-start gap-4 p-4 bg-green-50 rounded-lg">
+                            <div class="flex items-start gap-4 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
                                 <div class="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
                                 <div>
                                     <h4 class="font-semibold text-gray-800">Atur Kalender Pendidikan</h4>
                                     <p class="text-sm text-gray-600">Tentukan awal semester, akhir semester, dan hari libur.</p>
                                 </div>
                             </div>
-                            <div class="flex items-start gap-4 p-4 bg-yellow-50 rounded-lg">
+                            <div class="flex items-start gap-4 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
                                 <div class="w-8 h-8 bg-yellow-600 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
                                 <div>
                                     <h4 class="font-semibold text-gray-800">Buat Jadwal Pelajaran</h4>
                                     <p class="text-sm text-gray-600">Masukkan jadwal mengajar untuk setiap kelas dan hari.</p>
                                 </div>
                             </div>
-                            <div class="flex items-start gap-4 p-4 bg-purple-50 rounded-lg">
+                            <div class="flex items-start gap-4 p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500">
                                 <div class="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">4</div>
                                 <div>
                                     <h4 class="font-semibold text-gray-800">Generate Dokumen Otomatis</h4>
@@ -291,9 +304,9 @@
                 <section id="section-profile" class="section-content hidden">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Personal Info -->
-                        <div class="lg:col-span-2">
+                        <div class="lg:col-span-2 space-y-6">
                             <div class="card">
-                                <h3 class="text-lg font-bold text-gray-800 mb-4">👤 Data Pribadi</h3>
+                                <h3 class="section-title">👤 Data Pribadi</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
@@ -305,7 +318,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                        <input type="email" id="profileEmail" class="input-field" disabled>
+                                        <input type="email" id="profileEmail" class="input-field bg-gray-100" disabled>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">No. HP/WhatsApp</label>
@@ -314,8 +327,8 @@
                                 </div>
                             </div>
 
-                            <div class="card mt-6">
-                                <h3 class="text-lg font-bold text-gray-800 mb-4">🏫 Data Sekolah</h3>
+                            <div class="card">
+                                <h3 class="section-title">🏫 Data Sekolah</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="md:col-span-2">
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Sekolah</label>
@@ -357,47 +370,40 @@
                                 </div>
                             </div>
 
-                            <div class="card mt-6">
-                                <h3 class="text-lg font-bold text-gray-800 mb-4">📚 Mata Pelajaran yang Diampu</h3>
-                                <div id="subjectsContainer" class="space-y-4">
-                                    <!-- Dynamic subjects will be added here -->
+                            <div class="card">
+                                <h3 class="section-title">📚 Mata Pelajaran yang Diampu</h3>
+                                <div id="subjectsContainer" class="space-y-3">
+                                    <p class="text-gray-500 text-sm">Memuat...</p>
                                 </div>
                                 <button onclick="addSubject()" class="mt-4 btn-secondary flex items-center gap-2">
                                     <span>➕</span> Tambah Mata Pelajaran
                                 </button>
                             </div>
 
-                            <button onclick="saveProfile()" class="mt-6 btn-primary w-full">💾 Simpan Profil</button>
+                            <button onclick="saveProfile()" class="btn-primary w-full text-lg py-3">💾 Simpan Profil</button>
                         </div>
 
-                        <!-- Settings -->
-                        <div>
+                        <!-- Settings Sidebar -->
+                        <div class="space-y-6">
                             <div class="card">
-                                <h3 class="text-lg font-bold text-gray-800 mb-4">⚙️ Pengaturan</h3>
+                                <h3 class="section-title">⚙️ Pengaturan</h3>
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Durasi 1 JP (menit)</label>
                                         <input type="number" id="lessonDuration" class="input-field" min="25" max="60" value="35">
-                                        <p class="text-xs text-gray-500 mt-1">Default: SD=35, SMP/SMA=45</p>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tema</label>
-                                        <select id="appTheme" class="input-field">
-                                            <option value="light">Terang</option>
-                                            <option value="dark">Gelap (Coming Soon)</option>
-                                        </select>
+                                        <p class="text-xs text-gray-500 mt-1">Default: SD=35, SMP=40, SMA=45</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="card mt-6">
-                                <h3 class="text-lg font-bold text-gray-800 mb-4">💎 Status Langganan</h3>
+                            <div class="card">
+                                <h3 class="section-title">💎 Status Langganan</h3>
                                 <div id="subscriptionStatus">
                                     <div class="text-center py-4">
-                                        <span class="free-badge text-lg">FREE</span>
-                                        <p class="text-gray-600 mt-2">Akses terbatas ke fitur dasar</p>
+                                        <span id="subscriptionBadge" class="free-badge text-lg px-4 py-2">FREE</span>
+                                        <p id="subscriptionText" class="text-gray-600 mt-3">Akses terbatas ke fitur dasar</p>
                                     </div>
-                                    <button onclick="showUpgradeModal()" class="w-full btn-primary mt-4">
+                                    <button onclick="showUpgradeModal()" id="profileUpgradeBtn" class="w-full btn-warning mt-4">
                                         ⭐ Upgrade ke Premium
                                     </button>
                                 </div>
@@ -405,40 +411,44 @@
                         </div>
                     </div>
                 </section>
-
-                <!-- Calendar Section -->
+                                <!-- Calendar Section -->
                 <section id="section-calendar" class="section-content hidden">
                     <div class="card">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-lg font-bold text-gray-800">📅 Kalender Pendidikan</h3>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0">📅 Kalender Pendidikan</h3>
                             <button onclick="saveCalendar()" class="btn-primary">💾 Simpan Kalender</button>
                         </div>
 
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Semester Settings -->
-                            <div class="bg-blue-50 rounded-lg p-4">
-                                <h4 class="font-semibold text-blue-800 mb-4">📘 Semester Ganjil</h4>
+                            <!-- Semester Ganjil -->
+                            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+                                <h4 class="font-bold text-blue-800 mb-4 flex items-center gap-2">
+                                    <span>📘</span> Semester Ganjil
+                                </h4>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Mulai</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
                                         <input type="date" id="ganjilStart" class="input-field">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Selesai</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai</label>
                                         <input type="date" id="ganjilEnd" class="input-field">
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="bg-green-50 rounded-lg p-4">
-                                <h4 class="font-semibold text-green-800 mb-4">📗 Semester Genap</h4>
+                            <!-- Semester Genap -->
+                            <div class="bg-green-50 rounded-xl p-5 border border-green-200">
+                                <h4 class="font-bold text-green-800 mb-4 flex items-center gap-2">
+                                    <span>📗</span> Semester Genap
+                                </h4>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Mulai</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
                                         <input type="date" id="genapStart" class="input-field">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Selesai</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Selesai</label>
                                         <input type="date" id="genapEnd" class="input-field">
                                     </div>
                                 </div>
@@ -446,9 +456,11 @@
                         </div>
 
                         <!-- Special End for Grade 6, 9, 12 -->
-                        <div class="mt-6 bg-yellow-50 rounded-lg p-4">
-                            <h4 class="font-semibold text-yellow-800 mb-4">⚠️ Pengaturan Khusus Kelas Akhir (6, 9, 12)</h4>
-                            <p class="text-sm text-yellow-700 mb-4">Semester genap kelas akhir biasanya dipercepat untuk persiapan ujian</p>
+                        <div class="mt-6 bg-yellow-50 rounded-xl p-5 border border-yellow-200">
+                            <h4 class="font-bold text-yellow-800 mb-2 flex items-center gap-2">
+                                <span>⚠️</span> Pengaturan Khusus Kelas Akhir (6, 9, 12)
+                            </h4>
+                            <p class="text-sm text-yellow-700 mb-4">Semester genap kelas akhir biasanya dipercepat untuk persiapan ujian/kelulusan</p>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Akhir Smt Genap Kls 6</label>
@@ -467,24 +479,25 @@
 
                         <!-- Holidays -->
                         <div class="mt-6">
-                            <h4 class="font-semibold text-gray-800 mb-4">🎉 Hari Libur</h4>
+                            <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span>🎉</span> Hari Libur
+                            </h4>
                             
-                            <!-- Fixed Holidays (Read-only) -->
-                            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                                <h5 class="font-medium text-gray-700 mb-2">Libur Nasional Tetap</h5>
-                                <p class="text-sm text-gray-500 mb-2">Tanggal ini sudah otomatis ditentukan</p>
+                            <!-- Fixed Holidays -->
+                            <div class="bg-gray-50 rounded-xl p-4 mb-4 border">
+                                <h5 class="font-medium text-gray-700 mb-2">Libur Nasional Tetap (Otomatis)</h5>
                                 <div id="fixedHolidaysContainer" class="flex flex-wrap gap-2">
-                                    <!-- Will be populated by JS -->
+                                    <!-- Populated by JS -->
                                 </div>
                             </div>
 
                             <!-- Custom Holidays -->
-                            <div class="bg-orange-50 rounded-lg p-4">
-                                <h5 class="font-medium text-orange-800 mb-2">Libur Tidak Tetap (Bisa Diedit)</h5>
+                            <div class="bg-orange-50 rounded-xl p-4 border border-orange-200">
+                                <h5 class="font-medium text-orange-800 mb-3">Libur Tidak Tetap (Bisa Diedit)</h5>
                                 <div id="customHolidaysContainer" class="space-y-2">
-                                    <!-- Will be populated by JS -->
+                                    <!-- Populated by JS -->
                                 </div>
-                                <button onclick="addCustomHoliday()" class="mt-4 btn-secondary flex items-center gap-2">
+                                <button onclick="addCustomHoliday()" class="mt-4 btn-secondary text-sm flex items-center gap-2">
                                     <span>➕</span> Tambah Hari Libur
                                 </button>
                             </div>
@@ -495,8 +508,8 @@
                 <!-- Schedule Section -->
                 <section id="section-schedule" class="section-content hidden">
                     <div class="card">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-lg font-bold text-gray-800">⏰ Jadwal Pelajaran</h3>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0">⏰ Jadwal Pelajaran</h3>
                             <div class="flex gap-2">
                                 <button onclick="validateSchedule()" class="btn-secondary">✅ Validasi</button>
                                 <button onclick="saveSchedule()" class="btn-primary">💾 Simpan</button>
@@ -504,40 +517,40 @@
                         </div>
 
                         <!-- Lesson Time Settings -->
-                        <div class="bg-blue-50 rounded-lg p-4 mb-6">
-                            <h4 class="font-semibold text-blue-800 mb-4">🕐 Pengaturan Jam Pelajaran</h4>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div class="bg-blue-50 rounded-xl p-4 mb-6 border border-blue-200">
+                            <h4 class="font-bold text-blue-800 mb-4">🕐 Pengaturan Jam Pelajaran</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Durasi 1 JP</label>
-                                    <input type="number" id="jpDuration" class="input-field" value="35" min="25" max="60">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Durasi 1 JP (menit)</label>
+                                    <input type="number" id="jpDuration" class="input-field" value="35" min="25" max="60" onchange="initializeScheduleGrid()">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Jam Mulai</label>
-                                    <input type="time" id="startTime" class="input-field" value="07:00">
+                                    <input type="time" id="startTime" class="input-field" value="07:00" onchange="initializeScheduleGrid()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah JP/Hari</label>
+                                    <input type="number" id="jpPerDay" class="input-field" value="8" min="4" max="12" onchange="initializeScheduleGrid()">
                                 </div>
                             </div>
-                            <div id="lessonTimesContainer" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                                <!-- Will be populated by JS -->
-                            </div>
-                            <button onclick="addLessonTime()" class="mt-4 btn-secondary text-sm">➕ Tambah JP</button>
                         </div>
 
                         <!-- Schedule Grid -->
                         <div class="overflow-x-auto">
-                            <table class="w-full border-collapse">
+                            <table class="w-full border-collapse min-w-[800px]">
                                 <thead>
                                     <tr class="bg-primary-600 text-white">
-                                        <th class="border p-2 text-left">Jam</th>
-                                        <th class="border p-2">Senin</th>
-                                        <th class="border p-2">Selasa</th>
-                                        <th class="border p-2">Rabu</th>
-                                        <th class="border p-2">Kamis</th>
-                                        <th class="border p-2">Jum'at</th>
-                                        <th class="border p-2">Sabtu</th>
+                                        <th class="border border-primary-700 p-2 text-left w-28">Jam</th>
+                                        <th class="border border-primary-700 p-2 text-center">Senin</th>
+                                        <th class="border border-primary-700 p-2 text-center">Selasa</th>
+                                        <th class="border border-primary-700 p-2 text-center">Rabu</th>
+                                        <th class="border border-primary-700 p-2 text-center">Kamis</th>
+                                        <th class="border border-primary-700 p-2 text-center">Jum'at</th>
+                                        <th class="border border-primary-700 p-2 text-center">Sabtu</th>
                                     </tr>
                                 </thead>
                                 <tbody id="scheduleGrid">
-                                    <!-- Will be populated by JS -->
+                                    <!-- Populated by JS -->
                                 </tbody>
                             </table>
                         </div>
@@ -546,8 +559,7 @@
                         <div id="scheduleValidation" class="mt-4 hidden">
                             <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                                 <h5 class="font-semibold text-red-800 mb-2">⚠️ Konflik Jadwal Ditemukan</h5>
-                                <ul id="validationErrors" class="text-sm text-red-700 space-y-1">
-                                </ul>
+                                <ul id="validationErrors" class="text-sm text-red-700 space-y-1 list-disc list-inside"></ul>
                             </div>
                         </div>
                     </div>
@@ -556,8 +568,8 @@
                 <!-- Students Section -->
                 <section id="section-students" class="section-content hidden">
                     <div class="card">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-lg font-bold text-gray-800">👨‍🎓 Data Siswa</h3>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0">👨‍🎓 Data Siswa</h3>
                             <div class="flex gap-2">
                                 <button onclick="showImportStudents()" class="btn-secondary">📥 Import CSV</button>
                                 <button onclick="exportStudents()" class="btn-secondary">📤 Export</button>
@@ -597,18 +609,18 @@
                             <table class="w-full border-collapse">
                                 <thead>
                                     <tr class="bg-gray-100">
-                                        <th class="border p-2 text-left">No</th>
+                                        <th class="border p-2 text-left w-12">No</th>
                                         <th class="border p-2 text-left">NISN</th>
                                         <th class="border p-2 text-left">Nama Siswa</th>
-                                        <th class="border p-2">L/P</th>
-                                        <th class="border p-2">Kelas</th>
-                                        <th class="border p-2">Rombel</th>
-                                        <th class="border p-2">Aksi</th>
+                                        <th class="border p-2 text-center w-16">L/P</th>
+                                        <th class="border p-2 text-center w-20">Kelas</th>
+                                        <th class="border p-2 text-center w-20">Rombel</th>
+                                        <th class="border p-2 text-center w-20">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="studentsTable">
                                     <tr>
-                                        <td colspan="7" class="border p-4 text-center text-gray-500">
+                                        <td colspan="7" class="border p-8 text-center text-gray-500">
                                             Belum ada data siswa. Import dari CSV atau tambah manual.
                                         </td>
                                     </tr>
@@ -617,280 +629,882 @@
                         </div>
                     </div>
                 </section>
-
-                <!-- ATP Section -->
+                                <!-- ATP Section -->
                 <section id="section-atp" class="section-content hidden">
                     <div class="card mb-6 no-print">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-lg font-bold text-gray-800">📋 Alur Tujuan Pembelajaran (ATP)</h3>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0">📋 Alur Tujuan Pembelajaran (ATP)</h3>
                             <div class="flex gap-2">
-                                <button onclick="printDocument('atp')" class="btn-secondary">🖨️ Cetak</button>
+                                <button onclick="printDocument()" class="btn-secondary">🖨️ Cetak</button>
                                 <button onclick="generateATP()" class="btn-primary">🔄 Generate</button>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
-                                <select id="atpSubject" class="input-field" onchange="generateATP()">
+                                <select id="atpSubject" class="input-field" onchange="loadElemenOptions('atp')">
+                                    <option value="">Pilih Mapel</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
-                                <select id="atpClass" class="input-field" onchange="generateATP()">
-                                    <option value="1">Kelas 1</option>
-                                    <option value="2">Kelas 2</option>
-                                    <option value="3">Kelas 3</option>
-                                    <option value="4">Kelas 4</option>
-                                    <option value="5">Kelas 5</option>
-                                    <option value="6">Kelas 6</option>
+                                <select id="atpClass" class="input-field" onchange="loadElemenOptions('atp')">
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
-                                <select id="atpSemester" class="input-field" onchange="generateATP()">
+                                <select id="atpSemester" class="input-field" onchange="loadElemenOptions('atp')">
                                     <option value="Ganjil">Ganjil</option>
                                     <option value="Genap">Genap</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">JP per Pertemuan</label>
-                                <input type="number" id="atpJP" class="input-field" value="4" min="1" max="8" onchange="generateATP()">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">JP/Pertemuan</label>
+                                <input type="number" id="atpJP" class="input-field" value="4" min="1" max="8">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Rombel</label>
+                                <input type="text" id="atpRombel" class="input-field" value="A" maxlength="1">
                             </div>
                         </div>
                     </div>
 
                     <!-- ATP Document Preview -->
-                    <div id="atpDocument" class="bg-white rounded-xl shadow-lg p-8" style="max-width: 297mm; margin: 0 auto;">
-                        <div class="text-center font-bold text-lg mb-6">
+                    <div id="atpDocument" class="bg-white rounded-xl shadow-lg p-8 print-area" style="max-width: 297mm; margin: 0 auto;">
+                        <div class="doc-header">
                             ALUR TUJUAN PEMBELAJARAN (ATP)<br>
-                            TAHUN PELAJARAN <span id="atpYear"></span>
+                            TAHUN PELAJARAN <span id="atpYear">2024/2025</span>
                         </div>
                         
-                        <table class="w-full mb-4 text-sm">
-                            <tr>
-                                <td width="150">Satuan Pendidikan</td>
-                                <td>: <span id="atpSchool"></span></td>
-                            </tr>
-                            <tr>
-                                <td>Mata Pelajaran</td>
-                                <td>: <span id="atpSubjectName"></span></td>
-                            </tr>
-                            <tr>
-                                <td>Fase / Kelas</td>
-                                <td>: <span id="atpPhaseClass"></span></td>
-                            </tr>
-                            <tr>
-                                <td>Semester</td>
-                                <td>: <span id="atpSemesterName"></span></td>
-                            </tr>
+                        <table class="doc-identity w-full md:w-2/3">
+                            <tr><td width="180">Satuan Pendidikan</td><td>: <span id="atpSchool">-</span></td></tr>
+                            <tr><td>Mata Pelajaran</td><td>: <span id="atpSubjectName">-</span></td></tr>
+                            <tr><td>Fase / Kelas</td><td>: <span id="atpPhaseClass">-</span></td></tr>
+                            <tr><td>Semester</td><td>: <span id="atpSemesterName">-</span></td></tr>
                         </table>
 
-                        <table class="w-full border-collapse text-xs" id="atpTable">
+                        <table class="doc-table" id="atpTable">
                             <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="border p-2">No</th>
-                                    <th class="border p-2">Elemen & Capaian Pembelajaran</th>
-                                    <th class="border p-2">Tujuan Pembelajaran</th>
-                                    <th class="border p-2">ATP</th>
-                                    <th class="border p-2">Dimensi Profil Lulusan</th>
-                                    <th class="border p-2">Kompetensi</th>
-                                    <th class="border p-2">Lingkup Materi</th>
-                                    <th class="border p-2">Waktu</th>
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th width="20%">Elemen & CP</th>
+                                    <th width="25%">Tujuan Pembelajaran</th>
+                                    <th width="20%">ATP</th>
+                                    <th width="15%">Dimensi Profil</th>
+                                    <th width="8%">Waktu</th>
+                                    <th width="7%">Ket</th>
                                 </tr>
                             </thead>
                             <tbody id="atpBody">
-                                <tr>
-                                    <td colspan="8" class="border p-4 text-center text-gray-500">
-                                        Klik "Generate" untuk membuat ATP
-                                    </td>
-                                </tr>
+                                <tr><td colspan="7" class="text-center text-gray-500 py-8">Klik "Generate" untuk membuat ATP</td></tr>
                             </tbody>
                         </table>
 
-                        <div class="flex justify-between mt-12 text-sm">
-                            <div class="text-center">
+                        <div class="signature-area">
+                            <div class="signature-box">
                                 <p>Mengetahui,</p>
                                 <p>Kepala Sekolah</p>
-                                <br><br><br>
-                                <p class="font-bold underline" id="atpHeadmaster"></p>
-                                <p>NIP. <span id="atpHeadmasterNip"></span></p>
+                                <p class="signature-name" id="atpHeadmaster">-</p>
+                                <p>NIP. <span id="atpHeadmasterNip">-</span></p>
                             </div>
-                            <div class="text-center">
-                                <p><span id="atpLocation"></span></p>
+                            <div class="signature-box">
+                                <p id="atpLocation">-, ................ 2024</p>
                                 <p>Guru Mata Pelajaran</p>
-                                <br><br><br>
-                                <p class="font-bold underline" id="atpTeacher"></p>
-                                <p>NIP. <span id="atpTeacherNip"></span></p>
+                                <p class="signature-name" id="atpTeacher">-</p>
+                                <p>NIP. <span id="atpTeacherNip">-</span></p>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Continue with other sections... -->
                 <!-- Prota Section -->
                 <section id="section-prota" class="section-content hidden">
                     <div class="card mb-6 no-print">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-lg font-bold text-gray-800">📘 Program Tahunan (Prota)</h3>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0">📘 Program Tahunan (Prota)</h3>
                             <div class="flex gap-2">
-                                <button onclick="printDocument('prota')" class="btn-secondary">🖨️ Cetak</button>
+                                <button onclick="printDocument()" class="btn-secondary">🖨️ Cetak</button>
                                 <button onclick="generateProta()" class="btn-primary">🔄 Generate</button>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
-                                <select id="protaSubject" class="input-field" onchange="generateProta()"></select>
+                                <select id="protaSubject" class="input-field"></select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
-                                <select id="protaClass" class="input-field" onchange="generateProta()">
-                                    <option value="1">Kelas 1</option>
-                                    <option value="2">Kelas 2</option>
-                                    <option value="3">Kelas 3</option>
-                                    <option value="4">Kelas 4</option>
-                                    <option value="5">Kelas 5</option>
-                                    <option value="6">Kelas 6</option>
-                                </select>
+                                <select id="protaClass" class="input-field"></select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Rombel</label>
-                                <input type="text" id="protaRombel" class="input-field" value="A" onchange="generateProta()">
+                                <input type="text" id="protaRombel" class="input-field" value="A">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">JP per Pertemuan</label>
-                                <input type="number" id="protaJP" class="input-field" value="4" min="1" max="8" onchange="generateProta()">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">JP/Pertemuan</label>
+                                <input type="number" id="protaJP" class="input-field" value="4" min="1" max="8">
                             </div>
                         </div>
                     </div>
 
-                    <div id="protaDocument" class="bg-white rounded-xl shadow-lg p-8" style="max-width: 210mm; margin: 0 auto;">
-                        <div class="text-center font-bold text-lg mb-6">
+                    <div id="protaDocument" class="bg-white rounded-xl shadow-lg p-8 print-area" style="max-width: 210mm; margin: 0 auto;">
+                        <div class="doc-header">
                             PROGRAM TAHUNAN (PROTA)<br>
-                            <span id="protaSubjectTitle"></span>
+                            <span id="protaSubjectTitle">MATA PELAJARAN</span>
                         </div>
                         
-                        <table class="w-full mb-4 text-sm">
-                            <tr><td width="150">Satuan Pendidikan</td><td>: <span id="protaSchool"></span></td></tr>
-                            <tr><td>Mata Pelajaran</td><td>: <span id="protaSubjectName"></span></td></tr>
-                            <tr><td>Fase / Kelas / Rombel</td><td>: <span id="protaPhaseClass"></span></td></tr>
-                            <tr><td>Tahun Pelajaran</td><td>: <span id="protaYear"></span></td></tr>
+                        <table class="doc-identity">
+                            <tr><td width="180">Satuan Pendidikan</td><td>: <span id="protaSchool">-</span></td></tr>
+                            <tr><td>Mata Pelajaran</td><td>: <span id="protaSubjectName">-</span></td></tr>
+                            <tr><td>Fase / Kelas / Rombel</td><td>: <span id="protaPhaseClass">-</span></td></tr>
+                            <tr><td>Tahun Pelajaran</td><td>: <span id="protaYear">-</span></td></tr>
                         </table>
 
-                        <table class="w-full border-collapse text-xs">
+                        <table class="doc-table">
                             <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="border p-2">Smt</th>
-                                    <th class="border p-2">Bab / Elemen</th>
-                                    <th class="border p-2">Tujuan Pembelajaran</th>
-                                    <th class="border p-2">JP</th>
+                                <tr>
+                                    <th width="10%">Smt</th>
+                                    <th width="15%">Bab/Elemen</th>
+                                    <th width="65%">Tujuan Pembelajaran</th>
+                                    <th width="10%">JP</th>
                                 </tr>
                             </thead>
                             <tbody id="protaBody">
-                                <tr>
-                                    <td colspan="4" class="border p-4 text-center text-gray-500">
-                                        Klik "Generate" untuk membuat Prota
-                                    </td>
-                                </tr>
+                                <tr><td colspan="4" class="text-center text-gray-500 py-8">Klik "Generate" untuk membuat Prota</td></tr>
                             </tbody>
                         </table>
 
-                        <div class="flex justify-between mt-12 text-sm">
-                            <div class="text-center">
+                        <div class="signature-area">
+                            <div class="signature-box">
                                 <p>Mengetahui,</p>
                                 <p>Kepala Sekolah</p>
-                                <br><br><br>
-                                <p class="font-bold underline" id="protaHeadmaster"></p>
-                                <p>NIP. <span id="protaHeadmasterNip"></span></p>
+                                <p class="signature-name" id="protaHeadmaster">-</p>
+                                <p>NIP. <span id="protaHeadmasterNip">-</span></p>
                             </div>
-                            <div class="text-center">
-                                <p><span id="protaLocation"></span></p>
+                            <div class="signature-box">
+                                <p id="protaLocation">-, ................ 2024</p>
                                 <p>Guru Mata Pelajaran</p>
-                                <br><br><br>
-                                <p class="font-bold underline" id="protaTeacher"></p>
-                                <p>NIP. <span id="protaTeacherNip"></span></p>
+                                <p class="signature-name" id="protaTeacher">-</p>
+                                <p>NIP. <span id="protaTeacherNip">-</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                                <!-- Promes Section (PREMIUM) -->
+                <section id="section-promes" class="section-content hidden">
+                    <div class="card mb-6 no-print">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0">📗 Program Semester (Promes) <span class="premium-badge">PRO</span></h3>
+                            <div class="flex gap-2">
+                                <button onclick="printDocument()" class="btn-secondary">🖨️ Cetak</button>
+                                <button onclick="generatePromes()" class="btn-primary">🔄 Generate</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                                <select id="promesSubject" class="input-field"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                                <select id="promesClass" class="input-field"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                                <select id="promesSemester" class="input-field">
+                                    <option value="Ganjil">Ganjil</option>
+                                    <option value="Genap">Genap</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Rombel</label>
+                                <input type="text" id="promesRombel" class="input-field" value="A">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">JP/Pertemuan</label>
+                                <input type="number" id="promesJP" class="input-field" value="4" min="1" max="8">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Hari Mengajar</label>
+                                <select id="promesDay" class="input-field">
+                                    <option value="1">Senin</option>
+                                    <option value="2">Selasa</option>
+                                    <option value="3">Rabu</option>
+                                    <option value="4">Kamis</option>
+                                    <option value="5">Jum'at</option>
+                                    <option value="6">Sabtu</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="promesDocument" class="bg-white rounded-xl shadow-lg p-6 print-area overflow-x-auto" style="max-width: 100%;">
+                        <div class="doc-header">
+                            PROGRAM SEMESTER (PROMES)<br>
+                            SEMESTER <span id="promesSemesterTitle">GANJIL</span>
+                        </div>
+                        
+                        <table class="doc-identity w-1/2">
+                            <tr><td width="180">Satuan Pendidikan</td><td>: <span id="promesSchool">-</span></td></tr>
+                            <tr><td>Mata Pelajaran</td><td>: <span id="promesSubjectName">-</span></td></tr>
+                            <tr><td>Fase / Kelas / Rombel</td><td>: <span id="promesPhaseClass">-</span></td></tr>
+                            <tr><td>Tahun Pelajaran</td><td>: <span id="promesYear">-</span></td></tr>
+                        </table>
+
+                        <div class="overflow-x-auto">
+                            <table class="doc-table text-xs" style="min-width: 1200px;">
+                                <thead id="promesHead">
+                                    <tr>
+                                        <th rowspan="2" width="120">Bab/Elemen</th>
+                                        <th rowspan="2" width="250">Tujuan Pembelajaran</th>
+                                        <th rowspan="2" width="40">JP</th>
+                                        <th colspan="5">Juli</th>
+                                        <th colspan="5">Agustus</th>
+                                        <th colspan="5">September</th>
+                                        <th colspan="5">Oktober</th>
+                                        <th colspan="5">November</th>
+                                        <th colspan="5">Desember</th>
+                                    </tr>
+                                    <tr id="promesWeekRow">
+                                        <!-- Week numbers populated by JS -->
+                                    </tr>
+                                </thead>
+                                <tbody id="promesBody">
+                                    <tr><td colspan="33" class="text-center text-gray-500 py-8">Klik "Generate" untuk membuat Promes</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="signature-area mt-8">
+                            <div class="signature-box">
+                                <p>Mengetahui,</p>
+                                <p>Kepala Sekolah</p>
+                                <p class="signature-name" id="promesHeadmaster">-</p>
+                                <p>NIP. <span id="promesHeadmasterNip">-</span></p>
+                            </div>
+                            <div class="signature-box">
+                                <p id="promesLocation">-, ................ 2024</p>
+                                <p>Guru Mata Pelajaran</p>
+                                <p class="signature-name" id="promesTeacher">-</p>
+                                <p>NIP. <span id="promesTeacherNip">-</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                                <!-- Modul Ajar Section (PREMIUM) -->
+                <section id="section-modul" class="section-content hidden">
+                    <div class="card mb-6 no-print">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0">📕 Modul Ajar <span class="premium-badge">PRO</span></h3>
+                            <div class="flex gap-2">
+                                <button onclick="printDocument()" class="btn-secondary">🖨️ Cetak</button>
+                                <button onclick="generateModul()" class="btn-primary">🔄 Generate</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                                <select id="modulSubject" class="input-field" onchange="loadElemenOptions('modul')"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                                <select id="modulClass" class="input-field" onchange="loadElemenOptions('modul')"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                                <select id="modulSemester" class="input-field" onchange="loadElemenOptions('modul')">
+                                    <option value="Ganjil">Ganjil</option>
+                                    <option value="Genap">Genap</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Bab/Elemen</label>
+                                <select id="modulElemen" class="input-field"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">JP/Pertemuan</label>
+                                <input type="number" id="modulJP" class="input-field" value="4" min="1" max="8">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="modulDocument" class="bg-white rounded-xl shadow-lg p-8 print-area" style="max-width: 210mm; margin: 0 auto;">
+                        <div class="doc-header">
+                            MODUL AJAR KURIKULUM MERDEKA<br>
+                            <span class="text-sm font-normal">Pendekatan Mindful, Meaningful, & Joyful Learning</span>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                                <h4 class="font-bold text-blue-800 mb-2">A. IDENTITAS MODUL</h4>
+                                <table class="text-sm">
+                                    <tr><td width="180">Nama Penyusun</td><td>: <span id="modulGuru">-</span></td></tr>
+                                    <tr><td>Satuan Pendidikan</td><td>: <span id="modulSekolah">-</span></td></tr>
+                                    <tr><td>Mata Pelajaran</td><td>: <span id="modulMapel">-</span></td></tr>
+                                    <tr><td>Kelas / Fase / Semester</td><td>: <span id="modulKelas">-</span></td></tr>
+                                    <tr><td>Topik / Bab</td><td>: <span id="modulTopik" class="text-primary-600 font-semibold">-</span></td></tr>
+                                    <tr><td>Alokasi Waktu</td><td>: <span id="modulWaktu">-</span> JP</td></tr>
+                                </table>
+                            </div>
+
+                            <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                                <h4 class="font-bold text-green-800 mb-2">B. DIMENSI PROFIL PELAJAR PANCASILA</h4>
+                                <div id="modulDimensi" class="text-sm">-</div>
+                            </div>
+
+                            <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
+                                <h4 class="font-bold text-yellow-800 mb-2">C. CAPAIAN PEMBELAJARAN</h4>
+                                <p id="modulCP" class="text-sm">-</p>
+                            </div>
+
+                            <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
+                                <h4 class="font-bold text-purple-800 mb-2">D. TUJUAN PEMBELAJARAN</h4>
+                                <ol id="modulTP" class="text-sm list-decimal list-inside space-y-1">-</ol>
+                            </div>
+
+                            <div class="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-500">
+                                <h4 class="font-bold text-orange-800 mb-2">E. LANGKAH-LANGKAH PEMBELAJARAN</h4>
+                                <div id="modulLangkah" class="text-sm space-y-4">-</div>
+                            </div>
+
+                            <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                                <h4 class="font-bold text-red-800 mb-2">F. ASESMEN PEMBELAJARAN</h4>
+                                <div class="text-sm space-y-2">
+                                    <p><strong>Diagnostik:</strong> Tanya jawab pemantik di awal pembelajaran</p>
+                                    <p><strong>Formatif:</strong> Observasi keterlibatan dan pengerjaan LKPD</p>
+                                    <p><strong>Sumatif:</strong> Tes tertulis dan penugasan proyek</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="signature-area mt-8">
+                            <div class="signature-box">
+                                <p>Mengetahui,</p>
+                                <p>Kepala Sekolah</p>
+                                <p class="signature-name" id="modulHeadmaster">-</p>
+                                <p>NIP. <span id="modulHeadmasterNip">-</span></p>
+                            </div>
+                            <div class="signature-box">
+                                <p id="modulLocation">-, ................ 2024</p>
+                                <p>Guru Mata Pelajaran</p>
+                                <p class="signature-name" id="modulTeacher">-</p>
+                                <p>NIP. <span id="modulTeacherNip">-</span></p>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- AI Assistant Section -->
+                <!-- LKPD Section (PREMIUM) -->
+                <section id="section-lkpd" class="section-content hidden">
+                    <div class="card mb-6 no-print">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0">📝 Lembar Kerja Peserta Didik <span class="premium-badge">PRO</span></h3>
+                            <div class="flex gap-2">
+                                <button onclick="printDocument()" class="btn-secondary">🖨️ Cetak</button>
+                                <button onclick="generateLKPD()" class="btn-primary">🔄 Generate</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                                <select id="lkpdSubject" class="input-field" onchange="loadElemenOptions('lkpd')"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                                <select id="lkpdClass" class="input-field" onchange="loadElemenOptions('lkpd')"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                                <select id="lkpdSemester" class="input-field" onchange="loadElemenOptions('lkpd')">
+                                    <option value="Ganjil">Ganjil</option>
+                                    <option value="Genap">Genap</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Bab/Elemen</label>
+                                <select id="lkpdElemen" class="input-field"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Rombel</label>
+                                <input type="text" id="lkpdRombel" class="input-field" value="A">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="lkpdDocument" class="bg-white rounded-xl shadow-lg p-8 print-area" style="max-width: 210mm; margin: 0 auto;">
+                        <div class="border-4 border-dashed border-primary-400 rounded-2xl p-6">
+                            <div class="text-center mb-6">
+                                <h2 class="text-2xl font-bold text-primary-700">✨ LEMBAR KERJA PESERTA DIDIK ✨</h2>
+                                <p class="text-gray-600" id="lkpdMapelTitle">Mata Pelajaran</p>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-4 mb-6">
+                                <div class="border-b-2 border-gray-300 pb-1">
+                                    <span class="text-sm text-gray-600">Nama:</span>
+                                </div>
+                                <div class="border-b-2 border-gray-300 pb-1">
+                                    <span class="text-sm text-gray-600">Kelas: <span id="lkpdKelasInfo">-</span></span>
+                                </div>
+                                <div class="border-b-2 border-gray-300 pb-1">
+                                    <span class="text-sm text-gray-600">Tanggal:</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                                <h4 class="font-bold text-blue-800 mb-2">📚 Materi: <span id="lkpdMateri">-</span></h4>
+                                <p class="text-sm text-blue-700"><strong>Tujuan Pembelajaran:</strong></p>
+                                <ol id="lkpdTP" class="text-sm list-decimal list-inside ml-4">-</ol>
+                            </div>
+
+                            <div class="mb-6">
+                                <h4 class="font-bold text-gray-800 mb-2">📝 Petunjuk Pengerjaan:</h4>
+                                <ol class="text-sm list-decimal list-inside space-y-1 ml-4">
+                                    <li>Berdoa sebelum mengerjakan</li>
+                                    <li>Baca setiap pertanyaan dengan teliti</li>
+                                    <li>Kerjakan dengan jujur dan mandiri</li>
+                                    <li>Tanyakan kepada guru jika ada yang tidak dipahami</li>
+                                </ol>
+                            </div>
+
+                            <div class="space-y-6" id="lkpdQuestions">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <p class="font-semibold mb-3">1. Jelaskan pemahamanmu tentang materi ini!</p>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-lg h-32 flex items-center justify-center text-gray-400">
+                                        Tulis jawabanmu di sini
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <p class="font-semibold mb-3">2. Berikan contoh penerapan materi ini dalam kehidupan sehari-hari!</p>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-lg h-32 flex items-center justify-center text-gray-400">
+                                        Tulis jawabanmu di sini
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <p class="font-semibold mb-3">3. Apa kesimpulan yang dapat kamu ambil dari pembelajaran hari ini?</p>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-lg h-32 flex items-center justify-center text-gray-400">
+                                        Tulis jawabanmu di sini
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 text-right">
+                                <p class="text-green-600 font-bold text-lg">🌟 Semangat Belajar! 🌟</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                                <!-- Absensi Section (PREMIUM) -->
+                <section id="section-attendance" class="section-content hidden">
+                    <div class="card">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0">✅ Absensi Siswa <span class="premium-badge">PRO</span></h3>
+                            <div class="flex gap-2">
+                                <button onclick="printDocument()" class="btn-secondary">🖨️ Cetak</button>
+                                <button onclick="saveAttendance()" class="btn-primary">💾 Simpan</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                                <input type="date" id="attendanceDate" class="input-field" onchange="loadAttendance()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                                <select id="attendanceClass" class="input-field" onchange="loadAttendanceStudents()"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Rombel</label>
+                                <select id="attendanceRombel" class="input-field" onchange="loadAttendanceStudents()">
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                                <select id="attendanceSubject" class="input-field"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">JP Ke-</label>
+                                <input type="text" id="attendanceJP" class="input-field" placeholder="1-2" value="1-2">
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <button onclick="setAllAttendance('H')" class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 text-sm font-medium">
+                                ✓ Semua Hadir
+                            </button>
+                            <button onclick="setAllAttendance('S')" class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 text-sm font-medium">
+                                S - Sakit
+                            </button>
+                            <button onclick="setAllAttendance('I')" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-sm font-medium">
+                                I - Izin
+                            </button>
+                            <button onclick="setAllAttendance('A')" class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium">
+                                A - Alpha
+                            </button>
+                        </div>
+
+                        <!-- Attendance Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="border p-2 text-left w-12">No</th>
+                                        <th class="border p-2 text-left">NISN</th>
+                                        <th class="border p-2 text-left">Nama Siswa</th>
+                                        <th class="border p-2 text-center w-16">L/P</th>
+                                        <th class="border p-2 text-center w-24">Hadir</th>
+                                        <th class="border p-2 text-center w-24">Sakit</th>
+                                        <th class="border p-2 text-center w-24">Izin</th>
+                                        <th class="border p-2 text-center w-24">Alpha</th>
+                                        <th class="border p-2 text-left">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendanceTable">
+                                    <tr>
+                                        <td colspan="9" class="border p-8 text-center text-gray-500">
+                                            Pilih tanggal, kelas, dan rombel untuk menampilkan data siswa
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-green-50 p-4 rounded-lg text-center">
+                                <p class="text-green-600 text-2xl font-bold" id="attendanceHadir">0</p>
+                                <p class="text-green-700 text-sm">Hadir</p>
+                            </div>
+                            <div class="bg-yellow-50 p-4 rounded-lg text-center">
+                                <p class="text-yellow-600 text-2xl font-bold" id="attendanceSakit">0</p>
+                                <p class="text-yellow-700 text-sm">Sakit</p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg text-center">
+                                <p class="text-blue-600 text-2xl font-bold" id="attendanceIzin">0</p>
+                                <p class="text-blue-700 text-sm">Izin</p>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-lg text-center">
+                                <p class="text-red-600 text-2xl font-bold" id="attendanceAlpha">0</p>
+                                <p class="text-red-700 text-sm">Alpha</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                                <!-- Jurnal Section (PREMIUM) -->
+                <section id="section-journal" class="section-content hidden">
+                    <div class="card mb-6 no-print">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0">📓 Jurnal Pembelajaran <span class="premium-badge">PRO</span></h3>
+                            <div class="flex gap-2">
+                                <button onclick="printDocument()" class="btn-secondary">🖨️ Cetak</button>
+                                <button onclick="generateJournal()" class="btn-primary">🔄 Generate</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                                <select id="journalSubject" class="input-field"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                                <select id="journalClass" class="input-field"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                                <select id="journalSemester" class="input-field">
+                                    <option value="Ganjil">Ganjil</option>
+                                    <option value="Genap">Genap</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Rombel</label>
+                                <input type="text" id="journalRombel" class="input-field" value="A">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="journalDocument" class="bg-white rounded-xl shadow-lg p-6 print-area overflow-x-auto" style="max-width: 100%;">
+                        <div class="doc-header">
+                            JURNAL PEMBELAJARAN
+                        </div>
+                        
+                        <table class="doc-identity w-1/2">
+                            <tr><td width="180">Mata Pelajaran</td><td>: <span id="journalMapel">-</span></td></tr>
+                            <tr><td>Kelas / Rombel</td><td>: <span id="journalKelas">-</span></td></tr>
+                            <tr><td>Semester</td><td>: <span id="journalSmt">-</span></td></tr>
+                            <tr><td>Tahun Pelajaran</td><td>: <span id="journalTahun">-</span></td></tr>
+                        </table>
+
+                        <div class="overflow-x-auto">
+                            <table class="doc-table text-xs" style="min-width: 1000px;">
+                                <thead>
+                                    <tr>
+                                        <th width="5%">No</th>
+                                        <th width="8%">Kelas/Fase</th>
+                                        <th width="12%">Hari/Tanggal</th>
+                                        <th width="15%">Materi (Elemen/CP)</th>
+                                        <th width="20%">Tujuan Pembelajaran</th>
+                                        <th width="10%">Kehadiran</th>
+                                        <th width="15%">Hasil Pembelajaran</th>
+                                        <th width="15%">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="journalBody">
+                                    <tr><td colspan="8" class="text-center text-gray-500 py-8">Klik "Generate" untuk membuat Jurnal</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="signature-area mt-8">
+                            <div class="signature-box">
+                                <p>Mengetahui,</p>
+                                <p>Kepala Sekolah</p>
+                                <p class="signature-name" id="journalHeadmaster">-</p>
+                                <p>NIP. <span id="journalHeadmasterNip">-</span></p>
+                            </div>
+                            <div class="signature-box">
+                                <p id="journalLocation">-, ................ 2024</p>
+                                <p>Guru Mata Pelajaran</p>
+                                <p class="signature-name" id="journalTeacher">-</p>
+                                <p>NIP. <span id="journalTeacherNip">-</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                                <!-- Grades Section (PREMIUM) -->
+                <section id="section-grades" class="section-content hidden">
+                    <div class="card">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <h3 class="section-title mb-0">📊 Daftar Nilai <span class="premium-badge">PRO</span></h3>
+                            <div class="flex gap-2">
+                                <button onclick="printDocument()" class="btn-secondary">🖨️ Cetak</button>
+                                <button onclick="saveGrades()" class="btn-primary">💾 Simpan</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                                <select id="gradesSubject" class="input-field" onchange="loadGrades()"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                                <select id="gradesClass" class="input-field" onchange="loadGrades()"></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Rombel</label>
+                                <select id="gradesRombel" class="input-field" onchange="loadGrades()">
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                                <select id="gradesSemester" class="input-field" onchange="loadGrades()">
+                                    <option value="Ganjil">Ganjil</option>
+                                    <option value="Genap">Genap</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">KKM</label>
+                                <input type="number" id="gradesKKM" class="input-field" value="75" min="60" max="100">
+                            </div>
+                        </div>
+
+                        <!-- Grade Components Settings -->
+                        <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                            <h4 class="font-semibold text-blue-800 mb-3">⚙️ Pengaturan Komponen Nilai</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Sumatif 1</label>
+                                    <input type="checkbox" id="gradeSum1" checked class="mr-2">
+                                    <span class="text-sm">Aktif</span>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Sumatif 2</label>
+                                    <input type="checkbox" id="gradeSum2" checked class="mr-2">
+                                    <span class="text-sm">Aktif</span>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Sumatif 3</label>
+                                    <input type="checkbox" id="gradeSum3" checked class="mr-2">
+                                    <span class="text-sm">Aktif</span>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Sumatif 4</label>
+                                    <input type="checkbox" id="gradeSum4" class="mr-2">
+                                    <span class="text-sm">Aktif</span>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">ATS</label>
+                                    <input type="checkbox" id="gradeATS" checked class="mr-2">
+                                    <span class="text-sm">Aktif</span>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">ASAS</label>
+                                    <input type="checkbox" id="gradeASAS" checked class="mr-2">
+                                    <span class="text-sm">Aktif</span>
+                                </div>
+                            </div>
+                            <button onclick="loadGrades()" class="mt-3 btn-secondary text-sm">🔄 Terapkan</button>
+                        </div>
+
+                        <!-- Grades Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="border p-2 text-center w-10">No</th>
+                                        <th class="border p-2 text-left">NISN</th>
+                                        <th class="border p-2 text-left">Nama Siswa</th>
+                                        <th class="border p-2 text-center w-14">L/P</th>
+                                        <th class="border p-2 text-center w-16 bg-blue-50">Sum 1</th>
+                                        <th class="border p-2 text-center w-16 bg-blue-50">Sum 2</th>
+                                        <th class="border p-2 text-center w-16 bg-blue-50">Sum 3</th>
+                                        <th class="border p-2 text-center w-16 bg-yellow-50">ATS</th>
+                                        <th class="border p-2 text-center w-16 bg-green-50">ASAS</th>
+                                        <th class="border p-2 text-center w-16 bg-purple-100 font-bold">N. Rapor</th>
+                                        <th class="border p-2 text-center w-16">Ket</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gradesTable">
+                                    <tr>
+                                        <td colspan="11" class="border p-8 text-center text-gray-500">
+                                            Pilih mata pelajaran, kelas, dan rombel untuk menampilkan daftar nilai
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Statistics -->
+                        <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-green-50 p-4 rounded-lg text-center">
+                                <p class="text-green-600 text-2xl font-bold" id="gradesTuntas">0</p>
+                                <p class="text-green-700 text-sm">Tuntas</p>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-lg text-center">
+                                <p class="text-red-600 text-2xl font-bold" id="gradesBelumTuntas">0</p>
+                                <p class="text-red-700 text-sm">Belum Tuntas</p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg text-center">
+                                <p class="text-blue-600 text-2xl font-bold" id="gradesRataRata">0</p>
+                                <p class="text-blue-700 text-sm">Rata-rata</p>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg text-center">
+                                <p class="text-purple-600 text-2xl font-bold" id="gradesTertinggi">0</p>
+                                <p class="text-purple-700 text-sm">Nilai Tertinggi</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                                <!-- AI Assistant Section -->
                 <section id="section-ai-assistant" class="section-content hidden">
                     <div class="card">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">🤖 AI Assistant - Pembuat Prompt</h3>
+                        <h3 class="section-title">🤖 AI Assistant - Pembuat Prompt</h3>
                         <p class="text-gray-600 mb-6">Gunakan template prompt di bawah ini untuk mengubah materi mentah menjadi CSV yang bisa diupload ke sistem.</p>
 
                         <div class="space-y-6">
                             <!-- Prompt for CP-TP -->
-                            <div class="bg-blue-50 rounded-lg p-4">
-                                <h4 class="font-semibold text-blue-800 mb-2">📋 Prompt untuk Membuat cp-mapel-jenjang.csv</h4>
-                                <div class="bg-white rounded p-4 font-mono text-sm whitespace-pre-wrap border" id="promptCP">Tolong buatkan data CSV dengan format berikut untuk mata pelajaran [NAMA_MAPEL] jenjang [SD/SMP/SMA]:
+                            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+                                <h4 class="font-bold text-blue-800 mb-3">📋 Prompt untuk Membuat cp-mapel-jenjang.csv</h4>
+                                <div class="bg-white rounded-lg p-4 font-mono text-xs whitespace-pre-wrap border max-h-64 overflow-y-auto" id="promptCP">Tolong buatkan data CSV dengan format berikut untuk mata pelajaran [NAMA_MAPEL] jenjang [SD/SMP/SMA]:
 
-Kolom (dipisah titik koma):
+Kolom (dipisah titik koma ;):
 1. Fase (A/B/C/D/E/F)
 2. Kelas (1-12)
 3. Semester (Ganjil/Genap)
-4. Elemen/Bab
+4. Elemen/Bab (contoh: Al-Qur'an Hadis / Bab 1)
 5. Capaian Pembelajaran (CP Panjang)
-6. Tujuan Pembelajaran (TP)
+6. Tujuan Pembelajaran (TP) - dimulai dengan "Peserta didik mampu..."
 7. 8 Dimensi Profil Lulusan (pilih dari: Keimanan, Kewargaan, Penalaran Kritis, Kreativitas, Kolaborasi, Kemandirian, Kesehatan, Komunikasi)
 
-Contoh output:
-Fase A;1;Ganjil;Al-Qur'an Hadis / Bab 1;Peserta didik mengenal huruf hijaiyah...;Peserta didik mampu melafalkan...;Keimanan dan Ketakwaan terhadap Tuhan YME, Komunikasi
+PENTING: 
+- JANGAN gunakan tanda koma (,) di dalam teks CP atau TP
+- Gunakan titik koma (;) HANYA sebagai pemisah kolom
+- Baris pertama adalah header
 
-Buat untuk seluruh kelas sesuai jenjang dengan TP yang detail dan terukur.</div>
-                                <button onclick="copyPrompt('promptCP')" class="mt-2 btn-secondary text-sm">📋 Copy Prompt</button>
+Contoh output:
+Fase;Kelas;Semester;Elemen/Bab;Capaian Pembelajaran;Tujuan Pembelajaran;Dimensi Profil
+Fase A;1;Ganjil;Al-Qur'an Hadis / Bab 1;Peserta didik mengenal huruf hijaiyah dan harakatnya;Peserta didik mampu melafalkan huruf hijaiyah dengan makharijul huruf yang benar;Keimanan, Komunikasi
+
+Buat untuk SEMUA kelas sesuai jenjang dengan TP yang detail dan terukur (minimal 3-5 TP per Bab).</div>
+                                <button onclick="copyPrompt('promptCP')" class="mt-3 btn-secondary text-sm">📋 Copy Prompt</button>
                             </div>
 
                             <!-- Prompt for Students -->
-                            <div class="bg-green-50 rounded-lg p-4">
-                                <h4 class="font-semibold text-green-800 mb-2">👨‍🎓 Format CSV Data Siswa</h4>
-                                <div class="bg-white rounded p-4 font-mono text-sm whitespace-pre-wrap border" id="promptStudents">Format CSV Data Siswa:
+                            <div class="bg-green-50 rounded-xl p-5 border border-green-200">
+                                <h4 class="font-bold text-green-800 mb-3">👨‍🎓 Format CSV Data Siswa</h4>
+                                <div class="bg-white rounded-lg p-4 font-mono text-xs whitespace-pre-wrap border" id="promptStudents">Format CSV Data Siswa (pisahkan dengan titik koma ;):
+
+Header:
 nisn;nama;jenis_kelamin;kelas;rombel
 
-Contoh:
+Contoh Data:
 0012345678;Ahmad Fauzi;L;6;A
 0012345679;Siti Fatimah;P;6;A
 0012345680;Budi Santoso;L;6;B
 
-Publish di Google Spreadsheet:
+Cara Publish dari Google Spreadsheet:
 1. Buat spreadsheet dengan kolom di atas
-2. File > Share > Publish to web
-3. Pilih format CSV
-4. Copy link yang diberikan</div>
-                                <button onclick="copyPrompt('promptStudents')" class="mt-2 btn-secondary text-sm">📋 Copy Format</button>
+2. Klik File > Share > Publish to web
+3. Pilih format: Comma-separated values (.csv)
+4. Klik Publish dan copy link yang diberikan
+5. Paste link di menu Import Siswa</div>
+                                <button onclick="copyPrompt('promptStudents')" class="mt-3 btn-secondary text-sm">📋 Copy Format</button>
                             </div>
 
                             <!-- Prompt for Modul Ajar -->
-                            <div class="bg-purple-50 rounded-lg p-4">
-                                <h4 class="font-semibold text-purple-800 mb-2">📕 Prompt untuk Membuat Konten Modul Ajar</h4>
-                                <div class="bg-white rounded p-4 font-mono text-sm whitespace-pre-wrap border" id="promptModul">Buatkan konten modul ajar lengkap untuk:
+                            <div class="bg-purple-50 rounded-xl p-5 border border-purple-200">
+                                <h4 class="font-bold text-purple-800 mb-3">📕 Prompt untuk Konten Modul Ajar</h4>
+                                <div class="bg-white rounded-lg p-4 font-mono text-xs whitespace-pre-wrap border max-h-64 overflow-y-auto" id="promptModul">Buatkan konten modul ajar lengkap dengan pendekatan Mindful, Meaningful, dan Joyful Learning untuk:
+
 - Mata Pelajaran: [NAMA_MAPEL]
-- Kelas/Fase: [KELAS/FASE]
+- Kelas/Fase: [KELAS/FASE]  
 - Bab/Elemen: [NAMA_BAB]
+- Alokasi Waktu: [X] JP
 - Tujuan Pembelajaran: [TP]
 
 Format output yang dibutuhkan:
+
 1. IDENTIFIKASI KESIAPAN PESERTA DIDIK
-   - Pengetahuan Awal
-   - Kebutuhan Belajar
+   - Pengetahuan Awal yang dibutuhkan
+   - Kebutuhan Belajar siswa
 
 2. LANGKAH PEMBELAJARAN (per pertemuan)
-   - Pendahuluan (Mindful)
-   - Kegiatan Inti (Meaningful & Joyful)
-   - Penutup
+   A. Pendahuluan (Mindful) - 10 menit
+      - Salam dan doa
+      - Apersepsi/mengaitkan dengan pengetahuan sebelumnya
+      - Pertanyaan pemantik
+      
+   B. Kegiatan Inti (Meaningful & Joyful) - [X] menit
+      - Eksplorasi materi
+      - Diskusi kelompok
+      - Presentasi/demonstrasi
+      - Pengerjaan LKPD
+      
+   C. Penutup - 10 menit
+      - Refleksi pembelajaran
+      - Penguatan materi
+      - Doa penutup
 
 3. ASESMEN
-   - Diagnostik
-   - Formatif
-   - Sumatif
+   - Diagnostik: cara mengetahui pemahaman awal
+   - Formatif: cara menilai proses
+   - Sumatif: cara menilai hasil akhir
 
 4. KONTEN LKPD (bahasa siswa, friendly)
-   - Petunjuk kegiatan
-   - Soal/tantangan
-   - Lembar jawab</div>
-                                <button onclick="copyPrompt('promptModul')" class="mt-2 btn-secondary text-sm">📋 Copy Prompt</button>
+   - Petunjuk kegiatan yang jelas
+   - Soal/tantangan yang menarik
+   - Lembar jawab yang cukup</div>
+                                <button onclick="copyPrompt('promptModul')" class="mt-3 btn-secondary text-sm">📋 Copy Prompt</button>
                             </div>
                         </div>
                     </div>
@@ -899,109 +1513,162 @@ Format output yang dibutuhkan:
                 <!-- Help Section -->
                 <section id="section-help" class="section-content hidden">
                     <div class="card">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">❓ Panduan Penggunaan Aplikasi</h3>
+                        <h3 class="section-title">❓ Panduan Penggunaan Aplikasi</h3>
                         
-                        <div class="space-y-4">
-                            <details class="bg-gray-50 rounded-lg p-4 cursor-pointer">
-                                <summary class="font-semibold text-gray-800">📚 Apa itu AGSA?</summary>
-                                <p class="mt-2 text-gray-600">AGSA (Admin Guru Super App) adalah aplikasi web yang membantu guru mengotomatisasi administrasi mengajar dengan konsep Single Input – Multi Output. Cukup masukkan data dasar sekali, dan sistem akan menghasilkan berbagai dokumen yang saling sinkron.</p>
+                        <div class="space-y-3">
+                            <details class="bg-gray-50 rounded-xl p-4 cursor-pointer group" open>
+                                <summary class="font-bold text-gray-800 flex items-center justify-between">
+                                    📚 Apa itu AGSA?
+                                    <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <p class="mt-3 text-gray-600">AGSA (Admin Guru Super App) adalah aplikasi web yang membantu guru mengotomatisasi administrasi mengajar dengan konsep <strong>Single Input – Multi Output</strong>. Cukup masukkan data dasar sekali, dan sistem akan menghasilkan berbagai dokumen yang saling sinkron seperti ATP, Prota, Promes, Modul Ajar, LKPD, KKTP, Jurnal, dan Daftar Nilai.</p>
                             </details>
 
-                            <details class="bg-gray-50 rounded-lg p-4 cursor-pointer">
-                                <summary class="font-semibold text-gray-800">🚀 Bagaimana Cara Memulai?</summary>
-                                <div class="mt-2 text-gray-600">
+                            <details class="bg-gray-50 rounded-xl p-4 cursor-pointer group">
+                                <summary class="font-bold text-gray-800 flex items-center justify-between">
+                                    🚀 Bagaimana Cara Memulai?
+                                    <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-3 text-gray-600">
                                     <ol class="list-decimal list-inside space-y-2">
-                                        <li>Lengkapi profil Anda di menu Profil</li>
-                                        <li>Atur Kalender Pendidikan sesuai tahun ajaran</li>
-                                        <li>Buat Jadwal Pelajaran</li>
-                                        <li>Import data siswa (opsional)</li>
-                                        <li>Generate dokumen (ATP, Prota, Promes, dll)</li>
+                                        <li><strong>Lengkapi Profil</strong> - Isi data diri, sekolah, dan mata pelajaran yang diampu</li>
+                                        <li><strong>Atur Kalender</strong> - Tentukan tanggal semester dan hari libur</li>
+                                        <li><strong>Buat Jadwal</strong> - Masukkan jadwal mengajar per hari</li>
+                                        <li><strong>Import Siswa</strong> - Upload data siswa via CSV (opsional)</li>
+                                        <li><strong>Generate Dokumen</strong> - Klik Generate di setiap menu dokumen</li>
                                     </ol>
                                 </div>
                             </details>
 
-                            <details class="bg-gray-50 rounded-lg p-4 cursor-pointer">
-                                <summary class="font-semibold text-gray-800">💎 Apa Perbedaan Free dan Premium?</summary>
-                                <div class="mt-2 text-gray-600">
-                                    <p class="mb-2"><strong>FREE:</strong></p>
-                                    <ul class="list-disc list-inside mb-4">
-                                        <li>Kalender Pendidikan</li>
-                                        <li>Jadwal Pelajaran</li>
-                                        <li>ATP (Alur Tujuan Pembelajaran)</li>
-                                        <li>Prota (Program Tahunan)</li>
-                                    </ul>
-                                    <p class="mb-2"><strong>PREMIUM:</strong></p>
-                                    <ul class="list-disc list-inside">
-                                        <li>Semua fitur FREE +</li>
-                                        <li>Promes (Program Semester)</li>
-                                        <li>Modul Ajar</li>
-                                        <li>LKPD</li>
-                                        <li>KKTP</li>
-                                        <li>Bank Soal</li>
-                                        <li>Absensi & Jurnal</li>
-                                        <li>Daftar Nilai</li>
-                                    </ul>
+                            <details class="bg-gray-50 rounded-xl p-4 cursor-pointer group">
+                                <summary class="font-bold text-gray-800 flex items-center justify-between">
+                                    💎 Perbedaan Free dan Premium?
+                                    <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-3 text-gray-600">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="bg-white p-4 rounded-lg">
+                                            <p class="font-bold text-gray-700 mb-2">🆓 FREE</p>
+                                            <ul class="text-sm space-y-1">
+                                                <li>✅ Kalender Pendidikan</li>
+                                                <li>✅ Jadwal Pelajaran</li>
+                                                <li>✅ ATP</li>
+                                                <li>✅ Prota</li>
+                                                <li>✅ Data Siswa</li>
+                                                <li>✅ AI Assistant</li>
+                                            </ul>
+                                        </div>
+                                        <div class="bg-yellow-50 p-4 rounded-lg">
+                                            <p class="font-bold text-yellow-700 mb-2">⭐ PREMIUM</p>
+                                            <ul class="text-sm space-y-1">
+                                                <li>✅ Semua fitur FREE +</li>
+                                                <li>✅ Promes (dengan tanggal)</li>
+                                                <li>✅ Modul Ajar</li>
+                                                <li>✅ LKPD</li>
+                                                <li>✅ KKTP</li>
+                                                <li>✅ Absensi & Jurnal</li>
+                                                <li>✅ Daftar Nilai</li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                             </details>
 
-                            <details class="bg-gray-50 rounded-lg p-4 cursor-pointer">
-                                <summary class="font-semibold text-gray-800">📁 Format CSV yang Didukung</summary>
-                                <div class="mt-2 text-gray-600">
-                                    <p class="mb-2">Gunakan titik koma (;) sebagai pemisah. Contoh format:</p>
-                                    <p class="font-mono text-sm bg-white p-2 rounded">Fase;Kelas;Semester;Elemen/Bab;CP;TP;Dimensi Profil</p>
+                            <details class="bg-gray-50 rounded-xl p-4 cursor-pointer group">
+                                <summary class="font-bold text-gray-800 flex items-center justify-between">
+                                    📁 Format CSV yang Didukung
+                                    <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-3 text-gray-600">
+                                    <p class="mb-2">Gunakan <strong>titik koma (;)</strong> sebagai pemisah kolom. Jangan gunakan koma di dalam teks.</p>
+                                    <div class="bg-white p-3 rounded-lg font-mono text-xs">
+                                        <p class="text-gray-500 mb-1"># Format CP/TP:</p>
+                                        <p>Fase;Kelas;Semester;Elemen;CP;TP;Dimensi</p>
+                                        <p class="text-gray-500 mt-2 mb-1"># Format Siswa:</p>
+                                        <p>nisn;nama;jenis_kelamin;kelas;rombel</p>
+                                    </div>
+                                </div>
+                            </details>
+
+                            <details class="bg-gray-50 rounded-xl p-4 cursor-pointer group">
+                                <summary class="font-bold text-gray-800 flex items-center justify-between">
+                                    🖨️ Cara Mencetak Dokumen
+                                    <span class="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-3 text-gray-600">
+                                    <ol class="list-decimal list-inside space-y-2">
+                                        <li>Klik tombol "🖨️ Cetak" di menu dokumen</li>
+                                        <li>Pilih "Save as PDF" untuk menyimpan file</li>
+                                        <li>Atau pilih printer untuk cetak langsung</li>
+                                        <li>Pastikan orientasi kertas sesuai (Portrait/Landscape)</li>
+                                    </ol>
                                 </div>
                             </details>
                         </div>
                     </div>
                 </section>
 
-                <!-- Premium Feature Locked -->
+                <!-- Locked Section (for non-premium) -->
                 <section id="section-locked" class="section-content hidden">
-                    <div class="card text-center py-12">
-                        <div class="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <span class="text-5xl">🔒</span>
+                    <div class="card text-center py-16">
+                        <div class="w-32 h-32 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                            <span class="text-6xl">🔒</span>
                         </div>
-                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Fitur Premium</h3>
-                        <p class="text-gray-600 mb-6">Fitur ini hanya tersedia untuk pengguna Premium</p>
-                        <button onclick="showUpgradeModal()" class="btn-primary text-lg px-8">
+                        <h3 class="text-3xl font-bold text-gray-800 mb-3">Fitur Premium</h3>
+                        <p class="text-gray-600 mb-8 max-w-md mx-auto">Fitur ini hanya tersedia untuk pengguna Premium. Upgrade sekarang untuk mengakses semua fitur AGSA!</p>
+                        <button onclick="showUpgradeModal()" class="btn-warning text-lg px-8 py-3">
                             ⭐ Upgrade ke Premium
                         </button>
+                        <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto text-sm">
+                            <div class="p-3 bg-gray-50 rounded-lg">📗 Promes</div>
+                            <div class="p-3 bg-gray-50 rounded-lg">📕 Modul Ajar</div>
+                            <div class="p-3 bg-gray-50 rounded-lg">📝 LKPD</div>
+                            <div class="p-3 bg-gray-50 rounded-lg">🎯 KKTP</div>
+                            <div class="p-3 bg-gray-50 rounded-lg">✅ Absensi</div>
+                            <div class="p-3 bg-gray-50 rounded-lg">📓 Jurnal</div>
+                            <div class="p-3 bg-gray-50 rounded-lg">📊 Nilai</div>
+                            <div class="p-3 bg-gray-50 rounded-lg">📚 Bank Soal</div>
+                        </div>
                     </div>
                 </section>
+
             </div>
         </main>
     </div>
-
-    <!-- Upgrade Modal -->
-    <div id="upgradeModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
+        <!-- Upgrade Modal -->
+    <div id="upgradeModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 md:p-8 animate-scale-in">
             <div class="text-center">
-                <div class="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span class="text-3xl">⭐</span>
+                <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <span class="text-4xl">⭐</span>
                 </div>
                 <h3 class="text-2xl font-bold text-gray-800 mb-2">Upgrade ke Premium</h3>
                 <p class="text-gray-600 mb-6">Dapatkan akses penuh ke semua fitur AGSA!</p>
 
-                <div class="space-y-3 mb-6 text-left">
+                <div class="text-left space-y-2 mb-6 bg-gray-50 p-4 rounded-xl">
                     <div class="flex items-center gap-3">
-                        <span class="text-green-500">✓</span>
-                        <span>Promes dengan detail tanggal pertemuan</span>
+                        <span class="text-green-500 text-lg">✓</span>
+                        <span class="text-sm">Promes dengan detail tanggal pertemuan</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="text-green-500">✓</span>
-                        <span>Modul Ajar terintegrasi Jurnal & LKPD</span>
+                        <span class="text-green-500 text-lg">✓</span>
+                        <span class="text-sm">Modul Ajar terintegrasi Jurnal & LKPD</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="text-green-500">✓</span>
-                        <span>KKTP, Absensi, Daftar Nilai</span>
+                        <span class="text-green-500 text-lg">✓</span>
+                        <span class="text-sm">KKTP, Absensi, Daftar Nilai lengkap</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="text-green-500">✓</span>
-                        <span>Support teks Arab (RTL)</span>
+                        <span class="text-green-500 text-lg">✓</span>
+                        <span class="text-sm">Support teks Arab (RTL) untuk PAI</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-green-500 text-lg">✓</span>
+                        <span class="text-sm">Update fitur selamanya</span>
                     </div>
                 </div>
 
-                <a id="waUpgradeLink" href="#" target="_blank" class="block w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg mb-3 transition">
+                <a id="waUpgradeLink" href="#" target="_blank" class="block w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl mb-3 transition text-center">
                     💬 Hubungi via WhatsApp
                 </a>
                 <button onclick="closeUpgradeModal()" class="w-full btn-secondary">Nanti Saja</button>
@@ -1009,10 +1676,13 @@ Format output yang dibutuhkan:
         </div>
     </div>
 
-    <!-- Import Modal -->
-    <div id="importModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-6">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">📥 Import Data Siswa</h3>
+    <!-- Import Students Modal -->
+    <div id="importModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800">📥 Import Data Siswa</h3>
+                <button onclick="closeImportModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
             
             <div class="space-y-4">
                 <div>
@@ -1021,29 +1691,30 @@ Format output yang dibutuhkan:
                     <p class="text-xs text-gray-500 mt-1">Publish spreadsheet Anda ke web dalam format CSV</p>
                 </div>
                 
-                <div class="text-center text-gray-500">atau</div>
+                <div class="text-center text-gray-400 text-sm">— atau —</div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Upload File CSV</label>
                     <input type="file" id="csvFile" accept=".csv" class="input-field">
                 </div>
 
-                <div class="bg-blue-50 rounded-lg p-4">
-                    <p class="text-sm text-blue-800 font-medium">Format CSV:</p>
-                    <p class="text-xs text-blue-700 font-mono mt-1">nisn;nama;jenis_kelamin;kelas;rombel</p>
+                <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <p class="text-sm text-blue-800 font-medium mb-1">📋 Format CSV:</p>
+                    <p class="text-xs text-blue-700 font-mono">nisn;nama;jenis_kelamin;kelas;rombel</p>
+                    <p class="text-xs text-blue-600 mt-1">Contoh: 0012345678;Ahmad Fauzi;L;6;A</p>
                 </div>
             </div>
 
             <div class="flex gap-3 mt-6">
                 <button onclick="closeImportModal()" class="flex-1 btn-secondary">Batal</button>
-                <button onclick="importStudents()" class="flex-1 btn-primary">Import</button>
+                <button onclick="importStudents()" class="flex-1 btn-primary">📥 Import</button>
             </div>
         </div>
     </div>
 
     <!-- Alert Container -->
     <div id="alertContainer" class="fixed bottom-4 right-4 z-50 hidden">
-        <div id="alertBox" class="p-4 rounded-lg shadow-lg max-w-sm"></div>
+        <div id="alertBox" class="p-4 rounded-xl shadow-xl max-w-sm flex items-center gap-3"></div>
     </div>
 
     <script src="js/firebase-config.js"></script>
