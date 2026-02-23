@@ -3,7 +3,9 @@
 // Toggle Password Visibility
 function togglePassword(inputId) {
     const input = document.getElementById(inputId);
-    input.type = input.type === 'password' ? 'text' : 'password';
+    if (input) {
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
 }
 
 // Show/Hide Forms
@@ -59,9 +61,6 @@ async function loginWithEmail() {
 // Login with Google
 async function loginWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({
-        'hd': 'gmail.com' // Restrict to gmail.com domain
-    });
     
     showLoading();
     
@@ -114,14 +113,11 @@ async function registerWithEmail() {
     try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         
-        // Update display name
         await userCredential.user.updateProfile({
             displayName: name
         });
         
-        // Create user document in Firestore
         await createUserDocument(userCredential.user, name);
-        
         await handleSuccessfulLogin(userCredential.user);
     } catch (error) {
         hideLoading();
@@ -162,63 +158,33 @@ async function createUserDocument(user, name) {
     const doc = await userRef.get();
     
     if (!doc.exists) {
-        const isSuperAdmin = user.email === APP_CONFIG.superAdminEmail;
-        
-        await userRef.set({
-            uid: user.uid,
-            email: user.email,
-            name: name || user.displayName || 'Pengguna',
-            photoURL: user.photoURL || null,
-            role: isSuperAdmin ? 'super_admin' : 'user',
-            subscription: isSuperAdmin ? 'premium' : 'free',
-            subscriptionExpiry: null,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-            profile: {
-                nip: '',
-                phone: '',
-                subjects: [],
-                school: {
-                    name: '',
-                    npsn: '',
-                    address: '',
-                    city: '',
-                    province: '',
-                    level: 'SD', // SD, SMP, SMA, SMK
-                    headmaster: '',
-                    headmasterNip: ''
-                }
-            },
-            settings: {
-                academicYear: getCurrentAcademicYear().current,
-                lessonDuration: 35, // Default for SD
-                theme: 'light'
-            }
-        });
+        const defaultData = getDefaultUserData(user);
+        defaultData.name = name || user.displayName || 'Pengguna';
+        await userRef.set(defaultData);
     }
 }
 
 // Handle Successful Login
 async function handleSuccessfulLogin(user) {
     try {
-        // Check/create user document
         const userRef = db.collection('users').doc(user.uid);
-        const doc = await userRef.get();
+        let doc = await userRef.get();
         
         if (!doc.exists) {
             await createUserDocument(user, user.displayName);
-        } else {
-            // Update last login
-            await userRef.update({
-                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            doc = await userRef.get();
         }
         
-        // Check if super admin
-        const userData = (await userRef.get()).data();
+        // Update last login
+        await userRef.update({
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        const userData = doc.data();
         
         hideLoading();
         
+        // Redirect based on role
         if (userData.role === 'super_admin') {
             window.location.href = 'admin.html';
         } else {
@@ -243,18 +209,23 @@ function handleAuthError(error) {
         'auth/invalid-email': 'Format email tidak valid',
         'auth/popup-closed-by-user': 'Login dibatalkan',
         'auth/network-request-failed': 'Koneksi internet bermasalah',
-        'auth/too-many-requests': 'Terlalu banyak percobaan. Coba lagi nanti.'
+        'auth/too-many-requests': 'Terlalu banyak percobaan. Coba lagi nanti.',
+        'auth/invalid-credential': 'Email atau password salah'
     };
     
     const message = errorMessages[error.code] || `Terjadi kesalahan: ${error.message}`;
     showAlert(message, 'error');
 }
 
-// Auth State Listener
+// Auth State Listener (only for index.html)
 auth.onAuthStateChanged(async (user) => {
-    if (user) {
-        // User is logged in, redirect if on login page
-        if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+    // Only handle redirect on index page
+    const isIndexPage = window.location.pathname.includes('index.html') || 
+                        window.location.pathname === '/' ||
+                        window.location.pathname.endsWith('/');
+    
+    if (user && isIndexPage) {
+        try {
             const userDoc = await db.collection('users').doc(user.uid).get();
             if (userDoc.exists) {
                 const userData = userDoc.data();
@@ -263,7 +234,13 @@ auth.onAuthStateChanged(async (user) => {
                 } else {
                     window.location.href = 'app.html';
                 }
+            } else {
+                // Create user document if not exists
+                await createUserDocument(user, user.displayName);
+                window.location.href = 'app.html';
             }
+        } catch (error) {
+            console.error('Auth state error:', error);
         }
     }
 });
