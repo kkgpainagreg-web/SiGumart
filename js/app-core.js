@@ -32,120 +32,201 @@ const LIBUR_BAKU = [
 
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing app...');
     initApp();
 });
 
 function initApp() {
     // Check Auth State
     auth.onAuthStateChanged(async (user) => {
+        console.log('Auth state changed:', user ? user.email : 'No user');
+        
         if (user) {
             currentUser = user;
-            await loadUserData();
-            initializeUI();
-            setupEventListeners();
-            updateTahunAjarSelect();
+            
+            try {
+                await loadUserData();
+                initializeUI();
+                setupEventListeners();
+                updateTahunAjarSelect();
+                console.log('App initialized successfully');
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                
+                // If permission error, might be new user - create their document
+                if (error.code === 'permission-denied') {
+                    console.log('Creating new user document...');
+                    await createNewUserDocument();
+                    location.reload();
+                }
+            }
         } else {
             window.location.href = 'index.html';
         }
     });
 }
 
+async function createNewUserDocument() {
+    try {
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const doc = await userRef.get();
+        
+        if (!doc.exists) {
+            await userRef.set({
+                nama: currentUser.displayName || 'Pengguna Baru',
+                email: currentUser.email,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                subscription: 'free',
+                subscriptionExpiry: null,
+                profileComplete: false
+            });
+            console.log('New user document created');
+        }
+    } catch (error) {
+        console.error('Error creating user document:', error);
+    }
+}
+
 async function loadUserData() {
     try {
+        console.log('Loading user data for:', currentUser.uid);
         const doc = await db.collection('users').doc(currentUser.uid).get();
+        
         if (doc.exists) {
             userData = doc.data();
+            console.log('User data loaded:', userData);
+            updateUserDisplay();
+        } else {
+            console.log('User document does not exist, creating...');
+            await createNewUserDocument();
+            userData = {
+                nama: currentUser.displayName || 'Pengguna Baru',
+                email: currentUser.email,
+                subscription: 'free',
+                profileComplete: false
+            };
             updateUserDisplay();
         }
     } catch (error) {
         console.error('Error loading user data:', error);
+        throw error;
     }
 }
 
 function updateUserDisplay() {
-    document.getElementById('userName').textContent = userData?.nama || currentUser.displayName || 'Pengguna';
+    const userNameEl = document.getElementById('userName');
+    const badgeEl = document.getElementById('userBadge');
+    const btnUpgrade = document.getElementById('btnUpgrade');
     
-    const badge = document.getElementById('userBadge');
-    if (userData?.subscription === 'premium') {
-        badge.textContent = 'PREMIUM';
-        badge.className = 'badge badge-premium';
-        document.getElementById('btnUpgrade').classList.add('hidden');
-    } else {
-        badge.textContent = 'FREE';
-        badge.className = 'badge badge-free';
+    if (userNameEl) {
+        userNameEl.textContent = userData?.nama || currentUser?.displayName || 'Pengguna';
+    }
+    
+    if (badgeEl) {
+        if (userData?.subscription === 'premium') {
+            badgeEl.textContent = 'PREMIUM';
+            badgeEl.className = 'badge badge-premium';
+            if (btnUpgrade) btnUpgrade.classList.add('hidden');
+        } else {
+            badgeEl.textContent = 'FREE';
+            badgeEl.className = 'badge badge-free';
+            if (btnUpgrade) btnUpgrade.classList.remove('hidden');
+        }
     }
 }
 
 function initializeUI() {
+    console.log('Initializing UI...');
+    
     // Populate profil form
     if (userData) {
-        document.getElementById('profilNama').value = userData.nama || '';
-        document.getElementById('profilNip').value = userData.nip || '';
-        document.getElementById('profilEmail').value = currentUser.email;
-        document.getElementById('profilPhone').value = userData.phone || '';
-        document.getElementById('profilSekolah').value = userData.sekolah || '';
-        document.getElementById('profilJenjang').value = userData.jenjang || '';
-        document.getElementById('profilKota').value = userData.kota || '';
-        document.getElementById('profilAlamat').value = userData.alamat || '';
-        document.getElementById('profilKepsek').value = userData.kepsek || '';
-        document.getElementById('profilNipKepsek').value = userData.nipKepsek || '';
+        const fields = {
+            'profilNama': userData.nama || '',
+            'profilNip': userData.nip || '',
+            'profilEmail': currentUser?.email || '',
+            'profilPhone': userData.phone || '',
+            'profilSekolah': userData.sekolah || '',
+            'profilJenjang': userData.jenjang || '',
+            'profilKota': userData.kota || '',
+            'profilAlamat': userData.alamat || '',
+            'profilKepsek': userData.kepsek || '',
+            'profilNipKepsek': userData.nipKepsek || ''
+        };
+        
+        Object.keys(fields).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = fields[id];
+        });
     }
 
-    // Load mapel diampu
-    loadMapelDiampu();
-    
-    // Load kalender
-    loadKalender();
-    
-    // Load libur baku
+    // Load data with error handling
+    loadMapelDiampu().catch(e => console.log('Mapel load skipped:', e.message));
+    loadKalender().catch(e => console.log('Kalender load skipped:', e.message));
     loadLiburBaku();
-    
-    // Load CP data
-    loadCPData();
-    
-    // Update getting started
-    updateGettingStarted();
-    
-    // Populate class selects
+    loadCPData().catch(e => console.log('CP data load skipped:', e.message));
+    updateGettingStarted().catch(e => console.log('Getting started update skipped:', e.message));
     populateKelasSelect();
+    
+    // Initialize premium features if available
+    if (typeof initPremiumFeatures === 'function') {
+        setTimeout(initPremiumFeatures, 500);
+    }
+    
+    console.log('UI initialized');
 }
 
 function setupEventListeners() {
+    console.log('Setting up event listeners...');
+    
     // Mobile menu toggle
-    document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+    }
     
     // Sidebar navigation
     document.querySelectorAll('.sidebar-item[data-section]').forEach(item => {
         item.addEventListener('click', () => {
             const section = item.dataset.section;
             const isPremium = item.dataset.premium === 'true';
-            
-            if (isPremium && userData?.subscription !== 'premium') {
-                navigateTo(section); // Will show locked content
-            } else {
-                navigateTo(section);
-            }
+            navigateTo(section);
         });
     });
     
     // Profile form
-    document.getElementById('formProfil').addEventListener('submit', saveProfile);
+    const formProfil = document.getElementById('formProfil');
+    if (formProfil) {
+        formProfil.addEventListener('submit', saveProfile);
+    }
     
     // Kalender form
-    document.getElementById('formKalender').addEventListener('submit', saveKalender);
+    const formKalender = document.getElementById('formKalender');
+    if (formKalender) {
+        formKalender.addEventListener('submit', saveKalender);
+    }
     
     // Add Mapel form
-    document.getElementById('formAddMapel').addEventListener('submit', addMapel);
+    const formAddMapel = document.getElementById('formAddMapel');
+    if (formAddMapel) {
+        formAddMapel.addEventListener('submit', addMapel);
+    }
     
     // CP File Upload
-    document.getElementById('inputFileCP').addEventListener('change', handleCPFileUpload);
+    const inputFileCP = document.getElementById('inputFileCP');
+    if (inputFileCP) {
+        inputFileCP.addEventListener('change', handleCPFileUpload);
+    }
     
     // Drag and drop for CP
     setupDragAndDrop();
+    
+    console.log('Event listeners set up');
 }
 
 // ===== NAVIGATION =====
 function navigateTo(section) {
+    console.log('Navigating to:', section);
+    
     // Hide all sections
     document.querySelectorAll('.section-content').forEach(sec => sec.classList.add('hidden'));
     
@@ -153,6 +234,8 @@ function navigateTo(section) {
     const targetSection = document.getElementById(`section-${section}`);
     if (targetSection) {
         targetSection.classList.remove('hidden');
+    } else {
+        console.warn('Section not found:', section);
     }
     
     // Update sidebar active state
@@ -185,8 +268,11 @@ function navigateTo(section) {
     };
     
     const title = titles[section] || ['', ''];
-    document.getElementById('pageTitle').textContent = title[0];
-    document.getElementById('pageSubtitle').textContent = title[1];
+    const pageTitleEl = document.getElementById('pageTitle');
+    const pageSubtitleEl = document.getElementById('pageSubtitle');
+    
+    if (pageTitleEl) pageTitleEl.textContent = title[0];
+    if (pageSubtitleEl) pageSubtitleEl.textContent = title[1];
     
     // Close mobile menu
     closeMobileMenu();
@@ -194,20 +280,23 @@ function navigateTo(section) {
 
 function toggleMobileMenu() {
     const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('-translate-x-full');
+    if (sidebar) {
+        sidebar.classList.toggle('-translate-x-full');
+    }
 }
 
 function closeMobileMenu() {
     const sidebar = document.getElementById('sidebar');
-    sidebar.classList.add('-translate-x-full');
-    if (window.innerWidth >= 1024) {
-        sidebar.classList.remove('-translate-x-full');
+    if (sidebar && window.innerWidth < 1024) {
+        sidebar.classList.add('-translate-x-full');
     }
 }
 
 // ===== TAHUN AJAR =====
 function updateTahunAjarSelect() {
     const select = document.getElementById('selectTahunAjar');
+    if (!select) return;
+    
     const academicYear = getCurrentAcademicYear();
     
     select.innerHTML = '';
@@ -219,7 +308,10 @@ function updateTahunAjarSelect() {
         select.appendChild(option);
     });
     
-    document.getElementById('kalenderTahunAjar').textContent = academicYear.current;
+    const kalenderTahunAjar = document.getElementById('kalenderTahunAjar');
+    if (kalenderTahunAjar) {
+        kalenderTahunAjar.textContent = academicYear.current;
+    }
 }
 
 // ===== PROFILE =====
@@ -229,27 +321,28 @@ async function saveProfile(e) {
     
     try {
         const data = {
-            nama: document.getElementById('profilNama').value,
-            nip: document.getElementById('profilNip').value,
-            phone: document.getElementById('profilPhone').value,
-            sekolah: document.getElementById('profilSekolah').value,
-            jenjang: document.getElementById('profilJenjang').value,
-            kota: document.getElementById('profilKota').value,
-            alamat: document.getElementById('profilAlamat').value,
-            kepsek: document.getElementById('profilKepsek').value,
-            nipKepsek: document.getElementById('profilNipKepsek').value,
+            nama: document.getElementById('profilNama')?.value || '',
+            nip: document.getElementById('profilNip')?.value || '',
+            phone: document.getElementById('profilPhone')?.value || '',
+            sekolah: document.getElementById('profilSekolah')?.value || '',
+            jenjang: document.getElementById('profilJenjang')?.value || '',
+            kota: document.getElementById('profilKota')?.value || '',
+            alamat: document.getElementById('profilAlamat')?.value || '',
+            kepsek: document.getElementById('profilKepsek')?.value || '',
+            nipKepsek: document.getElementById('profilNipKepsek')?.value || '',
             profileComplete: true,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
-        await db.collection('users').doc(currentUser.uid).update(data);
+        await db.collection('users').doc(currentUser.uid).set(data, { merge: true });
         userData = { ...userData, ...data };
         
         hideLoading();
         showToast('Profil berhasil disimpan!', 'success');
-        updateGettingStarted();
+        updateGettingStarted().catch(e => console.log(e));
     } catch (error) {
         hideLoading();
+        console.error('Save profile error:', error);
         showToast('Gagal menyimpan profil: ' + error.message, 'error');
     }
 }
@@ -257,6 +350,7 @@ async function saveProfile(e) {
 // ===== MAPEL DIAMPU =====
 async function loadMapelDiampu() {
     const container = document.getElementById('listMapelDiampu');
+    if (!container) return;
     
     try {
         const snapshot = await db.collection('users').doc(currentUser.uid)
@@ -264,6 +358,7 @@ async function loadMapelDiampu() {
         
         if (snapshot.empty) {
             container.innerHTML = '<p class="text-gray-500 text-sm text-center">Belum ada mata pelajaran</p>';
+            document.getElementById('statMapel').textContent = '0';
             return;
         }
         
@@ -285,14 +380,19 @@ async function loadMapelDiampu() {
         
         container.innerHTML = html;
         updateMapelSelects();
-        document.getElementById('statMapel').textContent = snapshot.size;
+        
+        const statMapel = document.getElementById('statMapel');
+        if (statMapel) statMapel.textContent = snapshot.size;
+        
     } catch (error) {
         console.error('Error loading mapel:', error);
+        container.innerHTML = '<p class="text-red-500 text-sm text-center">Gagal memuat data</p>';
     }
 }
 
 function showAddMapelModal() {
-    document.getElementById('modalAddMapel').classList.remove('hidden');
+    const modal = document.getElementById('modalAddMapel');
+    if (modal) modal.classList.remove('hidden');
 }
 
 async function addMapel(e) {
@@ -301,10 +401,10 @@ async function addMapel(e) {
     
     try {
         const data = {
-            nama: document.getElementById('mapelNama').value,
-            jp: parseInt(document.getElementById('mapelJp').value),
-            pertemuan: parseInt(document.getElementById('mapelPertemuan').value),
-            needArabic: document.getElementById('mapelArabic').checked,
+            nama: document.getElementById('mapelNama')?.value || '',
+            jp: parseInt(document.getElementById('mapelJp')?.value) || 2,
+            pertemuan: parseInt(document.getElementById('mapelPertemuan')?.value) || 1,
+            needArabic: document.getElementById('mapelArabic')?.checked || false,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
@@ -315,9 +415,13 @@ async function addMapel(e) {
         closeModal('modalAddMapel');
         showToast('Mata pelajaran berhasil ditambahkan!', 'success');
         loadMapelDiampu();
-        document.getElementById('formAddMapel').reset();
+        
+        const form = document.getElementById('formAddMapel');
+        if (form) form.reset();
+        
     } catch (error) {
         hideLoading();
+        console.error('Add mapel error:', error);
         showToast('Gagal menambah mapel: ' + error.message, 'error');
     }
 }
@@ -331,12 +435,15 @@ async function deleteMapel(id) {
         showToast('Mata pelajaran dihapus', 'success');
         loadMapelDiampu();
     } catch (error) {
+        console.error('Delete mapel error:', error);
         showToast('Gagal menghapus: ' + error.message, 'error');
     }
 }
 
 function updateMapelSelects() {
-    const selects = ['cpMapel', 'atpMapel', 'protaMapel', 'promesMapel'];
+    const selects = ['cpMapel', 'atpMapel', 'protaMapel', 'promesMapel', 
+                     'modulMapel', 'lkpdMapel', 'kktpMapel', 'jurnalMapel', 
+                     'absensiMapel', 'nilaiMapel'];
     
     db.collection('users').doc(currentUser.uid)
         .collection('mapelDiampu').get()
@@ -352,17 +459,21 @@ function updateMapelSelects() {
                         option.value = doc.id;
                         option.textContent = mapel.nama;
                         option.dataset.nama = mapel.nama;
+                        option.dataset.jp = mapel.jp;
+                        option.dataset.needArabic = mapel.needArabic;
                         select.appendChild(option);
                     });
                     select.value = currentValue;
                 }
             });
-        });
+        })
+        .catch(err => console.log('Update mapel selects error:', err));
 }
 
 // ===== KALENDER =====
 async function loadKalender() {
-    const tahunAjar = document.getElementById('selectTahunAjar')?.value || getCurrentAcademicYear().current;
+    const tahunAjarSelect = document.getElementById('selectTahunAjar');
+    const tahunAjar = tahunAjarSelect?.value || getCurrentAcademicYear().current;
     
     try {
         const doc = await db.collection('users').doc(currentUser.uid)
@@ -370,38 +481,44 @@ async function loadKalender() {
         
         if (doc.exists) {
             const data = doc.data();
-            document.getElementById('ganjilMulai').value = data.ganjilMulai || '';
-            document.getElementById('ganjilSelesai').value = data.ganjilSelesai || '';
-            document.getElementById('genapMulai').value = data.genapMulai || '';
-            document.getElementById('genapSelesai').value = data.genapSelesai || '';
-            document.getElementById('genapSelesaiKelasAkhir').value = data.genapSelesaiKelasAkhir || '';
+            setElementValue('ganjilMulai', data.ganjilMulai || '');
+            setElementValue('ganjilSelesai', data.ganjilSelesai || '');
+            setElementValue('genapMulai', data.genapMulai || '');
+            setElementValue('genapSelesai', data.genapSelesai || '');
+            setElementValue('genapSelesaiKelasAkhir', data.genapSelesaiKelasAkhir || '');
         } else {
             // Set defaults
             const years = tahunAjar.split('/');
-            document.getElementById('ganjilMulai').value = `${years[0]}-07-15`;
-            document.getElementById('ganjilSelesai').value = `${years[0]}-12-20`;
-            document.getElementById('genapMulai').value = `${years[1]}-01-06`;
-            document.getElementById('genapSelesai').value = `${years[1]}-06-20`;
-            document.getElementById('genapSelesaiKelasAkhir').value = `${years[1]}-05-30`;
+            setElementValue('ganjilMulai', `${years[0]}-07-15`);
+            setElementValue('ganjilSelesai', `${years[0]}-12-20`);
+            setElementValue('genapMulai', `${years[1]}-01-06`);
+            setElementValue('genapSelesai', `${years[1]}-06-20`);
+            setElementValue('genapSelesaiKelasAkhir', `${years[1]}-05-30`);
         }
     } catch (error) {
         console.error('Error loading kalender:', error);
     }
 }
 
+function setElementValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value;
+}
+
 async function saveKalender(e) {
     e.preventDefault();
     showLoading('Menyimpan kalender...');
     
-    const tahunAjar = document.getElementById('selectTahunAjar').value;
+    const tahunAjarSelect = document.getElementById('selectTahunAjar');
+    const tahunAjar = tahunAjarSelect?.value || getCurrentAcademicYear().current;
     
     try {
         const data = {
-            ganjilMulai: document.getElementById('ganjilMulai').value,
-            ganjilSelesai: document.getElementById('ganjilSelesai').value,
-            genapMulai: document.getElementById('genapMulai').value,
-            genapSelesai: document.getElementById('genapSelesai').value,
-            genapSelesaiKelasAkhir: document.getElementById('genapSelesaiKelasAkhir').value,
+            ganjilMulai: document.getElementById('ganjilMulai')?.value || '',
+            ganjilSelesai: document.getElementById('ganjilSelesai')?.value || '',
+            genapMulai: document.getElementById('genapMulai')?.value || '',
+            genapSelesai: document.getElementById('genapSelesai')?.value || '',
+            genapSelesaiKelasAkhir: document.getElementById('genapSelesaiKelasAkhir')?.value || '',
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
@@ -410,17 +527,19 @@ async function saveKalender(e) {
         
         hideLoading();
         showToast('Kalender berhasil disimpan!', 'success');
-        updateGettingStarted();
+        updateGettingStarted().catch(e => console.log(e));
     } catch (error) {
         hideLoading();
+        console.error('Save kalender error:', error);
         showToast('Gagal menyimpan kalender: ' + error.message, 'error');
     }
 }
 
 function loadLiburBaku() {
     const container = document.getElementById('liburBaku');
-    let html = '';
+    if (!container) return;
     
+    let html = '';
     LIBUR_BAKU.forEach(libur => {
         html += `<li><strong>${libur.tanggal.replace('-', '/')}</strong> - ${libur.nama}</li>`;
     });
@@ -431,6 +550,7 @@ function loadLiburBaku() {
 // ===== CP DATA =====
 function setupDragAndDrop() {
     const dropZone = document.getElementById('dropZoneCP');
+    if (!dropZone) return;
     
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -447,7 +567,10 @@ function setupDragAndDrop() {
         
         const files = e.dataTransfer.files;
         if (files.length > 0) {
-            document.getElementById('inputFileCP').files = files;
+            const inputFileCP = document.getElementById('inputFileCP');
+            if (inputFileCP) {
+                inputFileCP.files = files;
+            }
             handleCPFileUpload({ target: { files } });
         }
     });
@@ -457,8 +580,8 @@ async function handleCPFileUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
     
-    const mapelId = document.getElementById('cpMapel').value;
-    const jenjang = document.getElementById('cpJenjang').value;
+    const mapelId = document.getElementById('cpMapel')?.value;
+    const jenjang = document.getElementById('cpJenjang')?.value;
     
     if (!mapelId || !jenjang) {
         showToast('Pilih mata pelajaran dan jenjang terlebih dahulu!', 'error');
@@ -482,7 +605,7 @@ async function handleCPFileUpload(e) {
         
         // Get mapel name
         const mapelOption = document.querySelector(`#cpMapel option[value="${mapelId}"]`);
-        const mapelNama = mapelOption?.dataset.nama || 'Unknown';
+        const mapelNama = mapelOption?.dataset?.nama || 'Unknown';
         
         // Save to Firestore
         await saveCPData(mapelId, jenjang, mapelNama, parsed);
@@ -490,9 +613,10 @@ async function handleCPFileUpload(e) {
         hideLoading();
         showToast(`${parsed.length} data CP berhasil diupload!`, 'success');
         loadCPData();
-        updateGettingStarted();
+        updateGettingStarted().catch(e => console.log(e));
     } catch (error) {
         hideLoading();
+        console.error('CP upload error:', error);
         showToast('Error: ' + error.message, 'error');
     }
 }
@@ -524,9 +648,11 @@ function parseCSV(csvText) {
 
 function displayCPPreview(data) {
     const tbody = document.getElementById('bodyCPPreview');
+    if (!tbody) return;
+    
     let html = '';
     
-    data.slice(0, 20).forEach(row => { // Show first 20 rows
+    data.slice(0, 20).forEach(row => {
         html += `
             <tr>
                 <td class="border border-gray-200 p-2">${row.fase}</td>
@@ -587,12 +713,13 @@ async function saveCPData(mapelId, jenjang, mapelNama, data) {
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     
-        // Update local cache
+    // Update local cache
     cpData[`${mapelId}-${jenjang.toLowerCase()}`] = grouped;
 }
 
 async function loadCPData() {
     const container = document.getElementById('listCPTersimpan');
+    if (!container) return;
     
     try {
         const snapshot = await db.collection('users').doc(currentUser.uid)
@@ -611,14 +738,14 @@ async function loadCPData() {
             html += `
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
-                        <p class="font-medium text-gray-800">${data.mapelNama}</p>
-                        <p class="text-xs text-gray-500">${data.jenjang} • ${kelasCount} kelas</p>
+                        <p class="font-medium text-gray-800">${data.mapelNama || 'Unknown'}</p>
+                        <p class="text-xs text-gray-500">${data.jenjang || '-'} • ${kelasCount} kelas</p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="viewCPData('${doc.id}')" class="text-primary hover:text-secondary">
+                        <button onclick="viewCPData('${doc.id}')" class="text-primary hover:text-secondary" title="Lihat">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button onclick="deleteCPData('${doc.id}')" class="text-red-500 hover:text-red-700">
+                        <button onclick="deleteCPData('${doc.id}')" class="text-red-500 hover:text-red-700" title="Hapus">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -632,18 +759,19 @@ async function loadCPData() {
         container.innerHTML = html;
     } catch (error) {
         console.error('Error loading CP data:', error);
+        container.innerHTML = '<p class="text-red-500 text-sm text-center py-4">Gagal memuat data</p>';
     }
 }
 
 async function loadCPFromUrl() {
-    const url = document.getElementById('cpCsvUrl').value.trim();
+    const url = document.getElementById('cpCsvUrl')?.value?.trim();
     if (!url) {
         showToast('Masukkan URL terlebih dahulu!', 'error');
         return;
     }
     
-    const mapelId = document.getElementById('cpMapel').value;
-    const jenjang = document.getElementById('cpJenjang').value;
+    const mapelId = document.getElementById('cpMapel')?.value;
+    const jenjang = document.getElementById('cpJenjang')?.value;
     
     if (!mapelId || !jenjang) {
         showToast('Pilih mata pelajaran dan jenjang terlebih dahulu!', 'error');
@@ -666,16 +794,17 @@ async function loadCPFromUrl() {
         displayCPPreview(parsed);
         
         const mapelOption = document.querySelector(`#cpMapel option[value="${mapelId}"]`);
-        const mapelNama = mapelOption?.dataset.nama || 'Unknown';
+        const mapelNama = mapelOption?.dataset?.nama || 'Unknown';
         
         await saveCPData(mapelId, jenjang, mapelNama, parsed);
         
         hideLoading();
         showToast(`${parsed.length} data CP berhasil diimport!`, 'success');
         loadCPData();
-        updateGettingStarted();
+        updateGettingStarted().catch(e => console.log(e));
     } catch (error) {
         hideLoading();
+        console.error('Load CP from URL error:', error);
         showToast('Gagal mengambil data: ' + error.message, 'error');
     }
 }
@@ -691,8 +820,14 @@ async function deleteCPData(id) {
         showToast('Data CP dihapus', 'success');
         loadCPData();
     } catch (error) {
+        console.error('Delete CP error:', error);
         showToast('Gagal menghapus: ' + error.message, 'error');
     }
+}
+
+function viewCPData(id) {
+    // TODO: Implement view CP data modal
+    showToast('Fitur lihat data akan segera hadir', 'warning');
 }
 
 // ===== KELAS SELECT =====
@@ -715,7 +850,8 @@ function populateKelasSelect() {
             kelasOptions = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
     }
     
-    const selects = ['jadwalKelas', 'siswaKelas', 'atpKelas', 'protaKelas', 'promesKelas'];
+    const selects = ['jadwalKelas', 'siswaKelas', 'atpKelas', 'protaKelas', 'promesKelas',
+                     'modulKelas', 'lkpdKelas', 'kktpKelas', 'jurnalKelas', 'absensiKelas', 'nilaiKelas'];
     
     selects.forEach(selectId => {
         const select = document.getElementById(selectId);
@@ -761,21 +897,26 @@ async function updateGettingStarted() {
         step4: false
     };
     
-    // Check kalender
-    const tahunAjar = document.getElementById('selectTahunAjar')?.value || getCurrentAcademicYear().current;
-    const kalenderDoc = await db.collection('users').doc(currentUser.uid)
-        .collection('kalender').doc(tahunAjar.replace('/', '-')).get();
-    steps.step2 = kalenderDoc.exists;
-    
-    // Check CP data
-    const cpSnapshot = await db.collection('users').doc(currentUser.uid)
-        .collection('cpData').limit(1).get();
-    steps.step3 = !cpSnapshot.empty;
-    
-    // Check jadwal
-    const jadwalSnapshot = await db.collection('users').doc(currentUser.uid)
-        .collection('jadwal').limit(1).get();
-    steps.step4 = !jadwalSnapshot.empty;
+    try {
+        // Check kalender
+        const tahunAjarSelect = document.getElementById('selectTahunAjar');
+        const tahunAjar = tahunAjarSelect?.value || getCurrentAcademicYear().current;
+        const kalenderDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('kalender').doc(tahunAjar.replace('/', '-')).get();
+        steps.step2 = kalenderDoc.exists;
+        
+        // Check CP data
+        const cpSnapshot = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').limit(1).get();
+        steps.step3 = !cpSnapshot.empty;
+        
+        // Check jadwal
+        const jadwalSnapshot = await db.collection('users').doc(currentUser.uid)
+            .collection('jadwal').limit(1).get();
+        steps.step4 = !jadwalSnapshot.empty;
+    } catch (error) {
+        console.log('Update getting started error:', error);
+    }
     
     // Update badges
     Object.keys(steps).forEach(step => {
@@ -792,427 +933,109 @@ async function updateGettingStarted() {
     });
 }
 
-// ===== DOCUMENT GENERATION =====
-async function generateATP() {
-    const mapelId = document.getElementById('atpMapel').value;
-    const kelas = document.getElementById('atpKelas').value;
-    const semester = document.getElementById('atpSemester').value;
+// ===== UTILITY FUNCTIONS =====
+function showLoading(text = 'Memproses...') {
+    const loadingText = document.getElementById('loadingText');
+    const loadingOverlay = document.getElementById('loadingOverlay');
     
-    if (!mapelId || !kelas) {
-        showToast('Pilih mata pelajaran dan kelas terlebih dahulu!', 'error');
+    if (loadingText) loadingText.textContent = text;
+    if (loadingOverlay) loadingOverlay.classList.remove('hidden');
+}
+
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) loadingOverlay.classList.add('hidden');
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const icon = document.getElementById('toastIcon');
+    const msg = document.getElementById('toastMessage');
+    
+    if (!toast || !icon || !msg) {
+        console.log(`Toast: ${type} - ${message}`);
         return;
     }
     
-    showLoading('Generating ATP...');
+    msg.textContent = message;
+    
+    const toastDiv = toast.querySelector('div');
+    if (toastDiv) {
+        toastDiv.classList.remove('border-green-500', 'border-red-500', 'border-yellow-500');
+        
+        if (type === 'success') {
+            toastDiv.classList.add('border-green-500');
+            icon.className = 'fas fa-check-circle text-xl text-green-500';
+        } else if (type === 'error') {
+            toastDiv.classList.add('border-red-500');
+            icon.className = 'fas fa-exclamation-circle text-xl text-red-500';
+        } else {
+            toastDiv.classList.add('border-yellow-500');
+            icon.className = 'fas fa-exclamation-triangle text-xl text-yellow-500';
+        }
+    }
+    
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 4000);
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.add('hidden');
+}
+
+async function showUpgradeModal() {
+    let waNumber = '6281234567890'; // Default
     
     try {
-        // Get CP data
-        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
-        const cpDoc = await db.collection('users').doc(currentUser.uid)
-            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
-        
-        if (!cpDoc.exists) {
-            hideLoading();
-            showToast('Data CP belum diupload untuk mapel ini!', 'error');
-            return;
+        const settingsDoc = await db.collection('settings').doc('general').get();
+        if (settingsDoc.exists && settingsDoc.data().whatsappUpgrade) {
+            waNumber = settingsDoc.data().whatsappUpgrade;
         }
-        
-        const cpDataDoc = cpDoc.data();
-        const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
-        
-        if (!dataKelas) {
-            hideLoading();
-            showToast(`Data CP untuk kelas ${kelas} semester ${semester} tidak ditemukan!`, 'error');
-            return;
-        }
-        
-        // Get mapel info
-        const mapelDoc = await db.collection('users').doc(currentUser.uid)
-            .collection('mapelDiampu').doc(mapelId).get();
-        const mapelData = mapelDoc.data();
-        const jpPerTp = mapelData?.jp || 2;
-        
-        // Get kalender info
-        const tahunAjar = document.getElementById('selectTahunAjar').value;
-        
-        // Update document values
-        updateDocumentValues({
-            tahun: tahunAjar,
-            sekolah: userData?.sekolah || '',
-            mapel: mapelData?.nama || cpDataDoc.mapelNama,
-            kelas: kelas,
-            semester: semester,
-            fase: getFaseByKelas(kelas),
-            kepsek: userData?.kepsek || '',
-            nipKepsek: userData?.nipKepsek || '',
-            guru: userData?.nama || '',
-            nipGuru: userData?.nip || '',
-            kota: userData?.kota || '',
-            tanggal: formatTanggalIndonesia(new Date())
-        });
-        
-        // Generate table content
-        let html = '';
-        let no = 0;
-        
-        Object.keys(dataKelas.babs).forEach(babName => {
-            const bab = dataKelas.babs[babName];
-            const tps = bab.tps || [];
-            const totalJp = tps.length * jpPerTp;
-            const minggu = Math.ceil(totalJp / jpPerTp);
-            
-            tps.forEach((tpObj, iTp) => {
-                const kompetensi = extractKompetensi(tpObj.tp);
-                
-                html += `<tr>`;
-                
-                if (iTp === 0) {
-                    no++;
-                    html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center">${no}</td>`;
-                    html += `<td rowspan="${tps.length}" class="border border-black p-2 text-left"><b>${babName}</b><br><br>${bab.cp}</td>`;
-                    html += `<td rowspan="${tps.length}" class="border border-black p-2 text-left">Peserta didik memahami materi terkait ${babName} dengan baik.</td>`;
-                }
-                
-                html += `<td class="border border-black p-2 text-left"><b>${no}.${iTp + 1}</b> ${tpObj.tp}</td>`;
-                html += `<td class="border border-black p-2 text-center text-blue-600 font-semibold" style="font-size:9px;">${tpObj.profil || '-'}</td>`;
-                html += `<td class="border border-black p-2 text-center text-yellow-600 font-semibold">${kompetensi}</td>`;
-                
-                if (iTp === 0) {
-                    html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center">${babName}</td>`;
-                    html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center"><b>${minggu} Minggu<br>${totalJp} JP</b></td>`;
-                    html += `<td rowspan="${tps.length}" class="border border-black p-2"></td>`;
-                }
-                
-                html += `</tr>`;
-            });
-        });
-        
-        document.getElementById('bodyATP').innerHTML = html;
-        
-        hideLoading();
-        showToast('ATP berhasil di-generate!', 'success');
     } catch (error) {
-        hideLoading();
-        showToast('Error: ' + error.message, 'error');
-        console.error(error);
+        console.log('Using default WhatsApp number');
+    }
+    
+    const message = encodeURIComponent(`Halo Admin, saya ingin upgrade ke Premium.\n\nNama: ${userData?.nama || '-'}\nEmail: ${currentUser?.email || '-'}\nSekolah: ${userData?.sekolah || '-'}`);
+    
+    const linkWa = document.getElementById('linkWhatsappUpgrade');
+    if (linkWa) {
+        linkWa.href = `https://wa.me/${waNumber}?text=${message}`;
+    }
+    
+    const modal = document.getElementById('modalUpgrade');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function copyPrompt(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    
+    const text = el.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('Prompt berhasil disalin!', 'success');
+    }).catch(() => {
+        showToast('Gagal menyalin prompt', 'error');
+    });
+}
+
+async function handleLogout() {
+    if (!confirm('Yakin ingin keluar?')) return;
+    
+    try {
+        await auth.signOut();
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Logout error:', error);
+        showToast('Gagal logout: ' + error.message, 'error');
     }
 }
 
-async function generateProta() {
-    const mapelId = document.getElementById('protaMapel').value;
-    const kelas = document.getElementById('protaKelas').value;
-    
-    if (!mapelId || !kelas) {
-        showToast('Pilih mata pelajaran dan kelas terlebih dahulu!', 'error');
-        return;
-    }
-    
-    showLoading('Generating Prota...');
-    
-    try {
-        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
-        const cpDoc = await db.collection('users').doc(currentUser.uid)
-            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
-        
-        if (!cpDoc.exists) {
-            hideLoading();
-            showToast('Data CP belum diupload untuk mapel ini!', 'error');
-            return;
-        }
-        
-        const cpDataDoc = cpDoc.data();
-        
-        // Get mapel info
-        const mapelDoc = await db.collection('users').doc(currentUser.uid)
-            .collection('mapelDiampu').doc(mapelId).get();
-        const mapelData = mapelDoc.data();
-        const jpPerTp = mapelData?.jp || 2;
-        
-        const tahunAjar = document.getElementById('selectTahunAjar').value;
-        
-        // Update document values
-        updateDocumentValues({
-            tahun: tahunAjar,
-            sekolah: userData?.sekolah || '',
-            mapel: mapelData?.nama || cpDataDoc.mapelNama,
-            kelas: kelas,
-            fase: getFaseByKelas(kelas),
-            kepsek: userData?.kepsek || '',
-            nipKepsek: userData?.nipKepsek || '',
-            guru: userData?.nama || '',
-            nipGuru: userData?.nip || '',
-            kota: userData?.kota || '',
-            tanggal: formatTanggalIndonesia(new Date())
-        });
-        
-        // Generate table for both semesters
-        let html = '';
-        
-        ['Ganjil', 'Genap'].forEach(semester => {
-            const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
-            if (!dataKelas) return;
-            
-            Object.keys(dataKelas.babs).forEach(babName => {
-                const bab = dataKelas.babs[babName];
-                const tps = bab.tps || [];
-                const totalJp = tps.length * jpPerTp;
-                
-                tps.forEach((tpObj, iTp) => {
-                    html += `<tr>`;
-                    
-                    if (iTp === 0) {
-                        html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center">${semester}</td>`;
-                        html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center bg-gray-50">
-                            <div style="writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold;">${babName}</div>
-                        </td>`;
-                    }
-                    
-                    html += `<td class="border border-black p-2 text-left">${tpObj.tp}</td>`;
-                    
-                    if (iTp === 0) {
-                        html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center font-bold">${totalJp} JP</td>`;
-                    }
-                    
-                    html += `</tr>`;
-                });
-            });
-        });
-        
-        document.getElementById('bodyProta').innerHTML = html;
-        
-        hideLoading();
-        showToast('Prota berhasil di-generate!', 'success');
-    } catch (error) {
-        hideLoading();
-        showToast('Error: ' + error.message, 'error');
-        console.error(error);
-    }
-}
-
-async function generatePromes() {
-    const mapelId = document.getElementById('promesMapel').value;
-    const kelas = document.getElementById('promesKelas').value;
-    const semester = document.getElementById('promesSemester').value;
-    
-    if (!mapelId || !kelas) {
-        showToast('Pilih mata pelajaran dan kelas terlebih dahulu!', 'error');
-        return;
-    }
-    
-    showLoading('Generating Promes...');
-    
-    try {
-        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
-        const cpDoc = await db.collection('users').doc(currentUser.uid)
-            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
-        
-        if (!cpDoc.exists) {
-            hideLoading();
-            showToast('Data CP belum diupload untuk mapel ini!', 'error');
-            return;
-        }
-        
-        const cpDataDoc = cpDoc.data();
-        const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
-        
-        if (!dataKelas) {
-            hideLoading();
-            showToast(`Data CP untuk kelas ${kelas} semester ${semester} tidak ditemukan!`, 'error');
-            return;
-        }
-        
-        // Get mapel info
-        const mapelDoc = await db.collection('users').doc(currentUser.uid)
-            .collection('mapelDiampu').doc(mapelId).get();
-        const mapelData = mapelDoc.data();
-        const jpPerTp = mapelData?.jp || 2;
-        
-        // Get kalender info
-        const tahunAjar = document.getElementById('selectTahunAjar').value;
-        const kalenderDoc = await db.collection('users').doc(currentUser.uid)
-            .collection('kalender').doc(tahunAjar.replace('/', '-')).get();
-        
-        const kalender = kalenderDoc.exists ? kalenderDoc.data() : {};
-        
-        // Update document values
-        updateDocumentValues({
-            tahun: tahunAjar,
-            sekolah: userData?.sekolah || '',
-            mapel: mapelData?.nama || cpDataDoc.mapelNama,
-            kelas: kelas,
-            semester: semester,
-            fase: getFaseByKelas(kelas),
-            kepsek: userData?.kepsek || '',
-            nipKepsek: userData?.nipKepsek || '',
-            guru: userData?.nama || '',
-            nipGuru: userData?.nip || '',
-            kota: userData?.kota || '',
-            tanggal: formatTanggalIndonesia(new Date())
-        });
-        
-        // Generate header
-        const namaBulan = semester === 'Ganjil' ? BULAN_GANJIL : BULAN_GENAP;
-        
-        let headHtml = `
-            <tr>
-                <th rowspan="2" class="border border-black p-2 bg-gray-100" width="12%">Bab / Elemen</th>
-                <th rowspan="2" class="border border-black p-2 bg-gray-100" width="28%">Tujuan Pembelajaran (TP)</th>
-                <th rowspan="2" class="border border-black p-2 bg-gray-100" width="5%">JP</th>
-        `;
-        
-        namaBulan.forEach(bulan => {
-            headHtml += `<th colspan="5" class="border border-black p-2 bg-gray-100">${bulan}</th>`;
-        });
-        
-        headHtml += `</tr><tr>`;
-        
-        for (let i = 0; i < 6; i++) {
-            for (let w = 1; w <= 5; w++) {
-                headHtml += `<th class="border border-black p-1 bg-gray-50 text-xs">${w}</th>`;
-            }
-        }
-        
-        headHtml += `</tr>`;
-        document.getElementById('headPromes').innerHTML = headHtml;
-        
-        // Calculate teaching dates
-        const tahunParts = tahunAjar.split('/');
-        const tahunOperasional = semester === 'Ganjil' ? parseInt(tahunParts[0]) : parseInt(tahunParts[1]);
-        const bulanAwal = semester === 'Ganjil' ? 6 : 0; // Juli (6) atau Januari (0)
-        
-        // Get jadwal hari mengajar
-        const jadwalSnapshot = await db.collection('users').doc(currentUser.uid)
-            .collection('jadwal')
-            .where('kelas', '==', kelas)
-            .where('mapelId', '==', mapelId)
-            .limit(1)
-            .get();
-        
-        let hariMengajar = 1; // Default Senin
-        if (!jadwalSnapshot.empty) {
-            const jadwalData = jadwalSnapshot.docs[0].data();
-            hariMengajar = jadwalData.hari || 1;
-        }
-        
-        // Calculate all teaching dates
-        const tanggalMengajar = calculateTanggalMengajar(
-            tahunOperasional, 
-            bulanAwal, 
-            hariMengajar, 
-            semester,
-            kalender
-        );
-        
-        // Generate body
-        let bodyHtml = '';
-        let tglIndex = 0;
-        const allTps = [];
-        
-        // Collect all TPs
-        Object.keys(dataKelas.babs).forEach(babName => {
-            const bab = dataKelas.babs[babName];
-            bab.tps.forEach((tpObj, iTp) => {
-                allTps.push({
-                    babName,
-                    bab,
-                    tpObj,
-                    iTp,
-                    isFirst: iTp === 0,
-                    rowspan: bab.tps.length
-                });
-            });
-        });
-        
-        // Generate rows
-        let currentBab = '';
-        allTps.forEach((tp, idx) => {
-            bodyHtml += `<tr>`;
-            
-            if (tp.isFirst) {
-                currentBab = tp.babName;
-                bodyHtml += `<td rowspan="${tp.rowspan}" class="border border-black p-2 text-center bg-gray-50">
-                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 9px;">${tp.babName}</div>
-                </td>`;
-            }
-            
-            bodyHtml += `<td class="border border-black p-2 text-left text-xs">${tp.tpObj.tp}</td>`;
-            bodyHtml += `<td class="border border-black p-2 text-center font-bold">${jpPerTp}</td>`;
-            
-            // 30 columns for weeks
-            for (let col = 0; col < 30; col++) {
-                const bulanIdx = Math.floor(col / 5);
-                const mingguIdx = col % 5;
-                
-                // Check if this cell has a teaching date
-                const cellDate = tanggalMengajar.find(t => {
-                    return t.bulanIdx === bulanIdx && t.minggu === mingguIdx + 1;
-                });
-                
-                if (cellDate && tglIndex < tanggalMengajar.length && idx === tglIndex) {
-                    bodyHtml += `<td class="border border-black p-1 text-center bg-blue-100">
-                        <span class="font-bold">${jpPerTp}</span>
-                        <span class="block text-xs text-red-600">${cellDate.tanggal}</span>
-                    </td>`;
-                    tglIndex++;
-                } else {
-                    bodyHtml += `<td class="border border-black p-1"></td>`;
-                }
-            }
-            
-            bodyHtml += `</tr>`;
-        });
-        
-        document.getElementById('bodyPromes').innerHTML = bodyHtml;
-        
-        hideLoading();
-        showToast('Promes berhasil di-generate!', 'success');
-    } catch (error) {
-        hideLoading();
-        showToast('Error: ' + error.message, 'error');
-        console.error(error);
-    }
-}
-
-function calculateTanggalMengajar(tahun, bulanAwal, hariTarget, semester, kalender) {
-    const hasil = [];
-    
-    for (let i = 0; i < 6; i++) {
-        let bulan = bulanAwal + i;
-        let tahunBulan = tahun;
-        
-        if (semester === 'Ganjil' && bulan > 11) {
-            bulan -= 12;
-            tahunBulan++;
-        }
-        
-        const jumlahHari = new Date(tahunBulan, bulan + 1, 0).getDate();
-        
-        for (let tgl = 1; tgl <= jumlahHari; tgl++) {
-            const tanggal = new Date(tahunBulan, bulan, tgl);
-            
-            if (tanggal.getDay() === hariTarget) {
-                const minggu = Math.ceil(tgl / 7);
-                
-                // Check if not a holiday
-                const dateStr = `${tahunBulan}-${String(bulan + 1).padStart(2, '0')}-${String(tgl).padStart(2, '0')}`;
-                const isLibur = LIBUR_BAKU.some(l => {
-                    const [mm, dd] = l.tanggal.split('-');
-                    return `${tahunBulan}-${mm}-${dd}` === dateStr;
-                });
-                
-                if (!isLibur) {
-                    hasil.push({
-                        bulanIdx: i,
-                        minggu: minggu > 5 ? 5 : minggu,
-                        tanggal: tgl,
-                        dateObj: tanggal
-                    });
-                }
-            }
-        }
-    }
-    
-    return hasil;
+// ===== DOCUMENT GENERATION (Placeholder - will be in separate section) =====
+function formatTanggalIndonesia(date) {
+    const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return `${date.getDate()} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
 }
 
 function updateDocumentValues(values) {
@@ -1223,34 +1046,19 @@ function updateDocumentValues(values) {
     });
 }
 
-function extractKompetensi(tpText) {
-    const match = tpText.match(/mampu\s+(\w+)/i);
-    if (match) {
-        const kata = match[1].toLowerCase();
-        const kompetensiMap = {
-            'menjelaskan': 'Memahami',
-            'mengidentifikasi': 'Menganalisis',
-            'menyebutkan': 'Mengingat',
-            'menganalisis': 'Menganalisis',
-            'menerapkan': 'Menerapkan',
-            'membuat': 'Mencipta',
-            'mempraktikkan': 'Menerapkan',
-            'menghafal': 'Mengingat',
-            'melafalkan': 'Menerapkan',
-            'membaca': 'Memahami',
-            'menulis': 'Menerapkan',
-            'menghitung': 'Menerapkan'
-        };
-        return kompetensiMap[kata] || 'Memahami';
-    }
-    return 'Memahami';
-}
+// Make functions global
+window.navigateTo = navigateTo;
+window.showAddMapelModal = showAddMapelModal;
+window.deleteMapel = deleteMapel;
+window.showUpgradeModal = showUpgradeModal;
+window.closeModal = closeModal;
+window.loadCPFromUrl = loadCPFromUrl;
+window.deleteCPData = deleteCPData;
+window.viewCPData = viewCPData;
+window.copyPrompt = copyPrompt;
+window.handleLogout = handleLogout;
 
-function formatTanggalIndonesia(date) {
-    const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-                   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    return `${date.getDate()} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
-}
+console.log('app-core.js loaded');
 
 // ===== PRINT =====
 function printDocument(type) {
@@ -2400,3 +2208,4 @@ window.hitungKKTP = hitungKKTP;
 window.hitungNA = hitungNA;
 window.updateAbsensiUI = updateAbsensiUI;
 window.checkPremiumAccess = checkPremiumAccess;
+
