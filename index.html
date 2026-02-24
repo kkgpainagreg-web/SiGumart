@@ -25,12 +25,12 @@
         .kktp-val { background-color: #fdfde8; font-weight: bold; color: #2563eb; cursor: text; text-align: center;}
         .kktp-hasil { background-color: #e0f2fe; color: #1e40af; font-size: 11pt; text-align: center; font-weight: bold;}
 
-        /* Perbaikan Tanda Tangan */
+        /* Signature Layout */
         .signature-area { display: flex; justify-content: space-between; margin-top: 40px; page-break-inside: avoid; padding: 0 5%; }
         .signature-box { text-align: center; font-size: 11pt; min-width: 250px; }
         .signature-name { text-decoration: underline; font-weight: bold; margin-top: 80px; }
 
-        /* Scrollbar Sidebar */
+        /* Scrollbar */
         .sidebar-scroll::-webkit-scrollbar { width: 5px; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
 
@@ -57,8 +57,8 @@
         <div class="bg-slate-800 p-8 rounded-xl shadow-2xl max-w-md w-full text-center border border-slate-700">
             <h1 class="text-3xl font-bold text-blue-400 mb-2">Admin Guru Super App</h1>
             <p class="text-slate-400 mb-8 text-sm">Sistem Administrasi Cerdas Single Input</p>
-            <button id="btn-login-google" class="w-full bg-white text-slate-800 font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-3 hover:bg-slate-100 transition">
-                Masuk dengan Google
+            <button id="btn-login" class="w-full bg-white text-slate-800 font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-3 hover:bg-slate-100 transition">
+                Masuk ke Aplikasi
             </button>
         </div>
     </div>
@@ -67,8 +67,8 @@
         <div class="p-5 border-b border-slate-700">
             <h2 class="text-xl font-bold text-white">Super App</h2>
             <div class="flex items-center gap-2 mt-2">
-                <span id="user-badge" class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-400">FREE</span>
-                <span id="user-email" class="text-xs truncate">user@gmail.com</span>
+                <span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-400">PRO</span>
+                <span id="user-email" class="text-xs truncate">guru@sekolah.id</span>
             </div>
         </div>
 
@@ -76,11 +76,16 @@
             
             <div class="border border-dashed border-amber-500 p-3 rounded-lg bg-amber-500/5">
                 <h3 class="text-xs font-bold text-amber-500 mb-2">1. LINK DATABASE CP (CSV)</h3>
-                <textarea id="in-csv-url" rows="3" class="w-full bg-slate-950 border border-slate-600 rounded p-2 text-xs focus:border-amber-500 outline-none text-slate-300" placeholder="Paste link CSV di sini..."></textarea>
+                <textarea id="in-csv-url" rows="3" class="w-full bg-slate-950 border border-slate-600 rounded p-2 text-[10px] focus:border-amber-500 outline-none text-slate-300" placeholder="Paste link CSV di sini..."></textarea>
                 <div class="flex gap-2 mt-2">
-                    <button onclick="Engine.fetchGlobalCSV()" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-1.5 rounded text-xs">Muat Data Cloud</button>
+                    <button onclick="Engine.fetchGlobalCSV()" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-1.5 rounded text-xs transition">Muat Data Cloud</button>
                 </div>
                 <div id="csvStatus" class="csv-info"></div>
+                
+                <div class="mt-2 pt-2 border-t border-slate-700 text-[10px] text-slate-400">
+                    <p class="mb-1">Atau Upload File Manual (Jika Offline):</p>
+                    <input type="file" id="fileCsv" accept=".csv" class="w-full p-1 bg-slate-800 border border-slate-600 rounded">
+                </div>
             </div>
 
             <div>
@@ -127,9 +132,9 @@
                     <input type="text" id="in-nip-guru" placeholder="NIP Guru" class="w-full bg-slate-800 border border-slate-600 rounded p-2 focus:border-blue-500 outline-none" value="19900202 201502 2 002">
                     <div class="grid grid-cols-2 gap-2">
                         <input type="text" id="in-rombel" placeholder="Rombel (Misal: A)" class="w-full bg-slate-800 border border-slate-600 rounded p-2 focus:border-blue-500 outline-none text-center" value="A">
-                        <input type="number" id="in-tahun" placeholder="Tahun Awal (2024)" class="w-full bg-slate-800 border border-slate-600 rounded p-2 focus:border-blue-500 outline-none text-center" value="2024">
+                        <input type="number" id="in-tahun" placeholder="Tahun Awal (2024)" class="w-full bg-slate-800 border border-slate-600 rounded p-2 focus:border-blue-500 outline-none text-center" value="2025">
                     </div>
-                    <input type="text" id="in-tempat-tgl" placeholder="Tgl Penetapan Dokumen" class="w-full bg-slate-800 border border-slate-600 rounded p-2 focus:border-blue-500 outline-none" value="Jakarta, 15 Juli 2024">
+                    <input type="text" id="in-tempat-tgl" placeholder="Tgl Penetapan Dokumen" class="w-full bg-slate-800 border border-slate-600 rounded p-2 focus:border-blue-500 outline-none" value="Jakarta, 15 Juli 2025">
                 </div>
             </div>
 
@@ -159,7 +164,7 @@
         </div>
         
         <div class="p-4 border-t border-slate-700">
-            <button onclick="Engine.syncAll()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg shadow-lg shadow-blue-500/30">
+            <button onclick="Engine.syncAll()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg shadow-lg shadow-blue-500/30 transition transform active:scale-95">
                 🚀 GENERATE DOKUMEN
             </button>
         </div>
@@ -185,7 +190,7 @@
             
             <div id="view-atp" class="view-section block">
                 <div class="no-print mb-4 flex justify-end gap-2">
-                    <select id="in-atp-mode" onchange="Engine.syncAll()" class="p-2 border border-slate-300 rounded text-sm outline-none bg-white font-bold text-blue-700">
+                    <select id="in-atp-mode" onchange="Engine.syncAll()" class="p-2 border border-slate-300 rounded text-sm outline-none bg-white font-bold text-blue-700 shadow-sm">
                         <option value="semester">Cetak 1 Semester (Aktif)</option>
                         <option value="tahun">Cetak 1 Tahun Penuh (Ganjil & Genap)</option>
                     </select>
@@ -215,7 +220,7 @@
                                 <th width="8%">WAKTU</th>
                             </tr>
                         </thead>
-                        <tbody id="out-atp"><tr><td colspan="6" class="text-center">Silakan klik tombol Generate...</td></tr></tbody>
+                        <tbody id="out-atp"><tr><td colspan="6" class="text-center italic text-slate-400">Silakan muat data dan klik tombol Generate...</td></tr></tbody>
                     </table>
 
                     <div class="signature-area" contenteditable="true">
@@ -303,7 +308,7 @@
                     <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">D. RINGKASAN MATERI PEMBELAJARAN</div>
                     <div class="pl-4 mb-3 text-justify" contenteditable="true">
                         <p class="italic text-slate-500 mb-2">[Ketik atau paste ringkasan materi untuk Bab ini di sini. Berikan penjelasan konsep dasar yang mudah dipahami oleh peserta didik sesuai dengan fase perkembangan mereka.]</p>
-                        <p>Materi pokok pada pertemuan ini mencakup pengertian, konsep dasar, dan implementasi nyata dari <strong><span class="v-bab-aktif"></span></strong> dalam kehidupan sehari-hari maupun dalam lingkup akademis.</p>
+                        <p>Materi pokok pada bab ini mencakup pengertian, konsep dasar, dan implementasi nyata dari <strong><span class="v-bab-aktif"></span></strong> dalam kehidupan sehari-hari maupun dalam lingkup akademis.</p>
                     </div>
 
                     <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">E. LANGKAH-LANGKAH OPERASIONAL (KBM)</div>
@@ -312,9 +317,9 @@
                     <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">F. ASESMEN & PENILAIAN</div>
                     <div class="pl-4 mb-3" contenteditable="true">
                         <ul class="list-disc pl-5">
-                            <li><strong>Asesmen Diagnostik:</strong> Melakukan tanya jawab pemantik terkait pemahaman dan pengalaman peserta didik terhadap materi di awal pertemuan.</li>
-                            <li><strong>Asesmen Formatif:</strong> Observasi keterlibatan, rubrik penilaian diskusi kelompok, dan pengerjaan Lembar Kerja Peserta Didik (LKPD) selama proses pembelajaran.</li>
-                            <li><strong>Asesmen Sumatif:</strong> Penugasan produk/proyek (unjuk kerja) dan tes tertulis di akhir bab untuk mengukur ketercapaian tujuan kognitif.</li>
+                            <li><strong>Asesmen Diagnostik:</strong> Melakukan tanya jawab pemantik terkait pemahaman awal peserta didik terhadap materi.</li>
+                            <li><strong>Asesmen Formatif:</strong> Observasi keterlibatan, rubrik penilaian diskusi kelompok, dan hasil pengerjaan Lembar Kerja Peserta Didik (LKPD).</li>
+                            <li><strong>Asesmen Sumatif:</strong> Penugasan produk (unjuk kerja) dan tes tertulis di akhir bab untuk mengukur ketercapaian tujuan kognitif.</li>
                         </ul>
                     </div>
                     
@@ -342,15 +347,15 @@
                             <p style="font-weight:bold; color:#1e40af; font-size:11pt;">B. Alat dan Bahan:</p>
                             <ul class="list-disc pl-5 mb-4 text-sm">
                                 <li>Alat tulis (Buku, Pensil/Pulpen)</li>
-                                <li>Buku Paket / Bahan Ajar Referensi</li>
+                                <li>Buku Paket / Bahan Ajar Referensi Utama</li>
                             </ul>
 
-                            <p style="font-weight:bold; color:#1e40af; font-size:11pt;">C. Langkah-Langkah Operasional (Petunjuk):</p>
+                            <p style="font-weight:bold; color:#1e40af; font-size:11pt;">C. Petunjuk Pengerjaan:</p>
                             <ol class="list-decimal pl-5 mb-6 text-sm">
                                 <li>Berdoalah terlebih dahulu sebelum memulai aktivitas.</li>
                                 <li>Bentuklah kelompok diskusi yang terdiri dari 3-4 orang (jika diinstruksikan guru).</li>
                                 <li>Bacalah ringkasan materi atau buku cetak yang berkaitan dengan <b><span class="v-bab-aktif"></span></b>.</li>
-                                <li>Diskusikan instruksi/pertanyaan di bawah ini secara seksama.</li>
+                                <li>Diskusikan instruksi/pertanyaan di bawah ini secara seksama bersama teman sekelompokmu.</li>
                                 <li>Tuliskan hasil diskusi pada kolom yang telah disediakan dengan rapi dan jelas.</li>
                                 <li>Presentasikan hasil kerja kalian di depan kelas secara bergantian!</li>
                             </ol>
@@ -359,15 +364,15 @@
                             
                             <div class="space-y-6 mt-4">
                                 <div>
-                                    <p class="font-bold text-sm mb-1">1. Tuliskan pemahaman utamamu mengenai materi ini menggunakan bahasamu sendiri!</p>
+                                    <p class="font-bold text-sm mb-1">1. Tuliskan pemahaman utamamu mengenai materi ini secara detail menggunakan bahasamu sendiri!</p>
                                     <div class="border border-slate-400 bg-white p-4 rounded-lg min-h-[120px]"></div>
                                 </div>
                                 <div>
-                                    <p class="font-bold text-sm mb-1">2. Coba berikan contoh penerapan materi ini secara nyata di sekolah atau lingkungan sekitarmu!</p>
+                                    <p class="font-bold text-sm mb-1">2. Berikan contoh nyata penerapan materi ini di lingkungan sekolah atau tempat tinggalmu!</p>
                                     <div class="border border-slate-400 bg-white p-4 rounded-lg min-h-[120px]"></div>
                                 </div>
                                 <div>
-                                    <p class="font-bold text-sm mb-1">3. Tuliskan kesimpulan atau nilai/hikmah positif apa yang bisa dipetik dari pelajaran hari ini!</p>
+                                    <p class="font-bold text-sm mb-1">3. Tuliskan kesimpulan atau hikmah positif apa yang bisa dipetik dari pelajaran hari ini!</p>
                                     <div class="border border-slate-400 bg-white p-4 rounded-lg min-h-[120px]"></div>
                                 </div>
                             </div>
@@ -421,7 +426,7 @@
                         <tbody id="out-absensi">
                             </tbody>
                     </table>
-                    <p class="text-xs italic text-slate-500 mt-2">*Keterangan: Ketik H (Hadir), S (Sakit), I (Izin), A (Alpa). Seluruh kolom default telah diset Hadir (H).</p>
+                    <p class="text-xs italic text-slate-500 mt-2">*Keterangan: Ketik H (Hadir), S (Sakit), I (Izin), A (Alpa). Kolom default diatur 'H'.</p>
                     
                     <div class="signature-area" contenteditable="true">
                         <div class="signature-box">Mengetahui,<br>Kepala Sekolah<div class="signature-name v-kepsek"></div>NIP. <span class="v-nip-kepsek"></span></div>
@@ -447,7 +452,7 @@
                         </thead>
                         <tbody id="out-kktp"></tbody>
                     </table>
-                    <p class="text-xs italic text-slate-500 mt-2">*Nilai KKTP akhir akan otomatis menghitung rata-rata dari 3 kriteria di atas jika angkanya diubah.</p>
+                    <p class="text-xs italic text-slate-500 mt-2">*Nilai KKTP akhir otomatis menghitung rata-rata dari 3 kriteria.</p>
                 </div>
                 
                 <div class="paper-preview landscape max-w-full mt-10">
@@ -468,7 +473,6 @@
                             <tr><td>1</td><td class="text-left" contenteditable="true">Ahmad Fulan</td><td contenteditable="true">85</td><td contenteditable="true">80</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true">82.5</td><td contenteditable="true">90</td><td contenteditable="true">85</td><td class="font-bold bg-blue-50" contenteditable="true">85</td></tr>
                             <tr><td>2</td><td class="text-left" contenteditable="true">Siti Fulanah</td><td contenteditable="true">90</td><td contenteditable="true">95</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true">92.5</td><td contenteditable="true">88</td><td contenteditable="true">90</td><td class="font-bold bg-blue-50" contenteditable="true">90.5</td></tr>
                             <tr><td>3</td><td class="text-left" contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td class="font-bold bg-blue-50" contenteditable="true"></td></tr>
-                            <tr><td>4</td><td class="text-left" contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td class="font-bold bg-blue-50" contenteditable="true"></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -477,53 +481,19 @@
         </div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDe4ie2wSPEpNbAgWP-q03vTuHyxc9Jj3E",
-            authDomain: "agsa-e5b08.firebaseapp.com",
-            projectId: "agsa-e5b08",
-            storageBucket: "agsa-e5b08.firebasestorage.app",
-            messagingSenderId: "916052746331",
-            appId: "1:916052746331:web:357cbadbfd8658f1689f7e"
-        };
-
-        try {
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const provider = new GoogleAuthProvider();
-
-            document.getElementById('btn-login-google').addEventListener('click', () => {
-                signInWithPopup(auth, provider).catch(err => {
-                    console.log("Firebase Bypass (Development/Localhost)");
-                    masukSistem();
-                });
-            });
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) masukSistem(user.email);
-            });
-        } catch(e) {
-            document.getElementById('btn-login-google').addEventListener('click', () => masukSistem());
-        }
-
-        function masukSistem(email = "guru@sekolah.id") {
+    <script>
+        // BYPASS LOGIN UNTUK LOKAL
+        document.getElementById('btn-login').addEventListener('click', () => {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-wrapper').classList.remove('hidden');
             document.getElementById('sidebar').classList.remove('hidden');
-            document.getElementById('user-email').innerText = email;
             
             const defaultUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?gid=1925091593&single=true&output=csv";
-            let savedUrl = localStorage.getItem('sa_global_csv') || defaultUrl;
-            document.getElementById('in-csv-url').value = savedUrl;
+            document.getElementById('in-csv-url').value = localStorage.getItem('sa_global_csv') || defaultUrl;
             
-            window.Engine.fetchGlobalCSV();
-        }
-    </script>
+            Engine.fetchGlobalCSV();
+        });
 
-    <script>
         const UI = {
             switchTab: function(tabId) {
                 document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
@@ -551,25 +521,26 @@
                 statusEl.innerHTML = "⏳ Mengunduh data dari Cloud...";
                 
                 try {
-                    // DUAL PROXY FALLBACK (Mencegah Timeout Error 408)
-                    let proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(url);
-                    let response;
-                    
+                    let csvText = "";
                     try {
-                        response = await fetch(proxyUrl);
-                    } catch(e) {
-                        console.warn("Proxy 1 Gagal, mencoba Proxy 2...");
-                        proxyUrl = "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(url);
-                        response = await fetch(proxyUrl);
+                        // LAYER 1: Direct Fetch (Google Sheets Publish link usually allows this natively)
+                        const res1 = await fetch(url);
+                        if (!res1.ok) throw new Error("Direct error");
+                        csvText = await res1.text();
+                    } catch (e1) {
+                        console.warn("Direct fetch gagal, mencoba JSON Proxy...");
+                        // LAYER 2: Fallback ke JSON Proxy (Menghindari 408 Timeout dari mode raw proxy)
+                        const res2 = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent(url));
+                        if (!res2.ok) throw new Error("Proxy error");
+                        const data = await res2.json();
+                        if (!data.contents) throw new Error("Data CSV Kosong");
+                        csvText = data.contents;
                     }
-                    
-                    if(!response || !response.ok) throw new Error("Gagal terhubung ke Proxy. Coba lagi nanti atau gunakan Upload Manual.");
-                    
-                    const csvText = await response.text();
                     this.parseCSV(csvText);
                 } catch(err) {
                     statusEl.className = 'csv-info error';
-                    statusEl.innerHTML = "❌ Error: " + err.message;
+                    statusEl.innerHTML = "❌ Gagal memuat Cloud. Coba gunakan fitur Upload File Manual.";
+                    console.error(err);
                 }
             },
 
@@ -610,7 +581,7 @@
 
                 let statusEl = document.getElementById('csvStatus');
                 statusEl.className = 'csv-info';
-                statusEl.innerHTML = `✅ Sukses membaca <b>${count}</b> TP dari Cloud.`;
+                statusEl.innerHTML = `✅ Sukses membaca <b>${count}</b> TP dari database.`;
                 
                 this.initDropdowns();
             },
@@ -678,13 +649,12 @@
                 let jp = parseInt(document.getElementById('in-jp').value) || 4;
                 let hariTarget = parseInt(document.getElementById('in-hari').value);
                 
-                // Hitung Fase
                 let kInt = parseInt(kls);
                 let f = kInt<=2?'A' : kInt<=4?'B' : kInt<=6?'C' : kInt<=9?'D' : kInt==10?'E' : 'F';
 
-                let thnAjarText = `${tahunAwal} / ${tahunAwal + 1}`;
+                let thnAjarText = `${thnAwal} / ${thnAwal + 1}`;
 
-                // Sync Teks Dinamis
+                // Sync UI Texts
                 document.querySelectorAll('.v-mapel').forEach(e=>e.innerText=mapel);
                 document.querySelectorAll('.v-kls').forEach(e=>e.innerText=kls);
                 document.querySelectorAll('.v-fase').forEach(e=>e.innerText="Fase "+f);
@@ -711,7 +681,7 @@
                 let spesifikTP = spesifikData ? spesifikData.tps : [];
                 document.querySelectorAll('.v-jp-bab').forEach(e=>e.innerText = spesifikTP.length * jp);
 
-                // LOGIKA HARI EFEKTIF & KALENDER
+                // LOGIKA HARI EFEKTIF
                 let colEvents = new Array(30).fill(null);
                 if (smt === "Ganjil") {
                     colEvents[0] = "MPLS / Libur"; colEvents[1] = "MPLS / Libur";           
@@ -765,7 +735,6 @@
                     }
                 }
 
-                // EXECUTE RENDER
                 this.renderATPProta(mapel, kls, smt, jp, activeDates);
                 this.renderPromes(jp, colEvents, smt, blnAwal);
                 this.renderAbsensiList();
@@ -797,7 +766,6 @@
                         let match = tpObj.tp.match(/mampu\s+([a-zA-Z\-]+)/i);
                         let kompetensi = match ? (match[1].charAt(0).toUpperCase() + match[1].slice(1)) : "Memahami";
 
-                        // ATP
                         atpHtml += `<tr>`;
                         if(tIdx===0) {
                             atpHtml += `<td rowspan="${item.d.tps.length}" class="text-center align-middle">${index+1}</td>
@@ -807,7 +775,6 @@
                         if(tIdx===0) atpHtml += `<td rowspan="${item.d.tps.length}" class="text-center align-middle">${Math.ceil(totalJp/jp)} Minggu<br>${totalJp} JP</td>`;
                         atpHtml += `</tr>`;
 
-                        // PROTA - Teks Normal (Tengah)
                         protaHtml += `<tr>`;
                         if(tIdx===0) {
                             protaHtml += `<td rowspan="${item.d.tps.length}" class="font-bold text-center align-middle">${item.smt}</td>
@@ -852,8 +819,9 @@
                                 let tBln = blnAwal+mI; if(tBln>11) tBln-=12;
                                 let match = r.alokasi.filter(a=> a.date.getMonth()===tBln && Math.ceil(a.date.getDate()/7)===wI);
                                 
+                                // UPDATE: HANYA MENAMPILKAN ANGKA TANGGAL PADA PROMES
                                 if(match.length>0) {
-                                    tb+=`<td class="bg-blue-100 text-center" contenteditable="true"><span class="cell-jp">${match[0].jp}</span><span class="cell-date">${match[0].date.getDate()}</span></td>`;
+                                    tb+=`<td class="bg-blue-100 text-center font-bold text-blue-800" contenteditable="true">${match[0].date.getDate()}</td>`;
                                 } else { tb+=`<td contenteditable="true"></td>`; }
                             }
                         }
@@ -865,7 +833,6 @@
 
             renderAbsensiList: function() {
                 let html = "";
-                // 20 Baris Dummy
                 for(let i=1; i<=20; i++) {
                     let nama = i===1 ? "Ahmad Fulan" : i===2 ? "Siti Fulanah" : i===3 ? "Budi Santoso" : "";
                     html += `<tr><td class="text-center">${i}</td><td class="text-left" contenteditable="true">${nama}</td>`;
@@ -914,7 +881,7 @@
                 document.getElementById('out-modul-tp').innerHTML = `<ul class="list-none">${mdHtml}</ul>`;
                 document.getElementById('out-lkpd-tp').innerHTML = lkpdTpHtml;
                 
-                // LANGKAH-LANGKAH KBM LEBIH DETAIL
+                // RENDER LANGKAH KBM (PROBLEM BASED LEARNING)
                 let stepHtml="";
                 data.tps.forEach((t,i)=>{
                     stepHtml += `<div class="mb-4 bg-slate-50 p-4 rounded border border-slate-300">
@@ -923,31 +890,31 @@
                         <div class="mb-3">
                             <span class="font-bold text-slate-700 underline">A. Pendahuluan (15 Menit)</span>
                             <ul class="list-decimal pl-6 mt-1 text-justify">
-                                <li>Guru mengucapkan salam, berdoa bersama, dan mengecek kehadiran peserta didik (Hadir, Sakit, Izin, Alpa).</li>
-                                <li>Guru memberikan apersepsi dengan mengaitkan materi sebelumnya atau kejadian sehari-hari dengan topik <b>${bab}</b>.</li>
-                                <li>Guru menyampaikan Tujuan Pembelajaran secara jelas kepada siswa.</li>
-                                <li>Guru memberikan pertanyaan pemantik untuk memancing nalar kritis siswa.</li>
+                                <li>Guru mengucapkan salam, mengajak siswa berdoa, dan mengecek daftar hadir (Hadir, Sakit, Izin, Alpa).</li>
+                                <li>Guru memberikan apersepsi dengan mengaitkan materi pertemuan sebelumnya atau kejadian di lingkungan sehari-hari dengan topik <b>${bab}</b>.</li>
+                                <li>Guru menyampaikan Tujuan Pembelajaran yang akan dicapai secara jelas kepada siswa.</li>
+                                <li>Guru memberikan pertanyaan pemantik untuk memancing rasa ingin tahu dan nalar kritis siswa.</li>
                             </ul>
                         </div>
                         
                         <div class="mb-3">
                             <span class="font-bold text-slate-700 underline">B. Kegiatan Inti (60 Menit)</span>
                             <ul class="list-decimal pl-6 mt-1 text-justify">
-                                <li><b>Eksplorasi (Stimulation):</b> Peserta didik mengamati penjelasan guru, membaca buku teks, atau melihat media visual yang disajikan di kelas.</li>
+                                <li><b>Orientasi Masalah (Stimulation):</b> Peserta didik mengamati penjelasan pemantik guru, membaca buku teks, atau melihat media visual yang disajikan di kelas.</li>
                                 <li><b>Kolaborasi (Problem Statement & Data Collection):</b> Peserta didik dibagi ke dalam beberapa kelompok yang heterogen. Guru membagikan LKPD.</li>
-                                <li><b>Aktivitas Kelompok (Data Processing):</b> Secara berkelompok, peserta didik berdiskusi untuk menganalisis dan memecahkan masalah yang ada di LKPD.</li>
-                                <li><b>Komunikasi (Verification):</b> Perwakilan kelompok mempresentasikan hasil diskusinya di depan kelas. Kelompok lain memberikan tanggapan.</li>
-                                <li><b>Penguatan (Generalization):</b> Guru memberikan penguatan, meluruskan miskonsepsi, dan memberikan apresiasi (reward) kepada semua peserta didik.</li>
+                                <li><b>Aktivitas Kelompok (Data Processing):</b> Secara berkelompok, peserta didik berdiskusi dan bertukar ide untuk menganalisis serta memecahkan masalah/tantangan yang ada di dalam LKPD.</li>
+                                <li><b>Komunikasi (Verification):</b> Perwakilan setiap kelompok mempresentasikan hasil diskusinya di depan kelas secara interaktif. Kelompok lain diberikan kesempatan untuk memberikan tanggapan atau pertanyaan.</li>
+                                <li><b>Penguatan (Generalization):</b> Guru memberikan penguatan pemahaman, meluruskan miskonsepsi yang terjadi selama diskusi, dan memberikan apresiasi (reward) kepada semua peserta didik atas partisipasi aktif mereka.</li>
                             </ul>
                         </div>
 
                         <div>
                             <span class="font-bold text-slate-700 underline">C. Penutup (15 Menit)</span>
                             <ul class="list-decimal pl-6 mt-1 text-justify">
-                                <li>Peserta didik bersama guru menyimpulkan materi pembelajaran hari ini.</li>
-                                <li>Guru melakukan refleksi dengan menanyakan: <i>"Bagian mana yang paling menyenangkan dari belajar hari ini?"</i></li>
-                                <li>Guru menyampaikan sekilas materi untuk pertemuan berikutnya.</li>
-                                <li>Kegiatan diakhiri dengan doa penutup dan salam.</li>
+                                <li>Peserta didik bersama guru membuat kesimpulan materi pembelajaran hari ini.</li>
+                                <li>Guru melakukan refleksi dengan menanyakan: <i>"Bagian mana yang paling menyenangkan dari belajar hari ini?"</i> atau <i>"Materi apa yang masih dirasa membingungkan?"</i></li>
+                                <li>Guru menyampaikan sekilas gambaran materi untuk pertemuan berikutnya.</li>
+                                <li>Kegiatan pembelajaran diakhiri dengan doa penutup dan salam.</li>
                             </ul>
                         </div>
                     </div>`;
@@ -958,19 +925,24 @@
             }
         };
 
-        // File Lokal Manual Uploader
-        document.getElementById('fileCsv').addEventListener('change', function(e) {
-            let file = e.target.files[0];
-            if(!file) return;
-            let reader = new FileReader();
-            reader.onload = function(e) { 
-                let statusEl = document.getElementById('csvStatus');
-                statusEl.style.display = 'block';
-                statusEl.className = 'csv-info';
-                statusEl.innerHTML = "⏳ Memproses file lokal...";
-                Engine.parseCSV(e.target.result); 
-            };
-            reader.readAsText(file);
+        // SAFETY WRAPPER UNTUK MENCEGAH ERROR NULL PADA FILE UPLOAD LOCAL
+        document.addEventListener("DOMContentLoaded", () => {
+            let fileInput = document.getElementById('fileCsv');
+            if(fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    let file = e.target.files[0];
+                    if(!file) return;
+                    let reader = new FileReader();
+                    reader.onload = function(e) { 
+                        let statusEl = document.getElementById('csvStatus');
+                        statusEl.style.display = 'block';
+                        statusEl.className = 'csv-info';
+                        statusEl.innerHTML = "⏳ Memproses file lokal...";
+                        Engine.parseCSV(e.target.result); 
+                    };
+                    reader.readAsText(file);
+                });
+            }
         });
     </script>
 </body>
