@@ -271,28 +271,52 @@
 
                 <div class="paper-preview portrait">
                     <h1 class="header-title" contenteditable="true">MODUL AJAR KURIKULUM MERDEKA</h1>
-                    <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">A. IDENTITAS</div>
+                    
+                    <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">A. IDENTITAS UMUM</div>
                     <table class="identity-table" contenteditable="true">
-                        <tr><td width="150">Penyusun</td><td>: <span class="v-guru"></span> (<span class="v-sekolah"></span>)</td></tr>
+                        <tr><td width="150">Nama Penyusun</td><td>: <span class="v-guru"></span> (<span class="v-sekolah"></span>)</td></tr>
                         <tr><td>Mata Pelajaran</td><td>: <span class="v-mapel"></span></td></tr>
                         <tr><td>Kelas / Smt / Rombel</td><td>: <span class="v-kls"></span> / <span class="v-smt"></span> / <span class="v-rombel"></span></td></tr>
                         <tr><td>Topik Materi</td><td>: <span class="text-blue-600 font-bold v-bab-aktif"></span></td></tr>
                         <tr><td>Alokasi Waktu</td><td>: <span class="v-jp-bab"></span> JP</td></tr>
                     </table>
                     
-                    <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">B. PROFIL LULUSAN</div>
-                    <div class="pl-4 mb-3" contenteditable="true" id="out-modul-p3"></div>
+                    <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">B. PROFIL LULUSAN & KESIAPAN</div>
+                    <div class="pl-4 mb-3" contenteditable="true">
+                        <p class="font-semibold text-slate-700">1. Dimensi Profil Lulusan:</p>
+                        <div id="out-modul-p3" class="mb-2"></div>
+                        <p class="font-semibold text-slate-700 mt-2">2. Identifikasi Kesiapan Peserta Didik:</p>
+                        <ul class="list-disc pl-5">
+                            <li><strong>Pengetahuan Awal:</strong> Peserta didik telah memiliki pemahaman dasar atau pengalaman nyata terkait materi <em><span class="v-bab-aktif"></span></em> dalam keseharian.</li>
+                            <li><strong>Kebutuhan Belajar:</strong> Dibutuhkan pendekatan diferensiasi, visualisasi materi, dan metode interaktif untuk memfasilitasi keragaman gaya belajar siswa.</li>
+                        </ul>
+                    </div>
 
                     <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">C. CAPAIAN & TUJUAN PEMBELAJARAN</div>
                     <div class="pl-4 mb-3 text-justify" contenteditable="true">
                         <p class="font-semibold italic text-slate-600 mb-2">Capaian Pembelajaran (CP):</p>
-                        <p id="out-modul-cp" class="mb-2"></p>
-                        <p class="font-semibold italic text-slate-600 mt-2">Tujuan Pembelajaran (TP):</p>
+                        <p id="out-modul-cp" class="mb-3 bg-blue-50 p-2 rounded"></p>
+                        <p class="font-semibold italic text-slate-600">Tujuan Pembelajaran (TP):</p>
                         <div id="out-modul-tp"></div>
                     </div>
 
-                    <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">D. LANGKAH PEMBELAJARAN</div>
+                    <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">D. RINGKASAN MATERI PEMBELAJARAN</div>
+                    <div class="pl-4 mb-3 text-justify" contenteditable="true">
+                        <p class="italic text-slate-500 mb-2">[Ketik atau paste ringkasan materi untuk Bab ini di sini. Berikan penjelasan konsep dasar yang mudah dipahami oleh peserta didik sesuai dengan fase perkembangan mereka.]</p>
+                        <p>Materi pokok pada pertemuan ini mencakup pengertian, konsep dasar, dan implementasi nyata dari <strong><span class="v-bab-aktif"></span></strong> dalam kehidupan sehari-hari maupun dalam lingkup akademis.</p>
+                    </div>
+
+                    <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">E. LANGKAH-LANGKAH OPERASIONAL (KBM)</div>
                     <div class="pl-4 mb-3" contenteditable="true" id="out-modul-langkah"></div>
+
+                    <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">F. ASESMEN & PENILAIAN</div>
+                    <div class="pl-4 mb-3" contenteditable="true">
+                        <ul class="list-disc pl-5">
+                            <li><strong>Asesmen Diagnostik:</strong> Melakukan tanya jawab pemantik terkait pemahaman dan pengalaman peserta didik terhadap materi di awal pertemuan.</li>
+                            <li><strong>Asesmen Formatif:</strong> Observasi keterlibatan, rubrik penilaian diskusi kelompok, dan pengerjaan Lembar Kerja Peserta Didik (LKPD) selama proses pembelajaran.</li>
+                            <li><strong>Asesmen Sumatif:</strong> Penugasan produk/proyek (unjuk kerja) dan tes tertulis di akhir bab untuk mengukur ketercapaian tujuan kognitif.</li>
+                        </ul>
+                    </div>
                     
                     <div class="signature-area" contenteditable="true">
                         <div class="signature-box">Mengetahui,<br>Kepala Sekolah<div class="signature-name v-kepsek"></div>NIP. <span class="v-nip-kepsek"></span></div>
@@ -304,16 +328,53 @@
                     <div class="border-2 border-dashed border-blue-600 p-6 rounded-xl bg-slate-50 h-full">
                         <h1 class="text-center font-bold text-xl text-blue-800 mb-4" contenteditable="true">LEMBAR KERJA PESERTA DIDIK (LKPD)</h1>
                         <div class="flex justify-between border-b border-black pb-2 mb-4 font-bold" contenteditable="true">
-                            <span>Nama : .......................</span>
+                            <span>Nama Siswa/Kelompok : .......................</span>
                             <span>Kelas: <span class="v-kls"></span>/<span class="v-rombel"></span></span>
                             <span>Nilai : .....</span>
                         </div>
                         <p class="font-bold text-blue-700">Mata Pelajaran: <span class="v-mapel"></span></p>
-                        <p class="font-bold text-blue-700 mb-2">Materi: <span class="v-bab-aktif"></span></p>
+                        <p class="font-bold text-blue-700 mb-4">Materi Topik: <span class="v-bab-aktif"></span></p>
                         
-                        <div class="space-y-6 mt-6" contenteditable="true">
-                            <div class="border border-slate-300 bg-white p-4 rounded-lg min-h-[120px]">1. Tulislah pemahamanmu tentang materi hari ini dengan bahasamu sendiri!</div>
-                            <div class="border border-slate-300 bg-white p-4 rounded-lg min-h-[120px]">2. Berikan contoh nyata penerapan materi ini dalam kehidupan sehari-hari!</div>
+                        <div class="content-body" contenteditable="true">
+                            <p style="font-weight:bold; color:#1e40af; font-size:11pt;">A. Tujuan Kegiatan Hari Ini:</p>
+                            <ul id="out-lkpd-tp" class="mb-4 bg-white p-2 border border-slate-200 rounded"></ul>
+                            
+                            <p style="font-weight:bold; color:#1e40af; font-size:11pt;">B. Alat dan Bahan:</p>
+                            <ul class="list-disc pl-5 mb-4 text-sm">
+                                <li>Alat tulis (Buku, Pensil/Pulpen)</li>
+                                <li>Buku Paket / Bahan Ajar Referensi</li>
+                            </ul>
+
+                            <p style="font-weight:bold; color:#1e40af; font-size:11pt;">C. Langkah-Langkah Operasional (Petunjuk):</p>
+                            <ol class="list-decimal pl-5 mb-6 text-sm">
+                                <li>Berdoalah terlebih dahulu sebelum memulai aktivitas.</li>
+                                <li>Bentuklah kelompok diskusi yang terdiri dari 3-4 orang (jika diinstruksikan guru).</li>
+                                <li>Bacalah ringkasan materi atau buku cetak yang berkaitan dengan <b><span class="v-bab-aktif"></span></b>.</li>
+                                <li>Diskusikan instruksi/pertanyaan di bawah ini secara seksama.</li>
+                                <li>Tuliskan hasil diskusi pada kolom yang telah disediakan dengan rapi dan jelas.</li>
+                                <li>Presentasikan hasil kerja kalian di depan kelas secara bergantian!</li>
+                            </ol>
+
+                            <p style="font-weight:bold; color:#1e40af; font-size:11pt; border-bottom:2px solid #ccc; padding-bottom:5px;">D. Kolom Pengerjaan / Tantangan:</p>
+                            
+                            <div class="space-y-6 mt-4">
+                                <div>
+                                    <p class="font-bold text-sm mb-1">1. Tuliskan pemahaman utamamu mengenai materi ini menggunakan bahasamu sendiri!</p>
+                                    <div class="border border-slate-400 bg-white p-4 rounded-lg min-h-[120px]"></div>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm mb-1">2. Coba berikan contoh penerapan materi ini secara nyata di sekolah atau lingkungan sekitarmu!</p>
+                                    <div class="border border-slate-400 bg-white p-4 rounded-lg min-h-[120px]"></div>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm mb-1">3. Tuliskan kesimpulan atau nilai/hikmah positif apa yang bisa dipetik dari pelajaran hari ini!</p>
+                                    <div class="border border-slate-400 bg-white p-4 rounded-lg min-h-[120px]"></div>
+                                </div>
+                            </div>
+
+                            <div class="text-right mt-8 font-bold text-emerald-600 text-lg italic">
+                                "Semangat Belajar, Kesuksesan Menanti!" 🌟
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -436,7 +497,7 @@
 
             document.getElementById('btn-login-google').addEventListener('click', () => {
                 signInWithPopup(auth, provider).catch(err => {
-                    console.log("Firebase bypass (Localhost)");
+                    console.log("Firebase Bypass (Development/Localhost)");
                     masukSistem();
                 });
             });
@@ -490,14 +551,25 @@
                 statusEl.innerHTML = "⏳ Mengunduh data dari Cloud...";
                 
                 try {
-                    const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
-                    const response = await fetch(proxyUrl);
-                    if(!response.ok) throw new Error("Gagal mengambil data HTTP " + response.status);
+                    // DUAL PROXY FALLBACK (Mencegah Timeout Error 408)
+                    let proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(url);
+                    let response;
+                    
+                    try {
+                        response = await fetch(proxyUrl);
+                    } catch(e) {
+                        console.warn("Proxy 1 Gagal, mencoba Proxy 2...");
+                        proxyUrl = "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(url);
+                        response = await fetch(proxyUrl);
+                    }
+                    
+                    if(!response || !response.ok) throw new Error("Gagal terhubung ke Proxy. Coba lagi nanti atau gunakan Upload Manual.");
+                    
                     const csvText = await response.text();
                     this.parseCSV(csvText);
                 } catch(err) {
                     statusEl.className = 'csv-info error';
-                    statusEl.innerHTML = "❌ Error: " + err.message + ". Pastikan Link dipublish ke web.";
+                    statusEl.innerHTML = "❌ Error: " + err.message;
                 }
             },
 
@@ -606,15 +678,18 @@
                 let jp = parseInt(document.getElementById('in-jp').value) || 4;
                 let hariTarget = parseInt(document.getElementById('in-hari').value);
                 
+                // Hitung Fase
                 let kInt = parseInt(kls);
                 let f = kInt<=2?'A' : kInt<=4?'B' : kInt<=6?'C' : kInt<=9?'D' : kInt==10?'E' : 'F';
 
-                // Teks UI Sinkronisasi
+                let thnAjarText = `${tahunAwal} / ${tahunAwal + 1}`;
+
+                // Sync Teks Dinamis
                 document.querySelectorAll('.v-mapel').forEach(e=>e.innerText=mapel);
                 document.querySelectorAll('.v-kls').forEach(e=>e.innerText=kls);
                 document.querySelectorAll('.v-fase').forEach(e=>e.innerText="Fase "+f);
                 document.querySelectorAll('.v-smt').forEach(e=>e.innerText=smt);
-                document.querySelectorAll('.v-thn').forEach(e=>e.innerText=`${thnAwal}/${thnAwal+1}`);
+                document.querySelectorAll('.v-thn').forEach(e=>e.innerText=thnAjarText);
                 document.querySelectorAll('.v-bab-aktif').forEach(e=>e.innerText=babAktif);
                 
                 document.querySelectorAll('.v-sekolah').forEach(e=>e.innerText=document.getElementById('in-sekolah').value);
@@ -625,41 +700,72 @@
                 document.querySelectorAll('.v-tgl').forEach(e=>e.innerText=document.getElementById('in-tempat-tgl').value);
                 document.querySelectorAll('.v-rombel').forEach(e=>e.innerText=document.getElementById('in-rombel').value);
 
-                // Date Engine
-                let liburRaw = document.getElementById('in-libur').value.split(/[\n,]+/);
-                let t1=thnAwal, t2=thnAwal+1;
-                let liburDB = [`${t1}-08-17`,`${t1}-12-25`,`${t2}-01-01`,`${t2}-05-01`]; 
-                liburRaw.forEach(d=>{ if(d.trim()) liburDB.push(d.trim()); });
-
-                let colEvents = new Array(30).fill(null);
-                if(smt==="Ganjil"){
-                    colEvents[0]="MPLS/Libur"; colEvents[1]="MPLS/Libur"; colEvents[12]="SUMATIF TENGAH SMT"; 
-                    colEvents[25]="SUMATIF AKHIR SMT"; colEvents[26]="PENGAYAAN"; colEvents[27]="PEMBAGIAN RAPOR"; colEvents[28]="LIBUR"; colEvents[29]="LIBUR";
-                } else {
-                    colEvents[0]="LIBUR"; colEvents[11]="SUMATIF TENGAH SMT"; 
-                    let sasIdx = (kInt==6 || kInt==9 || kInt==12) ? 20 : 25; 
-                    colEvents[sasIdx]="SUMATIF AKHIR SMT / PAT"; colEvents[sasIdx+1]="PENGAYAAN"; colEvents[sasIdx+2]="PEMBAGIAN RAPOR";
-                    for(let x=sasIdx+3; x<30; x++) colEvents[x]="LIBUR / LULUS";
+                let allBabInSmt = [];
+                if(this.data[mapel] && this.data[mapel][kls] && this.data[mapel][kls][smt]) {
+                    for (let babName in this.data[mapel][kls][smt]) {
+                        allBabInSmt.push({ bab: babName, cp: this.data[mapel][kls][smt][babName].cp, tps: this.data[mapel][kls][smt][babName].tps });
+                    }
                 }
 
-                let blnAwal = smt==="Ganjil"?6:0;
-                let activeDates = [];
-                for(let i=0; i<6; i++) {
-                    let b = blnAwal+i; let y = smt==="Ganjil" ? (b>11?t2:t1) : t2;
-                    if(b>11) b-=12;
-                    let daysInMonth = new Date(y, b+1, 0).getDate();
-                    for(let d=1; d<=daysInMonth; d++) {
-                        let dt = new Date(y, b, d);
-                        if(dt.getDay() === hariTarget) {
-                            let strD = `${y}-${String(b+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                            let wIdx = Math.ceil(d/7); if(wIdx>5) wIdx=5;
-                            let cIdx = (i*5)+(wIdx-1);
-                            if(liburDB.includes(strD)) { if(cIdx<30 && !colEvents[cIdx]) colEvents[cIdx]="LIBUR NASIONAL / KHUSUS"; } 
-                            else { if(!colEvents[cIdx]) activeDates.push(dt); }
+                let spesifikData = this.data[mapel]?.[kls]?.[smt]?.[babAktif];
+                let spesifikTP = spesifikData ? spesifikData.tps : [];
+                document.querySelectorAll('.v-jp-bab').forEach(e=>e.innerText = spesifikTP.length * jp);
+
+                // LOGIKA HARI EFEKTIF & KALENDER
+                let colEvents = new Array(30).fill(null);
+                if (smt === "Ganjil") {
+                    colEvents[0] = "MPLS / Libur"; colEvents[1] = "MPLS / Libur";           
+                    colEvents[13] = "SUMATIF TENGAH SMT"; colEvents[25] = "SUMATIF AKHIR SMT";     
+                    colEvents[26] = "PENGAYAAN / CLASSMEET"; colEvents[27] = "PEMBAGIAN RAPOR";       
+                    colEvents[28] = "LIBUR SMT GANJIL"; colEvents[29] = "LIBUR SMT GANJIL";      
+                } else {
+                    colEvents[0] = "LIBUR SMT GANJIL"; colEvents[11] = "SUMATIF TENGAH SMT";    
+                    colEvents[25] = "SUMATIF AKHIR SMT / PAT"; colEvents[26] = "PENGAYAAN / CLASSMEET"; 
+                    colEvents[27] = "PEMBAGIAN RAPOR"; colEvents[28] = "LIBUR SMT GENAP"; colEvents[29] = "LIBUR SMT GENAP";       
+                }
+
+                let blnAwal = (smt === "Ganjil") ? 6 : 0; 
+                let rawLibur = document.getElementById("inputLibur").value.split(/[\n,]+/);
+                let daftarLibur = getLiburBaku(tahunAwal);
+                rawLibur.forEach(d => { let trimD = d.trim(); if(trimD) daftarLibur.push(trimD); });
+
+                daftarLibur.forEach(dateStr => {
+                    let p = dateStr.split('-');
+                    if(p.length === 3) {
+                        let y = parseInt(p[0]); let m = parseInt(p[1]) - 1; let d = parseInt(p[2]);
+                        let tglLibur = new Date(y, m, d);
+                        if (tglLibur.getDay() === hariTarget) {
+                            let mIdx = m - blnAwal;
+                            if(smt === "Ganjil" && mIdx < 0) mIdx += 12;
+                            if(mIdx >= 0 && mIdx <= 5) {
+                                let wIdx = Math.ceil(d / 7);
+                                if(wIdx > 5) wIdx = 5;
+                                let c = (mIdx * 5) + (wIdx - 1);
+                                if(c >= 0 && c < 30 && colEvents[c] === null) colEvents[c] = "LIBUR NASIONAL / KHUSUS";
+                            }
+                        }
+                    }
+                });
+
+                let thnOperasional = (smt === "Ganjil") ? tahunAwal : tahunAwal + 1;
+                let semuaTanggalMengajar = [];
+                for (let i = 0; i < 6; i++) {
+                    let blnSekarang = blnAwal + i;
+                    let curYear = thnOperasional;
+                    if(smt === "Ganjil" && blnSekarang > 11) { curYear++; blnSekarang -= 12; }
+                    let jmlHari = new Date(curYear, blnSekarang + 1, 0).getDate();
+                    for (let tgl = 1; tgl <= jmlHari; tgl++) {
+                        let tglObyek = new Date(curYear, blnSekarang, tgl);
+                        if (tglObyek.getDay() === hariTarget) {
+                            let wIdx = Math.ceil(tgl / 7);
+                            if(wIdx > 5) wIdx = 5;
+                            let c = (i * 5) + (wIdx - 1);
+                            if(colEvents[c] === null) semuaTanggalMengajar.push(tglObyek);
                         }
                     }
                 }
 
+                // EXECUTE RENDER
                 this.renderATPProta(mapel, kls, smt, jp, activeDates);
                 this.renderPromes(jp, colEvents, smt, blnAwal);
                 this.renderAbsensiList();
@@ -688,26 +794,27 @@
                 dataToRender.forEach((item, index) => {
                     let totalJp = item.d.tps.length * jp;
                     item.d.tps.forEach((tpObj, tIdx) => {
-                        let kk = tpObj.tp.match(/mampu\s+([a-zA-Z\-]+)/i);
-                        kk = kk ? kk[1].toUpperCase() : "MEMAHAMI";
+                        let match = tpObj.tp.match(/mampu\s+([a-zA-Z\-]+)/i);
+                        let kompetensi = match ? (match[1].charAt(0).toUpperCase() + match[1].slice(1)) : "Memahami";
 
+                        // ATP
                         atpHtml += `<tr>`;
                         if(tIdx===0) {
-                            atpHtml += `<td rowspan="${item.d.tps.length}" class="text-center">${index+1}</td>
-                                        <td rowspan="${item.d.tps.length}" contenteditable="true" class="bg-slate-50"><b>${item.bab}</b><br><span class="text-xs text-slate-600">${item.d.cp}</span></td>`;
+                            atpHtml += `<td rowspan="${item.d.tps.length}" class="text-center align-middle">${index+1}</td>
+                                        <td rowspan="${item.d.tps.length}" contenteditable="true" class="bg-slate-50 align-middle"><b>${item.bab}</b><br><span class="text-xs text-slate-600">${item.d.cp}</span></td>`;
                         }
-                        atpHtml += `<td contenteditable="true">${tpObj.tp}</td><td class="text-xs text-blue-800" contenteditable="true">${tpObj.p3}</td><td class="font-bold text-amber-600">${kk}</td>`;
-                        if(tIdx===0) atpHtml += `<td rowspan="${item.d.tps.length}" class="text-center">${Math.ceil(totalJp/jp)} Minggu<br>${totalJp} JP</td>`;
+                        atpHtml += `<td contenteditable="true">${tpObj.tp}</td><td class="text-xs text-blue-800" contenteditable="true">${tpObj.p3}</td><td class="font-bold text-amber-600">${kompetensi}</td>`;
+                        if(tIdx===0) atpHtml += `<td rowspan="${item.d.tps.length}" class="text-center align-middle">${Math.ceil(totalJp/jp)} Minggu<br>${totalJp} JP</td>`;
                         atpHtml += `</tr>`;
 
-                        // PROTA - Teks Bab Normal (Horizontal)
+                        // PROTA - Teks Normal (Tengah)
                         protaHtml += `<tr>`;
                         if(tIdx===0) {
-                            protaHtml += `<td rowspan="${item.d.tps.length}" class="font-bold text-center">${item.smt}</td>
+                            protaHtml += `<td rowspan="${item.d.tps.length}" class="font-bold text-center align-middle">${item.smt}</td>
                                           <td rowspan="${item.d.tps.length}" class="bg-slate-50 font-bold text-center align-middle" contenteditable="true">${item.bab}</td>`;
                         }
                         protaHtml += `<td contenteditable="true">${tpObj.tp}</td>`;
-                        if(tIdx===0) protaHtml += `<td rowspan="${item.d.tps.length}" class="font-bold text-center">${totalJp} JP</td>`;
+                        if(tIdx===0) protaHtml += `<td rowspan="${item.d.tps.length}" class="font-bold text-center align-middle">${totalJp} JP</td>`;
                         protaHtml += `</tr>`;
 
                         if(atpMode === "semester" || item.smt === smt) {
@@ -725,7 +832,7 @@
 
             renderPromes: function(jp, colEvents, smt, blnAwal) {
                 let nBulan = smt==="Ganjil" ? ["Jul","Ags","Sep","Okt","Nov","Des"] : ["Jan","Feb","Mar","Apr","Mei","Jun"];
-                let th = `<tr><th rowspan="2" width="5%">Bab</th><th rowspan="2" width="25%">Tujuan Pembelajaran</th><th rowspan="2">JP</th>`;
+                let th = `<tr><th rowspan="2" width="10%">Bab / Elemen</th><th rowspan="2" width="22%">Capaian Pembelajaran (TP)</th><th rowspan="2" width="3%">JP</th>`;
                 nBulan.forEach(b=> th+=`<th colspan="5">${b}</th>`);
                 th+=`</tr><tr>`; for(let i=0;i<6;i++) th+=`<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>`; th+=`</tr>`;
                 document.getElementById('out-promes-head').innerHTML = th;
@@ -734,8 +841,8 @@
                 if(rows.length>0) {
                     rows.forEach((r, idx) => {
                         tb+=`<tr>`;
-                        if(r.rowsp>0) tb+=`<td rowspan="${r.rowsp}" class="bg-slate-50"><div class="vertical-text font-bold text-[8pt]">${r.bab}</div></td>`;
-                        tb+=`<td contenteditable="true">${r.tp}</td><td class="text-center font-bold">${r.jp}</td>`;
+                        if(r.rowsp>0) tb+=`<td rowspan="${r.rowsp}" class="bg-slate-50 font-bold text-center align-middle" contenteditable="true">${r.bab}</td>`;
+                        tb+=`<td contenteditable="true">${r.tp}</td><td class="text-center font-bold align-middle">${r.jp}</td>`;
                         
                         for(let c=0; c<30; c++) {
                             if(colEvents[c]) {
@@ -756,16 +863,14 @@
                 document.getElementById('out-promes-body').innerHTML = tb;
             },
 
-            // FITUR BARU ABSENSI HARIAN
             renderAbsensiList: function() {
                 let html = "";
-                // Generate 20 Baris Dummy
+                // 20 Baris Dummy
                 for(let i=1; i<=20; i++) {
                     let nama = i===1 ? "Ahmad Fulan" : i===2 ? "Siti Fulanah" : i===3 ? "Budi Santoso" : "";
                     html += `<tr><td class="text-center">${i}</td><td class="text-left" contenteditable="true">${nama}</td>`;
-                    // Generate 16 Kolom Presensi (Default 'H')
                     for(let j=0; j<16; j++) {
-                        html += `<td contenteditable="true" class="text-center font-bold text-blue-700">H</td>`;
+                        html += `<td contenteditable="true" class="text-center font-bold text-blue-700 cursor-text">H</td>`;
                     }
                     html += `</tr>`;
                 }
@@ -776,15 +881,16 @@
                 let data = this.data[mapel]?.[kls]?.[smt]?.[bab];
                 if(!data) return;
 
-                document.querySelectorAll('.valJpBab').forEach(e=>e.innerText = data.tps.length * jp);
+                document.querySelectorAll('.v-jp-bab').forEach(e=>e.innerText = data.tps.length * jp);
                 document.getElementById('out-modul-cp').innerText = data.cp;
 
                 let p3Set = new Set();
-                let mdHtml="", kktpHtml="", jurnalHtml="";
+                let mdHtml="", kktpHtml="", jurnalHtml="", lkpdTpHtml="";
 
                 data.tps.forEach((t, i) => {
                     t.p3.split(',').forEach(p=> { if(p.trim()) p3Set.add(p.trim())});
                     mdHtml += `<li><strong>Pertemuan ${i+1}:</strong> ${t.tp}</li>`;
+                    lkpdTpHtml += `<li>${t.tp}</li>`;
                     
                     kktpHtml += `<tr>`;
                     if(i===0) kktpHtml += `<td rowspan="${data.tps.length}" class="text-center align-middle">${i+1}</td>`;
@@ -800,23 +906,50 @@
                         let dt = dMatch.alokasi[0].date;
                         dStr = `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
                     }
-                    // JURNAL: Default Kehadiran adalah Hadir Semua
-                    jurnalHtml += `<tr><td class="text-center font-bold" contenteditable="true">${dStr}</td><td contenteditable="true">${bab}</td><td contenteditable="true">${t.tp}</td><td contenteditable="true" class="text-center font-bold text-blue-700">Hadir Semua</td><td contenteditable="true">Kegiatan Berjalan Baik</td></tr>`;
+                    jurnalHtml += `<tr><td class="text-center font-bold" contenteditable="true">${dStr}</td><td contenteditable="true">${bab}</td><td contenteditable="true">${t.tp}</td><td contenteditable="true" class="text-center font-bold text-blue-700">Hadir Semua</td><td contenteditable="true">KBM Tuntas</td></tr>`;
                 });
 
                 let p3Html = "<ul class='list-disc'>"; p3Set.forEach(s=> p3Html+=`<li><strong>${s}</strong></li>`); p3Html+="</ul>";
                 document.getElementById('out-modul-p3').innerHTML = p3Html;
                 document.getElementById('out-modul-tp').innerHTML = `<ul class="list-none">${mdHtml}</ul>`;
+                document.getElementById('out-lkpd-tp').innerHTML = lkpdTpHtml;
                 
+                // LANGKAH-LANGKAH KBM LEBIH DETAIL
                 let stepHtml="";
                 data.tps.forEach((t,i)=>{
-                    stepHtml += `<div class="mb-4 bg-slate-50 p-3 rounded border border-slate-200">
-                        <div class="font-bold border-b pb-1 mb-2 text-blue-800">Pertemuan ${i+1} (${jp} JP)</div>
-                        <ul class="list-disc pl-5">
-                            <li><b>Pendahuluan (Mindful):</b> Doa, apersepsi, memberikan pertanyaan pemantik terkait materi hari ini.</li>
-                            <li><b>Inti (Meaningful & Joyful):</b> Eksplorasi materi, pengerjaan LKPD secara berkelompok, dan unjuk karya interaktif.</li>
-                            <li><b>Penutup:</b> Kesimpulan, refleksi pembelajaran, diakhiri doa bersama.</li>
-                        </ul>
+                    stepHtml += `<div class="mb-4 bg-slate-50 p-4 rounded border border-slate-300">
+                        <div class="font-bold border-b-2 border-slate-300 pb-2 mb-3 text-blue-800 text-lg">Pertemuan ${i+1} (${jp} JP)</div>
+                        
+                        <div class="mb-3">
+                            <span class="font-bold text-slate-700 underline">A. Pendahuluan (15 Menit)</span>
+                            <ul class="list-decimal pl-6 mt-1 text-justify">
+                                <li>Guru mengucapkan salam, berdoa bersama, dan mengecek kehadiran peserta didik (Hadir, Sakit, Izin, Alpa).</li>
+                                <li>Guru memberikan apersepsi dengan mengaitkan materi sebelumnya atau kejadian sehari-hari dengan topik <b>${bab}</b>.</li>
+                                <li>Guru menyampaikan Tujuan Pembelajaran secara jelas kepada siswa.</li>
+                                <li>Guru memberikan pertanyaan pemantik untuk memancing nalar kritis siswa.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <span class="font-bold text-slate-700 underline">B. Kegiatan Inti (60 Menit)</span>
+                            <ul class="list-decimal pl-6 mt-1 text-justify">
+                                <li><b>Eksplorasi (Stimulation):</b> Peserta didik mengamati penjelasan guru, membaca buku teks, atau melihat media visual yang disajikan di kelas.</li>
+                                <li><b>Kolaborasi (Problem Statement & Data Collection):</b> Peserta didik dibagi ke dalam beberapa kelompok yang heterogen. Guru membagikan LKPD.</li>
+                                <li><b>Aktivitas Kelompok (Data Processing):</b> Secara berkelompok, peserta didik berdiskusi untuk menganalisis dan memecahkan masalah yang ada di LKPD.</li>
+                                <li><b>Komunikasi (Verification):</b> Perwakilan kelompok mempresentasikan hasil diskusinya di depan kelas. Kelompok lain memberikan tanggapan.</li>
+                                <li><b>Penguatan (Generalization):</b> Guru memberikan penguatan, meluruskan miskonsepsi, dan memberikan apresiasi (reward) kepada semua peserta didik.</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <span class="font-bold text-slate-700 underline">C. Penutup (15 Menit)</span>
+                            <ul class="list-decimal pl-6 mt-1 text-justify">
+                                <li>Peserta didik bersama guru menyimpulkan materi pembelajaran hari ini.</li>
+                                <li>Guru melakukan refleksi dengan menanyakan: <i>"Bagian mana yang paling menyenangkan dari belajar hari ini?"</i></li>
+                                <li>Guru menyampaikan sekilas materi untuk pertemuan berikutnya.</li>
+                                <li>Kegiatan diakhiri dengan doa penutup dan salam.</li>
+                            </ul>
+                        </div>
                     </div>`;
                 });
                 document.getElementById('out-modul-langkah').innerHTML = stepHtml;
@@ -824,6 +957,21 @@
                 document.getElementById('out-jurnal').innerHTML = jurnalHtml;
             }
         };
+
+        // File Lokal Manual Uploader
+        document.getElementById('fileCsv').addEventListener('change', function(e) {
+            let file = e.target.files[0];
+            if(!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) { 
+                let statusEl = document.getElementById('csvStatus');
+                statusEl.style.display = 'block';
+                statusEl.className = 'csv-info';
+                statusEl.innerHTML = "⏳ Memproses file lokal...";
+                Engine.parseCSV(e.target.result); 
+            };
+            reader.readAsText(file);
+        });
     </script>
 </body>
 </html>
