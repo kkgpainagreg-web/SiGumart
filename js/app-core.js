@@ -1059,7 +1059,1378 @@ window.copyPrompt = copyPrompt;
 window.handleLogout = handleLogout;
 
 console.log('app-core.js loaded');
+// ============================================
+// DOCUMENT GENERATION FUNCTIONS
+// ============================================
 
+// ===== ATP (Alur Tujuan Pembelajaran) =====
+async function generateATP() {
+    const mapelId = document.getElementById('atpMapel')?.value;
+    const kelas = document.getElementById('atpKelas')?.value;
+    const semester = document.getElementById('atpSemester')?.value;
+    
+    if (!mapelId || !kelas) {
+        showToast('Pilih mata pelajaran dan kelas terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Generating ATP...');
+    
+    try {
+        // Get CP data
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (!cpDoc.exists) {
+            hideLoading();
+            showToast('Data CP belum diupload untuk mapel ini!', 'error');
+            return;
+        }
+        
+        const cpDataDoc = cpDoc.data();
+        const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
+        
+        if (!dataKelas) {
+            hideLoading();
+            showToast(`Data CP untuk kelas ${kelas} semester ${semester} tidak ditemukan!`, 'error');
+            return;
+        }
+        
+        // Get mapel info
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.exists ? mapelDoc.data() : { nama: cpDataDoc.mapelNama, jp: 2 };
+        const jpPerTp = mapelData?.jp || 2;
+        
+        // Get kalender info
+        const tahunAjar = document.getElementById('selectTahunAjar')?.value || getCurrentAcademicYear().current;
+        
+        // Update document values
+        updateDocumentValues({
+            tahun: tahunAjar,
+            sekolah: userData?.sekolah || '',
+            mapel: mapelData?.nama || cpDataDoc.mapelNama,
+            kelas: kelas,
+            semester: semester.toUpperCase(),
+            fase: getFaseByKelas(kelas),
+            kepsek: userData?.kepsek || '',
+            'nip-kepsek': userData?.nipKepsek || '',
+            guru: userData?.nama || '',
+            'nip-guru': userData?.nip || '',
+            kota: userData?.kota || '',
+            tanggal: formatTanggalIndonesia(new Date())
+        });
+        
+        // Generate table content
+        let html = '';
+        let no = 0;
+        
+        Object.keys(dataKelas.babs).forEach(babName => {
+            const bab = dataKelas.babs[babName];
+            const tps = bab.tps || [];
+            const totalJp = tps.length * jpPerTp;
+            const minggu = Math.ceil(totalJp / jpPerTp);
+            
+            tps.forEach((tpObj, iTp) => {
+                const kompetensi = extractKompetensi(tpObj.tp);
+                
+                html += `<tr>`;
+                
+                if (iTp === 0) {
+                    no++;
+                    html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center">${no}</td>`;
+                    html += `<td rowspan="${tps.length}" class="border border-black p-2 text-left text-xs"><b>${babName}</b><br><br><span style="color:#374151;">${bab.cp}</span></td>`;
+                    html += `<td rowspan="${tps.length}" class="border border-black p-2 text-left text-xs">Peserta didik memahami materi terkait ${babName} dengan baik dan dapat mengimplementasikannya.</td>`;
+                }
+                
+                html += `<td class="border border-black p-2 text-left text-xs"><b>${no}.${iTp + 1}</b> ${tpObj.tp}</td>`;
+                html += `<td class="border border-black p-2 text-center text-xs" style="color:#1e40af; font-weight:600;">${tpObj.profil || '-'}</td>`;
+                html += `<td class="border border-black p-2 text-center text-xs" style="color:#ca8a04; font-weight:600;">${kompetensi}</td>`;
+                
+                if (iTp === 0) {
+                    html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center text-xs">${babName}</td>`;
+                    html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center text-xs"><b>${minggu} Minggu<br>${totalJp} JP</b></td>`;
+                    html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center"></td>`;
+                }
+                
+                html += `</tr>`;
+            });
+        });
+        
+        const bodyATP = document.getElementById('bodyATP');
+        if (bodyATP) bodyATP.innerHTML = html;
+        
+        hideLoading();
+        showToast('ATP berhasil di-generate!', 'success');
+    } catch (error) {
+        hideLoading();
+        console.error('Generate ATP error:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+// ===== PROTA (Program Tahunan) =====
+async function generateProta() {
+    const mapelId = document.getElementById('protaMapel')?.value;
+    const kelas = document.getElementById('protaKelas')?.value;
+    
+    if (!mapelId || !kelas) {
+        showToast('Pilih mata pelajaran dan kelas terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Generating Prota...');
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (!cpDoc.exists) {
+            hideLoading();
+            showToast('Data CP belum diupload untuk mapel ini!', 'error');
+            return;
+        }
+        
+        const cpDataDoc = cpDoc.data();
+        
+        // Get mapel info
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.exists ? mapelDoc.data() : { nama: cpDataDoc.mapelNama, jp: 2 };
+        const jpPerTp = mapelData?.jp || 2;
+        
+        const tahunAjar = document.getElementById('selectTahunAjar')?.value || getCurrentAcademicYear().current;
+        
+        // Update document values
+        updateDocumentValues({
+            tahun: tahunAjar,
+            sekolah: userData?.sekolah || '',
+            mapel: mapelData?.nama || cpDataDoc.mapelNama,
+            kelas: kelas,
+            fase: getFaseByKelas(kelas),
+            kepsek: userData?.kepsek || '',
+            'nip-kepsek': userData?.nipKepsek || '',
+            guru: userData?.nama || '',
+            'nip-guru': userData?.nip || '',
+            kota: userData?.kota || '',
+            tanggal: formatTanggalIndonesia(new Date())
+        });
+        
+        // Generate table for both semesters
+        let html = '';
+        
+        ['Ganjil', 'Genap'].forEach(semester => {
+            const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
+            if (!dataKelas) return;
+            
+            Object.keys(dataKelas.babs).forEach(babName => {
+                const bab = dataKelas.babs[babName];
+                const tps = bab.tps || [];
+                const totalJp = tps.length * jpPerTp;
+                
+                tps.forEach((tpObj, iTp) => {
+                    html += `<tr>`;
+                    
+                    if (iTp === 0) {
+                        html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center">${semester}</td>`;
+                        html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center bg-gray-50">
+                            <div style="writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 10px;">${babName}</div>
+                        </td>`;
+                    }
+                    
+                    html += `<td class="border border-black p-2 text-left text-sm">${tpObj.tp}</td>`;
+                    
+                    if (iTp === 0) {
+                        html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center font-bold">${totalJp} JP</td>`;
+                    }
+                    
+                    html += `</tr>`;
+                });
+            });
+        });
+        
+        const bodyProta = document.getElementById('bodyProta');
+        if (bodyProta) bodyProta.innerHTML = html || '<tr><td colspan="4" class="text-center p-4 text-gray-500">Tidak ada data</td></tr>';
+        
+        hideLoading();
+        showToast('Prota berhasil di-generate!', 'success');
+    } catch (error) {
+        hideLoading();
+        console.error('Generate Prota error:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+// ===== PROMES (Program Semester) =====
+async function generatePromes() {
+    const mapelId = document.getElementById('promesMapel')?.value;
+    const kelas = document.getElementById('promesKelas')?.value;
+    const semester = document.getElementById('promesSemester')?.value;
+    
+    if (!mapelId || !kelas) {
+        showToast('Pilih mata pelajaran dan kelas terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Generating Promes...');
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (!cpDoc.exists) {
+            hideLoading();
+            showToast('Data CP belum diupload untuk mapel ini!', 'error');
+            return;
+        }
+        
+        const cpDataDoc = cpDoc.data();
+        const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
+        
+        if (!dataKelas) {
+            hideLoading();
+            showToast(`Data CP untuk kelas ${kelas} semester ${semester} tidak ditemukan!`, 'error');
+            return;
+        }
+        
+        // Get mapel info
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.exists ? mapelDoc.data() : { nama: cpDataDoc.mapelNama, jp: 2 };
+        const jpPerTp = mapelData?.jp || 2;
+        
+        // Get kalender info
+        const tahunAjar = document.getElementById('selectTahunAjar')?.value || getCurrentAcademicYear().current;
+        
+        // Update document values
+        updateDocumentValues({
+            tahun: tahunAjar,
+            sekolah: userData?.sekolah || '',
+            mapel: mapelData?.nama || cpDataDoc.mapelNama,
+            kelas: kelas,
+            semester: semester.toUpperCase(),
+            fase: getFaseByKelas(kelas),
+            kepsek: userData?.kepsek || '',
+            'nip-kepsek': userData?.nipKepsek || '',
+            guru: userData?.nama || '',
+            'nip-guru': userData?.nip || '',
+            kota: userData?.kota || '',
+            tanggal: formatTanggalIndonesia(new Date())
+        });
+        
+        // Generate header
+        const namaBulan = semester === 'Ganjil' ? BULAN_GANJIL : BULAN_GENAP;
+        
+        let headHtml = `
+            <tr>
+                <th rowspan="2" class="border border-black p-2 bg-gray-100" width="12%">Bab / Elemen</th>
+                <th rowspan="2" class="border border-black p-2 bg-gray-100" width="28%">Tujuan Pembelajaran (TP)</th>
+                <th rowspan="2" class="border border-black p-2 bg-gray-100" width="5%">JP</th>
+        `;
+        
+        namaBulan.forEach(bulan => {
+            headHtml += `<th colspan="5" class="border border-black p-2 bg-gray-100">${bulan}</th>`;
+        });
+        
+        headHtml += `</tr><tr>`;
+        
+        for (let i = 0; i < 6; i++) {
+            for (let w = 1; w <= 5; w++) {
+                headHtml += `<th class="border border-black p-1 bg-gray-50 text-xs">${w}</th>`;
+            }
+        }
+        
+        headHtml += `</tr>`;
+        
+        const headPromes = document.getElementById('headPromes');
+        if (headPromes) headPromes.innerHTML = headHtml;
+        
+        // Calculate teaching dates
+        const tahunParts = tahunAjar.split('/');
+        const tahunOperasional = semester === 'Ganjil' ? parseInt(tahunParts[0]) : parseInt(tahunParts[1]);
+        const bulanAwal = semester === 'Ganjil' ? 6 : 0; // Juli (6) atau Januari (0)
+        
+        // Calculate all teaching dates (default Monday = 1)
+        const tanggalMengajar = calculateTanggalMengajar(tahunOperasional, bulanAwal, 1, semester);
+        
+        // Collect all TPs
+        const allTps = [];
+        Object.keys(dataKelas.babs).forEach(babName => {
+            const bab = dataKelas.babs[babName];
+            const tps = bab.tps || [];
+            tps.forEach((tpObj, iTp) => {
+                allTps.push({
+                    babName,
+                    tpObj,
+                    isFirst: iTp === 0,
+                    rowspan: tps.length
+                });
+            });
+        });
+        
+        // Generate body
+        let bodyHtml = '';
+        let tglIndex = 0;
+        
+        allTps.forEach((tp, idx) => {
+            bodyHtml += `<tr>`;
+            
+            if (tp.isFirst) {
+                bodyHtml += `<td rowspan="${tp.rowspan}" class="border border-black p-2 text-center bg-gray-50">
+                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 9px;">${tp.babName}</div>
+                </td>`;
+            }
+            
+            bodyHtml += `<td class="border border-black p-2 text-left text-xs">${tp.tpObj.tp}</td>`;
+            bodyHtml += `<td class="border border-black p-2 text-center font-bold">${jpPerTp}</td>`;
+            
+            // 30 columns for weeks (6 months x 5 weeks)
+            for (let col = 0; col < 30; col++) {
+                const bulanIdx = Math.floor(col / 5);
+                const mingguIdx = col % 5;
+                
+                // Check if this cell has a teaching date for this TP
+                if (tglIndex < tanggalMengajar.length && idx === tglIndex) {
+                    const tgl = tanggalMengajar[tglIndex];
+                    if (tgl && tgl.bulanIdx === bulanIdx && tgl.minggu === mingguIdx + 1) {
+                        bodyHtml += `<td class="border border-black p-1 text-center bg-blue-100">
+                            <span class="font-bold text-xs">${jpPerTp}</span>
+                            <span class="block text-xs text-red-600">${tgl.tanggal}</span>
+                        </td>`;
+                        tglIndex++;
+                    } else {
+                        bodyHtml += `<td class="border border-black p-1"></td>`;
+                    }
+                } else {
+                    bodyHtml += `<td class="border border-black p-1"></td>`;
+                }
+            }
+            
+            bodyHtml += `</tr>`;
+        });
+        
+        const bodyPromes = document.getElementById('bodyPromes');
+        if (bodyPromes) bodyPromes.innerHTML = bodyHtml || '<tr><td colspan="33" class="text-center p-4 text-gray-500">Tidak ada data</td></tr>';
+        
+        hideLoading();
+        showToast('Promes berhasil di-generate!', 'success');
+    } catch (error) {
+        hideLoading();
+        console.error('Generate Promes error:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+// ===== Helper: Calculate Teaching Dates =====
+function calculateTanggalMengajar(tahun, bulanAwal, hariTarget, semester) {
+    const hasil = [];
+    
+    for (let i = 0; i < 6; i++) {
+        let bulan = bulanAwal + i;
+        let tahunBulan = tahun;
+        
+        if (semester === 'Ganjil' && bulan > 11) {
+            bulan -= 12;
+            tahunBulan++;
+        }
+        
+        const jumlahHari = new Date(tahunBulan, bulan + 1, 0).getDate();
+        
+        for (let tgl = 1; tgl <= jumlahHari; tgl++) {
+            const tanggal = new Date(tahunBulan, bulan, tgl);
+            
+            if (tanggal.getDay() === hariTarget) {
+                let minggu = Math.ceil(tgl / 7);
+                if (minggu > 5) minggu = 5;
+                
+                // Check if not a holiday
+                const dateStr = `${String(bulan + 1).padStart(2, '0')}-${String(tgl).padStart(2, '0')}`;
+                const isLibur = LIBUR_BAKU.some(l => l.tanggal === dateStr);
+                
+                if (!isLibur) {
+                    hasil.push({
+                        bulanIdx: i,
+                        minggu: minggu,
+                        tanggal: tgl,
+                        dateObj: tanggal
+                    });
+                }
+            }
+        }
+    }
+    
+    return hasil;
+}
+
+// ===== Helper: Extract Kompetensi =====
+function extractKompetensi(tpText) {
+    const match = tpText.match(/mampu\s+(\w+)/i);
+    if (match) {
+        const kata = match[1].toLowerCase();
+        const kompetensiMap = {
+            'menjelaskan': 'Memahami',
+            'mengidentifikasi': 'Menganalisis',
+            'menyebutkan': 'Mengingat',
+            'menganalisis': 'Menganalisis',
+            'menerapkan': 'Menerapkan',
+            'membuat': 'Mencipta',
+            'mempraktikkan': 'Menerapkan',
+            'menghafal': 'Mengingat',
+            'melafalkan': 'Menerapkan',
+            'membaca': 'Memahami',
+            'menulis': 'Menerapkan',
+            'menghitung': 'Menerapkan',
+            'memahami': 'Memahami',
+            'mengenal': 'Mengingat',
+            'menceritakan': 'Memahami'
+        };
+        return kompetensiMap[kata] || 'Memahami';
+    }
+    return 'Memahami';
+}
+
+// ===== PRINT Document =====
+function printDocument(type) {
+    const documentId = `document${type.charAt(0).toUpperCase() + type.slice(1)}`;
+    const printContents = document.getElementById(documentId);
+    
+    if (!printContents) {
+        showToast('Dokumen tidak ditemukan!', 'error');
+        return;
+    }
+    
+    // Create print window
+    const printWindow = window.open('', '_blank');
+    
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Cetak Dokumen</title>
+            <style>
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                body { font-family: 'Times New Roman', serif; font-size: 12pt; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid black; padding: 6px; }
+                th { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
+                .bg-gray-50, .bg-gray-100 { background-color: #f9fafb !important; -webkit-print-color-adjust: exact; }
+                .bg-blue-100 { background-color: #dbeafe !important; -webkit-print-color-adjust: exact; }
+                .text-center { text-align: center; }
+                .text-left { text-align: left; }
+                .font-bold { font-weight: bold; }
+                @page { size: A4; margin: 15mm; }
+                @media print {
+                    body { -webkit-print-color-adjust: exact; }
+                }
+            </style>
+        </head>
+        <body>
+            ${printContents.innerHTML}
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 500);
+}
+
+// ===== Save Jam Pelajaran =====
+async function saveJamPelajaran() {
+    showLoading('Menyimpan...');
+    
+    try {
+        const data = {
+            durasiJp: parseInt(document.getElementById('durasiJp')?.value) || 35,
+            jamMulai: document.getElementById('jamMulai')?.value || '07:00',
+            durasiIstirahat: parseInt(document.getElementById('durasiIstirahat')?.value) || 15,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await db.collection('users').doc(currentUser.uid)
+            .collection('settings').doc('jadwal').set(data, { merge: true });
+        
+        hideLoading();
+        showToast('Pengaturan jam pelajaran disimpan!', 'success');
+    } catch (error) {
+        hideLoading();
+        console.error('Save jam pelajaran error:', error);
+        showToast('Gagal menyimpan: ' + error.message, 'error');
+    }
+}
+
+
+// ============================================
+// PREMIUM FEATURE FUNCTIONS
+// ============================================
+
+// Check and unlock premium features
+function checkPremiumAccess() {
+    const isPremium = userData?.subscription === 'premium';
+    
+    // List of premium section IDs
+    const premiumIds = {
+        'modulAjar': ['modulAjarLocked', 'modulAjarContent'],
+        'lkpd': ['lkpdLocked', 'lkpdContent'],
+        'kktp': ['kktpLocked', 'kktpContent'],
+        'jurnal': ['jurnalLocked', 'jurnalContent'],
+        'absensi': ['absensiLocked', 'absensiContent'],
+        'nilai': ['nilaiLocked', 'nilaiContent']
+    };
+    
+    Object.keys(premiumIds).forEach(key => {
+        const [lockedId, contentId] = premiumIds[key];
+        const locked = document.getElementById(lockedId);
+        const content = document.getElementById(contentId);
+        
+        if (isPremium) {
+            if (locked) locked.classList.add('hidden');
+            if (content) content.classList.remove('hidden');
+        } else {
+            if (locked) locked.classList.remove('hidden');
+            if (content) content.classList.add('hidden');
+        }
+    });
+    
+    // Update premium selects if premium
+    if (isPremium) {
+        updatePremiumSelects();
+    }
+}
+
+function updatePremiumSelects() {
+    // This will be called after mapel selects are populated
+    setTimeout(() => {
+        const sourceSelect = document.getElementById('atpMapel');
+        const sourceKelas = document.getElementById('atpKelas');
+        
+        if (!sourceSelect) return;
+        
+        const premiumMapelSelects = ['modulMapel', 'lkpdMapel', 'kktpMapel', 'jurnalMapel', 'absensiMapel', 'nilaiMapel'];
+        const premiumKelasSelects = ['modulKelas', 'lkpdKelas', 'kktpKelas', 'jurnalKelas', 'absensiKelas', 'nilaiKelas'];
+        
+        premiumMapelSelects.forEach(id => {
+            const select = document.getElementById(id);
+            if (select && sourceSelect) {
+                select.innerHTML = sourceSelect.innerHTML;
+            }
+        });
+        
+        premiumKelasSelects.forEach(id => {
+            const select = document.getElementById(id);
+            if (select && sourceKelas) {
+                select.innerHTML = sourceKelas.innerHTML;
+            }
+        });
+    }, 1000);
+}
+
+// Initialize premium features
+function initPremiumFeatures() {
+    checkPremiumAccess();
+    
+    // Set today's date for absensi
+    const today = new Date().toISOString().split('T')[0];
+    const absensiTanggal = document.getElementById('absensiTanggal');
+    if (absensiTanggal) {
+        absensiTanggal.value = today;
+    }
+}
+
+// ===== MODUL AJAR =====
+async function generateModulAjar() {
+    const mapelId = document.getElementById('modulMapel')?.value;
+    const kelas = document.getElementById('modulKelas')?.value;
+    const semester = document.getElementById('modulSemester')?.value;
+    const bab = document.getElementById('modulBab')?.value;
+    
+    if (!mapelId || !kelas || !bab) {
+        showToast('Lengkapi semua pilihan terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Generating Modul Ajar...');
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (!cpDoc.exists) {
+            hideLoading();
+            showToast('Data CP tidak ditemukan!', 'error');
+            return;
+        }
+        
+        const cpDataDoc = cpDoc.data();
+        const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
+        
+        if (!dataKelas || !dataKelas.babs[bab]) {
+            hideLoading();
+            showToast('Data bab tidak ditemukan!', 'error');
+            return;
+        }
+        
+        const babData = dataKelas.babs[bab];
+        const tps = babData.tps || [];
+        
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.exists ? mapelDoc.data() : { nama: cpDataDoc.mapelNama, jp: 2 };
+        const jpPerTp = mapelData?.jp || 2;
+        const needArabic = mapelData?.needArabic || false;
+        
+        const tahunAjar = document.getElementById('selectTahunAjar')?.value || getCurrentAcademicYear().current;
+        
+        // Update document values
+        updateDocumentValues({
+            tahun: tahunAjar,
+            sekolah: userData?.sekolah || '',
+            mapel: mapelData?.nama || cpDataDoc.mapelNama,
+            kelas: kelas,
+            semester: semester,
+            fase: getFaseByKelas(kelas),
+            kepsek: userData?.kepsek || '',
+            'nip-kepsek': userData?.nipKepsek || '',
+            guru: userData?.nama || '',
+            'nip-guru': userData?.nip || '',
+            kota: userData?.kota || '',
+            tanggal: formatTanggalIndonesia(new Date())
+        });
+        
+        // Set topik dan JP
+        const modulTopik = document.getElementById('modulTopik');
+        const modulJp = document.getElementById('modulJp');
+        if (modulTopik) modulTopik.textContent = bab;
+        if (modulJp) modulJp.textContent = tps.length * jpPerTp;
+        
+        // Dimensi Profil
+        const profilSet = new Set();
+        tps.forEach(tp => {
+            if (tp.profil) {
+                tp.profil.split(',').forEach(p => profilSet.add(p.trim()));
+            }
+        });
+        
+        const modulProfil = document.getElementById('modulProfil');
+        if (modulProfil) {
+            modulProfil.innerHTML = `<ul class="list-disc ml-4">${Array.from(profilSet).map(p => `<li><strong>${p}</strong></li>`).join('')}</ul>`;
+        }
+        
+        // Tujuan Pembelajaran
+        const modulTP = document.getElementById('modulTP');
+        if (modulTP) {
+            let tpHtml = '<ol class="list-decimal ml-4 space-y-2">';
+            tps.forEach((tp, i) => {
+                tpHtml += `<li><strong>Pertemuan ${i + 1}:</strong> ${tp.tp}</li>`;
+            });
+            tpHtml += '</ol>';
+            modulTP.innerHTML = tpHtml;
+        }
+        
+        // Pemahaman Bermakna
+        const modulPemahaman = document.getElementById('modulPemahaman');
+        if (modulPemahaman) {
+            modulPemahaman.innerHTML = `
+                <p>Melalui pembelajaran materi <strong>${bab}</strong>, peserta didik diharapkan dapat:</p>
+                <ul class="list-disc ml-4 mt-2">
+                    <li>Memahami konsep dasar dan penerapannya dalam kehidupan sehari-hari.</li>
+                    <li>Mengembangkan sikap positif sesuai dengan nilai-nilai yang terkandung dalam materi.</li>
+                    <li>Menerapkan pemahaman untuk menyelesaikan permasalahan yang relevan.</li>
+                </ul>
+            `;
+        }
+        
+        // Pertanyaan Pemantik
+        const modulPertanyaan = document.getElementById('modulPertanyaan');
+        if (modulPertanyaan) {
+            modulPertanyaan.innerHTML = `
+                <ol class="list-decimal ml-4 space-y-1">
+                    <li>Apa yang kalian ketahui tentang ${bab}?</li>
+                    <li>Pernahkah kalian mengalami atau melihat contoh terkait materi ini?</li>
+                    <li>Mengapa materi ini penting untuk dipelajari?</li>
+                </ol>
+            `;
+        }
+        
+        // Kegiatan Pembelajaran
+        const modulKegiatan = document.getElementById('modulKegiatan');
+        if (modulKegiatan) {
+            let kegiatanHtml = '';
+            tps.forEach((tp, i) => {
+                kegiatanHtml += `
+                    <div class="mb-4 p-3 bg-gray-50 rounded">
+                        <h5 class="font-bold text-blue-600 mb-2">Pertemuan ${i + 1} (${jpPerTp} JP)</h5>
+                        <p class="text-xs text-gray-600 mb-2 italic">TP: ${tp.tp}</p>
+                        <ul class="list-disc ml-4 space-y-1 text-sm">
+                            <li><strong>Pendahuluan (10 menit):</strong> Salam, doa, presensi, apersepsi.</li>
+                            <li><strong>Kegiatan Inti (${(jpPerTp * 35) - 20} menit):</strong>
+                                <ul class="list-circle ml-4 mt-1">
+                                    <li>Eksplorasi: Siswa mengamati/membaca materi.</li>
+                                    <li>Elaborasi: Diskusi kelompok dan pengerjaan LKPD.</li>
+                                    <li>Konfirmasi: Presentasi dan penguatan dari guru.</li>
+                                </ul>
+                            </li>
+                            <li><strong>Penutup (10 menit):</strong> Refleksi, kesimpulan, doa penutup.</li>
+                        </ul>
+                    </div>
+                `;
+            });
+            modulKegiatan.innerHTML = kegiatanHtml;
+        }
+        
+        // Show/hide Arabic section
+        const modulArabSection = document.getElementById('modulArabSection');
+        if (modulArabSection) {
+            if (needArabic) {
+                modulArabSection.classList.remove('hidden');
+            } else {
+                modulArabSection.classList.add('hidden');
+            }
+        }
+        
+        hideLoading();
+        showToast('Modul Ajar berhasil di-generate!', 'success');
+    } catch (error) {
+        hideLoading();
+        console.error('Generate Modul Ajar error:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+// ===== LKPD =====
+async function generateLKPD() {
+    const mapelId = document.getElementById('lkpdMapel')?.value;
+    const kelas = document.getElementById('lkpdKelas')?.value;
+    const semester = document.getElementById('lkpdSemester')?.value;
+    const bab = document.getElementById('lkpdBab')?.value;
+    const pertemuan = parseInt(document.getElementById('lkpdPertemuan')?.value) || 1;
+    
+    if (!mapelId || !kelas || !bab) {
+        showToast('Lengkapi semua pilihan terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Generating LKPD...');
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (!cpDoc.exists) {
+            hideLoading();
+            showToast('Data CP tidak ditemukan!', 'error');
+            return;
+        }
+        
+        const cpDataDoc = cpDoc.data();
+        const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
+        const babData = dataKelas?.babs[bab];
+        
+        if (!babData) {
+            hideLoading();
+            showToast('Data bab tidak ditemukan!', 'error');
+            return;
+        }
+        
+        const tps = babData.tps || [];
+        const selectedTP = tps[pertemuan - 1] || tps[0];
+        
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.exists ? mapelDoc.data() : { nama: cpDataDoc.mapelNama };
+        const needArabic = mapelData?.needArabic || false;
+        
+        // Update values
+        updateDocumentValues({
+            mapel: mapelData?.nama || cpDataDoc.mapelNama,
+            kelas: kelas
+        });
+        
+        // Set TP
+        const lkpdTP = document.getElementById('lkpdTP');
+        if (lkpdTP) {
+            lkpdTP.innerHTML = `<strong>Pertemuan ${pertemuan}:</strong> ${selectedTP.tp}`;
+        }
+        
+        // Set Materi
+        const lkpdMateri = document.getElementById('lkpdMateri');
+        if (lkpdMateri) lkpdMateri.textContent = bab;
+        
+        // Show/hide Arabic section
+        const lkpdArabSection = document.getElementById('lkpdArabSection');
+        if (lkpdArabSection) {
+            if (needArabic) {
+                lkpdArabSection.classList.remove('hidden');
+            } else {
+                lkpdArabSection.classList.add('hidden');
+            }
+        }
+        
+        hideLoading();
+        showToast('LKPD berhasil di-generate!', 'success');
+    } catch (error) {
+        hideLoading();
+        console.error('Generate LKPD error:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+// ===== KKTP =====
+async function generateKKTP() {
+    const mapelId = document.getElementById('kktpMapel')?.value;
+    const kelas = document.getElementById('kktpKelas')?.value;
+    
+    if (!mapelId || !kelas) {
+        showToast('Pilih mapel dan kelas terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Generating KKTP...');
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (!cpDoc.exists) {
+            hideLoading();
+            showToast('Data CP tidak ditemukan!', 'error');
+            return;
+        }
+        
+        const cpDataDoc = cpDoc.data();
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.exists ? mapelDoc.data() : { nama: cpDataDoc.mapelNama };
+        
+        const tahunAjar = document.getElementById('selectTahunAjar')?.value || getCurrentAcademicYear().current;
+        
+        updateDocumentValues({
+            tahun: tahunAjar,
+            sekolah: userData?.sekolah || '',
+            mapel: mapelData?.nama || cpDataDoc.mapelNama,
+            kelas: kelas,
+            fase: getFaseByKelas(kelas),
+            kepsek: userData?.kepsek || '',
+            'nip-kepsek': userData?.nipKepsek || '',
+            guru: userData?.nama || '',
+            'nip-guru': userData?.nip || '',
+            kota: userData?.kota || '',
+            tanggal: formatTanggalIndonesia(new Date())
+        });
+        
+        let html = '';
+        let no = 0;
+        
+        ['Ganjil', 'Genap'].forEach(semester => {
+            const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
+            if (!dataKelas) return;
+            
+            Object.keys(dataKelas.babs).forEach(babName => {
+                const bab = dataKelas.babs[babName];
+                const tps = bab.tps || [];
+                
+                tps.forEach((tp, iTp) => {
+                    no++;
+                    html += `
+                        <tr>
+                            ${iTp === 0 ? `
+                                <td rowspan="${tps.length}" class="border border-black p-2 text-center">${Math.ceil(no / tps.length)}</td>
+                                <td rowspan="${tps.length}" class="border border-black p-2 text-center">${semester}</td>
+                                <td rowspan="${tps.length}" class="border border-black p-2 text-center bg-gray-50">
+                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 9px;">${babName}</div>
+                                </td>
+                            ` : ''}
+                            <td class="border border-black p-2 text-left text-xs">${tp.tp}</td>
+                            <td class="border border-black p-2 text-center bg-yellow-50" contenteditable="true" oninput="hitungKKTP(this)">75</td>
+                            <td class="border border-black p-2 text-center bg-yellow-50" contenteditable="true" oninput="hitungKKTP(this)">75</td>
+                            <td class="border border-black p-2 text-center bg-yellow-50" contenteditable="true" oninput="hitungKKTP(this)">75</td>
+                            <td class="border border-black p-2 text-center bg-blue-100 font-bold kktp-result">75</td>
+                        </tr>
+                    `;
+                    no = iTp === 0 ? no : no - 1;
+                });
+                no++;
+            });
+        });
+        
+        const bodyKktp = document.getElementById('bodyKktp');
+        if (bodyKktp) bodyKktp.innerHTML = html || '<tr><td colspan="8" class="text-center p-4 text-gray-500">Tidak ada data</td></tr>';
+        
+        hideLoading();
+        showToast('KKTP berhasil di-generate!', 'success');
+    } catch (error) {
+        hideLoading();
+        console.error('Generate KKTP error:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+function hitungKKTP(element) {
+    const row = element.closest('tr');
+    const inputs = row.querySelectorAll('[contenteditable="true"]');
+    const result = row.querySelector('.kktp-result');
+    
+    if (inputs.length >= 3 && result) {
+        let total = 0;
+        let count = 0;
+        inputs.forEach(input => {
+            const val = parseInt(input.textContent);
+            if (!isNaN(val)) {
+                total += val;
+                count++;
+            }
+        });
+        if (count > 0) {
+            result.textContent = Math.round(total / count);
+        }
+    }
+}
+
+// ===== JURNAL =====
+async function generateJurnal() {
+    const mapelId = document.getElementById('jurnalMapel')?.value;
+    const kelas = document.getElementById('jurnalKelas')?.value;
+    const semester = document.getElementById('jurnalSemester')?.value;
+    
+    if (!mapelId || !kelas) {
+        showToast('Pilih mapel dan kelas terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Generating Jurnal...');
+    
+    try {
+        const jenjang = userData?.jenjang?.toLowerCase() || 'sd';
+        const cpDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('cpData').doc(`${mapelId}-${jenjang}`).get();
+        
+        if (!cpDoc.exists) {
+            hideLoading();
+            showToast('Data CP tidak ditemukan!', 'error');
+            return;
+        }
+        
+        const cpDataDoc = cpDoc.data();
+        const dataKelas = cpDataDoc.data[`${kelas}-${semester}`];
+        
+        if (!dataKelas) {
+            hideLoading();
+            showToast(`Data untuk kelas ${kelas} semester ${semester} tidak ditemukan!`, 'error');
+            return;
+        }
+        
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.exists ? mapelDoc.data() : { nama: cpDataDoc.mapelNama };
+        
+        const tahunAjar = document.getElementById('selectTahunAjar')?.value || getCurrentAcademicYear().current;
+        
+        updateDocumentValues({
+            tahun: tahunAjar,
+            mapel: mapelData?.nama || cpDataDoc.mapelNama,
+            semester: semester,
+            kepsek: userData?.kepsek || '',
+            'nip-kepsek': userData?.nipKepsek || '',
+            guru: userData?.nama || '',
+            'nip-guru': userData?.nip || '',
+            kota: userData?.kota || '',
+            tanggal: formatTanggalIndonesia(new Date())
+        });
+        
+        let html = '';
+        let no = 0;
+        
+        Object.keys(dataKelas.babs).forEach(babName => {
+            const bab = dataKelas.babs[babName];
+            const tps = bab.tps || [];
+            
+            tps.forEach((tp) => {
+                no++;
+                html += `
+                    <tr>
+                        <td class="border border-black p-2 text-center">${no}</td>
+                        <td class="border border-black p-2 text-center">${kelas} / ${getFaseByKelas(kelas)}</td>
+                        <td class="border border-black p-2 text-left text-xs">${babName}</td>
+                        <td class="border border-black p-2 text-left text-xs">${tp.tp}</td>
+                        <td class="border border-black p-2 text-center" contenteditable="true">... / ...</td>
+                        <td class="border border-black p-2 text-center" contenteditable="true">.../.../...</td>
+                        <td class="border border-black p-2 text-xs" contenteditable="true">Tersampaikan dengan baik</td>
+                        <td class="border border-black p-2 text-xs" contenteditable="true">Terlaksana sesuai jadwal</td>
+                    </tr>
+                `;
+            });
+        });
+        
+        const bodyJurnal = document.getElementById('bodyJurnal');
+        if (bodyJurnal) bodyJurnal.innerHTML = html || '<tr><td colspan="8" class="text-center p-4 text-gray-500">Tidak ada data</td></tr>';
+        
+        hideLoading();
+        showToast('Jurnal berhasil di-generate!', 'success');
+    } catch (error) {
+        hideLoading();
+        console.error('Generate Jurnal error:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+// ===== ABSENSI =====
+async function loadAbsensi() {
+    const kelas = document.getElementById('absensiKelas')?.value;
+    const tanggal = document.getElementById('absensiTanggal')?.value;
+    
+    if (!kelas || !tanggal) {
+        showToast('Pilih kelas dan tanggal terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Memuat data siswa...');
+    
+    try {
+        const siswaSnapshot = await db.collection('users').doc(currentUser.uid)
+            .collection('siswa')
+            .where('kelas', '==', kelas)
+            .orderBy('nama', 'asc')
+            .get();
+        
+        let html = '';
+        let no = 0;
+        
+        if (siswaSnapshot.empty) {
+            html = '<tr><td colspan="5" class="text-center text-gray-500 py-8">Tidak ada data siswa untuk kelas ini. Tambahkan data siswa terlebih dahulu.</td></tr>';
+        } else {
+            siswaSnapshot.forEach(doc => {
+                no++;
+                const siswa = doc.data();
+                
+                html += `
+                    <tr>
+                        <td class="text-center">${no}</td>
+                        <td>${siswa.nisn || '-'}</td>
+                        <td>${siswa.nama}</td>
+                        <td class="text-center">${siswa.jenisKelamin || '-'}</td>
+                        <td>
+                            <div class="flex gap-2 justify-center" data-siswa-id="${doc.id}">
+                                <label class="flex items-center gap-1 px-3 py-1 rounded bg-green-500 text-white cursor-pointer">
+                                    <input type="radio" name="absen_${doc.id}" value="H" checked class="hidden" onchange="updateAbsensiUI(this)">
+                                    <span>H</span>
+                                </label>
+                                <label class="flex items-center gap-1 px-3 py-1 rounded bg-gray-100 cursor-pointer">
+                                    <input type="radio" name="absen_${doc.id}" value="I" class="hidden" onchange="updateAbsensiUI(this)">
+                                    <span>I</span>
+                                </label>
+                                <label class="flex items-center gap-1 px-3 py-1 rounded bg-gray-100 cursor-pointer">
+                                    <input type="radio" name="absen_${doc.id}" value="S" class="hidden" onchange="updateAbsensiUI(this)">
+                                    <span>S</span>
+                                </label>
+                                <label class="flex items-center gap-1 px-3 py-1 rounded bg-gray-100 cursor-pointer">
+                                    <input type="radio" name="absen_${doc.id}" value="A" class="hidden" onchange="updateAbsensiUI(this)">
+                                    <span>A</span>
+                                </label>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        
+        const bodyAbsensi = document.getElementById('bodyAbsensi');
+        if (bodyAbsensi) bodyAbsensi.innerHTML = html;
+        
+        updateAbsensiStats();
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        console.error('Load absensi error:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+function updateAbsensiUI(input) {
+    const label = input.closest('label');
+    const container = input.closest('[data-siswa-id]');
+    
+    // Reset all labels
+    container.querySelectorAll('label').forEach(l => {
+        l.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-blue-500', 'bg-red-500', 'text-white');
+        l.classList.add('bg-gray-100');
+    });
+    
+    // Highlight selected
+    const colorMap = { 'H': 'bg-green-500', 'I': 'bg-yellow-500', 'S': 'bg-blue-500', 'A': 'bg-red-500' };
+    label.classList.remove('bg-gray-100');
+    label.classList.add(colorMap[input.value], 'text-white');
+    
+    updateAbsensiStats();
+}
+
+function updateAbsensiStats() {
+    let h = 0, i = 0, s = 0, a = 0;
+    
+    document.querySelectorAll('#bodyAbsensi input[type="radio"]:checked').forEach(input => {
+        if (input.value === 'H') h++;
+        else if (input.value === 'I') i++;
+        else if (input.value === 'S') s++;
+        else if (input.value === 'A') a++;
+    });
+    
+    const absensiHadir = document.getElementById('absensiHadir');
+    const absensiIzin = document.getElementById('absensiIzin');
+    const absensiSakit = document.getElementById('absensiSakit');
+    const absensiAlpha = document.getElementById('absensiAlpha');
+    
+    if (absensiHadir) absensiHadir.textContent = h;
+    if (absensiIzin) absensiIzin.textContent = i;
+    if (absensiSakit) absensiSakit.textContent = s;
+    if (absensiAlpha) absensiAlpha.textContent = a;
+}
+
+async function saveAbsensi() {
+    const mapelId = document.getElementById('absensiMapel')?.value;
+    const kelas = document.getElementById('absensiKelas')?.value;
+    const tanggal = document.getElementById('absensiTanggal')?.value;
+    
+    if (!kelas || !tanggal) {
+        showToast('Pilih kelas dan tanggal terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Menyimpan absensi...');
+    
+    try {
+        const detail = {};
+        let hadir = 0, total = 0;
+        
+        document.querySelectorAll('#bodyAbsensi [data-siswa-id]').forEach(container => {
+            const siswaId = container.dataset.siswaId;
+            const checked = container.querySelector('input:checked');
+            if (checked) {
+                detail[siswaId] = checked.value;
+                if (checked.value === 'H') hadir++;
+                total++;
+            }
+        });
+        
+        await db.collection('users').doc(currentUser.uid)
+            .collection('absensi')
+            .doc(`${kelas}-${mapelId || 'all'}-${tanggal}`)
+            .set({
+                kelas,
+                mapelId: mapelId || null,
+                tanggal,
+                detail,
+                hadir,
+                total,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        
+        hideLoading();
+        showToast('Absensi berhasil disimpan!', 'success');
+    } catch (error) {
+        hideLoading();
+        console.error('Save absensi error:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+// ===== DAFTAR NILAI =====
+async function loadNilai() {
+    const mapelId = document.getElementById('nilaiMapel')?.value;
+    const kelas = document.getElementById('nilaiKelas')?.value;
+    
+    if (!mapelId || !kelas) {
+        showToast('Pilih mapel dan kelas terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Memuat data nilai...');
+    
+    try {
+        const siswaSnapshot = await db.collection('users').doc(currentUser.uid)
+            .collection('siswa')
+            .where('kelas', '==', kelas)
+            .orderBy('nama', 'asc')
+            .get();
+        
+        const mapelDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('mapelDiampu').doc(mapelId).get();
+        const mapelData = mapelDoc.exists ? mapelDoc.data() : { nama: 'Mata Pelajaran' };
+        
+        const tahunAjar = document.getElementById('selectTahunAjar')?.value || getCurrentAcademicYear().current;
+        const semester = document.getElementById('nilaiSemester')?.value || 'Ganjil';
+        
+        updateDocumentValues({
+            tahun: tahunAjar,
+            mapel: mapelData?.nama || '',
+            kelas: kelas,
+            semester: semester,
+            kepsek: userData?.kepsek || '',
+            'nip-kepsek': userData?.nipKepsek || '',
+            guru: userData?.nama || '',
+            'nip-guru': userData?.nip || '',
+            kota: userData?.kota || '',
+            tanggal: formatTanggalIndonesia(new Date())
+        });
+        
+        let html = '';
+        let no = 0;
+        
+        if (siswaSnapshot.empty) {
+            html = '<tr><td colspan="11" class="border border-black p-4 text-center text-gray-500">Tidak ada data siswa</td></tr>';
+        } else {
+            siswaSnapshot.forEach(doc => {
+                no++;
+                const siswa = doc.data();
+                
+                html += `
+                    <tr data-siswa-id="${doc.id}">
+                        <td class="border border-black p-2 text-center">${no}</td>
+                        <td class="border border-black p-2">${siswa.nisn || '-'}</td>
+                        <td class="border border-black p-2">${siswa.nama}</td>
+                        <td class="border border-black p-2 text-center">${siswa.jenisKelamin || '-'}</td>
+                        <td class="border border-black p-2 text-center bg-blue-50" contenteditable="true" data-field="sum1" oninput="hitungNA(this)"></td>
+                        <td class="border border-black p-2 text-center bg-blue-50" contenteditable="true" data-field="sum2" oninput="hitungNA(this)"></td>
+                        <td class="border border-black p-2 text-center bg-yellow-50" contenteditable="true" data-field="ats" oninput="hitungNA(this)"></td>
+                        <td class="border border-black p-2 text-center bg-yellow-50" contenteditable="true" data-field="asas" oninput="hitungNA(this)"></td>
+                        <td class="border border-black p-2 text-center bg-green-100 font-bold nilai-na"></td>
+                        <td class="border border-black p-2 text-center bg-green-100 font-bold nilai-predikat"></td>
+                        <td class="border border-black p-2 text-center" contenteditable="true"></td>
+                    </tr>
+                `;
+            });
+        }
+        
+        const bodyNilai = document.getElementById('bodyNilai');
+        if (bodyNilai) bodyNilai.innerHTML = html;
+        
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        console.error('Load nilai error:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+function hitungNA(element) {
+    const row = element.closest('tr');
+    const fields = row.querySelectorAll('[data-field]');
+    const naCell = row.querySelector('.nilai-na');
+    const predikatCell = row.querySelector('.nilai-predikat');
+    
+    let total = 0;
+    let count = 0;
+    
+    fields.forEach(field => {
+        const val = parseInt(field.textContent);
+        if (!isNaN(val) && val > 0) {
+            total += val;
+            count++;
+        }
+    });
+    
+    if (count > 0 && naCell && predikatCell) {
+        const na = Math.round(total / count);
+        naCell.textContent = na;
+        
+        let predikat = '';
+        if (na >= 90) predikat = 'A';
+        else if (na >= 80) predikat = 'B';
+        else if (na >= 70) predikat = 'C';
+        else predikat = 'D';
+        predikatCell.textContent = predikat;
+    } else if (naCell && predikatCell) {
+        naCell.textContent = '';
+        predikatCell.textContent = '';
+    }
+}
+
+async function saveNilai() {
+    const mapelId = document.getElementById('nilaiMapel')?.value;
+    const kelas = document.getElementById('nilaiKelas')?.value;
+    const semester = document.getElementById('nilaiSemester')?.value;
+    
+    if (!mapelId || !kelas) {
+        showToast('Pilih mapel dan kelas terlebih dahulu!', 'error');
+        return;
+    }
+    
+    showLoading('Menyimpan nilai...');
+    
+    try {
+        const detail = {};
+        
+        document.querySelectorAll('#bodyNilai tr[data-siswa-id]').forEach(row => {
+            const siswaId = row.dataset.siswaId;
+            detail[siswaId] = {
+                sum1: parseInt(row.querySelector('[data-field="sum1"]')?.textContent) || 0,
+                sum2: parseInt(row.querySelector('[data-field="sum2"]')?.textContent) || 0,
+                ats: parseInt(row.querySelector('[data-field="ats"]')?.textContent) || 0,
+                asas: parseInt(row.querySelector('[data-field="asas"]')?.textContent) || 0
+            };
+        });
+        
+        await db.collection('users').doc(currentUser.uid)
+            .collection('nilai')
+            .doc(`${kelas}-${mapelId}-${semester}`)
+            .set({
+                kelas,
+                mapelId,
+                semester,
+                detail,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        
+        hideLoading();
+        showToast('Nilai berhasil disimpan!', 'success');
+    } catch (error) {
+        hideLoading();
+        console.error('Save nilai error:', error);
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+function updateNilaiTable() {
+    // Placeholder - will update table based on selected components
+    console.log('Update nilai table');
+}
+
+
+// ============================================
+// MAKE ALL FUNCTIONS GLOBAL
+// ============================================
+window.generateATP = generateATP;
+window.generateProta = generateProta;
+window.generatePromes = generatePromes;
+window.printDocument = printDocument;
+window.saveJamPelajaran = saveJamPelajaran;
+
+// Premium functions
+window.generateModulAjar = generateModulAjar;
+window.generateLKPD = generateLKPD;
+window.generateKKTP = generateKKTP;
+window.generateJurnal = generateJurnal;
+window.loadAbsensi = loadAbsensi;
+window.saveAbsensi = saveAbsensi;
+window.loadNilai = loadNilai;
+window.saveNilai = saveNilai;
+window.hitungKKTP = hitungKKTP;
+window.hitungNA = hitungNA;
+window.updateAbsensiUI = updateAbsensiUI;
+window.updateAbsensiStats = updateAbsensiStats;
+window.checkPremiumAccess = checkPremiumAccess;
+window.initPremiumFeatures = initPremiumFeatures;
+window.updateNilaiTable = updateNilaiTable;
+
+console.log('Document generation functions loaded');
 // ===== PRINT =====
 function printDocument(type) {
     const printContents = document.getElementById(`document${type.charAt(0).toUpperCase() + type.slice(1)}`);
@@ -2208,4 +3579,5 @@ window.hitungKKTP = hitungKKTP;
 window.hitungNA = hitungNA;
 window.updateAbsensiUI = updateAbsensiUI;
 window.checkPremiumAccess = checkPremiumAccess;
+
 
