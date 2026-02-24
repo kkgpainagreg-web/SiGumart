@@ -16,6 +16,7 @@
         .doc-table th, .doc-table td { border: 1px solid #1f2937; padding: 6px; text-align: left; vertical-align: top; }
         .doc-table th { background-color: #f1f5f9; font-weight: 600; text-align: center; }
         .text-center { text-align: center !important; }
+        .align-middle { vertical-align: middle !important; }
         .vertical-text { writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; vertical-align: middle; margin: auto; }
         .vertical-event { writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; vertical-align: middle; margin: auto; font-size: 8.5pt; letter-spacing: 1.5px; color: #334155; white-space: nowrap; }
         
@@ -23,6 +24,11 @@
         
         .kktp-val { background-color: #fdfde8; font-weight: bold; color: #2563eb; cursor: text; text-align: center;}
         .kktp-hasil { background-color: #e0f2fe; color: #1e40af; font-size: 11pt; text-align: center; font-weight: bold;}
+
+        /* Perbaikan Tanda Tangan */
+        .signature-area { display: flex; justify-content: space-between; margin-top: 40px; page-break-inside: avoid; padding: 0 5%; }
+        .signature-box { text-align: center; font-size: 11pt; min-width: 250px; }
+        .signature-name { text-decoration: underline; font-weight: bold; margin-top: 80px; }
 
         /* Scrollbar Sidebar */
         .sidebar-scroll::-webkit-scrollbar { width: 5px; }
@@ -72,14 +78,9 @@
                 <h3 class="text-xs font-bold text-amber-500 mb-2">1. LINK DATABASE CP (CSV)</h3>
                 <textarea id="in-csv-url" rows="3" class="w-full bg-slate-950 border border-slate-600 rounded p-2 text-xs focus:border-amber-500 outline-none text-slate-300" placeholder="Paste link CSV di sini..."></textarea>
                 <div class="flex gap-2 mt-2">
-                    <button onclick="Engine.fetchGlobalCSV()" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-1.5 rounded text-xs">Muat Data</button>
+                    <button onclick="Engine.fetchGlobalCSV()" class="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-1.5 rounded text-xs">Muat Data Cloud</button>
                 </div>
                 <div id="csvStatus" class="csv-info"></div>
-                
-                <div class="mt-2 pt-2 border-t border-slate-700 text-xs text-slate-500">
-                    Atau Upload Manual:
-                    <input type="file" id="fileCsv" accept=".csv" class="mt-1 w-full text-xs">
-                </div>
             </div>
 
             <div>
@@ -172,6 +173,7 @@
                 <button onclick="UI.switchTab('promes')" class="nav-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Promes</button>
                 <button onclick="UI.switchTab('modul')" class="nav-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Modul & LKPD</button>
                 <button onclick="UI.switchTab('jurnal')" class="nav-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Jurnal</button>
+                <button onclick="UI.switchTab('absensi')" class="nav-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Absensi</button>
                 <button onclick="UI.switchTab('kktp')" class="nav-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">KKTP & Nilai</button>
             </div>
             <button onclick="window.print()" class="bg-slate-800 text-white px-5 py-2 rounded-md text-sm font-semibold hover:bg-slate-700 shadow flex items-center gap-2">
@@ -215,6 +217,11 @@
                         </thead>
                         <tbody id="out-atp"><tr><td colspan="6" class="text-center">Silakan klik tombol Generate...</td></tr></tbody>
                     </table>
+
+                    <div class="signature-area" contenteditable="true">
+                        <div class="signature-box">Mengetahui,<br>Kepala Sekolah<div class="signature-name v-kepsek"></div>NIP. <span class="v-nip-kepsek"></span></div>
+                        <div class="signature-box"><span class="v-tgl"></span><br>Guru Mata Pelajaran<br><div class="signature-name v-guru"></div>NIP. <span class="v-nip-guru"></span></div>
+                    </div>
                 </div>
 
                 <div class="paper-preview portrait mt-10">
@@ -226,13 +233,13 @@
                     </table>
                     <table class="doc-table">
                         <thead>
-                            <tr><th width="10%">Smt</th><th width="20%">Elemen/Bab</th><th width="60%">Tujuan Pembelajaran</th><th width="10%">JP</th></tr>
+                            <tr><th width="10%">Smt</th><th width="25%">Elemen/Bab</th><th width="55%">Tujuan Pembelajaran</th><th width="10%">JP</th></tr>
                         </thead>
                         <tbody id="out-prota"></tbody>
                     </table>
                     <div class="signature-area" contenteditable="true">
                         <div class="signature-box">Mengetahui,<br>Kepala Sekolah<div class="signature-name v-kepsek"></div>NIP. <span class="v-nip-kepsek"></span></div>
-                        <div class="signature-box right"><span class="v-tgl"></span><br>Guru Mata Pelajaran<br><div class="signature-name v-guru"></div>NIP. <span class="v-nip-guru"></span></div>
+                        <div class="signature-box"><span class="v-tgl"></span><br>Guru Mata Pelajaran<br><div class="signature-name v-guru"></div>NIP. <span class="v-nip-guru"></span></div>
                     </div>
                 </div>
             </div>
@@ -250,7 +257,7 @@
                     </table>
                     <div class="signature-area" contenteditable="true">
                         <div class="signature-box">Mengetahui,<br>Kepala Sekolah<div class="signature-name v-kepsek"></div>NIP. <span class="v-nip-kepsek"></span></div>
-                        <div class="signature-box right"><span class="v-tgl"></span><br>Guru Mata Pelajaran<br><div class="signature-name v-guru"></div>NIP. <span class="v-nip-guru"></span></div>
+                        <div class="signature-box"><span class="v-tgl"></span><br>Guru Mata Pelajaran<br><div class="signature-name v-guru"></div>NIP. <span class="v-nip-guru"></span></div>
                     </div>
                 </div>
             </div>
@@ -289,7 +296,7 @@
                     
                     <div class="signature-area" contenteditable="true">
                         <div class="signature-box">Mengetahui,<br>Kepala Sekolah<div class="signature-name v-kepsek"></div>NIP. <span class="v-nip-kepsek"></span></div>
-                        <div class="signature-box right"><span class="v-tgl"></span><br>Guru Mata Pelajaran<br><div class="signature-name v-guru"></div>NIP. <span class="v-nip-guru"></span></div>
+                        <div class="signature-box"><span class="v-tgl"></span><br>Guru Mata Pelajaran<br><div class="signature-name v-guru"></div>NIP. <span class="v-nip-guru"></span></div>
                     </div>
                 </div>
 
@@ -321,10 +328,44 @@
                     </table>
                     <table class="doc-table text-sm">
                         <thead>
-                            <tr><th width="8%">Hari/Tanggal</th><th width="15%">Materi/Bab</th><th width="40%">Tujuan Pembelajaran (TP)</th><th width="12%">Absensi</th><th width="15%">Keterangan</th></tr>
+                            <tr><th width="8%">Hari/Tanggal</th><th width="15%">Materi/Bab</th><th width="40%">Tujuan Pembelajaran (TP)</th><th width="12%">Kehadiran</th><th width="15%">Keterangan</th></tr>
                         </thead>
                         <tbody id="out-jurnal"></tbody>
                     </table>
+                    <div class="signature-area" contenteditable="true">
+                        <div class="signature-box">Mengetahui,<br>Kepala Sekolah<div class="signature-name v-kepsek"></div>NIP. <span class="v-nip-kepsek"></span></div>
+                        <div class="signature-box"><span class="v-tgl"></span><br>Guru Mata Pelajaran<br><div class="signature-name v-guru"></div>NIP. <span class="v-nip-guru"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-absensi" class="view-section hidden relative">
+                <div class="paper-preview portrait">
+                    <h1 class="header-title" contenteditable="true">DAFTAR HADIR (PRESENSI) SISWA</h1>
+                    <table class="identity-table mb-4" contenteditable="true">
+                        <tr><td width="150">Mata Pelajaran</td><td>: <span class="v-mapel"></span></td><td width="100">Kelas/Rombel</td><td>: <span class="v-kls"></span> / <span class="v-rombel"></span></td></tr>
+                        <tr><td>Semester</td><td>: <span class="v-smt"></span></td><td>Bulan</td><td>: ........................</td></tr>
+                    </table>
+                    <table class="doc-table text-center text-[9pt]">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" width="5%">No</th>
+                                <th rowspan="2" width="25%" class="text-left">Nama Siswa</th>
+                                <th colspan="16">Pertemuan Ke- / Tanggal</th>
+                            </tr>
+                            <tr>
+                                <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16</th>
+                            </tr>
+                        </thead>
+                        <tbody id="out-absensi">
+                            </tbody>
+                    </table>
+                    <p class="text-xs italic text-slate-500 mt-2">*Keterangan: Ketik H (Hadir), S (Sakit), I (Izin), A (Alpa). Seluruh kolom default telah diset Hadir (H).</p>
+                    
+                    <div class="signature-area" contenteditable="true">
+                        <div class="signature-box">Mengetahui,<br>Kepala Sekolah<div class="signature-name v-kepsek"></div>NIP. <span class="v-nip-kepsek"></span></div>
+                        <div class="signature-box"><span class="v-tgl"></span><br>Guru Mata Pelajaran<br><div class="signature-name v-guru"></div>NIP. <span class="v-nip-guru"></span></div>
+                    </div>
                 </div>
             </div>
 
@@ -379,7 +420,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-        // Konfigurasi dummy untuk prototipe agar tidak error
         const firebaseConfig = {
             apiKey: "AIzaSyDe4ie2wSPEpNbAgWP-q03vTuHyxc9Jj3E",
             authDomain: "agsa-e5b08.firebaseapp.com",
@@ -396,7 +436,7 @@
 
             document.getElementById('btn-login-google').addEventListener('click', () => {
                 signInWithPopup(auth, provider).catch(err => {
-                    console.log("Firebase Auth Error (Wajar karena API Key Prototipe). Melanjutkan mode offline...");
+                    console.log("Firebase bypass (Localhost)");
                     masukSistem();
                 });
             });
@@ -405,7 +445,6 @@
                 if (user) masukSistem(user.email);
             });
         } catch(e) {
-            // Fallback jika diblokir localhost
             document.getElementById('btn-login-google').addEventListener('click', () => masukSistem());
         }
 
@@ -415,7 +454,6 @@
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('user-email').innerText = email;
             
-            // Load URL CSV yang tersimpan
             const defaultUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?gid=1925091593&single=true&output=csv";
             let savedUrl = localStorage.getItem('sa_global_csv') || defaultUrl;
             document.getElementById('in-csv-url').value = savedUrl;
@@ -439,7 +477,6 @@
         };
 
         window.Engine = {
-            // Struktur Data: data[mapel][kelas][semester][bab] = { cp: "", tps: [{tp:"", p3:""}] }
             data: {}, 
 
             fetchGlobalCSV: async function() {
@@ -450,10 +487,9 @@
                 let statusEl = document.getElementById('csvStatus');
                 statusEl.style.display = 'block';
                 statusEl.className = 'csv-info';
-                statusEl.innerHTML = "⏳ Mengunduh data dari Cloud (Bypass CORS)...";
+                statusEl.innerHTML = "⏳ Mengunduh data dari Cloud...";
                 
                 try {
-                    // Menggunakan CORS Proxy agar terhindar dari origin null error
                     const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
                     const response = await fetch(proxyUrl);
                     if(!response.ok) throw new Error("Gagal mengambil data HTTP " + response.status);
@@ -461,7 +497,7 @@
                     this.parseCSV(csvText);
                 } catch(err) {
                     statusEl.className = 'csv-info error';
-                    statusEl.innerHTML = "❌ Error: " + err.message + ". Pastikan Link Google Sheets dipublish sebagai CSV.";
+                    statusEl.innerHTML = "❌ Error: " + err.message + ". Pastikan Link dipublish ke web.";
                 }
             },
 
@@ -470,7 +506,7 @@
                 this.data = {};
                 let count = 0;
 
-                for(let i=1; i<lines.length; i++) { // Skip baris header
+                for(let i=1; i<lines.length; i++) { 
                     let row = lines[i].trim();
                     if(!row) continue;
                     
@@ -479,7 +515,6 @@
                     const regex = new RegExp(`(\"([^\"]*)\"|[^\"${separator}]+)(?=${separator}|$)`, 'g');
                     while(match = regex.exec(row)) cols.push(match[2] ? match[2] : match[1]);
 
-                    // Format 8 Kolom: Mapel; Fase; Kelas; Smt; Bab; CP; TP; P3
                     if(cols.length < 5) continue;
 
                     let mapel  = cols[0] ? cols[0].trim() : "Mata Pelajaran";
@@ -492,7 +527,6 @@
                     let tpText = cols.length >= 8 ? cols[6].trim() : (cols[5]||"TP...");
                     let p3Text = cols.length >= 8 ? cols[7].trim() : "Beriman Bertakwa, Mandiri";
 
-                    // Build Hierarchy
                     if(!this.data[mapel]) this.data[mapel] = {};
                     if(!this.data[mapel][kls]) this.data[mapel][kls] = {};
                     if(!this.data[mapel][kls][smt]) this.data[mapel][kls][smt] = {};
@@ -509,14 +543,11 @@
                 this.initDropdowns();
             },
 
-            // --- CASCADING DROPDOWNS ---
             initDropdowns: function() {
                 let mapelSel = document.getElementById('in-mapel');
                 mapelSel.innerHTML = "";
                 let mapels = Object.keys(this.data);
-                if(mapels.length === 0) {
-                    mapelSel.innerHTML = "<option value=''>- Kosong -</option>"; return;
-                }
+                if(mapels.length === 0) { mapelSel.innerHTML = "<option value=''>- Kosong -</option>"; return; }
                 mapels.forEach(m => {
                     let opt = document.createElement('option'); opt.value=m; opt.text=m; mapelSel.appendChild(opt);
                 });
@@ -563,7 +594,6 @@
                 this.syncAll();
             },
 
-            // --- CORE SYNC ---
             syncAll: function() {
                 let mapel = document.getElementById('in-mapel').value;
                 let kls = document.getElementById('in-kelas').value;
@@ -579,7 +609,7 @@
                 let kInt = parseInt(kls);
                 let f = kInt<=2?'A' : kInt<=4?'B' : kInt<=6?'C' : kInt<=9?'D' : kInt==10?'E' : 'F';
 
-                // Sync UI Texts
+                // Teks UI Sinkronisasi
                 document.querySelectorAll('.v-mapel').forEach(e=>e.innerText=mapel);
                 document.querySelectorAll('.v-kls').forEach(e=>e.innerText=kls);
                 document.querySelectorAll('.v-fase').forEach(e=>e.innerText="Fase "+f);
@@ -604,7 +634,7 @@
                 let colEvents = new Array(30).fill(null);
                 if(smt==="Ganjil"){
                     colEvents[0]="MPLS/Libur"; colEvents[1]="MPLS/Libur"; colEvents[12]="SUMATIF TENGAH SMT"; 
-                    colEvents[25]="SUMATIF AKHIR SMT"; colEvents[26]="PENGAYAAN / CLASSMEET"; colEvents[27]="PEMBAGIAN RAPOR"; colEvents[28]="LIBUR"; colEvents[29]="LIBUR";
+                    colEvents[25]="SUMATIF AKHIR SMT"; colEvents[26]="PENGAYAAN"; colEvents[27]="PEMBAGIAN RAPOR"; colEvents[28]="LIBUR"; colEvents[29]="LIBUR";
                 } else {
                     colEvents[0]="LIBUR"; colEvents[11]="SUMATIF TENGAH SMT"; 
                     let sasIdx = (kInt==6 || kInt==9 || kInt==12) ? 20 : 25; 
@@ -624,7 +654,7 @@
                             let strD = `${y}-${String(b+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                             let wIdx = Math.ceil(d/7); if(wIdx>5) wIdx=5;
                             let cIdx = (i*5)+(wIdx-1);
-                            if(liburDB.includes(strD)) { if(cIdx<30 && !colEvents[cIdx]) colEvents[cIdx]="LIBUR NASIONAL"; } 
+                            if(liburDB.includes(strD)) { if(cIdx<30 && !colEvents[cIdx]) colEvents[cIdx]="LIBUR NASIONAL / KHUSUS"; } 
                             else { if(!colEvents[cIdx]) activeDates.push(dt); }
                         }
                     }
@@ -632,11 +662,12 @@
 
                 this.renderATPProta(mapel, kls, smt, jp, activeDates);
                 this.renderPromes(jp, colEvents, smt, blnAwal);
+                this.renderAbsensiList();
                 if(babAktif) this.renderModulDanLainnya(mapel, kls, smt, babAktif, jp);
             },
 
             renderATPProta: function(mapel, kls, smt, jp, activeDates) {
-                let atpMode = document.getElementById('in-atp-mode').value; // 'semester' or 'tahun'
+                let atpMode = document.getElementById('in-atp-mode').value;
                 let dataToRender = [];
                 
                 if(atpMode === "tahun") {
@@ -660,7 +691,6 @@
                         let kk = tpObj.tp.match(/mampu\s+([a-zA-Z\-]+)/i);
                         kk = kk ? kk[1].toUpperCase() : "MEMAHAMI";
 
-                        // ATP
                         atpHtml += `<tr>`;
                         if(tIdx===0) {
                             atpHtml += `<td rowspan="${item.d.tps.length}" class="text-center">${index+1}</td>
@@ -670,17 +700,16 @@
                         if(tIdx===0) atpHtml += `<td rowspan="${item.d.tps.length}" class="text-center">${Math.ceil(totalJp/jp)} Minggu<br>${totalJp} JP</td>`;
                         atpHtml += `</tr>`;
 
-                        // Prota
+                        // PROTA - Teks Bab Normal (Horizontal)
                         protaHtml += `<tr>`;
                         if(tIdx===0) {
                             protaHtml += `<td rowspan="${item.d.tps.length}" class="font-bold text-center">${item.smt}</td>
-                                          <td rowspan="${item.d.tps.length}" class="bg-slate-50" contenteditable="true"><div class="vertical-text text-sm font-bold">${item.bab}</div></td>`;
+                                          <td rowspan="${item.d.tps.length}" class="bg-slate-50 font-bold text-center align-middle" contenteditable="true">${item.bab}</td>`;
                         }
                         protaHtml += `<td contenteditable="true">${tpObj.tp}</td>`;
                         if(tIdx===0) protaHtml += `<td rowspan="${item.d.tps.length}" class="font-bold text-center">${totalJp} JP</td>`;
                         protaHtml += `</tr>`;
 
-                        // Data For Promes
                         if(atpMode === "semester" || item.smt === smt) {
                             let alok = [];
                             if(dIdx < activeDates.length) { alok.push({date: activeDates[dIdx], jp: jp}); dIdx++; }
@@ -727,6 +756,22 @@
                 document.getElementById('out-promes-body').innerHTML = tb;
             },
 
+            // FITUR BARU ABSENSI HARIAN
+            renderAbsensiList: function() {
+                let html = "";
+                // Generate 20 Baris Dummy
+                for(let i=1; i<=20; i++) {
+                    let nama = i===1 ? "Ahmad Fulan" : i===2 ? "Siti Fulanah" : i===3 ? "Budi Santoso" : "";
+                    html += `<tr><td class="text-center">${i}</td><td class="text-left" contenteditable="true">${nama}</td>`;
+                    // Generate 16 Kolom Presensi (Default 'H')
+                    for(let j=0; j<16; j++) {
+                        html += `<td contenteditable="true" class="text-center font-bold text-blue-700">H</td>`;
+                    }
+                    html += `</tr>`;
+                }
+                document.getElementById('out-absensi').innerHTML = html;
+            },
+
             renderModulDanLainnya: function(mapel, kls, smt, bab, jp) {
                 let data = this.data[mapel]?.[kls]?.[smt]?.[bab];
                 if(!data) return;
@@ -742,12 +787,12 @@
                     mdHtml += `<li><strong>Pertemuan ${i+1}:</strong> ${t.tp}</li>`;
                     
                     kktpHtml += `<tr>`;
-                    if(i===0) kktpHtml += `<td rowspan="${data.tps.length}" class="text-center">${i+1}</td>`;
+                    if(i===0) kktpHtml += `<td rowspan="${data.tps.length}" class="text-center align-middle">${i+1}</td>`;
                     kktpHtml += `<td contenteditable="true">${t.tp}</td>
                                  <td class="kktp-val" contenteditable="true" oninput="Engine.calcKktp(this)">75</td>
                                  <td class="kktp-val" contenteditable="true" oninput="Engine.calcKktp(this)">75</td>
                                  <td class="kktp-val" contenteditable="true" oninput="Engine.calcKktp(this)">75</td>
-                                 <td class="kktp-hasil font-bold text-center">75</td></tr>`;
+                                 <td class="kktp-hasil">75</td></tr>`;
 
                     let dMatch = (window.promesRows||[]).find(pr => pr.tp === t.tp);
                     let dStr = "...../...../20..";
@@ -755,7 +800,8 @@
                         let dt = dMatch.alokasi[0].date;
                         dStr = `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
                     }
-                    jurnalHtml += `<tr><td class="text-center" contenteditable="true">${dStr}</td><td contenteditable="true">${bab}</td><td contenteditable="true">${t.tp}</td><td contenteditable="true" class="text-center">S:.. I:.. A:..</td><td contenteditable="true">Tuntas</td></tr>`;
+                    // JURNAL: Default Kehadiran adalah Hadir Semua
+                    jurnalHtml += `<tr><td class="text-center font-bold" contenteditable="true">${dStr}</td><td contenteditable="true">${bab}</td><td contenteditable="true">${t.tp}</td><td contenteditable="true" class="text-center font-bold text-blue-700">Hadir Semua</td><td contenteditable="true">Kegiatan Berjalan Baik</td></tr>`;
                 });
 
                 let p3Html = "<ul class='list-disc'>"; p3Set.forEach(s=> p3Html+=`<li><strong>${s}</strong></li>`); p3Html+="</ul>";
@@ -778,22 +824,6 @@
                 document.getElementById('out-jurnal').innerHTML = jurnalHtml;
             }
         };
-
-        // File Lokal Manual Uploader
-        document.getElementById('fileCsv').addEventListener('change', function(e) {
-            let file = e.target.files[0];
-            if(!file) return;
-            let reader = new FileReader();
-            reader.onload = function(e) { 
-                let statusEl = document.getElementById('csvStatus');
-                statusEl.style.display = 'block';
-                statusEl.className = 'csv-info';
-                statusEl.innerHTML = "⏳ Memproses file lokal...";
-                Engine.parseCSV(e.target.result); 
-            };
-            reader.readAsText(file);
-        });
-
     </script>
 </body>
 </html>
