@@ -2429,7 +2429,820 @@ window.updateAbsensiStats = updateAbsensiStats;
 window.checkPremiumAccess = checkPremiumAccess;
 window.initPremiumFeatures = initPremiumFeatures;
 window.updateNilaiTable = updateNilaiTable;
+// ============================================
+// JADWAL PELAJARAN FUNCTIONS
+// ============================================
 
+// Show Add Jadwal Modal
+function showAddJadwalModal() {
+    // Create modal if not exists
+    let modal = document.getElementById('modalAddJadwal');
+    if (!modal) {
+        modal = createAddJadwalModal();
+        document.body.appendChild(modal);
+    }
+    
+    // Populate mapel select
+    const mapelSelect = document.getElementById('jadwalMapelInput');
+    const sourceMapel = document.getElementById('cpMapel');
+    if (mapelSelect && sourceMapel) {
+        mapelSelect.innerHTML = sourceMapel.innerHTML;
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+function createAddJadwalModal() {
+    const modal = document.createElement('div');
+    modal.id = 'modalAddJadwal';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+    modal.innerHTML = `
+        <div class="bg-white rounded-xl w-full max-w-md p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">
+                <i class="fas fa-clock mr-2 text-primary"></i>Tambah Jadwal Pelajaran
+            </h3>
+            <form id="formAddJadwal" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                    <select id="jadwalKelasInput" class="w-full px-4 py-2 border rounded-lg" required>
+                        <option value="">Pilih Kelas</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Rombel</label>
+                    <input type="text" id="jadwalRombelInput" class="w-full px-4 py-2 border rounded-lg" placeholder="A, B, C, dll" value="A">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran</label>
+                    <select id="jadwalMapelInput" class="w-full px-4 py-2 border rounded-lg" required>
+                        <option value="">Pilih Mapel</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Hari</label>
+                    <select id="jadwalHariInput" class="w-full px-4 py-2 border rounded-lg" required>
+                        <option value="1">Senin</option>
+                        <option value="2">Selasa</option>
+                        <option value="3">Rabu</option>
+                        <option value="4">Kamis</option>
+                        <option value="5">Jumat</option>
+                        <option value="6">Sabtu</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Jam Ke</label>
+                        <input type="number" id="jadwalJamKeInput" class="w-full px-4 py-2 border rounded-lg" min="1" max="12" value="1" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah JP</label>
+                        <input type="number" id="jadwalJumlahJpInput" class="w-full px-4 py-2 border rounded-lg" min="1" max="8" value="2" required>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeModal('modalAddJadwal')" class="flex-1 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600">
+                        <i class="fas fa-plus mr-2"></i>Tambah
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    // Populate kelas select
+    setTimeout(() => {
+        const kelasSelect = document.getElementById('jadwalKelasInput');
+        const sourceKelas = document.getElementById('jadwalKelas');
+        if (kelasSelect && sourceKelas) {
+            kelasSelect.innerHTML = sourceKelas.innerHTML;
+        }
+        
+        // Add form submit handler
+        const form = document.getElementById('formAddJadwal');
+        if (form) {
+            form.addEventListener('submit', addJadwal);
+        }
+    }, 100);
+    
+    return modal;
+}
+
+async function addJadwal(e) {
+    e.preventDefault();
+    showLoading('Menyimpan jadwal...');
+    
+    try {
+        const kelas = document.getElementById('jadwalKelasInput')?.value;
+        const rombel = document.getElementById('jadwalRombelInput')?.value || 'A';
+        const mapelId = document.getElementById('jadwalMapelInput')?.value;
+        const hari = parseInt(document.getElementById('jadwalHariInput')?.value);
+        const jamKe = parseInt(document.getElementById('jadwalJamKeInput')?.value);
+        const jumlahJp = parseInt(document.getElementById('jadwalJumlahJpInput')?.value);
+        
+        if (!kelas || !mapelId) {
+            hideLoading();
+            showToast('Lengkapi semua field!', 'error');
+            return;
+        }
+        
+        // Get mapel name
+        const mapelOption = document.querySelector(`#jadwalMapelInput option[value="${mapelId}"]`);
+        const mapelNama = mapelOption?.textContent || 'Unknown';
+        
+        // Check for conflicts
+        const conflict = await checkJadwalConflict(kelas, rombel, hari, jamKe, jumlahJp);
+        if (conflict) {
+            hideLoading();
+            showToast(conflict, 'error');
+            return;
+        }
+        
+        const data = {
+            kelas,
+            rombel,
+            mapelId,
+            mapelNama,
+            hari,
+            jamKe,
+            jumlahJp,
+            guruId: currentUser.uid,
+            guruNama: userData?.nama || '',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await db.collection('users').doc(currentUser.uid)
+            .collection('jadwal').add(data);
+        
+        hideLoading();
+        closeModal('modalAddJadwal');
+        showToast('Jadwal berhasil ditambahkan!', 'success');
+        
+        // Reload jadwal table
+        loadJadwalTable(kelas);
+        updateGettingStarted().catch(e => console.log(e));
+        
+    } catch (error) {
+        hideLoading();
+        console.error('Add jadwal error:', error);
+        showToast('Gagal menambah jadwal: ' + error.message, 'error');
+    }
+}
+
+async function checkJadwalConflict(kelas, rombel, hari, jamKe, jumlahJp) {
+    try {
+        // Check if same guru already teaching at this time (any class)
+        const guruJadwal = await db.collection('users').doc(currentUser.uid)
+            .collection('jadwal')
+            .where('hari', '==', hari)
+            .get();
+        
+        for (const doc of guruJadwal.docs) {
+            const jadwal = doc.data();
+            const jadwalStart = jadwal.jamKe;
+            const jadwalEnd = jadwal.jamKe + jadwal.jumlahJp - 1;
+            const newStart = jamKe;
+            const newEnd = jamKe + jumlahJp - 1;
+            
+            // Check overlap
+            if (newStart <= jadwalEnd && newEnd >= jadwalStart) {
+                if (jadwal.kelas !== kelas || jadwal.rombel !== rombel) {
+                    return `Anda sudah mengajar di kelas ${jadwal.kelas}${jadwal.rombel} pada jam tersebut!`;
+                }
+            }
+        }
+        
+        return null; // No conflict
+    } catch (error) {
+        console.error('Check conflict error:', error);
+        return null;
+    }
+}
+
+async function loadJadwalTable(kelas) {
+    const tbody = document.getElementById('bodyJadwal');
+    if (!tbody || !kelas) {
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-gray-500 py-8">Pilih kelas untuk melihat jadwal</td></tr>';
+        }
+        return;
+    }
+    
+    try {
+        const snapshot = await db.collection('users').doc(currentUser.uid)
+            .collection('jadwal')
+            .where('kelas', '==', kelas)
+            .orderBy('hari', 'asc')
+            .orderBy('jamKe', 'asc')
+            .get();
+        
+        // Get jam settings
+        const settingsDoc = await db.collection('users').doc(currentUser.uid)
+            .collection('settings').doc('jadwal').get();
+        const settings = settingsDoc.exists ? settingsDoc.data() : { durasiJp: 35, jamMulai: '07:00' };
+        
+        // Create schedule grid
+        const schedule = {};
+        for (let jam = 1; jam <= 10; jam++) {
+            schedule[jam] = { 1: '-', 2: '-', 3: '-', 4: '-', 5: '-', 6: '-' };
+        }
+        
+        snapshot.forEach(doc => {
+            const jadwal = doc.data();
+            for (let i = 0; i < jadwal.jumlahJp; i++) {
+                const jamKe = jadwal.jamKe + i;
+                if (schedule[jamKe]) {
+                    schedule[jamKe][jadwal.hari] = `
+                        <div class="bg-blue-100 p-1 rounded text-xs">
+                            <strong>${jadwal.mapelNama}</strong>
+                            <br><span class="text-gray-500">${jadwal.rombel}</span>
+                            <button onclick="deleteJadwal('${doc.id}', '${kelas}')" class="ml-1 text-red-500 hover:text-red-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+        });
+        
+        // Calculate times
+        const startTime = settings.jamMulai.split(':');
+        let startMinutes = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
+        
+        let html = '';
+        for (let jam = 1; jam <= 10; jam++) {
+            const endMinutes = startMinutes + settings.durasiJp;
+            const startStr = `${String(Math.floor(startMinutes / 60)).padStart(2, '0')}:${String(startMinutes % 60).padStart(2, '0')}`;
+            const endStr = `${String(Math.floor(endMinutes / 60)).padStart(2, '0')}:${String(endMinutes % 60).padStart(2, '0')}`;
+            
+            html += `
+                <tr>
+                    <td class="text-center font-bold">${jam}</td>
+                    <td class="text-center text-xs text-gray-500">${startStr} - ${endStr}</td>
+                    <td class="text-center">${schedule[jam][1]}</td>
+                    <td class="text-center">${schedule[jam][2]}</td>
+                    <td class="text-center">${schedule[jam][3]}</td>
+                    <td class="text-center">${schedule[jam][4]}</td>
+                    <td class="text-center">${schedule[jam][5]}</td>
+                    <td class="text-center">${schedule[jam][6]}</td>
+                </tr>
+            `;
+            
+            startMinutes = endMinutes;
+            
+            // Add break after jam ke 4
+            if (jam === 4) {
+                startMinutes += settings.durasiIstirahat || 15;
+            }
+        }
+        
+        tbody.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Load jadwal error:', error);
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-red-500 py-8">Gagal memuat jadwal</td></tr>';
+    }
+}
+
+async function deleteJadwal(jadwalId, kelas) {
+    if (!confirm('Hapus jadwal ini?')) return;
+    
+    try {
+        await db.collection('users').doc(currentUser.uid)
+            .collection('jadwal').doc(jadwalId).delete();
+        
+        showToast('Jadwal dihapus', 'success');
+        loadJadwalTable(kelas);
+    } catch (error) {
+        console.error('Delete jadwal error:', error);
+        showToast('Gagal menghapus: ' + error.message, 'error');
+    }
+}
+
+// Event listener for kelas select change
+document.getElementById('jadwalKelas')?.addEventListener('change', function() {
+    loadJadwalTable(this.value);
+});
+
+
+// ============================================
+// DATA SISWA FUNCTIONS
+// ============================================
+
+function showAddSiswaModal() {
+    let modal = document.getElementById('modalAddSiswa');
+    if (!modal) {
+        modal = createAddSiswaModal();
+        document.body.appendChild(modal);
+    }
+    modal.classList.remove('hidden');
+}
+
+function createAddSiswaModal() {
+    const modal = document.createElement('div');
+    modal.id = 'modalAddSiswa';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+    modal.innerHTML = `
+        <div class="bg-white rounded-xl w-full max-w-md p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">
+                <i class="fas fa-user-plus mr-2 text-primary"></i>Tambah Siswa
+            </h3>
+            <form id="formAddSiswa" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">NISN</label>
+                    <input type="text" id="siswaNisn" class="w-full px-4 py-2 border rounded-lg" placeholder="10 digit NISN">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="siswaNama" class="w-full px-4 py-2 border rounded-lg" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin</label>
+                        <select id="siswaJk" class="w-full px-4 py-2 border rounded-lg" required>
+                            <option value="L">Laki-laki</option>
+                            <option value="P">Perempuan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                        <select id="siswaKelasInput" class="w-full px-4 py-2 border rounded-lg" required>
+                            <option value="">Pilih</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Rombel</label>
+                    <input type="text" id="siswaRombel" class="w-full px-4 py-2 border rounded-lg" placeholder="A, B, C, dll" value="A">
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeModal('modalAddSiswa')" class="flex-1 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600">
+                        <i class="fas fa-plus mr-2"></i>Tambah
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    setTimeout(() => {
+        const kelasSelect = document.getElementById('siswaKelasInput');
+        const sourceKelas = document.getElementById('siswaKelas');
+        if (kelasSelect && sourceKelas) {
+            kelasSelect.innerHTML = sourceKelas.innerHTML;
+        }
+        
+        const form = document.getElementById('formAddSiswa');
+        if (form) {
+            form.addEventListener('submit', addSiswa);
+        }
+    }, 100);
+    
+    return modal;
+}
+
+async function addSiswa(e) {
+    e.preventDefault();
+    showLoading('Menambah siswa...');
+    
+    try {
+        const data = {
+            nisn: document.getElementById('siswaNisn')?.value || '',
+            nama: document.getElementById('siswaNama')?.value || '',
+            jenisKelamin: document.getElementById('siswaJk')?.value || 'L',
+            kelas: document.getElementById('siswaKelasInput')?.value || '',
+            rombel: document.getElementById('siswaRombel')?.value || 'A',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        if (!data.nama || !data.kelas) {
+            hideLoading();
+            showToast('Nama dan kelas wajib diisi!', 'error');
+            return;
+        }
+        
+        await db.collection('users').doc(currentUser.uid)
+            .collection('siswa').add(data);
+        
+        hideLoading();
+        closeModal('modalAddSiswa');
+        showToast('Siswa berhasil ditambahkan!', 'success');
+        loadSiswaTable();
+        
+        // Reset form
+        document.getElementById('formAddSiswa')?.reset();
+        
+    } catch (error) {
+        hideLoading();
+        console.error('Add siswa error:', error);
+        showToast('Gagal menambah siswa: ' + error.message, 'error');
+    }
+}
+
+function showImportSiswaModal() {
+    let modal = document.getElementById('modalImportSiswa');
+    if (!modal) {
+        modal = createImportSiswaModal();
+        document.body.appendChild(modal);
+    }
+    modal.classList.remove('hidden');
+}
+
+function createImportSiswaModal() {
+    const modal = document.createElement('div');
+    modal.id = 'modalImportSiswa';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+    modal.innerHTML = `
+        <div class="bg-white rounded-xl w-full max-w-lg p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">
+                <i class="fas fa-file-import mr-2 text-green-500"></i>Import Data Siswa
+            </h3>
+            
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                <p class="text-yellow-800 text-sm">
+                    <strong>Format CSV (delimiter koma):</strong><br>
+                    nisn,nama,jenis_kelamin,kelas,rombel<br><br>
+                    <strong>Contoh:</strong><br>
+                    0012345678,Ahmad Fauzi,L,7,A<br>
+                    0012345679,Siti Aisyah,P,7,A
+                </p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Upload File CSV</label>
+                    <input type="file" id="importSiswaFile" accept=".csv" class="w-full px-4 py-2 border rounded-lg">
+                </div>
+                
+                <p class="text-center text-gray-500 text-sm">atau</p>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">URL Google Spreadsheet (CSV)</label>
+                    <input type="url" id="importSiswaUrl" class="w-full px-4 py-2 border rounded-lg" placeholder="https://docs.google.com/spreadsheets/.../export?format=csv">
+                </div>
+            </div>
+            
+            <div class="flex gap-3 pt-6">
+                <button type="button" onclick="closeModal('modalImportSiswa')" class="flex-1 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50">
+                    Batal
+                </button>
+                <button type="button" onclick="importSiswa()" class="flex-1 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600">
+                    <i class="fas fa-upload mr-2"></i>Import
+                </button>
+            </div>
+        </div>
+    `;
+    
+    return modal;
+}
+
+async function importSiswa() {
+    const fileInput = document.getElementById('importSiswaFile');
+    const urlInput = document.getElementById('importSiswaUrl');
+    
+    let csvText = '';
+    
+    showLoading('Mengimport data siswa...');
+    
+    try {
+        if (fileInput?.files?.length > 0) {
+            csvText = await fileInput.files[0].text();
+        } else if (urlInput?.value) {
+            const response = await fetch(urlInput.value);
+            csvText = await response.text();
+        } else {
+            hideLoading();
+            showToast('Pilih file atau masukkan URL!', 'error');
+            return;
+        }
+        
+        const lines = csvText.split('\n');
+        let imported = 0;
+        
+        for (let i = 1; i < lines.length; i++) { // Skip header
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            const cols = line.split(',');
+            if (cols.length < 4) continue;
+            
+            const data = {
+                nisn: cols[0]?.trim() || '',
+                nama: cols[1]?.trim() || '',
+                jenisKelamin: cols[2]?.trim()?.toUpperCase() || 'L',
+                kelas: cols[3]?.trim() || '',
+                rombel: cols[4]?.trim() || 'A',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            if (data.nama && data.kelas) {
+                await db.collection('users').doc(currentUser.uid)
+                    .collection('siswa').add(data);
+                imported++;
+            }
+        }
+        
+        hideLoading();
+        closeModal('modalImportSiswa');
+        showToast(`${imported} siswa berhasil diimport!`, 'success');
+        loadSiswaTable();
+        
+    } catch (error) {
+        hideLoading();
+        console.error('Import siswa error:', error);
+        showToast('Gagal import: ' + error.message, 'error');
+    }
+}
+
+async function loadSiswaTable(filterKelas = '') {
+    const tbody = document.getElementById('bodySiswa');
+    if (!tbody) return;
+    
+    try {
+        let query = db.collection('users').doc(currentUser.uid)
+            .collection('siswa')
+            .orderBy('kelas', 'asc')
+            .orderBy('nama', 'asc');
+        
+        if (filterKelas) {
+            query = db.collection('users').doc(currentUser.uid)
+                .collection('siswa')
+                .where('kelas', '==', filterKelas)
+                .orderBy('nama', 'asc');
+        }
+        
+        const snapshot = await query.get();
+        
+        if (snapshot.empty) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">Belum ada data siswa</td></tr>';
+            document.getElementById('statSiswa').textContent = '0';
+            return;
+        }
+        
+        let html = '';
+        let no = 0;
+        
+        snapshot.forEach(doc => {
+            no++;
+            const siswa = doc.data();
+            html += `
+                <tr>
+                    <td class="text-center">${no}</td>
+                    <td>${siswa.nisn || '-'}</td>
+                    <td>${siswa.nama}</td>
+                    <td class="text-center">${siswa.jenisKelamin || '-'}</td>
+                    <td class="text-center">${siswa.kelas}</td>
+                    <td class="text-center">${siswa.rombel || '-'}</td>
+                    <td class="text-center">
+                        <button onclick="deleteSiswa('${doc.id}')" class="text-red-500 hover:text-red-700" title="Hapus">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
+        
+        // Update stats
+        const statSiswa = document.getElementById('statSiswa');
+        if (statSiswa) statSiswa.textContent = no;
+        
+    } catch (error) {
+        console.error('Load siswa error:', error);
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-red-500 py-8">Gagal memuat data</td></tr>';
+    }
+}
+
+async function deleteSiswa(siswaId) {
+    if (!confirm('Hapus data siswa ini?')) return;
+    
+    try {
+        await db.collection('users').doc(currentUser.uid)
+            .collection('siswa').doc(siswaId).delete();
+        
+        showToast('Siswa dihapus', 'success');
+        loadSiswaTable();
+    } catch (error) {
+        console.error('Delete siswa error:', error);
+        showToast('Gagal menghapus: ' + error.message, 'error');
+    }
+}
+
+// Event listener for siswa kelas filter
+document.getElementById('siswaKelas')?.addEventListener('change', function() {
+    loadSiswaTable(this.value);
+});
+
+
+// ============================================
+// HARI LIBUR TAMBAHAN FUNCTIONS
+// ============================================
+
+function showAddLiburModal() {
+    let modal = document.getElementById('modalAddLibur');
+    if (!modal) {
+        modal = createAddLiburModal();
+        document.body.appendChild(modal);
+    }
+    modal.classList.remove('hidden');
+}
+
+function createAddLiburModal() {
+    const modal = document.createElement('div');
+    modal.id = 'modalAddLibur';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+    modal.innerHTML = `
+        <div class="bg-white rounded-xl w-full max-w-md p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">
+                <i class="fas fa-calendar-times mr-2 text-red-500"></i>Tambah Hari Libur
+            </h3>
+            <form id="formAddLibur" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                    <input type="date" id="liburTanggal" class="w-full px-4 py-2 border rounded-lg" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
+                    <input type="text" id="liburKeterangan" class="w-full px-4 py-2 border rounded-lg" placeholder="Contoh: Libur Hari Raya" required>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeModal('modalAddLibur')" class="flex-1 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600">
+                        <i class="fas fa-plus mr-2"></i>Tambah
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    setTimeout(() => {
+        const form = document.getElementById('formAddLibur');
+        if (form) {
+            form.addEventListener('submit', addLibur);
+        }
+    }, 100);
+    
+    return modal;
+}
+
+async function addLibur(e) {
+    e.preventDefault();
+    showLoading('Menambah hari libur...');
+    
+    try {
+        const tanggal = document.getElementById('liburTanggal')?.value;
+        const keterangan = document.getElementById('liburKeterangan')?.value;
+        
+        if (!tanggal || !keterangan) {
+            hideLoading();
+            showToast('Lengkapi semua field!', 'error');
+            return;
+        }
+        
+        await db.collection('users').doc(currentUser.uid)
+            .collection('liburTambahan').add({
+                tanggal,
+                keterangan,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        
+        hideLoading();
+        closeModal('modalAddLibur');
+        showToast('Hari libur ditambahkan!', 'success');
+        loadLiburTambahan();
+        
+        // Reset form
+        document.getElementById('formAddLibur')?.reset();
+        
+    } catch (error) {
+        hideLoading();
+        console.error('Add libur error:', error);
+        showToast('Gagal menambah: ' + error.message, 'error');
+    }
+}
+
+async function loadLiburTambahan() {
+    const container = document.getElementById('liburTambahan');
+    if (!container) return;
+    
+    try {
+        const snapshot = await db.collection('users').doc(currentUser.uid)
+            .collection('liburTambahan')
+            .orderBy('tanggal', 'asc')
+            .get();
+        
+        if (snapshot.empty) {
+            container.innerHTML = '<p class="text-gray-500 text-sm text-center py-2">Belum ada libur tambahan</p>';
+            return;
+        }
+        
+        let html = '';
+        snapshot.forEach(doc => {
+            const libur = doc.data();
+            const date = new Date(libur.tanggal);
+            const dateStr = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            
+            html += `
+                <div class="flex items-center justify-between p-2 bg-red-50 rounded">
+                    <div>
+                        <span class="font-medium text-red-800">${dateStr}</span>
+                        <span class="text-sm text-red-600 ml-2">${libur.keterangan}</span>
+                    </div>
+                    <button onclick="deleteLibur('${doc.id}')" class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Load libur error:', error);
+        container.innerHTML = '<p class="text-red-500 text-sm">Gagal memuat data</p>';
+    }
+}
+
+async function deleteLibur(liburId) {
+    if (!confirm('Hapus hari libur ini?')) return;
+    
+    try {
+        await db.collection('users').doc(currentUser.uid)
+            .collection('liburTambahan').doc(liburId).delete();
+        
+        showToast('Hari libur dihapus', 'success');
+        loadLiburTambahan();
+    } catch (error) {
+        console.error('Delete libur error:', error);
+        showToast('Gagal menghapus: ' + error.message, 'error');
+    }
+}
+
+
+// ============================================
+// UPDATE initializeUI to load additional data
+// ============================================
+
+// Override initializeUI to include new data loading
+const _originalInitializeUI = initializeUI;
+initializeUI = function() {
+    _originalInitializeUI();
+    
+    // Load additional data
+    setTimeout(() => {
+        loadSiswaTable().catch(e => console.log('Siswa load skipped:', e.message));
+        loadLiburTambahan().catch(e => console.log('Libur load skipped:', e.message));
+        
+        // Setup jadwal kelas change listener
+        const jadwalKelas = document.getElementById('jadwalKelas');
+        if (jadwalKelas) {
+            jadwalKelas.addEventListener('change', function() {
+                loadJadwalTable(this.value);
+            });
+        }
+        
+        // Setup siswa kelas change listener
+        const siswaKelas = document.getElementById('siswaKelas');
+        if (siswaKelas) {
+            siswaKelas.addEventListener('change', function() {
+                loadSiswaTable(this.value);
+            });
+        }
+    }, 500);
+};
+
+
+// ============================================
+// MAKE JADWAL, SISWA, LIBUR FUNCTIONS GLOBAL
+// ============================================
+
+// Jadwal functions
+window.showAddJadwalModal = showAddJadwalModal;
+window.addJadwal = addJadwal;
+window.deleteJadwal = deleteJadwal;
+window.loadJadwalTable = loadJadwalTable;
+
+// Siswa functions
+window.showAddSiswaModal = showAddSiswaModal;
+window.showImportSiswaModal = showImportSiswaModal;
+window.addSiswa = addSiswa;
+window.importSiswa = importSiswa;
+window.deleteSiswa = deleteSiswa;
+window.loadSiswaTable = loadSiswaTable;
+
+// Libur functions
+window.showAddLiburModal = showAddLiburModal;
+window.addLibur = addLibur;
+window.deleteLibur = deleteLibur;
+window.loadLiburTambahan = loadLiburTambahan;
+
+console.log('Jadwal, Siswa, Libur functions loaded');
 console.log('Document generation functions loaded');
 // ===== PRINT =====
 function printDocument(type) {
@@ -3579,5 +4392,6 @@ window.hitungKKTP = hitungKKTP;
 window.hitungNA = hitungNA;
 window.updateAbsensiUI = updateAbsensiUI;
 window.checkPremiumAccess = checkPremiumAccess;
+
 
 
