@@ -1170,7 +1170,6 @@ async function generateATP() {
     }
 }
 
-// ===== PROTA (Program Tahunan) =====
 async function generateProta() {
     const mapelId = document.getElementById('protaMapel')?.value;
     const kelas = document.getElementById('protaKelas')?.value;
@@ -1235,8 +1234,9 @@ async function generateProta() {
                     
                     if (iTp === 0) {
                         html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center">${semester}</td>`;
-                        html += `<td rowspan="${tps.length}" class="border border-black p-2 text-center bg-gray-50">
-                            <div style="writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 10px;">${babName}</div>
+                        // HORIZONTAL TEXT
+                        html += `<td rowspan="${tps.length}" class="border border-black p-2 text-left bg-gray-50">
+                            <div class="font-bold text-sm">${babName}</div>
                         </td>`;
                     }
                     
@@ -1262,7 +1262,6 @@ async function generateProta() {
         showToast('Error: ' + error.message, 'error');
     }
 }
-
 // ===== PROMES (Program Semester) =====
 async function generatePromes() {
     const mapelId = document.getElementById('promesMapel')?.value;
@@ -1380,8 +1379,8 @@ async function generatePromes() {
             
             if (tp.isFirst) {
                 bodyHtml += `<td rowspan="${tp.rowspan}" class="border border-black p-2 text-center bg-gray-50">
-                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 9px;">${tp.babName}</div>
-                </td>`;
+                    <div class="font-bold text-xs">${tp.babName}</div>
+</td>`;
             }
             
             bodyHtml += `<td class="border border-black p-2 text-left text-xs">${tp.tpObj.tp}</td>`;
@@ -1947,9 +1946,9 @@ async function generateKKTP() {
                                 <td rowspan="${tps.length}" class="border border-black p-2 text-center">${Math.ceil(no / tps.length)}</td>
                                 <td rowspan="${tps.length}" class="border border-black p-2 text-center">${semester}</td>
                                 <td rowspan="${tps.length}" class="border border-black p-2 text-center bg-gray-50">
-                                    <div style="writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; font-size: 9px;">${babName}</div>
-                                </td>
-                            ` : ''}
+                                    <div class="font-bold text-xs">${babName}</div>
+    </td>
+`;''}
                             <td class="border border-black p-2 text-left text-xs">${tp.tp}</td>
                             <td class="border border-black p-2 text-center bg-yellow-50" contenteditable="true" oninput="hitungKKTP(this)">75</td>
                             <td class="border border-black p-2 text-center bg-yellow-50" contenteditable="true" oninput="hitungKKTP(this)">75</td>
@@ -2630,17 +2629,34 @@ async function loadJadwalTable(kelas) {
     }
     
     try {
+        // Simple query without complex ordering
         const snapshot = await db.collection('users').doc(currentUser.uid)
             .collection('jadwal')
             .where('kelas', '==', kelas)
-            .orderBy('hari', 'asc')
-            .orderBy('jamKe', 'asc')
             .get();
         
         // Get jam settings
-        const settingsDoc = await db.collection('users').doc(currentUser.uid)
-            .collection('settings').doc('jadwal').get();
-        const settings = settingsDoc.exists ? settingsDoc.data() : { durasiJp: 35, jamMulai: '07:00' };
+        let settings = { durasiJp: 35, jamMulai: '07:00', durasiIstirahat: 15 };
+        try {
+            const settingsDoc = await db.collection('users').doc(currentUser.uid)
+                .collection('settings').doc('jadwal').get();
+            if (settingsDoc.exists) {
+                settings = { ...settings, ...settingsDoc.data() };
+            }
+        } catch (e) {
+            console.log('Using default settings');
+        }
+        
+        // Sort in JavaScript
+        const jadwalList = [];
+        snapshot.forEach(doc => {
+            jadwalList.push({ id: doc.id, ...doc.data() });
+        });
+        
+        jadwalList.sort((a, b) => {
+            if (a.hari !== b.hari) return a.hari - b.hari;
+            return a.jamKe - b.jamKe;
+        });
         
         // Create schedule grid
         const schedule = {};
@@ -2648,16 +2664,15 @@ async function loadJadwalTable(kelas) {
             schedule[jam] = { 1: '-', 2: '-', 3: '-', 4: '-', 5: '-', 6: '-' };
         }
         
-        snapshot.forEach(doc => {
-            const jadwal = doc.data();
+        jadwalList.forEach(jadwal => {
             for (let i = 0; i < jadwal.jumlahJp; i++) {
                 const jamKe = jadwal.jamKe + i;
-                if (schedule[jamKe]) {
+                if (schedule[jamKe] && schedule[jamKe][jadwal.hari]) {
                     schedule[jamKe][jadwal.hari] = `
                         <div class="bg-blue-100 p-1 rounded text-xs">
-                            <strong>${jadwal.mapelNama}</strong>
-                            <br><span class="text-gray-500">${jadwal.rombel}</span>
-                            <button onclick="deleteJadwal('${doc.id}', '${kelas}')" class="ml-1 text-red-500 hover:text-red-700">
+                            <strong>${jadwal.mapelNama || 'Mapel'}</strong>
+                            <br><span class="text-gray-500">${jadwal.rombel || ''}</span>
+                            <button onclick="deleteJadwal('${jadwal.id}', '${kelas}')" class="ml-1 text-red-500 hover:text-red-700">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -2667,12 +2682,14 @@ async function loadJadwalTable(kelas) {
         });
         
         // Calculate times
-        const startTime = settings.jamMulai.split(':');
+        const startTime = (settings.jamMulai || '07:00').split(':');
         let startMinutes = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
+        const durasiJp = settings.durasiJp || 35;
+        const durasiIstirahat = settings.durasiIstirahat || 15;
         
         let html = '';
         for (let jam = 1; jam <= 10; jam++) {
-            const endMinutes = startMinutes + settings.durasiJp;
+            const endMinutes = startMinutes + durasiJp;
             const startStr = `${String(Math.floor(startMinutes / 60)).padStart(2, '0')}:${String(startMinutes % 60).padStart(2, '0')}`;
             const endStr = `${String(Math.floor(endMinutes / 60)).padStart(2, '0')}:${String(endMinutes % 60).padStart(2, '0')}`;
             
@@ -2693,7 +2710,7 @@ async function loadJadwalTable(kelas) {
             
             // Add break after jam ke 4
             if (jam === 4) {
-                startMinutes += settings.durasiIstirahat || 15;
+                startMinutes += durasiIstirahat;
             }
         }
         
@@ -2701,10 +2718,9 @@ async function loadJadwalTable(kelas) {
         
     } catch (error) {
         console.error('Load jadwal error:', error);
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-red-500 py-8">Gagal memuat jadwal</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-red-500 py-8">Gagal memuat jadwal. Coba refresh halaman.</td></tr>';
     }
 }
-
 async function deleteJadwal(jadwalId, kelas) {
     if (!confirm('Hapus jadwal ini?')) return;
     
@@ -2962,42 +2978,54 @@ async function loadSiswaTable(filterKelas = '') {
     if (!tbody) return;
     
     try {
-        let query = db.collection('users').doc(currentUser.uid)
-            .collection('siswa')
-            .orderBy('kelas', 'asc')
-            .orderBy('nama', 'asc');
+        let query;
         
         if (filterKelas) {
+            // Simple query with single orderBy
             query = db.collection('users').doc(currentUser.uid)
                 .collection('siswa')
-                .where('kelas', '==', filterKelas)
-                .orderBy('nama', 'asc');
+                .where('kelas', '==', filterKelas);
+        } else {
+            // Get all without complex ordering
+            query = db.collection('users').doc(currentUser.uid)
+                .collection('siswa');
         }
         
         const snapshot = await query.get();
         
         if (snapshot.empty) {
             tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">Belum ada data siswa</td></tr>';
-            document.getElementById('statSiswa').textContent = '0';
+            const statSiswa = document.getElementById('statSiswa');
+            if (statSiswa) statSiswa.textContent = '0';
             return;
         }
         
-        let html = '';
-        let no = 0;
-        
+        // Sort in JavaScript instead of Firestore
+        const siswaList = [];
         snapshot.forEach(doc => {
-            no++;
-            const siswa = doc.data();
+            siswaList.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Sort by kelas then nama
+        siswaList.sort((a, b) => {
+            if (a.kelas !== b.kelas) {
+                return String(a.kelas).localeCompare(String(b.kelas), undefined, { numeric: true });
+            }
+            return (a.nama || '').localeCompare(b.nama || '');
+        });
+        
+        let html = '';
+        siswaList.forEach((siswa, index) => {
             html += `
                 <tr>
-                    <td class="text-center">${no}</td>
+                    <td class="text-center">${index + 1}</td>
                     <td>${siswa.nisn || '-'}</td>
                     <td>${siswa.nama}</td>
                     <td class="text-center">${siswa.jenisKelamin || '-'}</td>
                     <td class="text-center">${siswa.kelas}</td>
                     <td class="text-center">${siswa.rombel || '-'}</td>
                     <td class="text-center">
-                        <button onclick="deleteSiswa('${doc.id}')" class="text-red-500 hover:text-red-700" title="Hapus">
+                        <button onclick="deleteSiswa('${siswa.id}')" class="text-red-500 hover:text-red-700" title="Hapus">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -3009,14 +3037,13 @@ async function loadSiswaTable(filterKelas = '') {
         
         // Update stats
         const statSiswa = document.getElementById('statSiswa');
-        if (statSiswa) statSiswa.textContent = no;
+        if (statSiswa) statSiswa.textContent = siswaList.length;
         
     } catch (error) {
         console.error('Load siswa error:', error);
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-red-500 py-8">Gagal memuat data</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-red-500 py-8">Gagal memuat data. Coba refresh halaman.</td></tr>';
     }
 }
-
 async function deleteSiswa(siswaId) {
     if (!confirm('Hapus data siswa ini?')) return;
     
@@ -4392,6 +4419,7 @@ window.hitungKKTP = hitungKKTP;
 window.hitungNA = hitungNA;
 window.updateAbsensiUI = updateAbsensiUI;
 window.checkPremiumAccess = checkPremiumAccess;
+
 
 
 
