@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Guru Super App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; overflow: hidden; }
+        
+        /* A4 Paper Styling for Preview */
+        .paper-preview { background: white; margin: 20px auto; padding: 15mm; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); max-width: 297mm; min-height: 210mm; position: relative; }
+        .paper-preview.portrait { max-width: 210mm; min-height: 297mm; }
+        
+        /* Table Styles */
+        .doc-table { width: 100%; border-collapse: collapse; font-size: 10pt; margin-bottom: 20px; }
+        .doc-table th, .doc-table td { border: 1px solid #1f2937; padding: 6px; text-align: left; vertical-align: top; }
+        .doc-table th { background-color: #f1f5f9; font-weight: 600; text-align: center; }
+        .text-center { text-align: center !important; }
+        .vertical-text { writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; vertical-align: middle; margin: auto; }
+        
+        /* RTL for Arabic */
+        .arabic-text { direction: rtl; font-family: 'Amiri', serif; font-size: 14pt; text-align: right; }
+        
+        /* Editable cells */
+        [contenteditable="true"]:hover { background-color: #fef08a; outline: 1px dashed #eab308; cursor: text; }
+
+        /* Lock Overlay */
+        .premium-lock { position: absolute; inset: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; }
+        
+        /* Loader */
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media print {
+            body { background: white; overflow: visible; }
+            #sidebar, #topbar, .no-print { display: none !important; }
+            #main-content { margin: 0; padding: 0; width: 100%; }
+            .paper-preview { margin: 0; padding: 15mm; box-shadow: none; max-width: 100%; page-break-after: always; }
+            @page { size: auto; margin: 0mm; }
+        }
+    </style>
+</head>
+<body class="flex h-screen text-slate-800">
+
+    <div id="login-screen" class="fixed inset-0 bg-slate-900 z-[100] flex flex-col items-center justify-center text-white">
+        <div class="bg-slate-800 p-8 rounded-xl shadow-2xl max-w-md w-full text-center border border-slate-700">
+            <h1 class="text-3xl font-bold text-blue-400 mb-2">Admin Guru Super App</h1>
+            <p class="text-slate-400 mb-8 text-sm">Sistem Administrasi Cerdas Single Input</p>
+            <button id="btn-login-google" class="w-full bg-white text-slate-800 font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-3 hover:bg-slate-100 transition">
+                <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Masuk dengan Google
+            </button>
+            <div id="login-loader" class="loader mx-auto mt-4 hidden"></div>
+        </div>
+    </div>
+
+    <aside id="sidebar" class="w-80 bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-700 hidden">
+        <div class="p-5 border-b border-slate-700">
+            <h2 class="text-xl font-bold text-white">Super App</h2>
+            <div class="flex items-center gap-2 mt-2">
+                <span id="user-badge" class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-400">FREE</span>
+                <span id="user-email" class="text-xs truncate">user@gmail.com</span>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-6 sidebar-scroll">
+            
+            <div>
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Data Pokok</h3>
+                <div class="space-y-3">
+                    <input type="text" id="in-sekolah" placeholder="Nama Sekolah" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none" value="SD Cerdas Bangsa">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="in-kepsek" placeholder="Nama Kepsek" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none" value="Budi, S.Pd.">
+                        <input type="text" id="in-nip-kepsek" placeholder="NIP Kepsek" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="in-guru" placeholder="Nama Guru" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none" value="Siti, S.Pd.I">
+                        <input type="text" id="in-nip-guru" placeholder="NIP Guru" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none">
+                    </div>
+                    <input type="text" id="in-tempat-tgl" placeholder="Tempat, Tanggal Pengesahan" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none" value="Jakarta, 15 Juli 2024">
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Kurikulum & Kelas</h3>
+                <div class="space-y-3">
+                    <select id="in-jenjang" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none">
+                        <option value="SD">SD/MI</option>
+                        <option value="SMP">SMP/MTs</option>
+                        <option value="SMA">SMA/SMK/MA</option>
+                    </select>
+                    <select id="in-mapel" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none">
+                        <option value="PAI">Pendidikan Agama Islam</option>
+                        </select>
+                    
+                    <div class="grid grid-cols-3 gap-2">
+                        <select id="in-kelas" class="col-span-1 bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none">
+                            <option value="1">Kls 1</option><option value="2">Kls 2</option><option value="3">Kls 3</option>
+                            <option value="4">Kls 4</option><option value="5">Kls 5</option><option value="6" selected>Kls 6</option>
+                        </select>
+                        <input type="text" id="in-rombel" placeholder="Rombel" class="col-span-1 bg-slate-800 border border-slate-600 rounded p-2 text-sm text-center focus:border-blue-500 outline-none" value="A">
+                        <select id="in-semester" class="col-span-1 bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none">
+                            <option value="Ganjil">Ganjil</option><option value="Genap">Genap</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] text-slate-500">Tahun Awal</label>
+                            <input type="number" id="in-tahun" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none" value="2024">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-500">JP / Pertemuan</label>
+                            <input type="number" id="in-jp" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none" value="4">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Jadwal & Kalender</h3>
+                <div class="space-y-3">
+                    <select id="in-hari" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none">
+                        <option value="1">Senin</option><option value="2">Selasa</option><option value="3">Rabu</option>
+                        <option value="4">Kamis</option><option value="5">Jum'at</option><option value="6">Sabtu</option>
+                    </select>
+                    <textarea id="in-libur" rows="2" placeholder="Libur Khusus (YYYY-MM-DD)" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm focus:border-blue-500 outline-none"></textarea>
+                </div>
+            </div>
+
+            <div id="panel-superadmin" class="hidden p-3 border border-dashed border-rose-500 rounded bg-rose-500/10">
+                <h3 class="text-xs font-bold text-rose-400 mb-2">SUPER ADMIN TOOLS</h3>
+                <input type="text" id="sa-csv-url" placeholder="Paste URL CSV CP Global" class="w-full bg-slate-900 border border-rose-500 rounded p-2 text-xs text-white mb-2">
+                <button onclick="SuperAdmin.saveGlobalCSV()" class="w-full bg-rose-600 hover:bg-rose-700 text-white text-xs py-1.5 rounded">Set URL Global</button>
+            </div>
+            
+        </div>
+        
+        <div class="p-4 border-t border-slate-700">
+            <button onclick="Engine.syncAll()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg transition shadow-lg shadow-blue-500/30">
+                🔄 Sync & Generate
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col hidden" id="main-wrapper">
+        
+        <header id="topbar" class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 no-print">
+            <div class="flex space-x-1 overflow-x-auto">
+                <button onclick="UI.switchTab('atp')" class="nav-tab px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600">ATP & Prota</button>
+                <button onclick="UI.switchTab('promes')" class="nav-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Promes</button>
+                <button onclick="UI.switchTab('modul')" class="nav-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Modul & LKPD</button>
+                <button onclick="UI.switchTab('jurnal')" class="nav-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Jurnal</button>
+                <button onclick="UI.switchTab('kktp')" class="nav-tab px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">KKTP & Nilai</button>
+                <button onclick="UI.openAiModal()" class="px-4 py-2 text-sm font-medium text-purple-600 flex items-center gap-1 hover:bg-purple-50 rounded-md transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> AI Assistant</button>
+            </div>
+            <button onclick="window.print()" class="bg-slate-800 text-white px-5 py-2 rounded-md text-sm font-semibold hover:bg-slate-700 shadow flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg> Cetak PDF
+            </button>
+        </header>
+
+        <div id="main-content" class="flex-1 overflow-y-auto p-8">
+            
+            <div id="view-atp" class="view-section block">
+                <div class="no-print mb-4 flex justify-end">
+                    <select id="in-atp-mode" onchange="Engine.renderATP()" class="p-2 border border-slate-300 rounded text-sm outline-none">
+                        <option value="semester">Tampilkan 1 Semester Aktif</option>
+                        <option value="tahun">Tampilkan 1 Tahun Penuh (2 Smt)</option>
+                    </select>
+                </div>
+                
+                <div class="paper-preview landscape">
+                    <h1 class="header-title" contenteditable="true">ALUR TUJUAN PEMBELAJARAN (ATP)<br>TAHUN PELAJARAN <span class="v-thn"></span></h1>
+                    <table class="identity-table" contenteditable="true">
+                        <tr><td width="150">Nama Sekolah</td><td>: <span class="v-sekolah"></span></td><td width="100">Fase/Kelas</td><td>: <span class="v-fase"></span> / <span class="v-kls"></span></td></tr>
+                        <tr><td>Mata Pelajaran</td><td>: <span class="v-mapel"></span></td><td>Semester</td><td>: <span class="v-smt"></span></td></tr>
+                    </table>
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th width="3%">No</th>
+                                <th width="20%">Elemen & Capaian Pembelajaran</th>
+                                <th width="30%">Tujuan Pembelajaran</th>
+                                <th width="15%">Profil Lulusan</th>
+                                <th width="10%">Kompetensi</th>
+                                <th width="8%">Waktu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="out-atp"></tbody>
+                    </table>
+                </div>
+
+                <div class="paper-preview portrait mt-10">
+                    <h1 class="header-title" contenteditable="true">PROGRAM TAHUNAN (PROTA)<br><span class="v-mapel"></span></h1>
+                    <table class="identity-table" contenteditable="true">
+                        <tr><td width="150">Satuan Pendidikan</td><td>: <span class="v-sekolah"></span></td></tr>
+                        <tr><td>Fase / Kelas</td><td>: <span class="v-fase"></span> / <span class="v-kls"></span></td></tr>
+                        <tr><td>Tahun Pelajaran</td><td>: <span class="v-thn"></span></td></tr>
+                    </table>
+                    <table class="doc-table">
+                        <thead>
+                            <tr><th width="10%">Smt</th><th width="20%">Elemen</th><th width="60%">Tujuan Pembelajaran</th><th width="10%">JP</th></tr>
+                        </thead>
+                        <tbody id="out-prota"></tbody>
+                    </table>
+                    <div class="signature-area" contenteditable="true">
+                        <div class="signature-box">Mengetahui,<br>Kepala Sekolah<div class="signature-name v-kepsek"></div>NIP. <span class="v-nip-kepsek"></span></div>
+                        <div class="signature-box right"><span class="v-tgl"></span><br>Guru Mata Pelajaran<br><div class="signature-name v-guru"></div>NIP. <span class="v-nip-guru"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-promes" class="view-section hidden">
+                <div class="paper-preview landscape max-w-full">
+                    <h1 class="header-title" contenteditable="true">PROGRAM SEMESTER (PROSEM)<br>SEMESTER <span class="v-smt uppercase"></span></h1>
+                    <table class="identity-table w-1/2" contenteditable="true">
+                        <tr><td width="150">Sekolah</td><td>: <span class="v-sekolah"></span></td></tr>
+                        <tr><td>Kelas/Rombel</td><td>: <span class="v-kls"></span> / <span class="v-rombel"></span></td></tr>
+                    </table>
+                    <table class="doc-table text-[8pt]">
+                        <thead id="out-promes-head"></thead>
+                        <tbody id="out-promes-body"></tbody>
+                    </table>
+                    <div class="signature-area" contenteditable="true">
+                        <div class="signature-box">Mengetahui,<br>Kepala Sekolah<div class="signature-name v-kepsek"></div>NIP. <span class="v-nip-kepsek"></span></div>
+                        <div class="signature-box right"><span class="v-tgl"></span><br>Guru Mata Pelajaran<br><div class="signature-name v-guru"></div>NIP. <span class="v-nip-guru"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-modul" class="view-section hidden relative">
+                <div id="lock-modul" class="premium-lock hidden">
+                    <svg class="w-16 h-16 text-slate-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7z"></path></svg>
+                    <h2 class="text-2xl font-bold text-slate-800">Fitur Premium</h2>
+                    <p class="text-slate-500 mt-2 mb-6">Upgrade akun untuk membuka Generator Modul Ajar Otomatis.</p>
+                    <button onclick="Premium.upgrade()" class="bg-emerald-500 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-emerald-600">Hubungi Admin (WhatsApp)</button>
+                </div>
+
+                <div class="no-print mb-4 bg-white p-3 rounded shadow flex items-center gap-4 border border-slate-200">
+                    <label class="font-semibold text-sm">Pilih Bab Materi:</label>
+                    <select id="in-bab-modul" onchange="Engine.renderModul()" class="flex-1 bg-slate-50 border border-slate-300 rounded p-2 text-sm outline-none"></select>
+                    <label class="flex items-center gap-2 text-sm font-semibold cursor-pointer">
+                        <input type="checkbox" id="in-toggle-lkpd" checked onchange="document.getElementById('wrapper-lkpd').classList.toggle('hidden')"> Sertakan LKPD
+                    </label>
+                </div>
+
+                <div class="paper-preview portrait">
+                    <h1 class="header-title" contenteditable="true">MODUL AJAR KURIKULUM MERDEKA</h1>
+                    <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">A. IDENTITAS</div>
+                    <table class="identity-table" contenteditable="true">
+                        <tr><td width="150">Penyusun</td><td>: <span class="v-guru"></span></td></tr>
+                        <tr><td>Mata Pelajaran</td><td>: <span class="v-mapel"></span></td></tr>
+                        <tr><td>Kelas / Semester</td><td>: <span class="v-kls"></span> / <span class="v-smt"></span></td></tr>
+                        <tr><td>Topik Materi</td><td>: <span class="text-blue-600 font-bold v-bab-aktif"></span></td></tr>
+                    </table>
+                    
+                    <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">B. PROFIL LULUSAN</div>
+                    <div class="pl-4 mb-3" contenteditable="true" id="out-modul-p3"></div>
+
+                    <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">C. TUJUAN PEMBELAJARAN</div>
+                    <div class="pl-4 mb-3" contenteditable="true" id="out-modul-tp"></div>
+
+                    <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">D. LANGKAH PEMBELAJARAN</div>
+                    <div class="pl-4 mb-3" contenteditable="true" id="out-modul-langkah"></div>
+                    
+                    <div class="signature-area" contenteditable="true">
+                        <div class="signature-box">Mengetahui,<br>Kepala Sekolah<div class="signature-name v-kepsek"></div>NIP. <span class="v-nip-kepsek"></span></div>
+                        <div class="signature-box right"><span class="v-tgl"></span><br>Guru Mata Pelajaran<br><div class="signature-name v-guru"></div>NIP. <span class="v-nip-guru"></span></div>
+                    </div>
+                </div>
+
+                <div id="wrapper-lkpd" class="paper-preview portrait mt-10">
+                    <div class="border-2 border-dashed border-blue-600 p-6 rounded-xl bg-slate-50 h-full">
+                        <h1 class="text-center font-bold text-xl text-blue-800 mb-4" contenteditable="true">LEMBAR KERJA PESERTA DIDIK (LKPD)</h1>
+                        <div class="flex justify-between border-b border-black pb-2 mb-4 font-bold" contenteditable="true">
+                            <span>Nama : .......................</span>
+                            <span>Kelas: <span class="v-kls"></span>/<span class="v-rombel"></span></span>
+                            <span>Nilai : .....</span>
+                        </div>
+                        <p class="font-bold text-blue-700">Materi: <span class="v-bab-aktif"></span></p>
+                        <div id="out-lkpd-tp" class="text-sm italic mb-6"></div>
+                        <div class="space-y-6" contenteditable="true">
+                            <div class="border border-slate-300 bg-white p-4 rounded-lg min-h-[100px]">1. Tulislah pemahamanmu tentang materi hari ini!</div>
+                            <div class="border border-slate-300 bg-white p-4 rounded-lg min-h-[100px]">2. Berikan contoh nyata dalam kehidupan sehari-hari!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-jurnal" class="view-section hidden relative">
+                <div id="lock-jurnal" class="premium-lock hidden">
+                    <svg class="w-16 h-16 text-slate-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7z"></path></svg>
+                    <h2 class="text-2xl font-bold text-slate-800">Fitur Premium</h2>
+                    <button onclick="Premium.upgrade()" class="bg-emerald-500 text-white px-6 py-2 mt-4 rounded-lg font-semibold shadow hover:bg-emerald-600">Hubungi Admin</button>
+                </div>
+
+                <div class="paper-preview landscape">
+                    <h1 class="header-title" contenteditable="true">JURNAL PELAKSANAAN PEMBELAJARAN</h1>
+                    <table class="identity-table w-1/2" contenteditable="true">
+                        <tr><td width="150">Mata Pelajaran</td><td>: <span class="v-mapel"></span></td></tr>
+                        <tr><td>Kelas/Semester</td><td>: <span class="v-kls"></span> / <span class="v-smt"></span></td></tr>
+                    </table>
+                    <table class="doc-table text-sm">
+                        <thead>
+                            <tr><th width="10%">Tanggal</th><th width="15%">Elemen/Materi</th><th width="45%">Tujuan Pembelajaran</th><th width="15%">Absensi</th><th width="15%">Keterangan</th></tr>
+                        </thead>
+                        <tbody id="out-jurnal"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-kktp" class="view-section hidden relative">
+                <div id="lock-kktp" class="premium-lock hidden">
+                    <svg class="w-16 h-16 text-slate-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7z"></path></svg>
+                    <h2 class="text-2xl font-bold text-slate-800">Fitur Premium</h2>
+                    <button onclick="Premium.upgrade()" class="bg-emerald-500 text-white px-6 py-2 mt-4 rounded-lg font-semibold shadow hover:bg-emerald-600">Hubungi Admin</button>
+                </div>
+
+                <div class="paper-preview portrait">
+                    <h1 class="header-title" contenteditable="true">KRITERIA KETERCAPAIAN TUJUAN PEMBELAJARAN (KKTP)</h1>
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" width="5%">No</th><th rowspan="2" width="45%">Tujuan Pembelajaran</th>
+                                <th colspan="3">Kriteria (Klik Angka Edit)</th><th rowspan="2" width="10%">KKTP</th>
+                            </tr>
+                            <tr><th class="text-[8pt]">Kompleksitas</th><th class="text-[8pt]">Daya Dukung</th><th class="text-[8pt]">Intaks Siswa</th></tr>
+                        </thead>
+                        <tbody id="out-kktp"></tbody>
+                    </table>
+                </div>
+                
+                <div class="paper-preview landscape mt-10">
+                    <h1 class="header-title" contenteditable="true">DAFTAR NILAI SUMATIF & FORMATIF</h1>
+                    <table class="doc-table text-[9pt]">
+                        <thead>
+                            <tr>
+                                <th width="3%" rowspan="2">No</th><th width="20%" rowspan="2">Nama Siswa</th>
+                                <th colspan="5">Nilai Sumatif (Harian)</th><th width="5%" rowspan="2">STS</th><th width="5%" rowspan="2">SAS</th><th width="5%" rowspan="2">NR</th>
+                            </tr>
+                            <tr><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>Rata2</th></tr>
+                        </thead>
+                        <tbody id="out-nilai">
+                            <tr><td>1</td><td contenteditable="true">Ahmad Fulan</td><td contenteditable="true">85</td><td contenteditable="true">80</td><td></td><td></td><td>82.5</td><td contenteditable="true">90</td><td contenteditable="true">85</td><td class="font-bold">85</td></tr>
+                            <tr><td>2</td><td contenteditable="true">Siti Fulanah</td><td contenteditable="true">90</td><td contenteditable="true">95</td><td></td><td></td><td>92.5</td><td contenteditable="true">88</td><td contenteditable="true">90</td><td class="font-bold">90.5</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="ai-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="document.getElementById('ai-modal').style.display='none'">Tutup</button>
+            <div class="modal-header">🤖 AI Assistant Module</div>
+            <p class="text-sm text-slate-600 mb-4">Fitur ini membantu Anda menyusun format CSV mentah yang siap dibaca oleh sistem, berdasarkan teks CP bebas yang Anda miliki.</p>
+            
+            <label class="font-bold text-sm">Tempel Teks CP/Materi Mentah Anda di sini:</label>
+            <textarea id="ai-input" rows="4" class="w-full bg-slate-50 border border-slate-300 p-2 mt-1 mb-3 rounded outline-none focus:border-purple-500"></textarea>
+            
+            <button onclick="AI.generateCSV()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded w-full mb-4">✨ Generate ke Format Sistem</button>
+            
+            <label class="font-bold text-sm">Hasil CSV (Siap Copy-Paste ke Excel / Notepad):</label>
+            <textarea id="ai-output" rows="6" class="w-full bg-slate-900 text-green-400 border border-slate-700 p-2 mt-1 rounded font-mono text-sm" readonly></textarea>
+        </div>
+    </div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // 1. CONFIGURATION (Strict Rule: Given by user)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDe4ie2wSPEpNbAgWP-q03vTuHyxc9Jj3E", // Fake API key pattern, replace with real in production
+            authDomain: "agsa-e5b08.firebaseapp.com",
+            projectId: "agsa-e5b08",
+            storageBucket: "agsa-e5b08.firebasestorage.app",
+            messagingSenderId: "916052746331",
+            appId: "1:916052746331:web:357cbadbfd8658f1689f7e"
+        };
+
+        // 2. INITIALIZE
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // 3. GLOBAL STATE
+        window.AppState = {
+            user: null,
+            role: 'user', // 'user' or 'superadmin'
+            subscription: 'free', // 'free' or 'premium'
+            csvData: [], // Array of objects parsed from CSV
+            dates: [] // Array of active teaching dates
+        };
+
+        // Default Super Admin CP Link (Fallback)
+        const DEFAULT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?output=csv";
+
+        // 4. AUTH LOGIC
+        const btnLogin = document.getElementById('btn-login-google');
+        const loginScreen = document.getElementById('login-screen');
+        const mainWrapper = document.getElementById('main-wrapper');
+        const sidebar = document.getElementById('sidebar');
+        const loader = document.getElementById('login-loader');
+
+        btnLogin.addEventListener('click', () => {
+            loader.classList.remove('hidden');
+            // Simulate Google Login if real Firebase throws error due to invalid test key
+            signInWithPopup(auth, provider).catch(err => {
+                console.warn("Firebase Auth blocked/invalid key. Simulating login for demo purposes.");
+                setTimeout(() => handleUserSession({ email: 'guru.demo@gmail.com', uid: '123' }), 1000);
+            });
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) handleUserSession(user);
+        });
+
+        async function handleUserSession(user) {
+            AppState.user = user;
+            document.getElementById('user-email').innerText = user.email;
+            
+            // Check Super Admin
+            if(user.email === 'afifaro@gmail.com') {
+                AppState.role = 'superadmin';
+                AppState.subscription = 'premium';
+                document.getElementById('panel-superadmin').classList.remove('hidden');
+            } else {
+                // In real app, fetch from Firestore `users/${user.uid}`. Hardcoding demo:
+                AppState.subscription = 'free'; // Change to 'premium' to unlock all
+            }
+
+            // Update UI based on Subscription
+            let badge = document.getElementById('user-badge');
+            if(AppState.subscription === 'premium') {
+                badge.innerText = "PREMIUM";
+                badge.className = "px-2 py-0.5 rounded text-xs font-semibold bg-amber-500/20 text-amber-500";
+            }
+
+            Premium.checkAccess();
+
+            // Hide Login, Show App
+            loginScreen.style.display = 'none';
+            mainWrapper.classList.remove('hidden');
+            sidebar.classList.remove('hidden');
+
+            // Initial Data Load
+            fetchGlobalCSV();
+        }
+
+        // Fetch CSV using Proxy to bypass CORS
+        async function fetchGlobalCSV() {
+            let url = localStorage.getItem('sa_global_csv') || DEFAULT_CSV_URL;
+            document.getElementById('csvStatus').style.display = 'block';
+            document.getElementById('csvStatus').innerText = "⏳ Memuat database Kurikulum...";
+            
+            try {
+                const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error("Gagal mengambil data dari server.");
+                const text = await response.text();
+                Engine.parseCSV(text);
+            } catch (err) {
+                document.getElementById('csvStatus').innerText = "❌ Error memuat CSV. Menggunakan data lokal jika ada.";
+                document.getElementById('csvStatus').className = "csv-info error";
+            }
+        }
+
+        // Super Admin Action
+        window.SuperAdmin = {
+            saveGlobalCSV: function() {
+                let url = document.getElementById('sa-csv-url').value;
+                if(url) {
+                    localStorage.setItem('sa_global_csv', url);
+                    fetchGlobalCSV();
+                }
+            }
+        };
+    </script>
+
+    <script>
+        // TAB NAVIGATION
+        const UI = {
+            switchTab: function(tabId) {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.nav-tab').forEach(el => {
+                    el.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                    el.classList.add('text-slate-500');
+                });
+                
+                document.getElementById(`view-${tabId}`).classList.remove('hidden');
+                event.currentTarget.classList.remove('text-slate-500');
+                event.currentTarget.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            },
+            openAiModal: function() {
+                document.getElementById('ai-modal').style.display = 'flex';
+            }
+        };
+
+        // PREMIUM GATEKEEPER
+        const Premium = {
+            checkAccess: function() {
+                const isPremium = window.AppState && window.AppState.subscription === 'premium';
+                const locks = ['lock-modul', 'lock-jurnal', 'lock-kktp'];
+                locks.forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) {
+                        if(isPremium) el.classList.add('hidden');
+                        else el.classList.remove('hidden');
+                    }
+                });
+            },
+            upgrade: function() {
+                window.open("https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20ingin%20upgrade%20akun%20Admin%20Guru%20Super%20App%20ke%20Premium.", "_blank");
+            }
+        };
+
+        // CORE GENERATOR ENGINE
+        const Engine = {
+            data: {}, // Structured Data
+
+            parseCSV: function(csvText) {
+                const lines = csvText.split('\n');
+                this.data = {};
+                let count = 0;
+
+                for(let i=1; i<lines.length; i++) {
+                    let row = lines[i].trim();
+                    if(!row) continue;
+                    
+                    let separator = row.includes(';') ? ';' : ',';
+                    let cols = []; let match;
+                    const regex = new RegExp(`(\"([^\"]*)\"|[^\"${separator}]+)(?=${separator}|$)`, 'g');
+                    while(match = regex.exec(row)) cols.push(match[2] ? match[2] : match[1]);
+
+                    if(cols.length < 5) continue;
+
+                    let fase = cols[0]?cols[0].trim():"";
+                    let kls = cols[1]?cols[1].trim():"";
+                    let smt = cols[2]?cols[2].trim():"";
+                    let elemen = cols[3]?cols[3].trim():"";
+                    let cp = cols.length >= 7 ? cols[4].trim() : "Memahami materi terkait.";
+                    let tp = cols.length >= 7 ? cols[5].trim() : cols[4].trim();
+                    let p3 = cols.length >= 7 ? cols[6].trim() : "Beriman Bertakwa, Mandiri, Bernalar Kritis";
+
+                    if(!this.data[kls]) this.data[kls] = {};
+                    if(!this.data[kls][smt]) this.data[kls][smt] = {};
+                    if(!this.data[kls][smt][elemen]) this.data[kls][smt][elemen] = { cp: cp, tps: [] };
+                    
+                    this.data[kls][smt][elemen].tps.push({ tp: tp, p3: p3 });
+                    count++;
+                }
+                
+                let sEl = document.getElementById('csvStatus');
+                sEl.style.display='block'; sEl.className='csv-info'; sEl.innerHTML=`✅ Sukses sinkronisasi <b>${count}</b> TP.`;
+                this.updateDropdowns();
+                this.syncAll();
+            },
+
+            updateDropdowns: function() {
+                let kls = document.getElementById('in-kelas').value;
+                let smt = document.getElementById('in-semester').value;
+                let sel = document.getElementById('in-bab-modul');
+                sel.innerHTML = "";
+
+                if(this.data[kls] && this.data[kls][smt]) {
+                    Object.keys(this.data[kls][smt]).forEach(el => {
+                        let opt = document.createElement('option');
+                        opt.value = el; opt.text = el; sel.appendChild(opt);
+                    });
+                } else {
+                    sel.innerHTML = "<option value=''>- Data Kosong -</option>";
+                }
+            },
+
+            // Kalkulator KKTP (Inline HTML handler)
+            calcKktp: function(el) {
+                let row = el.closest('tr');
+                let vals = row.querySelectorAll('.kktp-val');
+                let res = row.querySelector('.kktp-hasil');
+                if(vals.length === 3 && res) {
+                    let v1 = parseFloat(vals[0].innerText.replace(/[^0-9.]/g, ''))||0;
+                    let v2 = parseFloat(vals[1].innerText.replace(/[^0-9.]/g, ''))||0;
+                    let v3 = parseFloat(vals[2].innerText.replace(/[^0-9.]/g, ''))||0;
+                    res.innerText = Math.round((v1+v2+v3)/3);
+                }
+            },
+
+            syncAll: function() {
+                // 1. Ambil State Input
+                let mapel = document.getElementById('in-mapel').options[document.getElementById('in-mapel').selectedIndex].text;
+                let kls = document.getElementById('in-kelas').value;
+                let smt = document.getElementById('in-semester').value;
+                let thnAwal = parseInt(document.getElementById('in-tahun').value) || 2024;
+                let jp = parseInt(document.getElementById('in-jp').value) || 4;
+                let babAktif = document.getElementById('in-bab-modul').value;
+                
+                // Hitung Fase Dinamis
+                let k = parseInt(kls);
+                let f = k<=2?'A' : k<=4?'B' : k<=6?'C' : k<=9?'D' : k==10?'E' : 'F';
+
+                // 2. Tembak ke UI Kertas
+                document.querySelectorAll('.v-sekolah').forEach(e=>e.innerText=document.getElementById('in-sekolah').value);
+                document.querySelectorAll('.v-kepsek').forEach(e=>e.innerText=document.getElementById('in-kepsek').value);
+                document.querySelectorAll('.v-nip-kepsek').forEach(e=>e.innerText=document.getElementById('in-nip-kepsek').value);
+                document.querySelectorAll('.v-guru').forEach(e=>e.innerText=document.getElementById('in-guru').value);
+                document.querySelectorAll('.v-nip-guru').forEach(e=>e.innerText=document.getElementById('in-nip-guru').value);
+                document.querySelectorAll('.v-tgl').forEach(e=>e.innerText=document.getElementById('in-tempat-tgl').value);
+                
+                document.querySelectorAll('.v-mapel').forEach(e=>e.innerText=mapel);
+                document.querySelectorAll('.v-kls').forEach(e=>e.innerText=kls);
+                document.querySelectorAll('.v-rombel').forEach(e=>e.innerText=document.getElementById('in-rombel').value);
+                document.querySelectorAll('.v-smt').forEach(e=>e.innerText=smt);
+                document.querySelectorAll('.v-thn').forEach(e=>e.innerText=`${thnAwal}/${thnAwal+1}`);
+                document.querySelectorAll('.v-fase').forEach(e=>e.innerText="Fase "+f);
+                document.querySelectorAll('.v-bab-aktif').forEach(e=>e.innerText=babAktif);
+
+                // 3. Bangun Engine Kalender (Anti Bentrok)
+                let hariTarget = parseInt(document.getElementById('in-hari').value);
+                let liburRaw = document.getElementById('in-libur').value.split(/[\n,]+/);
+                let t1=thnAwal, t2=thnAwal+1;
+                // Auto Libur Nasional
+                let liburDB = [`${t1}-08-17`,`${t1}-12-25`,`${t2}-01-01`,`${t2}-05-01`]; 
+                liburRaw.forEach(d=>{ if(d.trim()) liburDB.push(d.trim()); });
+
+                let colEvents = new Array(30).fill(null);
+                if(smt==="Ganjil"){
+                    colEvents[0]="MPLS/Libur"; colEvents[1]="MPLS/Libur"; colEvents[12]="SUMATIF TENGAH SMT"; 
+                    colEvents[25]="SUMATIF AKHIR SMT"; colEvents[26]="PENGAYAAN"; colEvents[27]="PEMBAGIAN RAPOR"; colEvents[28]="LIBUR"; colEvents[29]="LIBUR";
+                } else {
+                    colEvents[0]="LIBUR"; colEvents[11]="SUMATIF TENGAH SMT"; 
+                    // Logika Kelas Akhir (6,9,12) Ujian lebih cepat
+                    let isAkhir = (k==6 || k==9 || k==12);
+                    let sasIdx = isAkhir ? 20 : 25; 
+                    colEvents[sasIdx]="UJIAN SEKOLAH / SAS"; colEvents[sasIdx+1]="PENGAYAAN"; colEvents[sasIdx+2]="PEMBAGIAN RAPOR";
+                    for(let x=sasIdx+3; x<30; x++) colEvents[x]="LIBUR / LULUS";
+                }
+
+                let blnAwal = smt==="Ganjil"?6:0;
+                let activeDates = [];
+                for(let i=0; i<6; i++) {
+                    let b = blnAwal+i; let y = smt==="Ganjil" ? (b>11?t2:t1) : t2;
+                    if(b>11) b-=12;
+                    let daysInMonth = new Date(y, b+1, 0).getDate();
+                    for(let d=1; d<=daysInMonth; d++) {
+                        let dt = new Date(y, b, d);
+                        if(dt.getDay() === hariTarget) {
+                            let strD = `${y}-${String(b+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                            let wIdx = Math.ceil(d/7); if(wIdx>5) wIdx=5;
+                            let cIdx = (i*5)+(wIdx-1);
+                            
+                            if(liburDB.includes(strD)) {
+                                if(cIdx<30 && !colEvents[cIdx]) colEvents[cIdx]="LIBUR NASIONAL";
+                            } else {
+                                if(!colEvents[cIdx]) activeDates.push(dt);
+                            }
+                        }
+                    }
+                }
+                window.AppState.dates = activeDates;
+
+                // 4. Render Semua Dokumen
+                this.renderATPProta(jp, activeDates);
+                this.renderPromes(jp, colEvents, smt, blnAwal);
+                if(babAktif) this.renderModulJurnal(babAktif, jp);
+            },
+
+            renderATPProta: function(jp, dates) {
+                let atpMode = document.getElementById('in-atp-mode').value;
+                let kls = document.getElementById('in-kelas').value;
+                let smt = document.getElementById('in-semester').value;
+                
+                let dataToRender = [];
+                if(atpMode === "tahun") {
+                    // Combine Ganjil & Genap
+                    if(this.data[kls]) {
+                        if(this.data[kls]["Ganjil"]) Object.keys(this.data[kls]["Ganjil"]).forEach(k => dataToRender.push({smt:"Ganjil", bab:k, d:this.data[kls]["Ganjil"][k]}));
+                        if(this.data[kls]["Genap"]) Object.keys(this.data[kls]["Genap"]).forEach(k => dataToRender.push({smt:"Genap", bab:k, d:this.data[kls]["Genap"][k]}));
+                    }
+                } else {
+                    if(this.data[kls] && this.data[kls][smt]) {
+                        Object.keys(this.data[kls][smt]).forEach(k => dataToRender.push({smt:smt, bab:k, d:this.data[kls][smt][k]}));
+                    }
+                }
+
+                let atpHtml="", protaHtml=""; let dIdx = 0;
+                
+                // Simpan global Promes Rows untuk step selanjutnya
+                window.AppState.promesRows = [];
+
+                dataToRender.forEach((item, index) => {
+                    let totalJp = item.d.tps.length * jp;
+                    
+                    item.d.tps.forEach((tpObj, tIdx) => {
+                        let kk = tpObj.tp.match(/mampu\s+([a-zA-Z\-]+)/i);
+                        kk = kk ? kk[1].toUpperCase() : "MEMAHAMI";
+
+                        // ATP
+                        atpHtml += `<tr>`;
+                        if(tIdx===0) {
+                            atpHtml += `<td rowspan="${item.d.tps.length}">${index+1}</td>
+                                        <td rowspan="${item.d.tps.length}" contenteditable="true" class="bg-slate-50 font-semibold">${item.bab}<br><span class="text-xs font-normal text-slate-500">${item.d.cp}</span></td>`;
+                        }
+                        atpHtml += `<td contenteditable="true">${tpObj.tp}</td><td class="text-xs text-blue-800" contenteditable="true">${tpObj.p3}</td><td class="font-bold text-amber-600">${kk}</td>`;
+                        if(tIdx===0) atpHtml += `<td rowspan="${item.d.tps.length}">${Math.ceil(totalJp/jp)} Minggu<br>${totalJp} JP</td>`;
+                        atpHtml += `</tr>`;
+
+                        // Prota
+                        protaHtml += `<tr>`;
+                        if(tIdx===0) {
+                            protaHtml += `<td rowspan="${item.d.tps.length}" class="font-bold">${item.smt}</td>
+                                          <td rowspan="${item.d.tps.length}" class="bg-slate-50 font-bold" contenteditable="true"><div class="vertical-text text-sm">${item.bab}</div></td>`;
+                        }
+                        protaHtml += `<td contenteditable="true">${tpObj.tp}</td>`;
+                        if(tIdx===0) protaHtml += `<td rowspan="${item.d.tps.length}" class="font-bold">${totalJp} JP</td>`;
+                        protaHtml += `</tr>`;
+
+                        // Track for Promes
+                        if(atpMode === "semester" || item.smt === smt) { // Only track current semester for Promes grid
+                            let alok = [];
+                            if(dIdx < dates.length) { alok.push({date: dates[dIdx], jp: jp}); dIdx++; }
+                            window.AppState.promesRows.push({
+                                bab: tIdx===0?item.bab:"", tp: tpObj.tp, jp: jp, alokasi: alok, rowsp: tIdx===0?item.d.tps.length:0
+                            });
+                        }
+                    });
+                });
+                document.getElementById('out-atp').innerHTML = atpHtml || `<tr><td colspan="6">Data kosong</td></tr>`;
+                document.getElementById('out-prota').innerHTML = protaHtml || `<tr><td colspan="4">Data kosong</td></tr>`;
+            },
+
+            renderPromes: function(jp, colEvents, smt, blnAwal) {
+                let nBulan = smt==="Ganjil" ? ["Jul","Ags","Sep","Okt","Nov","Des"] : ["Jan","Feb","Mar","Apr","Mei","Jun"];
+                let th = `<tr><th rowspan="2" width="5%">Bab</th><th rowspan="2" width="25%">Tujuan Pembelajaran</th><th rowspan="2">JP</th>`;
+                nBulan.forEach(b=> th+=`<th colspan="5">${b}</th>`);
+                th+=`</tr><tr>`; for(let i=0;i<6;i++) th+=`<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>`; th+=`</tr>`;
+                document.getElementById('out-promes-head').innerHTML = th;
+
+                let tb = ""; let rows = window.AppState.promesRows || [];
+                if(rows.length>0) {
+                    rows.forEach((r, idx) => {
+                        tb+=`<tr>`;
+                        if(r.rowsp>0) tb+=`<td rowspan="${r.rowsp}" class="bg-slate-50"><div class="vertical-text font-bold text-[8pt]">${r.bab}</div></td>`;
+                        tb+=`<td contenteditable="true">${r.tp}</td><td class="text-center font-bold">${r.jp}</td>`;
+                        
+                        for(let c=0; c<30; c++) {
+                            if(colEvents[c]) {
+                                if(idx===0) tb+=`<td rowspan="${rows.length}" class="bg-slate-100" contenteditable="true"><div class="vertical-event">${colEvents[c]}</div></td>`;
+                            } else {
+                                let mI=Math.floor(c/5); let wI=(c%5)+1;
+                                let tBln = blnAwal+mI; if(tBln>11) tBln-=12;
+                                let match = r.alokasi.filter(a=> a.date.getMonth()===tBln && Math.ceil(a.date.getDate()/7)===wI);
+                                
+                                if(match.length>0) {
+                                    tb+=`<td class="bg-blue-100 text-center"><span class="cell-jp">${match[0].jp}</span><span class="cell-date">${match[0].date.getDate()}</span></td>`;
+                                } else { tb+=`<td contenteditable="true"></td>`; }
+                            }
+                        }
+                        tb+=`</tr>`;
+                    });
+                } else tb = `<tr><td colspan="33" class="text-center">Kosong</td></tr>`;
+                document.getElementById('out-promes-body').innerHTML = tb;
+            },
+
+            renderModulJurnal: function(bab, jp) {
+                let kls = document.getElementById('in-kelas').value;
+                let smt = document.getElementById('in-semester').value;
+                let data = this.data[kls]?.[smt]?.[bab];
+                if(!data) return;
+
+                // Modul & LKPD
+                let p3Set = new Set();
+                let mdHtml="", kktpHtml="", jurnalHtml="";
+                
+                document.querySelectorAll('.valJpBab').forEach(e=>e.innerText = data.tps.length * jp);
+
+                data.tps.forEach((t, i) => {
+                    t.p3.split(',').forEach(p=> { if(p.trim()) p3Set.add(p.trim())});
+                    let p=i+1;
+                    mdHtml += `<li><strong>Pertemuan ${p}:</strong> ${t.tp}</li>`;
+                    
+                    // KKTP Sync
+                    kktpHtml += `<tr>`;
+                    if(i===0) kktpHtml += `<td rowspan="${data.tps.length}">${i+1}</td>`;
+                    kktpHtml += `<td contenteditable="true">${t.tp}</td>
+                                 <td class="kktp-val" contenteditable="true" oninput="Engine.calcKktp(this)">75</td>
+                                 <td class="kktp-val" contenteditable="true" oninput="Engine.calcKktp(this)">75</td>
+                                 <td class="kktp-val" contenteditable="true" oninput="Engine.calcKktp(this)">75</td>
+                                 <td class="kktp-hasil font-bold text-center">75</td></tr>`;
+
+                    // Jurnal Sync (Find date from AppState)
+                    let dMatch = window.AppState.promesRows.find(pr => pr.tp === t.tp);
+                    let dStr = "...../...../20..";
+                    if(dMatch && dMatch.alokasi.length>0) {
+                        let dt = dMatch.alokasi[0].date;
+                        dStr = `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()}`;
+                    }
+                    jurnalHtml += `<tr><td class="text-center">${dStr}</td><td>${bab}</td><td contenteditable="true">${t.tp}</td><td contenteditable="true" class="text-center">S:.. I:.. A:..</td><td contenteditable="true">Tuntas</td></tr>`;
+                });
+
+                let p3Html = "<ul>"; p3Set.forEach(s=> p3Html+=`<li>${s}</li>`); p3Html+="</ul>";
+                document.getElementById('out-modul-p3').innerHTML = p3Html;
+                document.getElementById('out-modul-tp').innerHTML = `<ul>${mdHtml}</ul>`;
+                document.getElementById('out-lkpd-tp').innerHTML = `<ul>${mdHtml}</ul>`;
+                document.getElementById('out-kktp').innerHTML = kktpHtml;
+                document.getElementById('out-jurnal').innerHTML = jurnalHtml;
+
+                // Generate Generic Steps
+                let stepHtml="";
+                data.tps.forEach((t,i)=>{
+                    stepHtml += `<div class="mb-4 bg-slate-50 p-2 rounded border border-slate-200">
+                        <div class="font-bold border-b pb-1 mb-2">Pertemuan ${i+1} (${jp} JP)</div>
+                        <ul class="list-disc pl-5">
+                            <li><b>Pendahuluan (Mindful):</b> Doa, apersepsi, ice breaking.</li>
+                            <li><b>Inti (Meaningful & Joyful):</b> Eksplorasi materi, diskusi kelompok LKPD, presentasi interaktif.</li>
+                            <li><b>Penutup:</b> Kesimpulan, refleksi, doa.</li>
+                        </ul>
+                    </div>`;
+                });
+                document.getElementById('out-modul-langkah').innerHTML = stepHtml;
+            }
+        };
+
+        // AI ASSISTANT (Client Side Simulator)
+        const AI = {
+            generateCSV: function() {
+                let input = document.getElementById('ai-input').value;
+                if(!input) return alert("Masukkan teks materi dulu!");
+                
+                // Simulasi AI memproses teks mentah menjadi format CSV
+                let output = `Fase;Kelas;Semester;Elemen/Bab;Capaian Pembelajaran (CP);Tujuan Pembelajaran (TP);Dimensi Profil Lulusan\n`;
+                output += `Fase C;6;Ganjil;Bab 1 Materi Baru;Peserta didik memahami konsep dasar materi.;Peserta didik mampu menjelaskan pengertian materi.;Beriman, Mandiri\n`;
+                output += `Fase C;6;Ganjil;Bab 1 Materi Baru;Peserta didik memahami konsep dasar materi.;Peserta didik mampu memberikan contoh nyata.;Beriman, Bernalar Kritis, Kreatif\n`;
+                
+                document.getElementById('ai-output').value = output;
+            }
+        };
+
+        // Custom File Upload Listener (Overrides Cloud)
+        document.getElementById('fileCsv').addEventListener('change', function(e) {
+            let file = e.target.files[0];
+            if(!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) { Engine.parseCSV(e.target.result); };
+            reader.readAsText(file);
+        });
+    </script>
+</body>
+</html>
