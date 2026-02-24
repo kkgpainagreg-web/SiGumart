@@ -1,5 +1,5 @@
 // js/firebase-config.js
-// Firebase Configuration - JANGAN DIUBAH KECUALI DIPERLUKAN
+// Firebase Configuration
 
 const firebaseConfig = {
     apiKey: "AIzaSyDe4ie2wSPEpNbAgWP-q03vTuHyxc9Jj3E",
@@ -15,6 +15,16 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
+
+// Enable offline persistence (optional but recommended)
+db.enablePersistence({ synchronizeTabs: true })
+    .catch((err) => {
+        if (err.code === 'failed-precondition') {
+            console.log('Persistence failed: Multiple tabs open');
+        } else if (err.code === 'unimplemented') {
+            console.log('Persistence not supported');
+        }
+    });
 
 // Super Admin Email
 const SUPER_ADMIN_EMAIL = "afifaro@gmail.com";
@@ -76,3 +86,5 @@ window.FirebaseConfig = {
     DEFAULT_SETTINGS,
     DIMENSI_PROFIL
 };
+
+console.log('Firebase initialized successfully');
