@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AGSA - Dashboard</title>
     
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS CDN (untuk development, gunakan CLI untuk production) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -74,14 +74,13 @@
         }
         
         /* Page transitions */
-        .page-enter {
-            opacity: 0;
-            transform: translateY(10px);
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
         }
-        .page-enter-active {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.3s, transform 0.3s;
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         /* Print styles */
@@ -105,7 +104,7 @@
     <div id="app" class="hidden">
         
         <!-- Mobile Sidebar Overlay -->
-        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
         
         <!-- Sidebar -->
         <aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen bg-white border-r border-gray-200 sidebar-transition transform -translate-x-full lg:translate-x-0">
@@ -120,7 +119,7 @@
                         </div>
                         <span class="text-xl font-bold text-gray-800">AGSA</span>
                     </div>
-                    <button class="lg:hidden text-gray-500 hover:text-gray-700" onclick="toggleSidebar()">
+                    <button class="lg:hidden text-gray-500 hover:text-gray-700" id="closeSidebarBtn">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -274,7 +273,7 @@
                             <p id="userName" class="text-sm font-medium text-gray-900 truncate"></p>
                             <p id="userPlan" class="text-xs text-gray-500"></p>
                         </div>
-                        <button onclick="handleLogout()" class="text-gray-400 hover:text-red-500 transition-colors" title="Logout">
+                        <button id="logoutBtn" class="text-gray-400 hover:text-red-500 transition-colors" title="Logout">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                             </svg>
@@ -290,7 +289,7 @@
             <header class="bg-white border-b border-gray-200 px-4 py-4 sticky top-0 z-30">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
-                        <button onclick="toggleSidebar()" class="lg:hidden text-gray-500 hover:text-gray-700">
+                        <button id="menuToggleBtn" class="lg:hidden text-gray-500 hover:text-gray-700">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                             </svg>
@@ -308,7 +307,7 @@
                         </div>
                         
                         <!-- Upgrade Button -->
-                        <button id="upgradeBtn" onclick="showUpgradeModal()" class="hidden bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all">
+                        <button id="upgradeBtn" class="hidden bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all">
                             ⭐ Upgrade
                         </button>
                     </div>
@@ -324,7 +323,7 @@
 
     <!-- Modal Container -->
     <div id="modalContainer" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black bg-opacity-50" onclick="closeModal()"></div>
+        <div class="absolute inset-0 bg-black bg-opacity-50" id="modalOverlay"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4">
             <div id="modalContent" class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-auto">
                 <!-- Modal content will be injected here -->
@@ -337,38 +336,19 @@
         <!-- Toasts will be added here -->
     </div>
 
-    <!-- Firebase & App Scripts -->
-    <script type="module">
-        // ============================================
-        // FIREBASE INITIALIZATION
-        // ============================================
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { 
-            getAuth, 
-            signOut, 
-            onAuthStateChanged 
-        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc, 
-            setDoc,
-            collection,
-            query,
-            where,
-            getDocs,
-            addDoc,
-            updateDoc,
-            deleteDoc,
-            orderBy,
-            serverTimestamp,
-            onSnapshot
-        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-        // Firebase Configuration
+    <script>
+        // ============================================
+        // GLOBAL CONFIGURATION
+        // ============================================
+        
         const firebaseConfig = {
             apiKey: "AIzaSyDpiK4F4ilnDDNEwO0djGY-ClwgwBl1eFk",
-  	    authDomain: "asap-1d653.firebaseapp.com",
+            authDomain: "asap-1d653.firebaseapp.com",
   	    projectId: "asap-1d653",
   	    storageBucket: "asap-1d653.firebasestorage.app",
   	    messagingSenderId: "143263188364",
@@ -376,13 +356,25 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Super Admin Email
+        const SUPER_ADMIN_EMAIL = 'afifaro@gmail.com';
+
+        // CSV Links for CP Database
+        const CSV_LINKS = {
+            SD: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?gid=1925091593&single=true&output=csv',
+            SMP: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?gid=1962203786&single=true&output=csv',
+            SMA: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?gid=260922290&single=true&output=csv',
+            SMK: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?gid=260922290&single=true&output=csv'
+        };
 
         // ============================================
         // GLOBAL STATE
         // ============================================
+        
         window.AGSA = {
             user: null,
             userData: null,
@@ -391,39 +383,25 @@
             isPremium: false,
             isSuperAdmin: false,
             db: db,
-            auth: auth
+            auth: auth,
+            cpCache: {}
         };
-
-        // ============================================
-        // CSV LINKS FOR CP DATABASE
-        // ============================================
-        const CSV_LINKS = {
-            SD: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?gid=1925091593&single=true&output=csv',
-            SMP: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?gid=1962203786&single=true&output=csv',
-            SMA: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?gid=260922290&single=true&output=csv',
-            SMK: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?gid=260922290&single=true&output=csv'
-        };
-
-        // 8 Dimensi Profil Pelajar Pancasila
-        const DIMENSI_PROFIL = [
-            'Beriman, Bertakwa kepada Tuhan YME, dan Berakhlak Mulia',
-            'Berkebinekaan Global',
-            'Bergotong-royong',
-            'Mandiri',
-            'Bernalar Kritis',
-            'Kreatif'
-        ];
 
         // ============================================
         // UTILITY FUNCTIONS
         // ============================================
         
         // Show/Hide Loading
-        const showLoading = () => document.getElementById('loadingOverlay').classList.remove('hidden');
-        const hideLoading = () => document.getElementById('loadingOverlay').classList.add('hidden');
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
 
         // Toast Notification
-        window.showToast = function(message, type = 'info') {
+        function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             
@@ -437,9 +415,10 @@
             toast.className = `${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 transform translate-x-full transition-transform duration-300`;
             toast.innerHTML = `
                 <span>${message}</span>
-                <button onclick="this.parentElement.remove()" class="ml-2 hover:opacity-75">×</button>
+                <button class="ml-2 hover:opacity-75">&times;</button>
             `;
             
+            toast.querySelector('button').onclick = () => toast.remove();
             container.appendChild(toast);
             
             // Animate in
@@ -450,111 +429,174 @@
                 toast.classList.add('translate-x-full');
                 setTimeout(() => toast.remove(), 300);
             }, 4000);
-        };
+        }
+        
+        // Make showToast global
+        window.showToast = showToast;
 
         // Modal Functions
-        window.showModal = function(content) {
+        function showModal(content) {
             document.getElementById('modalContent').innerHTML = content;
             document.getElementById('modalContainer').classList.remove('hidden');
-        };
+        }
+        
+        window.showModal = showModal;
 
-        window.closeModal = function() {
+        function closeModal() {
             document.getElementById('modalContainer').classList.add('hidden');
-        };
+        }
+        
+        window.closeModal = closeModal;
 
         // Toggle Sidebar
-        window.toggleSidebar = function() {
+        function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             
             sidebar.classList.toggle('-translate-x-full');
             overlay.classList.toggle('hidden');
-        };
+        }
+        
+        window.toggleSidebar = toggleSidebar;
 
-        // Get Current Tahun Ajar (Auto calculate)
-        window.getTahunAjar = function(tahunAwal) {
-            const tahunAkhir = parseInt(tahunAwal) + 1;
-            return `${tahunAwal}/${tahunAkhir}`;
-        };
-
-        // Get Auto Tahun Ajar based on current date
-        window.getAutoTahunAjar = function() {
+        // Date utilities
+        function getAutoTahunAjar() {
             const now = new Date();
             const year = now.getFullYear();
-            const month = now.getMonth(); // 0-11
+            const month = now.getMonth();
             
-            // Tahun ajaran baru dimulai Juli (month = 6)
-            if (month >= 6) { // Juli - Desember
+            if (month >= 6) {
                 return { tahunAwal: year, tahunAkhir: year + 1 };
-            } else { // Januari - Juni
+            } else {
                 return { tahunAwal: year - 1, tahunAkhir: year };
             }
-        };
+        }
+        
+        window.getAutoTahunAjar = getAutoTahunAjar;
 
-        // Get Tanggal Pengesahan (Akhir bulan, bukan hari libur)
-        window.getTanggalPengesahan = function(bulan, tahun) {
-            // Get last day of month
-            const lastDay = new Date(tahun, bulan, 0).getDate();
-            let tanggal = new Date(tahun, bulan - 1, lastDay);
+        function formatTahunAjar(tahunAwal) {
+            return `${tahunAwal}/${parseInt(tahunAwal) + 1}`;
+        }
+        
+        window.formatTahunAjar = formatTahunAjar;
+
+        function formatDate(date, format = 'DD/MM/YYYY') {
+            if (!date) return '';
+            const d = date.toDate ? date.toDate() : new Date(date);
+            if (isNaN(d.getTime())) return '';
             
-            // Check if weekend, move to Friday
-            const day = tanggal.getDay();
-            if (day === 0) tanggal.setDate(tanggal.getDate() - 2); // Sunday -> Friday
-            if (day === 6) tanggal.setDate(tanggal.getDate() - 1); // Saturday -> Friday
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
             
-            return tanggal;
-        };
+            const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                               'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            switch (format) {
+                case 'DD/MM/YYYY':
+                    return `${day}/${month}/${year}`;
+                case 'YYYY-MM-DD':
+                    return `${year}-${month}-${day}`;
+                case 'DD MMMM YYYY':
+                    return `${d.getDate()} ${monthNames[d.getMonth()]} ${year}`;
+                case 'dddd, DD MMMM YYYY':
+                    return `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]} ${year}`;
+                default:
+                    return `${day}/${month}/${year}`;
+            }
+        }
+        
+        window.formatDate = formatDate;
 
         // Parse CSV
-        window.parseCSV = function(csvText, delimiter = ';') {
-            const lines = csvText.split('\n');
-            const headers = lines[0].split(delimiter).map(h => h.trim());
+        function parseCSV(csvText, delimiter = ';') {
+            const lines = csvText.trim().split('\n');
+            if (lines.length === 0) return { headers: [], data: [] };
+            
+            const headers = lines[0].split(delimiter).map(h => h.trim().replace(/"/g, ''));
             const data = [];
             
             for (let i = 1; i < lines.length; i++) {
-                if (lines[i].trim()) {
-                    const values = lines[i].split(delimiter);
-                    const row = {};
-                    headers.forEach((header, index) => {
-                        row[header] = values[index] ? values[index].trim() : '';
-                    });
-                    data.push(row);
-                }
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const values = line.split(delimiter);
+                const row = {};
+                
+                headers.forEach((header, index) => {
+                    row[header] = values[index] ? values[index].trim().replace(/"/g, '') : '';
+                });
+                
+                data.push(row);
             }
             
             return { headers, data };
-        };
+        }
+        
+        window.parseCSV = parseCSV;
 
         // Fetch CSV from URL
-        window.fetchCSV = async function(url) {
+        async function fetchCSV(url) {
             try {
                 const response = await fetch(url);
+                if (!response.ok) throw new Error('Network response was not ok');
                 const text = await response.text();
                 return parseCSV(text);
             } catch (error) {
                 console.error('Error fetching CSV:', error);
                 throw error;
             }
-        };
+        }
+        
+        window.fetchCSV = fetchCSV;
+
+        // Get Kelas Options based on jenjang
+        function getKelasOptions(jenjang) {
+            switch (jenjang) {
+                case 'SD': return ['1', '2', '3', '4', '5', '6'];
+                case 'SMP': return ['7', '8', '9'];
+                case 'SMA':
+                case 'SMK': return ['10', '11', '12'];
+                default: return [];
+            }
+        }
+        
+        window.getKelasOptions = getKelasOptions;
+
+        // Get Fase from Kelas
+        function getFaseFromKelas(kelas, jenjang) {
+            const kelasNum = parseInt(kelas);
+            
+            if (jenjang === 'SD') {
+                if (kelasNum <= 2) return 'A';
+                if (kelasNum <= 4) return 'B';
+                return 'C';
+            }
+            if (jenjang === 'SMP') return 'D';
+            if (jenjang === 'SMA' || jenjang === 'SMK') {
+                if (kelasNum === 10) return 'E';
+                return 'F';
+            }
+            return '';
+        }
+        
+        window.getFaseFromKelas = getFaseFromKelas;
 
         // ============================================
-        // AUTHENTICATION & USER DATA
+        // AUTHENTICATION & DATA LOADING
         // ============================================
         
         async function loadUserData(uid) {
-            const userRef = doc(db, 'users', uid);
-            const userSnap = await getDoc(userRef);
-            
-            if (userSnap.exists()) {
-                return userSnap.data();
+            const userDoc = await db.collection('users').doc(uid).get();
+            if (userDoc.exists) {
+                return userDoc.data();
             }
             return null;
         }
 
         async function loadProfil(uid) {
-            const profilRef = collection(db, `users/${uid}/profil`);
-            const profilSnap = await getDocs(profilRef);
-            
+            const profilSnap = await db.collection(`users/${uid}/profil`).limit(1).get();
             if (!profilSnap.empty) {
                 const doc = profilSnap.docs[0];
                 return { id: doc.id, ...doc.data() };
@@ -562,35 +604,20 @@
             return null;
         }
 
-        window.handleLogout = async function() {
+        function handleLogout() {
             if (confirm('Apakah Anda yakin ingin keluar?')) {
-                await signOut(auth);
-                window.location.href = 'index.html';
+                auth.signOut().then(() => {
+                    window.location.href = 'index.html';
+                });
             }
-        };
+        }
+        
+        window.handleLogout = handleLogout;
 
         // ============================================
         // ROUTER / PAGE NAVIGATION
         // ============================================
         
-        const pages = {
-            dashboard: () => renderDashboard(),
-            profil: () => renderProfil(),
-            kalender: () => renderKalender(),
-            jadwal: () => renderJadwal(),
-            siswa: () => renderSiswa(),
-            mapel: () => renderMapel(),
-            atp: () => renderATP(),
-            prota: () => renderProta(),
-            promes: () => renderPromes(),
-            'modul-ajar': () => renderModulAjar(),
-            jurnal: () => renderJurnal(),
-            kktp: () => renderKKTP(),
-            nilai: () => renderNilai(),
-            'ai-assistant': () => renderAIAssistant(),
-            'super-admin': () => renderSuperAdmin()
-        };
-
         const pageTitles = {
             dashboard: 'Dashboard',
             profil: 'Profil Guru & Sekolah',
@@ -631,17 +658,41 @@
             });
             
             // Render page
-            if (pages[page]) {
-                pages[page]();
-            }
+            renderPage(page);
             
             // Close mobile sidebar
             if (window.innerWidth < 1024) {
-                toggleSidebar();
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
             }
             
             // Update URL hash
             window.location.hash = page;
+        }
+        
+        window.navigateTo = navigateTo;
+
+        function renderPage(page) {
+            switch(page) {
+                case 'dashboard': renderDashboard(); break;
+                case 'profil': renderProfil(); break;
+                case 'kalender': renderKalender(); break;
+                case 'jadwal': renderJadwal(); break;
+                case 'siswa': renderSiswa(); break;
+                case 'mapel': renderMapel(); break;
+                case 'atp': renderATP(); break;
+                case 'prota': renderProta(); break;
+                case 'promes': renderPromes(); break;
+                case 'modul-ajar': renderModulAjar(); break;
+                case 'jurnal': renderJurnal(); break;
+                case 'kktp': renderKKTP(); break;
+                case 'nilai': renderNilai(); break;
+                case 'ai-assistant': renderAIAssistant(); break;
+                case 'super-admin': renderSuperAdmin(); break;
+                default: renderDashboard();
+            }
         }
 
         // Handle hash change
@@ -654,7 +705,7 @@
         // UPGRADE MODAL
         // ============================================
         
-        window.showUpgradeModal = function() {
+        function showUpgradeModal() {
             const content = `
                 <div class="p-6">
                     <div class="text-center mb-6">
@@ -705,29 +756,30 @@
                             Nanti
                         </button>
                         <button onclick="redirectToWhatsApp()" class="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-medium hover:shadow-lg transition-all flex items-center justify-center space-x-2">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                            </svg>
-                                                        <span>Hubungi via WhatsApp</span>
+                            <span>Hubungi via WhatsApp</span>
                         </button>
                     </div>
                 </div>
             `;
             showModal(content);
-        };
+        }
+        
+        window.showUpgradeModal = showUpgradeModal;
 
-        window.redirectToWhatsApp = function() {
-            const waNumber = '6281234567890'; // Will be fetched from config
+        function redirectToWhatsApp() {
+            const waNumber = '6281234567890';
             const message = encodeURIComponent(`Halo, saya ingin upgrade ke AGSA Premium.\n\nEmail: ${window.AGSA.user?.email || ''}\nNama: ${window.AGSA.user?.displayName || ''}`);
             window.open(`https://wa.me/${waNumber}?text=${message}`, '_blank');
             closeModal();
-        };
+        }
+        
+        window.redirectToWhatsApp = redirectToWhatsApp;
 
         // ============================================
         // PAGE RENDERERS
         // ============================================
 
-        // Dashboard Page
+        // DASHBOARD
         function renderDashboard() {
             const content = `
                 <div class="space-y-6 fade-in">
@@ -809,19 +861,6 @@
                         </div>
                     </div>
 
-                    <!-- Setup Checklist -->
-                    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100">
-                            <h3 class="text-lg font-semibold text-gray-900">Panduan Setup</h3>
-                            <p class="text-sm text-gray-500">Ikuti langkah-langkah berikut untuk memulai</p>
-                        </div>
-                        <div class="p-6">
-                            <div class="space-y-4" id="setupChecklist">
-                                <!-- Checklist items will be rendered here -->
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Quick Actions -->
                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <a href="#atp" class="bg-white rounded-xl p-6 border border-gray-100 hover:border-blue-500 hover:shadow-md transition-all group">
@@ -870,885 +909,308 @@
             `;
             
             document.getElementById('pageContent').innerHTML = content;
-            loadDashboardData();
+            loadDashboardStats();
         }
 
-        async function loadDashboardData() {
+        async function loadDashboardStats() {
             if (!window.AGSA.user) return;
-            
             const uid = window.AGSA.user.uid;
             
-            // Load stats
             try {
-                // Count ATP
-                const atpSnap = await getDocs(collection(db, `users/${uid}/atp`));
+                const atpSnap = await db.collection(`users/${uid}/atp`).get();
                 document.getElementById('statATP').textContent = atpSnap.size;
                 
-                // Count Modul Ajar
-                const modulSnap = await getDocs(collection(db, `users/${uid}/modulAjar`));
+                const modulSnap = await db.collection(`users/${uid}/modulAjar`).get();
                 document.getElementById('statModul').textContent = modulSnap.size;
                 
-                // Count Siswa
-                const siswaSnap = await getDocs(collection(db, `users/${uid}/siswa`));
+                const siswaSnap = await db.collection(`users/${uid}/siswa`).get();
                 document.getElementById('statSiswa').textContent = siswaSnap.size;
                 
-                // Count Kelas
-                const kelasSnap = await getDocs(collection(db, `users/${uid}/kelas`));
+                const kelasSnap = await db.collection(`users/${uid}/kelas`).get();
                 document.getElementById('statKelas').textContent = kelasSnap.size;
-                
             } catch (error) {
                 console.error('Error loading stats:', error);
             }
-            
-            // Render setup checklist
-            renderSetupChecklist();
         }
 
-        async function renderSetupChecklist() {
-            const uid = window.AGSA.user.uid;
-            const checklist = document.getElementById('setupChecklist');
-            
-            const steps = [
-                { id: 'profil', name: 'Isi Profil Guru & Sekolah', collection: 'profil', href: '#profil' },
-                { id: 'kalender', name: 'Setup Kalender Pendidikan', collection: 'kalender', href: '#kalender' },
-                { id: 'jadwal', name: 'Atur Jadwal Pelajaran', collection: 'jadwal', href: '#jadwal' },
-                { id: 'siswa', name: 'Import Data Siswa', collection: 'siswa', href: '#siswa' },
-                { id: 'mapel', name: 'Setup Mata Pelajaran & CP', collection: 'mataPelajaran', href: '#mapel' }
-            ];
-            
-            let html = '';
-            
-            for (const step of steps) {
-                let completed = false;
-                try {
-                    const snap = await getDocs(collection(db, `users/${uid}/${step.collection}`));
-                    completed = snap.size > 0;
-                } catch (e) {
-                    completed = false;
-                }
-                
-                html += `
-                    <a href="${step.href}" class="flex items-center p-4 rounded-lg border ${completed ? 'border-green-200 bg-green-50' : 'border-gray-200 hover:border-blue-500'} transition-colors">
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center mr-4 ${completed ? 'bg-green-500' : 'bg-gray-200'}">
-                            ${completed ? 
-                                '<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>' :
-                                '<span class="text-sm font-medium text-gray-500">' + (steps.indexOf(step) + 1) + '</span>'
-                            }
-                        </div>
-                        <div class="flex-1">
-                            <p class="font-medium ${completed ? 'text-green-700' : 'text-gray-900'}">${step.name}</p>
-                            <p class="text-sm ${completed ? 'text-green-600' : 'text-gray-500'}">${completed ? 'Selesai' : 'Belum dikonfigurasi'}</p>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </a>
-                `;
-            }
-            
-            checklist.innerHTML = html;
-        }
-
-        // ============================================
-        // PROFIL PAGE
-        // ============================================
-        
-        function renderProfil() {
-            const autoTahun = getAutoTahunAjar();
-            
+        // ATP PAGE
+        function renderATP() {
             const content = `
-                <div class="max-w-4xl mx-auto space-y-6 fade-in">
-                    <!-- Info Card -->
-                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                        <div class="flex items-start space-x-3">
-                            <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <div>
-                                <p class="text-sm text-blue-800">Data ini akan digunakan di semua dokumen. Pastikan mengisi dengan benar.</p>
-                            </div>
+                <div class="max-w-6xl mx-auto space-y-6 fade-in">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-900">Alur Tujuan Pembelajaran (ATP)</h2>
+                            <p class="text-gray-600">Generate ATP dari Capaian Pembelajaran</p>
                         </div>
+                        <button onclick="showGenerateATPModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Generate ATP Baru
+                        </button>
                     </div>
 
-                    <form id="formProfil" class="space-y-6">
-                        <!-- Data Guru -->
-                        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                                <h3 class="text-lg font-semibold text-gray-900">Data Guru</h3>
-                            </div>
-                            <div class="p-6 space-y-4">
-                                <div class="grid md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap Guru</label>
-                                        <input type="text" id="namaGuru" name="namaGuru" required
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            placeholder="Nama lengkap dengan gelar">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">NIP Guru</label>
-                                        <input type="text" id="nipGuru" name="nipGuru"
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            placeholder="Nomor Induk Pegawai">
-                                    </div>
-                                </div>
+                    <div id="atpList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="col-span-full text-center py-12 text-gray-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p>Memuat data ATP...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('pageContent').innerHTML = content;
+            loadATPList();
+        }
+
+        async function loadATPList() {
+            if (!window.AGSA.user) return;
+            const uid = window.AGSA.user.uid;
+            
+            try {
+                const atpSnap = await db.collection(`users/${uid}/atp`).orderBy('createdAt', 'desc').get();
+                const atpList = document.getElementById('atpList');
+                
+                if (atpSnap.empty) {
+                    atpList.innerHTML = `
+                        <div class="col-span-full text-center py-12 text-gray-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p>Belum ada ATP yang dibuat.</p>
+                            <p class="text-sm">Klik tombol "Generate ATP Baru" untuk memulai.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                atpSnap.forEach(doc => {
+                    const atp = { id: doc.id, ...doc.data() };
+                    html += `
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-start justify-between mb-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Link Gambar Tanda Tangan Guru</label>
-                                    <input type="url" id="linkTTDGuru" name="linkTTDGuru"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        placeholder="https://contoh.com/ttd-guru.png">
-                                    <p class="text-xs text-gray-500 mt-1">Upload gambar TTD ke Google Drive/Imgur, lalu paste link-nya di sini</p>
+                                    <h4 class="font-semibold text-gray-900">${atp.namaMapel || 'Unnamed'}</h4>
+                                    <p class="text-sm text-gray-500">Kelas ${atp.kelas || '-'} | Fase ${atp.fase || '-'}</p>
                                 </div>
+                                <span class="px-2 py-1 text-xs font-medium rounded-full ${atp.status === 'final' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                                    ${atp.status === 'final' ? 'Final' : 'Draft'}
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">Total: ${atp.totalJP || 0} JP</p>
+                            <div class="flex space-x-2">
+                                <button onclick="viewATP('${atp.id}')" class="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
+                                    Lihat
+                                </button>
+                                <button onclick="printATP('${atp.id}')" class="px-3 py-2 text-sm bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="deleteATP('${atp.id}')" class="px-3 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
+                    `;
+                });
+                
+                atpList.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading ATP:', error);
+                showToast('Gagal memuat data ATP', 'error');
+            }
+        }
 
-                        <!-- Data Kepala Sekolah -->
-                        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                                <h3 class="text-lg font-semibold text-gray-900">Data Kepala Sekolah</h3>
+        // ATP Functions - Made Global
+        function showGenerateATPModal() {
+            const jenjang = window.AGSA.profil?.jenjang || 'SMP';
+            const kelasOptions = getKelasOptions(jenjang);
+            
+            const modalContent = `
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Generate ATP Baru</h3>
+                    
+                    <form id="formGenerateATP" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Mata Pelajaran</label>
+                            <input type="text" id="atpNamaMapel" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="Contoh: Matematika">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Fase</label>
+                                <select id="atpFase" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Pilih Fase</option>
+                                    <option value="A">Fase A</option>
+                                    <option value="B">Fase B</option>
+                                    <option value="C">Fase C</option>
+                                    <option value="D">Fase D</option>
+                                    <option value="E">Fase E</option>
+                                    <option value="F">Fase F</option>
+                                </select>
                             </div>
-                            <div class="p-6 space-y-4">
-                                <div class="grid md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Kepala Sekolah</label>
-                                        <input type="text" id="namaKepalaSekolah" name="namaKepalaSekolah" required
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            placeholder="Nama lengkap dengan gelar">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">NIP Kepala Sekolah</label>
-                                        <input type="text" id="nipKepalaSekolah" name="nipKepalaSekolah"
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            placeholder="Nomor Induk Pegawai">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Link Gambar Tanda Tangan Kepala Sekolah</label>
-                                    <input type="url" id="linkTTDKepalaSekolah" name="linkTTDKepalaSekolah"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        placeholder="https://contoh.com/ttd-kepsek.png">
-                                </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                                <select id="atpKelas" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Pilih Kelas</option>
+                                    ${kelasOptions.map(k => `<option value="${k}">${k}</option>`).join('')}
+                                </select>
                             </div>
                         </div>
-
-                        <!-- Data Satuan Pendidikan -->
-                        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                                <h3 class="text-lg font-semibold text-gray-900">Data Satuan Pendidikan</h3>
-                            </div>
-                            <div class="p-6 space-y-4">
-                                <div class="grid md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Satuan Pendidikan</label>
-                                        <input type="text" id="namaSatuan" name="namaSatuan" required
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            placeholder="SD/SMP/SMA Negeri 1 ...">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">NPSN</label>
-                                        <input type="text" id="npsn" name="npsn" required
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            placeholder="8 digit NPSN">
-                                    </div>
-                                </div>
-                                <div class="grid md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenjang</label>
-                                        <select id="jenjang" name="jenjang" required
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                                            <option value="">Pilih Jenjang</option>
-                                            <option value="SD">SD - Sekolah Dasar</option>
-                                            <option value="SMP">SMP - Sekolah Menengah Pertama</option>
-                                            <option value="SMA">SMA - Sekolah Menengah Atas</option>
-                                            <option value="SMK">SMK - Sekolah Menengah Kejuruan</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-                                        <input type="text" id="alamat" name="alamat"
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            placeholder="Alamat lengkap sekolah">
-                                    </div>
-                                </div>
-                            </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                            <select id="atpSemester" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="Ganjil-Genap">Ganjil & Genap (1 Tahun)</option>
+                                <option value="1">Semester 1 (Ganjil)</option>
+                                <option value="2">Semester 2 (Genap)</option>
+                            </select>
                         </div>
-
-                        <!-- Data Pengesahan -->
-                        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                                <h3 class="text-lg font-semibold text-gray-900">Data Pengesahan & Tahun Ajar</h3>
-                            </div>
-                            <div class="p-6 space-y-4">
-                                <div class="grid md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi Pengesahan</label>
-                                        <input type="text" id="lokasiPengesahan" name="lokasiPengesahan" required
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            placeholder="Nama Kota/Kabupaten">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Pengesahan Dokumen</label>
-                                        <input type="date" id="tanggalPengesahan" name="tanggalPengesahan" required
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                                    </div>
-                                </div>
-                                <div class="grid md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Ajar (Tahun Awal)</label>
-                                        <input type="number" id="tahunAjarAwal" name="tahunAjarAwal" required
-                                            min="2020" max="2030" value="${autoTahun.tahunAwal}"
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            placeholder="2024">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Ajar (Otomatis)</label>
-                                        <input type="text" id="tahunAjarDisplay" readonly
-                                            class="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600"
-                                            value="${autoTahun.tahunAwal}/${autoTahun.tahunAkhir}">
-                                        <p class="text-xs text-gray-500 mt-1">Format otomatis: Tahun Awal/Tahun Akhir</p>
-                                    </div>
-                                </div>
-                            </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Capaian Pembelajaran (CP)</label>
+                            <textarea id="atpCP" rows="3" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="Masukkan CP..."></textarea>
                         </div>
-
-                        <!-- Submit Button -->
-                        <div class="flex justify-end space-x-3">
-                            <button type="button" onclick="loadProfilData()" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                                Reset
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tujuan Pembelajaran (pisahkan dengan enter)</label>
+                            <textarea id="atpTP" rows="5" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="TP 1: ...&#10;TP 2: ...&#10;TP 3: ..."></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Total JP</label>
+                            <input type="number" id="atpTotalJP" value="32" min="1"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3 pt-4">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                                Batal
                             </button>
-                            <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span>Simpan Profil</span>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Generate ATP
                             </button>
                         </div>
                     </form>
                 </div>
             `;
             
-            document.getElementById('pageContent').innerHTML = content;
+            showModal(modalContent);
             
-            // Setup tahun ajar auto-update
-            document.getElementById('tahunAjarAwal').addEventListener('input', function() {
-                const tahunAwal = parseInt(this.value);
-                if (tahunAwal >= 2020 && tahunAwal <= 2030) {
-                    document.getElementById('tahunAjarDisplay').value = `${tahunAwal}/${tahunAwal + 1}`;
-                }
-            });
-            
-            // Load existing data
-            loadProfilData();
-            
-            // Setup form submission
-            document.getElementById('formProfil').addEventListener('submit', handleProfilSubmit);
+            document.getElementById('formGenerateATP').addEventListener('submit', handleGenerateATP);
         }
+        
+        window.showGenerateATPModal = showGenerateATPModal;
 
-        async function loadProfilData() {
-            if (!window.AGSA.user) return;
-            
-            const profil = await loadProfil(window.AGSA.user.uid);
-            
-            if (profil) {
-                window.AGSA.profil = profil;
-                
-                // Fill form
-                document.getElementById('namaGuru').value = profil.namaGuru || '';
-                document.getElementById('nipGuru').value = profil.nipGuru || '';
-                document.getElementById('linkTTDGuru').value = profil.linkTTDGuru || '';
-                document.getElementById('namaKepalaSekolah').value = profil.namaKepalaSekolah || '';
-                document.getElementById('nipKepalaSekolah').value = profil.nipKepalaSekolah || '';
-                document.getElementById('linkTTDKepalaSekolah').value = profil.linkTTDKepalaSekolah || '';
-                document.getElementById('namaSatuan').value = profil.namaSatuan || '';
-                document.getElementById('npsn').value = profil.npsn || '';
-                document.getElementById('jenjang').value = profil.jenjang || '';
-                document.getElementById('alamat').value = profil.alamat || '';
-                document.getElementById('lokasiPengesahan').value = profil.lokasiPengesahan || '';
-                
-                if (profil.tanggalPengesahan) {
-                    const date = profil.tanggalPengesahan.toDate ? profil.tanggalPengesahan.toDate() : new Date(profil.tanggalPengesahan);
-                    document.getElementById('tanggalPengesahan').value = date.toISOString().split('T')[0];
-                }
-                
-                if (profil.tahunAjarAwal) {
-                    document.getElementById('tahunAjarAwal').value = profil.tahunAjarAwal;
-                    document.getElementById('tahunAjarDisplay').value = `${profil.tahunAjarAwal}/${profil.tahunAjarAwal + 1}`;
-                }
-            }
-        }
-
-        async function handleProfilSubmit(e) {
+        async function handleGenerateATP(e) {
             e.preventDefault();
             
-            const uid = window.AGSA.user.uid;
-            const formData = new FormData(e.target);
-            const tahunAwal = parseInt(formData.get('tahunAjarAwal'));
+            const namaMapel = document.getElementById('atpNamaMapel').value;
+            const fase = document.getElementById('atpFase').value;
+            const kelas = document.getElementById('atpKelas').value;
+            const semester = document.getElementById('atpSemester').value;
+            const cp = document.getElementById('atpCP').value;
+            const tpText = document.getElementById('atpTP').value;
+            const totalJP = parseInt(document.getElementById('atpTotalJP').value);
             
-            const data = {
-                namaGuru: formData.get('namaGuru'),
-                nipGuru: formData.get('nipGuru'),
-                linkTTDGuru: formData.get('linkTTDGuru'),
-                namaKepalaSekolah: formData.get('namaKepalaSekolah'),
-                nipKepalaSekolah: formData.get('nipKepalaSekolah'),
-                linkTTDKepalaSekolah: formData.get('linkTTDKepalaSekolah'),
-                namaSatuan: formData.get('namaSatuan'),
-                npsn: formData.get('npsn'),
-                jenjang: formData.get('jenjang'),
-                alamat: formData.get('alamat'),
-                lokasiPengesahan: formData.get('lokasiPengesahan'),
-                tanggalPengesahan: new Date(formData.get('tanggalPengesahan')),
-                tahunAjarAwal: tahunAwal,
-                tahunAjarAkhir: tahunAwal + 1,
-                updatedAt: serverTimestamp()
+            // Parse TP
+            const tpLines = tpText.split('\n').filter(line => line.trim());
+            const tpList = tpLines.map((line, idx) => ({
+                kode: `TP.${idx + 1}`,
+                deskripsi: line.trim(),
+                alokasiWaktu: Math.floor(totalJP / tpLines.length)
+            }));
+            
+            const tahunAjar = window.AGSA.profil?.tahunAjarAwal ? 
+                formatTahunAjar(window.AGSA.profil.tahunAjarAwal) : 
+                formatTahunAjar(getAutoTahunAjar().tahunAwal);
+            
+            const atpData = {
+                namaMapel,
+                fase,
+                kelas,
+                semester,
+                tahunAjar,
+                alurTP: [{
+                    urutan: 1,
+                    elemen: 'Elemen Utama',
+                    cp: cp,
+                    tp: tpList
+                }],
+                totalJP,
+                status: 'draft',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
             
             try {
                 showLoading();
+                closeModal();
                 
-                if (window.AGSA.profil?.id) {
-                    // Update existing
-                    await updateDoc(doc(db, `users/${uid}/profil`, window.AGSA.profil.id), data);
-                } else {
-                    // Create new
-                    data.createdAt = serverTimestamp();
-                    await addDoc(collection(db, `users/${uid}/profil`), data);
-                }
+                const uid = window.AGSA.user.uid;
+                await db.collection(`users/${uid}/atp`).add(atpData);
                 
-                // Update tahun ajar display in header
-                document.getElementById('tahunAjarText').textContent = `TA ${tahunAwal}/${tahunAwal + 1}`;
-                document.getElementById('tahunAjarDisplay').classList.remove('hidden');
-                
-                showToast('Profil berhasil disimpan!', 'success');
+                showToast('ATP berhasil dibuat!', 'success');
+                loadATPList();
                 
             } catch (error) {
-                console.error('Error saving profil:', error);
-                showToast('Gagal menyimpan profil', 'error');
+                console.error('Error creating ATP:', error);
+                showToast('Gagal membuat ATP', 'error');
             } finally {
                 hideLoading();
             }
         }
 
-        // ============================================
-        // KALENDER PENDIDIKAN PAGE
-        // ============================================
+        async function viewATP(atpId) {
+            showToast('Fitur lihat detail ATP dalam pengembangan', 'info');
+            // TODO: Implement view ATP detail
+        }
         
-        function renderKalender() {
-            const content = `
-                <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <!-- Header -->
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Kalender Pendidikan</h2>
-                            <p class="text-gray-600">Kelola hari efektif, libur nasional, dan event akademik</p>
-                        </div>
-                        <button onclick="showAddEventModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Tambah Event
-                        </button>
-                    </div>
+        window.viewATP = viewATP;
 
-                    <!-- Libur Nasional Default -->
-                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-gray-900">Libur Nasional</h3>
-                            <span class="text-sm text-gray-500">Otomatis terisi, dapat diedit</span>
-                        </div>
-                        <div class="p-6">
-                            <div id="liburNasionalList" class="space-y-2">
-                                <!-- Will be populated -->
-                                <div class="text-center py-8 text-gray-500">
-                                    <p>Memuat data libur nasional...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Libur Lokal -->
-                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-gray-900">Libur Lokal</h3>
-                            <button onclick="showAddLiburLokalModal()" class="text-sm text-blue-600 hover:text-blue-700">
-                                + Tambah Libur Lokal
-                            </button>
-                        </div>
-                        <div class="p-6">
-                            <div id="liburLokalList" class="space-y-2">
-                                <div class="text-center py-4 text-gray-500">
-                                    <p>Belum ada libur lokal yang ditambahkan</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Semester Configuration -->
-                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                            <h3 class="text-lg font-semibold text-gray-900">Konfigurasi Semester</h3>
-                        </div>
-                        <div class="p-6">
-                            <form id="formSemester" class="space-y-6">
-                                <div class="grid md:grid-cols-2 gap-6">
-                                    <!-- Semester 1 -->
-                                    <div class="space-y-4">
-                                        <h4 class="font-medium text-gray-900">Semester 1 (Ganjil)</h4>
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm text-gray-600 mb-1">Mulai</label>
-                                                <input type="date" id="sem1Mulai" 
-                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm text-gray-600 mb-1">Selesai</label>
-                                                <input type="date" id="sem1Selesai"
-                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm text-gray-600 mb-1">Minggu Efektif</label>
-                                            <input type="number" id="sem1Minggu" min="1" max="30"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Semester 2 -->
-                                    <div class="space-y-4">
-                                        <h4 class="font-medium text-gray-900">Semester 2 (Genap)</h4>
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm text-gray-600 mb-1">Mulai</label>
-                                                <input type="date" id="sem2Mulai"
-                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm text-gray-600 mb-1">Selesai</label>
-                                                <input type="date" id="sem2Selesai"
-                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm text-gray-600 mb-1">Minggu Efektif</label>
-                                            <input type="number" id="sem2Minggu" min="1" max="30"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm text-gray-600 mb-1">Selesai Kelas Akhir (6/9/12)</label>
-                                            <input type="date" id="sem2KelasAkhir"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                            <p class="text-xs text-gray-500 mt-1">Untuk kelas 6 SD, 9 SMP, atau 12 SMA/SMK</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex justify-end">
-                                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                        Simpan Konfigurasi
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Ringkasan Hari Efektif -->
-                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                            <h3 class="text-lg font-semibold text-gray-900">Ringkasan Hari Efektif per Bulan</h3>
-                        </div>
-                        <div class="p-6">
-                            <div class="grid grid-cols-3 md:grid-cols-6 gap-4" id="hariEfektifGrid">
-                                <!-- Will be populated -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('pageContent').innerHTML = content;
-            loadKalenderData();
+        async function printATP(atpId) {
+            showToast('Fitur cetak ATP dalam pengembangan', 'info');
+            // TODO: Implement print ATP
         }
-
-        // Default Indonesian National Holidays 2024/2025
-        const DEFAULT_HOLIDAYS = [
-            { tanggal: '2024-07-17', nama: 'Tahun Baru Islam 1446 H' },
-            { tanggal: '2024-08-17', nama: 'Hari Kemerdekaan RI' },
-            { tanggal: '2024-09-16', nama: 'Maulid Nabi Muhammad SAW' },
-            { tanggal: '2024-12-25', nama: 'Hari Raya Natal' },
-            { tanggal: '2025-01-01', nama: 'Tahun Baru 2025' },
-            { tanggal: '2025-01-29', nama: 'Tahun Baru Imlek' },
-            { tanggal: '2025-03-29', nama: 'Hari Raya Nyepi' },
-            { tanggal: '2025-03-31', nama: 'Idul Fitri 1446 H' },
-            { tanggal: '2025-04-01', nama: 'Idul Fitri 1446 H' },
-            { tanggal: '2025-04-18', nama: 'Jumat Agung' },
-            { tanggal: '2025-05-01', nama: 'Hari Buruh' },
-            { tanggal: '2025-05-12', nama: 'Hari Raya Waisak' },
-            { tanggal: '2025-05-29', nama: 'Kenaikan Isa Almasih' },
-            { tanggal: '2025-06-01', nama: 'Hari Lahir Pancasila' },
-            { tanggal: '2025-06-07', nama: 'Idul Adha 1446 H' },
-            { tanggal: '2025-06-27', nama: 'Tahun Baru Islam 1447 H' }
-        ];
-
-        async function loadKalenderData() {
-            // Render default holidays
-            const liburNasionalList = document.getElementById('liburNasionalList');
-            let html = '<div class="grid md:grid-cols-2 gap-2">';
-            
-            DEFAULT_HOLIDAYS.forEach(libur => {
-                const date = new Date(libur.tanggal);
-                const formattedDate = date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-                html += `
-                    <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                        <div>
-                            <p class="font-medium text-red-800">${libur.nama}</p>
-                            <p class="text-sm text-red-600">${formattedDate}</p>
-                        </div>
-                        <button class="text-red-400 hover:text-red-600" onclick="removeLibur('${libur.tanggal}')">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-                `;
-            });
-            
-            html += '</div>';
-            liburNasionalList.innerHTML = html;
-            
-            // Render hari efektif grid
-            renderHariEfektifGrid();
-        }
-
-        function renderHariEfektifGrid() {
-            const bulanList = ['Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni'];
-            const grid = document.getElementById('hariEfektifGrid');
-            
-            let html = '';
-            bulanList.forEach((bulan, index) => {
-                // Calculate effective days (simplified)
-                const efektif = Math.floor(Math.random() * 5) + 18; // Demo data
-                html += `
-                    <div class="bg-gray-50 rounded-lg p-3 text-center">
-                        <p class="text-xs text-gray-500">${bulan}</p>
-                        <p class="text-lg font-bold text-gray-900">${efektif}</p>
-                        <p class="text-xs text-gray-500">hari</p>
-                    </div>
-                `;
-            });
-            
-            grid.innerHTML = html;
-        }
-
-        // ============================================
-        // JADWAL PELAJARAN PAGE
-        // ============================================
         
-        function renderJadwal() {
-            const content = `
-                <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <!-- Header -->
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Jadwal Pelajaran</h2>
-                            <p class="text-gray-600">Atur jadwal mengajar dengan deteksi konflik otomatis</p>
-                        </div>
-                    </div>
+        window.printATP = printATP;
 
-                    <!-- Konfigurasi Jam -->
-                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                            <h3 class="text-lg font-semibold text-gray-900">Konfigurasi Jam Pelajaran</h3>
-                        </div>
-                        <div class="p-6">
-                            <form id="formKonfigurasiJam" class="grid md:grid-cols-4 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Durasi per JP (menit)</label>
-                                    <select id="durasiJP" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                        <option value="30">30 menit (TK/PAUD)</option>
-                                        <option value="35" selected>35 menit (SD)</option>
-                                        <option value="40">40 menit (SMP)</option>
-                                        <option value="45">45 menit (SMA/SMK)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Jam Mulai</label>
-                                    <input type="time" id="jamMulai" value="07:00"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah JP/Hari</label>
-                                    <input type="number" id="jumlahJP" value="8" min="1" max="12"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                </div>
-                                <div class="flex items-end">
-                                    <button type="button" onclick="generateJamTable()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                        Generate Tabel
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Tabel Jadwal -->
-                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-gray-900">Jadwal Mengajar</h3>
-                            <button onclick="showAddJadwalModal()" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                </svg>
-                                Tambah Jadwal
-                            </button>
-                        </div>
-                        <div class="p-6 overflow-x-auto">
-                            <table class="w-full min-w-[800px]" id="jadwalTable">
-                                <thead>
-                                    <tr class="bg-gray-50">
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 w-24">Jam</th>
-                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Senin</th>
-                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Selasa</th>
-                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Rabu</th>
-                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Kamis</th>
-                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Jumat</th>
-                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Sabtu</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="jadwalTableBody">
-                                    <!-- Will be generated -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Conflict Alert -->
-                    <div id="conflictAlert" class="hidden bg-red-50 border border-red-200 rounded-xl p-4">
-                        <div class="flex items-start space-x-3">
-                            <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                            </svg>
-                            <div>
-                                <h4 class="font-medium text-red-800">Konflik Jadwal Terdeteksi!</h4>
-                                <p id="conflictMessage" class="text-sm text-red-600 mt-1"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('pageContent').innerHTML = content;
-            generateJamTable();
-        }
-
-        window.generateJamTable = function() {
-            const durasi = parseInt(document.getElementById('durasiJP').value);
-            const jamMulai = document.getElementById('jamMulai').value;
-            const jumlahJP = parseInt(document.getElementById('jumlahJP').value);
-            
-            const tbody = document.getElementById('jadwalTableBody');
-            let html = '';
-            
-            let [hours, minutes] = jamMulai.split(':').map(Number);
-            
-            for (let i = 1; i <= jumlahJP; i++) {
-                const startTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-                
-                // Add duration
-                minutes += durasi;
-                if (minutes >= 60) {
-                    hours += Math.floor(minutes / 60);
-                    minutes = minutes % 60;
-                }
-                
-                const endTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-                
-                // Add break after jam ke-3 (example)
-                if (i === 3) {
-                    minutes += 15; // 15 min break
-                    if (minutes >= 60) {
-                        hours += Math.floor(minutes / 60);
-                        minutes = minutes % 60;
-                    }
-                }
-                
-                html += `
-                    <tr class="border-b border-gray-100 hover:bg-gray-50">
-                        <td class="px-4 py-3">
-                            <div class="text-sm font-medium text-gray-900">Jam ${i}</div>
-                            <div class="text-xs text-gray-500">${startTime} - ${endTime}</div>
-                        </td>
-                        ${['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].map(hari => `
-                            <td class="px-4 py-3 text-center">
-                                <button onclick="editJadwalSlot('${hari}', ${i})" class="w-full h-12 border-2 border-dashed border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors text-gray-400 hover:text-blue-600">
-                                    <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                </button>
-                            </td>
-                        `).join('')}
-                    </tr>
-                `;
-            }
-            
-            tbody.innerHTML = html;
-        };
-
-        // ============================================
-        // DATA SISWA PAGE
-        // ============================================
-        
-        function renderSiswa() {
-            const content = `
-                <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <!-- Header -->
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Data Siswa</h2>
-                            <p class="text-gray-600">Import dan kelola data siswa per kelas</p>
-                        </div>
-                        <div class="flex space-x-3">
-                            <button onclick="showImportSiswaModal()" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                                </svg>
-                                Import CSV
-                            </button>
-                            <button onclick="showAddSiswaModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                </svg>
-                                Tambah Siswa
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Filter -->
-                    <div class="bg-white rounded-xl border border-gray-200 p-4">
-                        <div class="grid md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
-                                <select id="filterKelas" onchange="filterSiswa()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Semua Kelas</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
-                                <input type="text" id="searchSiswa" oninput="filterSiswa()" placeholder="Nama atau NISN..."
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div class="flex items-end">
-                                <button onclick="exportSiswa()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                                    Export CSV
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Data Table -->
-                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">No</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">NISN</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">NIS</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nama</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">L/P</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Kelas</th>
-                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="siswaTableBody">
-                                    <tr>
-                                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">
-                                            Belum ada data siswa. Silakan import CSV atau tambah manual.
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- CSV Format Info -->
-                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                        <h4 class="font-medium text-blue-800 mb-2">Format CSV Siswa</h4>
-                        <code class="text-sm text-blue-700 bg-blue-100 px-2 py-1 rounded">
-                            NISN;NIS;Nama;JenisKelamin;Kelas
-                        </code>
-                        <p class="text-sm text-blue-600 mt-2">Contoh: 1234567890;001;Ahmad Rizki;L;7A</p>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('pageContent').innerHTML = content;
-            loadSiswaData();
-        }
-
-        async function loadSiswaData() {
-            if (!window.AGSA.user) return;
-            
-            const uid = window.AGSA.user.uid;
+        async function deleteATP(atpId) {
+            if (!confirm('Hapus ATP ini?')) return;
             
             try {
-                // Load kelas for filter
-                const kelasSnap = await getDocs(collection(db, `users/${uid}/kelas`));
-                const filterKelas = document.getElementById('filterKelas');
-                
-                kelasSnap.forEach(doc => {
-                    const kelas = doc.data();
-                    filterKelas.innerHTML += `<option value="${doc.id}">${kelas.namaKelas}</option>`;
-                });
-                
-                // Load siswa
-                const siswaSnap = await getDocs(collection(db, `users/${uid}/siswa`));
-                const tbody = document.getElementById('siswaTableBody');
-                
-                if (siswaSnap.empty) {
-                    return;
-                }
-                
-                let html = '';
-                let no = 1;
-                
-                siswaSnap.forEach(doc => {
-                    const siswa = doc.data();
-                    html += `
-                        <tr class="border-b border-gray-100 hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm text-gray-900">${no++}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900">${siswa.nisn || '-'}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900">${siswa.nis || '-'}</td>
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${siswa.nama}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900">${siswa.jenisKelamin}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900">${siswa.namaKelas || '-'}</td>
-                            <td class="px-4 py-3 text-center">
-                                <button onclick="editSiswa('${doc.id}')" class="text-blue-600 hover:text-blue-800 mr-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                                <button onclick="deleteSiswa('${doc.id}')" class="text-red-600 hover:text-red-800">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                tbody.innerHTML = html;
-                
+                showLoading();
+                const uid = window.AGSA.user.uid;
+                await db.collection(`users/${uid}/atp`).doc(atpId).delete();
+                showToast('ATP berhasil dihapus', 'success');
+                loadATPList();
             } catch (error) {
-                console.error('Error loading siswa:', error);
+                console.error('Error deleting ATP:', error);
+                showToast('Gagal menghapus ATP', 'error');
+            } finally {
+                hideLoading();
             }
         }
-
-        // ============================================
-        // MATA PELAJARAN & CP PAGE
-        // ============================================
         
+        window.deleteATP = deleteATP;
+
+        // MAPEL PAGE
         function renderMapel() {
             const content = `
                 <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <!-- Header -->
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
                             <h2 class="text-xl font-semibold text-gray-900">Mata Pelajaran & CP</h2>
@@ -1761,17 +1223,12 @@
                                 </svg>
                                 Load CP dari Database
                             </button>
-                            <button onclick="showAddMapelModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                </svg>
-                                Tambah Mapel
-                            </button>
                         </div>
                     </div>
 
                     <!-- Jenjang Selector -->
                     <div class="bg-white rounded-xl border border-gray-200 p-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Jenjang</label>
                         <div class="flex flex-wrap gap-2">
                             <button onclick="selectJenjang('SD')" class="jenjang-btn px-4 py-2 rounded-lg border border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors" data-jenjang="SD">
                                 SD (Kelas 1-6)
@@ -1794,24 +1251,6 @@
                             Pilih jenjang untuk melihat daftar mata pelajaran
                         </div>
                     </div>
-
-                    <!-- Custom CSV Input -->
-                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                            <h3 class="text-lg font-semibold text-gray-900">Import CP Custom (Format CSV)</h3>
-                        </div>
-                        <div class="p-6">
-                            <p class="text-sm text-gray-600 mb-4">Format: <code class="bg-gray-100 px-2 py-1 rounded">Mata Pelajaran;Fase;Kelas;Semester;Elemen/Bab;CP;TP;8 Dimensi Profil Lulusan</code></p>
-                            <textarea id="customCPInput" rows="6" 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
-                                placeholder="Paste data CSV di sini..."></textarea>
-                            <div class="mt-4 flex justify-end">
-                                <button onclick="parseCustomCP()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                    Parse & Import
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             `;
             
@@ -1823,7 +1262,7 @@
             }
         }
 
-        window.selectJenjang = async function(jenjang) {
+        async function selectJenjang(jenjang) {
             // Update button states
             document.querySelectorAll('.jenjang-btn').forEach(btn => {
                 btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
@@ -1841,43 +1280,19 @@
             `;
             
             try {
+                // Check cache first
+                if (window.AGSA.cpCache[jenjang]) {
+                    renderMapelList(window.AGSA.cpCache[jenjang], jenjang);
+                    return;
+                }
+                
                 const csvUrl = CSV_LINKS[jenjang];
                 const data = await fetchCSV(csvUrl);
                 
-                // Group by mata pelajaran
-                const mapelGroups = {};
-                data.data.forEach(row => {
-                    const mapel = row['Mata Pelajaran'];
-                    if (!mapelGroups[mapel]) {
-                        mapelGroups[mapel] = [];
-                    }
-                    mapelGroups[mapel].push(row);
-                });
+                // Cache the data
+                window.AGSA.cpCache[jenjang] = data;
                 
-                let html = '';
-                Object.keys(mapelGroups).forEach(mapel => {
-                    const items = mapelGroups[mapel];
-                    const fases = [...new Set(items.map(i => i.Fase))].join(', ');
-                    
-                    html += `
-                        <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer" onclick="showMapelDetail('${mapel}', '${jenjang}')">
-                            <div class="flex items-start justify-between">
-                                <div>
-                                    <h4 class="font-semibold text-gray-900">${mapel}</h4>
-                                    <p class="text-sm text-gray-500 mt-1">Fase: ${fases}</p>
-                                    <p class="text-sm text-gray-500">${items.length} CP tersedia</p>
-                                </div>
-                                <button onclick="event.stopPropagation(); addMapelToList('${mapel}', '${jenjang}')" class="text-blue-600 hover:text-blue-800">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                mapelList.innerHTML = html || '<div class="col-span-full text-center py-8 text-gray-500">Tidak ada data</div>';
+                renderMapelList(data, jenjang);
                 
             } catch (error) {
                 console.error('Error loading CP:', error);
@@ -1887,339 +1302,223 @@
                     </div>
                 `;
             }
-        };
-
-        // ============================================
-        // ATP PAGE
-        // ============================================
+        }
         
-        function renderATP() {
-            const content = `
-                <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <!-- Header -->
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Alur Tujuan Pembelajaran (ATP)</h2>
-                            <p class="text-gray-600">Generate ATP dari Capaian Pembelajaran</p>
-                        </div>
-                        <button onclick="showGenerateATPModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Generate ATP Baru
-                        </button>
-                    </div>
+        window.selectJenjang = selectJenjang;
 
-                    <!-- ATP List -->
-                    <div id="atpList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="col-span-full text-center py-12 text-gray-500">
-                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            <p>Belum ada ATP yang dibuat.</p>
-                            <p class="text-sm">Klik tombol "Generate ATP Baru" untuk memulai.</p>
+        function renderMapelList(data, jenjang) {
+            const mapelList = document.getElementById('mapelList');
+            
+            // Group by mata pelajaran
+            const mapelGroups = {};
+            data.data.forEach(row => {
+                const mapel = row['Mata Pelajaran'];
+                if (!mapel) return;
+                if (!mapelGroups[mapel]) {
+                    mapelGroups[mapel] = [];
+                }
+                mapelGroups[mapel].push(row);
+            });
+            
+            let html = '';
+            Object.keys(mapelGroups).forEach(mapel => {
+                const items = mapelGroups[mapel];
+                const fases = [...new Set(items.map(i => i.Fase).filter(Boolean))].join(', ');
+                
+                html += `
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer" onclick="showMapelDetail('${encodeURIComponent(mapel)}', '${jenjang}')">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="font-semibold text-gray-900">${mapel}</h4>
+                                <p class="text-sm text-gray-500 mt-1">Fase: ${fases || '-'}</p>
+                                <p class="text-sm text-gray-500">${items.length} CP tersedia</p>
+                            </div>
+                            <button onclick="event.stopPropagation(); addMapelToATP('${encodeURIComponent(mapel)}', '${jenjang}')" class="text-blue-600 hover:text-blue-800 p-2">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
+            });
             
-            document.getElementById('pageContent').innerHTML = content;
-            loadATPList();
+            mapelList.innerHTML = html || '<div class="col-span-full text-center py-8 text-gray-500">Tidak ada data</div>';
         }
 
-        async function loadATPList() {
-            if (!window.AGSA.user) return;
+        function showMapelDetail(encodedMapel, jenjang) {
+            const mapel = decodeURIComponent(encodedMapel);
+            const data = window.AGSA.cpCache[jenjang];
             
-            const uid = window.AGSA.user.uid;
-            
-            try {
-                const atpSnap = await getDocs(collection(db, `users/${uid}/atp`));
-                const atpList = document.getElementById('atpList');
-                
-                if (atpSnap.empty) return;
-                
-                let html = '';
-                atpSnap.forEach(doc => {
-                    const atp = doc.data();
-                    html += `
-                        <div class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                            <div class="flex items-start justify-between mb-3">
-                                <div>
-                                    <h4 class="font-semibold text-gray-900">${atp.namaMapel}</h4>
-                                    <p class="text-sm text-gray-500">Kelas ${atp.kelas} | Fase ${atp.fase}</p>
-                                </div>
-                                <span class="px-2 py-1 text-xs font-medium rounded-full ${atp.status === 'final' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
-                                    ${atp.status === 'final' ? 'Final' : 'Draft'}
-                                </span>
-                            </div>
-                            <p class="text-sm text-gray-600 mb-3">Total: ${atp.totalJP || 0} JP</p>
-                            <div class="flex space-x-2">
-                                <button onclick="viewATP('${doc.id}')" class="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
-                                    Lihat
-                                </button>
-                                <button onclick="printATP('${doc.id}')" class="px-3 py-2 text-sm bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                atpList.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Error loading ATP:', error);
+            if (!data) {
+                showToast('Data tidak ditemukan', 'error');
+                return;
             }
+            
+            const items = data.data.filter(row => row['Mata Pelajaran'] === mapel);
+            
+            const modalContent = `
+                <div class="p-6 max-h-[80vh] overflow-auto">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">${mapel}</h3>
+                    
+                    <div class="space-y-4">
+                        ${items.map((item, idx) => `
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex justify-between text-sm text-gray-500 mb-2">
+                                    <span>Fase ${item.Fase || '-'}</span>
+                                    <span>Kelas ${item.Kelas || '-'}</span>
+                                    <span>Semester ${item.Semester || '-'}</span>
+                                </div>
+                                <p class="font-medium text-gray-900 mb-2">${item['Elemen/Bab'] || '-'}</p>
+                                <p class="text-gray-700 mb-2"><strong>CP:</strong> ${item.CP || '-'}</p>
+                                <p class="text-gray-700 mb-2"><strong>TP:</strong> ${item.TP || '-'}</p>
+                                <p class="text-xs text-purple-600">${item['8 Dimensi Profil Lulusan'] || '-'}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="flex justify-end mt-4">
+                        <button onclick="closeModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            showModal(modalContent);
+        }
+        
+        window.showMapelDetail = showMapelDetail;
+
+        function addMapelToATP(encodedMapel, jenjang) {
+            const mapel = decodeURIComponent(encodedMapel);
+            showToast(`Fitur tambah ${mapel} ke ATP dalam pengembangan`, 'info');
+        }
+        
+        window.addMapelToATP = addMapelToATP;
+
+        function loadCPFromDatabase() {
+            const jenjang = window.AGSA.profil?.jenjang || 'SMP';
+            selectJenjang(jenjang);
+            showToast('Memuat data CP dari database...', 'info');
+        }
+        
+        window.loadCPFromDatabase = loadCPFromDatabase;
+
+        // Placeholder render functions for other pages
+        function renderProfil() {
+            document.getElementById('pageContent').innerHTML = `
+                <div class="max-w-4xl mx-auto fade-in">
+                    <div class="bg-white rounded-xl border p-6">
+                        <h2 class="text-xl font-semibold mb-4">Profil Guru & Sekolah</h2>
+                        <p class="text-gray-600">Halaman ini dalam pengembangan...</p>
+                    </div>
+                </div>
+            `;
         }
 
-        // ============================================
-        // PROTA PAGE
-        // ============================================
-        
+        function renderKalender() {
+            document.getElementById('pageContent').innerHTML = `
+                <div class="max-w-6xl mx-auto fade-in">
+                    <div class="bg-white rounded-xl border p-6">
+                        <h2 class="text-xl font-semibold mb-4">Kalender Pendidikan</h2>
+                        <p class="text-gray-600">Halaman ini dalam pengembangan...</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderJadwal() {
+            document.getElementById('pageContent').innerHTML = `
+                <div class="max-w-6xl mx-auto fade-in">
+                    <div class="bg-white rounded-xl border p-6">
+                        <h2 class="text-xl font-semibold mb-4">Jadwal Pelajaran</h2>
+                        <p class="text-gray-600">Halaman ini dalam pengembangan...</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSiswa() {
+            document.getElementById('pageContent').innerHTML = `
+                <div class="max-w-6xl mx-auto fade-in">
+                    <div class="bg-white rounded-xl border p-6">
+                        <h2 class="text-xl font-semibold mb-4">Data Siswa</h2>
+                        <p class="text-gray-600">Halaman ini dalam pengembangan...</p>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderProta() {
-            const content = `
-                <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Program Tahunan (Prota)</h2>
-                            <p class="text-gray-600">Distribusi materi per tahun dari ATP</p>
-                        </div>
-                        <button onclick="showGenerateProtaModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Generate Prota
-                        </button>
-                    </div>
-
-                    <div id="protaList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="col-span-full text-center py-12 text-gray-500">
-                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            <p>Belum ada Prota yang dibuat.</p>
-                            <p class="text-sm">Generate Prota dari ATP yang sudah ada.</p>
-                        </div>
+            document.getElementById('pageContent').innerHTML = `
+                <div class="max-w-6xl mx-auto fade-in">
+                    <div class="bg-white rounded-xl border p-6">
+                        <h2 class="text-xl font-semibold mb-4">Program Tahunan (Prota)</h2>
+                        <p class="text-gray-600">Halaman ini dalam pengembangan...</p>
                     </div>
                 </div>
             `;
-            
-            document.getElementById('pageContent').innerHTML = content;
         }
 
-        // ============================================
-        // PROMES PAGE (PREMIUM)
-        // ============================================
-        
         function renderPromes() {
-            const content = `
-                <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Program Semester (Promes)</h2>
-                            <p class="text-gray-600">Sinkron dengan Kalender, Jadwal, dan TP</p>
-                        </div>
-                        <button onclick="showGeneratePromesModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Generate Promes
-                        </button>
-                    </div>
-
-                    <!-- Sync Status -->
-                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="font-medium text-blue-900">Sinkronisasi Otomatis</p>
-                                <p class="text-sm text-blue-700">Promes terhubung dengan Prota, Kalender, Jadwal, dan akan menyinkronkan TP ke Modul Ajar, Jurnal, dan KKTP</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="promesList" class="grid md:grid-cols-2 gap-4">
-                        <div class="col-span-full text-center py-12 text-gray-500">
-                            <p>Belum ada Promes. Generate dari Prota yang sudah ada.</p>
-                        </div>
+            document.getElementById('pageContent').innerHTML = `
+                <div class="max-w-6xl mx-auto fade-in">
+                    <div class="bg-white rounded-xl border p-6">
+                        <h2 class="text-xl font-semibold mb-4">Program Semester (Promes)</h2>
+                        <p class="text-gray-600">Halaman ini dalam pengembangan... (Premium Feature)</p>
                     </div>
                 </div>
             `;
-            
-            document.getElementById('pageContent').innerHTML = content;
         }
 
-        // ============================================
-        // MODUL AJAR PAGE (PREMIUM)
-        // ============================================
-        
         function renderModulAjar() {
-            const content = `
-                <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Modul Ajar</h2>
-                            <p class="text-gray-600">Sinkron dengan Promes, mendukung teks RTL (Arab)</p>
-                        </div>
-                        <button onclick="showCreateModulAjarModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Buat Modul Ajar
-                        </button>
-                    </div>
-
-                    <div id="modulAjarList" class="space-y-4">
-                        <div class="text-center py-12 text-gray-500">
-                            <p>Belum ada Modul Ajar. Buat dari Promes yang sudah ada.</p>
-                        </div>
+            document.getElementById('pageContent').innerHTML = `
+                <div class="max-w-6xl mx-auto fade-in">
+                    <div class="bg-white rounded-xl border p-6">
+                        <h2 class="text-xl font-semibold mb-4">Modul Ajar</h2>
+                        <p class="text-gray-600">Halaman ini dalam pengembangan... (Premium Feature)</p>
                     </div>
                 </div>
             `;
-            
-            document.getElementById('pageContent').innerHTML = content;
         }
 
-        // ============================================
-        // JURNAL PAGE (PREMIUM)
-        // ============================================
-        
         function renderJurnal() {
-            const content = `
-                <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Jurnal Pembelajaran</h2>
-                            <p class="text-gray-600">Auto generate dari Promes + Absensi</p>
-                        </div>
-                        <div class="flex space-x-3">
-                            <button onclick="showAbsensiModal()" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                                </svg>
-                                Input Absensi
-                            </button>
-                            <button onclick="generateJurnal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                </svg>
-                                Generate Jurnal
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Info -->
-                    <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-                        <p class="text-sm text-green-800">
-                            <strong>Kolom Jurnal:</strong> Mata Pelajaran, Semester, Tahun Ajar, Kelas/Fase, Materi, Elemen/CP, TP (auto dari promes), Kehadiran (auto dari absensi), Hari/Tanggal, Hasil, Keterangan, TTD Guru & Kepala Sekolah
-                        </p>
-                    </div>
-
-                    <div id="jurnalList" class="space-y-4">
-                        <div class="text-center py-12 text-gray-500">
-                            <p>Jurnal akan di-generate otomatis dari data Promes dan Absensi</p>
-                        </div>
+            document.getElementById('pageContent').innerHTML = `
+                <div class="max-w-6xl mx-auto fade-in">
+                    <div class="bg-white rounded-xl border p-6">
+                        <h2 class="text-xl font-semibold mb-4">Jurnal Pembelajaran</h2>
+                        <p class="text-gray-600">Halaman ini dalam pengembangan... (Premium Feature)</p>
                     </div>
                 </div>
             `;
-            
-            document.getElementById('pageContent').innerHTML = content;
         }
 
-        // ============================================
-        // KKTP PAGE (PREMIUM)
-        // ============================================
-        
         function renderKKTP() {
-            const content = `
-                <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-900">KKTP (Kriteria Ketercapaian TP)</h2>
-                            <p class="text-gray-600">Sinkron dengan TP dari Promes, nilai customizable</p>
-                        </div>
-                        <button onclick="showCreateKKTPModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Buat KKTP
-                        </button>
-                    </div>
-
-                    <div id="kktpList" class="space-y-4">
-                        <div class="text-center py-12 text-gray-500">
-                            <p>Belum ada KKTP. TP akan otomatis diambil dari Promes.</p>
-                        </div>
+            document.getElementById('pageContent').innerHTML = `
+                <div class="max-w-6xl mx-auto fade-in">
+                    <div class="bg-white rounded-xl border p-6">
+                        <h2 class="text-xl font-semibold mb-4">KKTP</h2>
+                        <p class="text-gray-600">Halaman ini dalam pengembangan... (Premium Feature)</p>
                     </div>
                 </div>
             `;
-            
-            document.getElementById('pageContent').innerHTML = content;
         }
 
-        // ============================================
-        // DAFTAR NILAI PAGE (PREMIUM)
-        // ============================================
-        
         function renderNilai() {
-            const content = `
-                <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Daftar Nilai</h2>
-                            <p class="text-gray-600">Sumatif, ATS, ASAS dengan auto hitung Nilai Rapor</p>
-                        </div>
-                        <button onclick="showCreateNilaiModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Buat Daftar Nilai
-                        </button>
-                    </div>
-
-                    <!-- Component Config -->
-                    <div class="bg-white rounded-xl border border-gray-200 p-4">
-                        <h3 class="font-medium text-gray-900 mb-3">Konfigurasi Komponen Nilai</h3>
-                        <div class="grid md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-sm text-gray-600 mb-1">Label Sumatif</label>
-                                <input type="text" value="Sumatif" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm text-gray-600 mb-1">Label ATS</label>
-                                <input type="text" value="ATS" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm text-gray-600 mb-1">Label ASAS</label>
-                                <input type="text" value="ASAS" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="nilaiList" class="space-y-4">
-                        <div class="text-center py-12 text-gray-500">
-                            <p>Belum ada daftar nilai.</p>
-                        </div>
+            document.getElementById('pageContent').innerHTML = `
+                <div class="max-w-6xl mx-auto fade-in">
+                    <div class="bg-white rounded-xl border p-6">
+                        <h2 class="text-xl font-semibold mb-4">Daftar Nilai</h2>
+                        <p class="text-gray-600">Halaman ini dalam pengembangan... (Premium Feature)</p>
                     </div>
                 </div>
             `;
-            
-            document.getElementById('pageContent').innerHTML = content;
         }
 
-        // ============================================
-        // AI ASSISTANT PAGE
-        // ============================================
-        
         function renderAIAssistant() {
-            const content = `
-                <div class="max-w-4xl mx-auto space-y-6 fade-in">
+            document.getElementById('pageContent').innerHTML = `
+                <div class="max-w-4xl mx-auto fade-in">
                     <div class="text-center mb-8">
                         <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2229,126 +1528,14 @@
                         <h2 class="text-2xl font-bold text-gray-900">AI Assistant</h2>
                         <p class="text-gray-600">Bantu generate format CSV dan template dokumen</p>
                     </div>
-
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <!-- Generate CSV Siswa -->
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                                    </svg>
-                                </div>
-                                <h3 class="font-semibold text-gray-900">Template CSV Siswa</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 mb-4">Generate template CSV untuk import data siswa</p>
-                            <button onclick="generateCSVSiswaTemplate()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                Generate Template
-                            </button>
-                        </div>
-
-                        <!-- Generate CP Template -->
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                </div>
-                                <h3 class="font-semibold text-gray-900">Template CP Custom</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 mb-4">Generate template CSV untuk Capaian Pembelajaran</p>
-                            <button onclick="generateCPTemplate()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                                Generate Template
-                            </button>
-                        </div>
-
-                        <!-- Convert Materi -->
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                                    </svg>
-                                </div>
-                                <h3 class="font-semibold text-gray-900">Konversi Materi</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 mb-4">Konversi materi mentah ke format sistem</p>
-                            <button onclick="showConvertMateriModal()" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                                Konversi Materi
-                            </button>
-                        </div>
-
-                        <!-- Kalender Generator -->
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                </div>
-                                <h3 class="font-semibold text-gray-900">Template Kalender</h3>
-                            </div>
-                            <p class="text-sm text-gray-600 mb-4">Generate template kalender pendidikan</p>
-                            <button onclick="generateKalenderTemplate()" class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-                                Generate Template
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Output Area -->
-                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-                            <h3 class="font-semibold text-gray-900">Output</h3>
-                            <button onclick="copyOutput()" class="text-sm text-blue-600 hover:text-blue-700">
-                                Copy to Clipboard
-                            </button>
-                        </div>
-                        <div class="p-6">
-                            <textarea id="aiOutput" rows="10" readonly
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm"
-                                placeholder="Output akan muncul di sini..."></textarea>
-                        </div>
+                    
+                    <div class="bg-white rounded-xl border p-6">
+                        <p class="text-gray-600">Fitur AI Assistant dalam pengembangan...</p>
                     </div>
                 </div>
             `;
-            
-            document.getElementById('pageContent').innerHTML = content;
         }
 
-        window.generateCSVSiswaTemplate = function() {
-            const template = `NISN;NIS;Nama;JenisKelamin;Kelas
-1234567890;001;Ahmad Rizki Pratama;L;7A
-1234567891;002;Siti Nurhaliza;P;7A
-1234567892;003;Muhammad Fadil;L;7A
-1234567893;004;Putri Amelia;P;7B
-1234567894;005;Dimas Prayoga;L;7B`;
-            
-            document.getElementById('aiOutput').value = template;
-            showToast('Template CSV Siswa berhasil di-generate!', 'success');
-        };
-
-        window.generateCPTemplate = function() {
-            const template = `Mata Pelajaran;Fase;Kelas;Semester;Elemen/Bab;CP;TP;8 Dimensi Profil Lulusan
-Matematika;D;7;1;Bilangan;Peserta didik dapat memahami bilangan bulat dan pecahan;TP.1.1 Menjelaskan konsep bilangan bulat;Bernalar Kritis
-Matematika;D;7;1;Bilangan;Peserta didik dapat memahami bilangan bulat dan pecahan;TP.1.2 Melakukan operasi bilangan bulat;Bernalar Kritis
-Matematika;D;7;1;Aljabar;Peserta didik dapat memahami bentuk aljabar;TP.2.1 Menjelaskan bentuk aljabar;Bernalar Kritis`;
-            
-            document.getElementById('aiOutput').value = template;
-            showToast('Template CP berhasil di-generate!', 'success');
-        };
-
-        window.copyOutput = function() {
-            const output = document.getElementById('aiOutput');
-            output.select();
-            document.execCommand('copy');
-            showToast('Berhasil di-copy!', 'success');
-        };
-
-        // ============================================
-        // SUPER ADMIN PAGE
-        // ============================================
-        
         function renderSuperAdmin() {
             if (!window.AGSA.isSuperAdmin) {
                 document.getElementById('pageContent').innerHTML = `
@@ -2359,134 +1546,45 @@ Matematika;D;7;1;Aljabar;Peserta didik dapat memahami bentuk aljabar;TP.2.1 Menj
                 return;
             }
             
-            const content = `
-                <div class="max-w-6xl mx-auto space-y-6 fade-in">
-                    <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+            document.getElementById('pageContent').innerHTML = `
+                <div class="max-w-6xl mx-auto fade-in">
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
                         <p class="text-red-800 font-medium">⚠️ Area Super Admin - Hanya untuk pengelolaan sistem</p>
                     </div>
-
-                    <!-- Stats Overview -->
-                    <div class="grid md:grid-cols-4 gap-4">
-                        <div class="bg-white rounded-xl border p-4">
-                            <p class="text-sm text-gray-500">Total User</p>
-                            <p id="totalUsers" class="text-2xl font-bold text-gray-900">-</p>
-                        </div>
-                        <div class="bg-white rounded-xl border p-4">
-                            <p class="text-sm text-gray-500">User Premium</p>
-                            <p id="premiumUsers" class="text-2xl font-bold text-green-600">-</p>
-                        </div>
-                        <div class="bg-white rounded-xl border p-4">
-                            <p class="text-sm text-gray-500">Sekolah Aktif</p>
-                            <p id="activeSchools" class="text-2xl font-bold text-blue-600">-</p>
-                        </div>
-                        <div class="bg-white rounded-xl border p-4">
-                            <p class="text-sm text-gray-500">Pendapatan Bulan Ini</p>
-                            <p id="monthlyRevenue" class="text-2xl font-bold text-purple-600">-</p>
-                        </div>
-                    </div>
-
-                    <!-- WhatsApp Config -->
-                    <div class="bg-white rounded-xl border overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 border-b">
-                            <h3 class="font-semibold text-gray-900">Konfigurasi Sistem</h3>
-                        </div>
-                        <div class="p-6 space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp untuk Upgrade</label>
-                                <div class="flex space-x-2">
-                                    <input type="text" id="waNumber" placeholder="6281234567890"
-                                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
-                                    <button onclick="saveWANumber()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                                        Simpan
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- User Management -->
-                    <div class="bg-white rounded-xl border overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50 border-b flex items-center justify-between">
-                            <h3 class="font-semibold text-gray-900">Manajemen User</h3>
-                            <input type="text" placeholder="Cari user..." class="px-3 py-1.5 border rounded-lg text-sm">
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nama</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Plan</th>
-                                        <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Expired</th>
-                                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="userTableBody">
-                                    <tr>
-                                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">Loading...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="bg-white rounded-xl border p-6">
+                        <h2 class="text-xl font-semibold mb-4">Super Admin Panel</h2>
+                        <p class="text-gray-600">Halaman ini dalam pengembangan...</p>
                     </div>
                 </div>
             `;
-            
-            document.getElementById('pageContent').innerHTML = content;
-            loadSuperAdminData();
-        }
-
-        async function loadSuperAdminData() {
-            try {
-                const usersSnap = await getDocs(collection(db, 'users'));
-                
-                let totalUsers = 0;
-                let premiumUsers = 0;
-                
-                const tbody = document.getElementById('userTableBody');
-                let html = '';
-                
-                usersSnap.forEach(doc => {
-                    const user = doc.data();
-                    totalUsers++;
-                    
-                    if (user.subscription?.type === 'premium') {
-                        premiumUsers++;
-                    }
-                    
-                    html += `
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm">${user.email}</td>
-                            <td class="px-4 py-3 text-sm">${user.displayName || '-'}</td>
-                            <td class="px-4 py-3">
-                                <span class="px-2 py-1 text-xs rounded-full ${user.subscription?.type === 'premium' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">
-                                    ${user.subscription?.type || 'free'}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-sm">${user.subscription?.expiredAt ? new Date(user.subscription.expiredAt.toDate()).toLocaleDateString('id-ID') : '-'}</td>
-                            <td class="px-4 py-3 text-center">
-                                <button onclick="togglePremium('${doc.id}')" class="text-blue-600 hover:text-blue-800 text-sm">
-                                    Toggle Premium
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                document.getElementById('totalUsers').textContent = totalUsers;
-                document.getElementById('premiumUsers').textContent = premiumUsers;
-                tbody.innerHTML = html || '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">Tidak ada data</td></tr>';
-                
-            } catch (error) {
-                console.error('Error loading admin data:', error);
-            }
         }
 
         // ============================================
-        // AUTHENTICATION CHECK & INIT
+        // EVENT LISTENERS & INITIALIZATION
         // ============================================
         
-        onAuthStateChanged(auth, async (user) => {
+        // Sidebar toggle events
+        document.getElementById('menuToggleBtn').addEventListener('click', toggleSidebar);
+        document.getElementById('closeSidebarBtn').addEventListener('click', toggleSidebar);
+        document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
+        document.getElementById('modalOverlay').addEventListener('click', closeModal);
+        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        document.getElementById('upgradeBtn').addEventListener('click', showUpgradeModal);
+
+        // Nav link clicks
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = link.getAttribute('href').replace('#', '');
+                navigateTo(page);
+            });
+        });
+
+        // ============================================
+        // AUTH STATE LISTENER
+        // ============================================
+        
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
                 window.AGSA.user = user;
                 
@@ -2496,15 +1594,15 @@ Matematika;D;7;1;Aljabar;Peserta didik dapat memahami bentuk aljabar;TP.2.1 Menj
                 
                 // Check subscription
                 window.AGSA.isPremium = userData?.subscription?.type === 'premium';
-                window.AGSA.isSuperAdmin = userData?.role === 'superadmin' || user.email === 'afifaro@gmail.com';
+                window.AGSA.isSuperAdmin = userData?.role === 'superadmin' || user.email === SUPER_ADMIN_EMAIL;
                 
                 // Load profil
                 const profil = await loadProfil(user.uid);
                 window.AGSA.profil = profil;
                 
                 // Update UI
-                document.getElementById('userPhoto').src = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName);
-                document.getElementById('userName').textContent = user.displayName;
+                document.getElementById('userPhoto').src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}`;
+                document.getElementById('userName').textContent = user.displayName || 'User';
                 document.getElementById('userPlan').textContent = window.AGSA.isPremium ? '⭐ Premium' : 'Free';
                 
                 // Show/hide admin menu
@@ -2524,7 +1622,7 @@ Matematika;D;7;1;Aljabar;Peserta didik dapat memahami bentuk aljabar;TP.2.1 Menj
                 }
                 
                 // Show app
-                document.getElementById('loadingOverlay').classList.add('hidden');
+                hideLoading();
                 document.getElementById('app').classList.remove('hidden');
                 
                 // Navigate to initial page
