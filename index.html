@@ -3,539 +3,835 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Guru Super App - SaaS Edition</title>
+    <title>Admin Guru Super App - SaaS Kolaboratif</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'sans': ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
     <style>
-        * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
-        body { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh; }
-        .glass { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); }
+        * { font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         .sidebar-scroll::-webkit-scrollbar { width: 4px; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-        .gradient-primary { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); }
-        .gradient-secondary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-        .gradient-google { background: linear-gradient(135deg, #ea4335 0%, #fbbc05 50%, #34a853 100%); }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .glow-blue { box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
+        .glow-green { box-shadow: 0 0 30px rgba(16, 185, 129, 0.3); }
+        .paper-preview { background: white; margin: 20px auto; padding: 15mm; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-width: 210mm; min-height: 297mm; }
+        .paper-preview.landscape { max-width: 297mm; min-height: 210mm; }
+        .doc-table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+        .doc-table th, .doc-table td { border: 1px solid #374151; padding: 6px; text-align: left; vertical-align: top; }
+        .doc-table th { background: #f1f5f9; font-weight: 600; text-align: center; }
+        [contenteditable="true"]:hover { background: #fef9c3; outline: 1px dashed #eab308; }
+        .event-cell { background: #fca5a5 !important; text-align: center; vertical-align: middle; }
+        .vertical-text { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 7pt; font-weight: bold; }
+        .nav-item { transition: all 0.2s; }
+        .nav-item:hover { background: rgba(59, 130, 246, 0.2); transform: translateX(4px); }
+        .nav-item.active { background: linear-gradient(90deg, rgba(59, 130, 246, 0.3), transparent); border-left: 3px solid #3b82f6; }
+        .feature-card { transition: all 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .btn-gradient { background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+        .btn-gradient:hover { background: linear-gradient(135deg, #2563eb, #7c3aed); }
+        @media print {
+            body { background: white; }
+            .no-print { display: none !important; }
+            .paper-preview { box-shadow: none; margin: 0; padding: 10mm; }
+            @page { size: A4; margin: 10mm; }
+        }
         .animate-float { animation: float 3s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .paper-preview { background: white; margin: 20px auto; padding: 15mm; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 210mm; min-height: 297mm; border-radius: 8px; }
-        .paper-preview.landscape { max-width: 297mm; min-height: 210mm; }
-        .doc-table { width: 100%; border-collapse: collapse; font-size: 10pt; margin-bottom: 20px; }
-        .doc-table th, .doc-table td { border: 1px solid #334155; padding: 8px; text-align: left; vertical-align: top; }
-        .doc-table th { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); font-weight: 600; text-align: center; }
-        .event-cell { vertical-align: middle !important; text-align: center !important; background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%) !important; }
-        .vertical-text { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 7pt; font-weight: bold; }
-        [contenteditable="true"]:hover { background: #fef9c3; outline: 2px dashed #eab308; }
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .signature-area { display: flex; justify-content: space-between; margin-top: 40px; page-break-inside: avoid; flex-wrap: wrap; gap: 20px; }
-        .signature-box { text-align: center; font-size: 11pt; min-width: 200px; flex: 1; }
-        .signature-name { text-decoration: underline; font-weight: bold; margin-top: 70px; }
-        .nav-item { transition: all 0.2s; border-left: 3px solid transparent; }
-        .nav-item:hover, .nav-item.active { background: rgba(37, 99, 235, 0.1); border-left-color: #2563eb; }
-        .premium-badge { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-        .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid #2563eb; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .toast { animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .mode-badge { position: fixed; bottom: 20px; right: 20px; z-index: 999; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-        .google-btn { background: white; border: 2px solid #e2e8f0; transition: all 0.3s; }
-        .google-btn:hover { border-color: #4285f4; box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3); }
-        .divider { display: flex; align-items: center; text-align: center; margin: 20px 0; }
-        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
-        .divider span { padding: 0 15px; color: #94a3b8; font-size: 14px; }
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); position: fixed !important; z-index: 100; height: 100vh; }
-            .sidebar.open { transform: translateX(0); }
-            .paper-preview { padding: 5mm; margin: 10px; font-size: 8pt; min-height: auto; }
-            .doc-table th, .doc-table td { padding: 4px; font-size: 8pt; }
-            .signature-area { flex-direction: column; align-items: center; }
-        }
-        @media print {
-            body { background: white !important; }
-            .no-print, #sidebar, #topbar, .mobile-menu-btn, .mode-badge, #toast-container { display: none !important; }
-            #main-content { margin: 0 !important; padding: 0 !important; }
-            .paper-preview { margin: 0; box-shadow: none; page-break-after: always; border-radius: 0; }
-            @page { size: A4 portrait; margin: 10mm; }
-        }
     </style>
 </head>
-<body>
-    <!-- Toast Container -->
-    <div id="toast-container" class="fixed top-4 right-4 z-[2000] space-y-2"></div>
+<body class="min-h-screen text-white">
 
-    <!-- Mode Badge -->
-    <div id="mode-badge" class="mode-badge bg-slate-800 text-white hidden">
-        <span id="mode-text">Mode: Offline</span>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-white z-[3000] flex items-center justify-center">
-        <div class="text-center">
-            <div class="loading-spinner mx-auto mb-4"></div>
-            <p class="text-slate-600 font-medium">Memuat aplikasi...</p>
-            <p class="text-slate-400 text-sm mt-2" id="loading-status">Menghubungkan ke server...</p>
+<!-- ========== LANDING PAGE ========== -->
+<div id="landing-page" class="min-h-screen">
+    <!-- Hero Section -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-xl">📚</div>
+                <span class="font-bold text-xl">Admin Guru <span class="text-blue-400">Super App</span></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="#features" class="hidden md:block text-slate-300 hover:text-white transition">Fitur</a>
+                <a href="#pricing" class="hidden md:block text-slate-300 hover:text-white transition">Harga</a>
+                <button onclick="showAuthModal('login')" class="px-5 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition font-medium">Masuk</button>
+                <button onclick="showAuthModal('register')" class="px-5 py-2 rounded-lg btn-gradient text-white font-medium">Daftar Gratis</button>
+            </div>
         </div>
-    </div>
+    </nav>
 
-    <!-- Landing Page -->
-    <div id="landing-page" class="hidden">
-        <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-200">
-            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center text-white text-xl">📚</div>
-                    <span class="font-bold text-xl text-slate-800">AdminGuru<span class="text-blue-600">Pro</span></span>
-                </div>
-                <div class="hidden md:flex items-center gap-8">
-                    <a href="#features" class="text-slate-600 hover:text-blue-600 font-medium">Fitur</a>
-                    <a href="#pricing" class="text-slate-600 hover:text-blue-600 font-medium">Harga</a>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="UISystem.showPage('login')" class="px-4 py-2 text-blue-600 font-semibold hover:bg-blue-50 rounded-lg transition">Masuk</button>
-                    <button onclick="UISystem.showPage('register')" class="px-5 py-2 gradient-primary text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition">Daftar Gratis</button>
-                </div>
+    <!-- Hero Content -->
+    <section class="pt-32 pb-20 px-4">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/20 text-blue-400 text-sm mb-6">
+                <span class="animate-pulse">🔥</span> Platform #1 untuk Administrasi Guru di Indonesia
             </div>
-        </nav>
-
-        <!-- Hero Section -->
-        <section class="pt-32 pb-20 px-4">
-            <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-6">
-                        🚀 Platform Administrasi Guru #1 di Indonesia
-                    </div>
-                    <h1 class="text-4xl lg:text-6xl font-extrabold text-slate-900 leading-tight mb-6">
-                        Kelola Administrasi <span class="text-transparent bg-clip-text gradient-primary">Guru</span> dengan Mudah
-                    </h1>
-                    <p class="text-lg text-slate-600 mb-8 leading-relaxed">
-                        Generate ATP, Prota, Promes, Modul Ajar, LKPD, Jurnal, Absensi, KKTP & Nilai secara otomatis. 
-                        Terintegrasi dengan Kurikulum Merdeka terbaru.
-                    </p>
-                    <div class="flex flex-wrap gap-4">
-                        <button onclick="AuthSystem.loginWithGoogle()" class="px-8 py-4 google-btn text-slate-700 font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition flex items-center gap-3">
-                            <svg class="w-6 h-6" viewBox="0 0 24 24">
-                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                            </svg>
-                            Masuk dengan Google
-                        </button>
-                        <button onclick="AppState.enterOfflineMode()" class="px-8 py-4 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:border-blue-500 hover:text-blue-600 transition">
-                            🔌 Mode Offline
-                        </button>
-                    </div>
-                    <div class="flex items-center gap-6 mt-8">
-                        <div class="flex -space-x-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-white text-sm font-bold">A</div>
-                            <div class="w-10 h-10 rounded-full bg-green-500 border-2 border-white flex items-center justify-center text-white text-sm font-bold">B</div>
-                            <div class="w-10 h-10 rounded-full bg-purple-500 border-2 border-white flex items-center justify-center text-white text-sm font-bold">C</div>
-                        </div>
-                        <div class="text-sm text-slate-600">
-                            <span class="font-bold text-slate-900">5,000+</span> Guru sudah bergabung
-                        </div>
-                    </div>
-                </div>
-                <div class="relative hidden lg:block">
-                    <div class="absolute -top-10 -left-10 w-72 h-72 bg-blue-200 rounded-full opacity-50 blur-3xl"></div>
-                    <div class="absolute -bottom-10 -right-10 w-72 h-72 bg-purple-200 rounded-full opacity-50 blur-3xl"></div>
-                    <div class="relative glass rounded-2xl shadow-2xl p-6 animate-float">
-                        <div class="bg-slate-100 rounded-xl p-4 mb-4">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-8 h-8 bg-blue-500 rounded-lg"></div>
-                                <div class="flex-1">
-                                    <div class="h-3 bg-slate-300 rounded w-3/4 mb-2"></div>
-                                    <div class="h-2 bg-slate-200 rounded w-1/2"></div>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-3 gap-2">
-                                <div class="h-16 bg-green-200 rounded-lg"></div>
-                                <div class="h-16 bg-blue-200 rounded-lg"></div>
-                                <div class="h-16 bg-purple-200 rounded-lg"></div>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-slate-600">✅ ATP Generated</span>
-                            <span class="text-green-600 font-bold">100%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section id="features" class="py-20 px-4 bg-white">
-            <div class="max-w-7xl mx-auto">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">Fitur Lengkap untuk Guru Modern</h2>
-                    <p class="text-lg text-slate-600 max-w-2xl mx-auto">Semua yang Anda butuhkan dalam satu platform</p>
-                </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="card-hover bg-gradient-to-br from-blue-50 to-white p-6 rounded-2xl border border-blue-100">
-                        <div class="w-14 h-14 gradient-primary rounded-2xl flex items-center justify-center text-2xl mb-4">📋</div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">ATP & Prota</h3>
-                        <p class="text-slate-600">Generate Alur Tujuan Pembelajaran dan Program Tahunan otomatis</p>
-                        <span class="inline-block mt-3 px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">GRATIS</span>
-                    </div>
-                    <div class="card-hover bg-gradient-to-br from-green-50 to-white p-6 rounded-2xl border border-green-100">
-                        <div class="w-14 h-14 gradient-secondary rounded-2xl flex items-center justify-center text-2xl mb-4">📅</div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Kalender & Jadwal</h3>
-                        <p class="text-slate-600">Kelola kalender pendidikan dan jadwal pelajaran dengan mudah</p>
-                        <span class="inline-block mt-3 px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">GRATIS</span>
-                    </div>
-                    <div class="card-hover bg-gradient-to-br from-purple-50 to-white p-6 rounded-2xl border border-purple-100">
-                        <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-2xl mb-4">📚</div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Modul & LKPD</h3>
-                        <p class="text-slate-600">Buat Modul Ajar dan Lembar Kerja Peserta Didik otomatis</p>
-                        <span class="inline-block mt-3 px-3 py-1 premium-badge text-white text-sm font-medium rounded-full">PRO</span>
-                    </div>
-                    <div class="card-hover bg-gradient-to-br from-amber-50 to-white p-6 rounded-2xl border border-amber-100">
-                        <div class="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center text-2xl mb-4">📝</div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Jurnal & Absensi</h3>
-                        <p class="text-slate-600">Catat pelaksanaan pembelajaran dan kehadiran siswa</p>
-                        <span class="inline-block mt-3 px-3 py-1 premium-badge text-white text-sm font-medium rounded-full">PRO</span>
-                    </div>
-                    <div class="card-hover bg-gradient-to-br from-red-50 to-white p-6 rounded-2xl border border-red-100">
-                        <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-pink-500 rounded-2xl flex items-center justify-center text-2xl mb-4">🎯</div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">KKTP & Nilai</h3>
-                        <p class="text-slate-600">Kelola kriteria ketercapaian dan penilaian siswa</p>
-                        <span class="inline-block mt-3 px-3 py-1 premium-badge text-white text-sm font-medium rounded-full">PRO</span>
-                    </div>
-                    <div class="card-hover bg-gradient-to-br from-cyan-50 to-white p-6 rounded-2xl border border-cyan-100">
-                        <div class="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center text-2xl mb-4">❓</div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">Bank Soal</h3>
-                        <p class="text-slate-600">Buat dan kelola bank soal dengan berbagai tipe</p>
-                        <span class="inline-block mt-3 px-3 py-1 premium-badge text-white text-sm font-medium rounded-full">PRO</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Pricing Section -->
-        <section id="pricing" class="py-20 px-4">
-            <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">Pilih Paket Anda</h2>
-                    <p class="text-lg text-slate-600">Mulai gratis, upgrade kapan saja</p>
-                </div>
-                <div class="grid md:grid-cols-2 gap-8">
-                    <div class="bg-white rounded-3xl p-8 shadow-lg border border-slate-200">
-                        <div class="text-center mb-6">
-                            <span class="text-slate-600 font-medium">GRATIS</span>
-                            <div class="text-4xl font-extrabold text-slate-900 mt-2">Rp 0</div>
-                            <span class="text-slate-500">Selamanya</span>
-                        </div>
-                        <ul class="space-y-4 mb-8 text-sm">
-                            <li class="flex items-center gap-3"><span class="text-green-500">✓</span> Kalender Pendidikan</li>
-                            <li class="flex items-center gap-3"><span class="text-green-500">✓</span> Jadwal Pelajaran</li>
-                            <li class="flex items-center gap-3"><span class="text-green-500">✓</span> ATP & Prota</li>
-                            <li class="flex items-center gap-3 text-slate-400"><span>✗</span> Promes, Modul, LKPD</li>
-                            <li class="flex items-center gap-3 text-slate-400"><span>✗</span> Jurnal, Absensi, Nilai</li>
-                        </ul>
-                        <button onclick="AuthSystem.loginWithGoogle()" class="w-full py-3 google-btn text-slate-700 font-bold rounded-xl flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24">
-                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                            </svg>
-                            Mulai dengan Google
-                        </button>
-                    </div>
-                    <div class="bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl p-8 shadow-2xl text-white relative overflow-hidden">
-                        <div class="absolute top-4 right-4 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-bold">POPULER</div>
-                        <div class="text-center mb-6">
-                            <span class="text-blue-200 font-medium">PRO</span>
-                            <div class="text-4xl font-extrabold mt-2">Rp 50.000</div>
-                            <span class="text-blue-200">Per bulan</span>
-                        </div>
-                        <ul class="space-y-4 mb-8 text-sm">
-                            <li class="flex items-center gap-3"><span class="text-yellow-400">✓</span> Semua Fitur Gratis</li>
-                            <li class="flex items-center gap-3"><span class="text-yellow-400">✓</span> Promes, Modul Ajar, LKPD</li>
-                            <li class="flex items-center gap-3"><span class="text-yellow-400">✓</span> Jurnal & Absensi</li>
-                            <li class="flex items-center gap-3"><span class="text-yellow-400">✓</span> KKTP & Daftar Nilai</li>
-                            <li class="flex items-center gap-3"><span class="text-yellow-400">✓</span> Bank Soal Lengkap</li>
-                        </ul>
-                        <button onclick="SubscriptionSystem.showUpgradeModal()" class="w-full py-3 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition">
-                            Upgrade Sekarang
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <footer class="bg-slate-900 text-white py-12 px-4">
-            <div class="max-w-7xl mx-auto text-center">
-                <p class="text-slate-400">© 2025 AdminGuruPro. All rights reserved.</p>
-            </div>
-        </footer>
-    </div>
-
-    <!-- Login Page -->
-    <div id="login-page" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">📚</div>
-                <h1 class="text-2xl font-bold text-slate-900">Masuk ke Akun</h1>
-                <p class="text-slate-500 mt-2">Selamat datang kembali!</p>
-            </div>
-
-            <!-- Google Sign In Button -->
-            <button onclick="AuthSystem.loginWithGoogle()" id="google-login-btn" class="w-full py-3 google-btn text-slate-700 font-bold rounded-xl flex items-center justify-center gap-3 mb-4">
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Masuk dengan Google
-            </button>
-
-            <div class="divider"><span>atau dengan email</span></div>
-
-            <form id="login-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                    <input type="email" id="login-email" required class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="email@contoh.com">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                    <input type="password" id="login-password" required minlength="6" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Minimal 6 karakter">
-                </div>
-                <button type="submit" id="login-btn" class="w-full py-3 gradient-primary text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition">
-                    Masuk dengan Email
-                </button>
-            </form>
-            <div class="mt-4 text-center">
-                <button onclick="AppState.enterOfflineMode()" class="text-slate-500 hover:text-blue-600 text-sm">
-                    🔌 Gunakan Mode Offline
-                </button>
-            </div>
-            <p class="text-center text-slate-600 mt-6">
-                Belum punya akun? <button onclick="UISystem.showPage('register')" class="text-blue-600 font-semibold hover:underline">Daftar</button>
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
+                Kelola Administrasi Mengajar<br>
+                <span class="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Dengan Cerdas & Efisien</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto mb-10">
+                ATP, Prota, Promes, Modul Ajar, LKPD, Jurnal, Absensi, KKTP, Bank Soal - 
+                Semua dokumen otomatis ter-generate sesuai Kurikulum Merdeka.
             </p>
-            <button onclick="UISystem.showPage('landing')" class="w-full mt-4 text-slate-500 hover:text-slate-700 text-sm">← Kembali</button>
-        </div>
-    </div>
-
-    <!-- Register Page -->
-    <div id="register-page" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 gradient-secondary rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">🎓</div>
-                <h1 class="text-2xl font-bold text-slate-900">Daftar Akun Baru</h1>
-                <p class="text-slate-500 mt-2">Buat akun gratis sekarang</p>
-            </div>
-
-            <!-- Google Sign Up Button -->
-            <button onclick="AuthSystem.loginWithGoogle()" class="w-full py-3 google-btn text-slate-700 font-bold rounded-xl flex items-center justify-center gap-3 mb-4">
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Daftar dengan Google
-            </button>
-
-            <div class="divider"><span>atau dengan email</span></div>
-
-            <form id="register-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
-                    <input type="text" id="reg-nama" required class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" placeholder="Nama lengkap dengan gelar">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                    <input type="email" id="reg-email" required class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" placeholder="email@contoh.com">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">NPSN Sekolah</label>
-                    <input type="text" id="reg-npsn" required pattern="[0-9]{8}" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" placeholder="8 digit NPSN (contoh: 20234567)">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                    <input type="password" id="reg-password" required minlength="6" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" placeholder="Minimal 6 karakter">
-                </div>
-                <button type="submit" id="register-btn" class="w-full py-3 gradient-secondary text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition">
-                    Daftar dengan Email
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="showAuthModal('register')" class="px-8 py-4 rounded-xl btn-gradient text-white font-bold text-lg glow-blue transition transform hover:scale-105">
+                    🚀 Mulai Gratis Sekarang
                 </button>
-            </form>
-            <p class="text-center text-slate-600 mt-6">
-                Sudah punya akun? <button onclick="UISystem.showPage('login')" class="text-green-600 font-semibold hover:underline">Masuk</button>
-            </p>
-            <button onclick="UISystem.showPage('landing')" class="w-full mt-4 text-slate-500 hover:text-slate-700 text-sm">← Kembali</button>
-        </div>
-    </div>
-
-    <!-- NPSN Modal (for Google Sign-in new users) -->
-    <div id="npsn-modal" class="modal-overlay">
-        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 gradient-primary rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🏫</div>
-                <h2 class="text-xl font-bold text-slate-900">Lengkapi Data Anda</h2>
-                <p class="text-slate-500 mt-2">Masukkan NPSN sekolah untuk melanjutkan</p>
-            </div>
-            <form id="npsn-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">NPSN Sekolah</label>
-                    <input type="text" id="modal-npsn" required pattern="[0-9]{8}" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="8 digit NPSN (contoh: 20234567)">
-                    <p class="text-xs text-slate-500 mt-1">NPSN adalah Nomor Pokok Sekolah Nasional (8 digit)</p>
-                </div>
-                <button type="submit" class="w-full py-3 gradient-primary text-white font-bold rounded-xl">
-                    Lanjutkan
+                <button onclick="document.getElementById('demo-video').scrollIntoView({behavior:'smooth'})" class="px-8 py-4 rounded-xl glass text-white font-bold text-lg hover:bg-white/10 transition">
+                    ▶️ Lihat Demo
                 </button>
-            </form>
+            </div>
+            <p class="mt-6 text-slate-500 text-sm">✓ Gratis selamanya untuk fitur dasar ✓ Tanpa kartu kredit</p>
         </div>
-    </div>
+        
+        <!-- Preview Image -->
+        <div class="max-w-5xl mx-auto mt-16 animate-float">
+            <div class="glass rounded-2xl p-4 glow-blue">
+                <div class="bg-slate-800 rounded-xl p-6 aspect-video flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">📊</div>
+                        <p class="text-slate-400">Preview Dashboard</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <!-- Main App -->
-    <div id="app-container" class="hidden flex h-screen overflow-hidden">
-        <!-- Mobile Menu Button -->
-        <button id="mobile-menu-btn" class="mobile-menu-btn fixed top-4 left-4 z-50 md:hidden bg-white p-2 rounded-lg shadow-lg no-print" onclick="document.getElementById('sidebar').classList.toggle('open')">
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">Fitur Lengkap & Powerful</h2>
+            <p class="text-slate-400 text-center mb-12 max-w-2xl mx-auto">Semua yang Anda butuhkan untuk administrasi mengajar dalam satu platform</p>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature Cards -->
+                <div class="feature-card glass rounded-2xl p-6">
+                    <div class="w-14 h-14 rounded-xl bg-blue-500/20 flex items-center justify-center text-2xl mb-4">📋</div>
+                    <h3 class="font-bold text-xl mb-2">ATP & Prota Otomatis</h3>
+                    <p class="text-slate-400 text-sm">Generate Alur Tujuan Pembelajaran & Program Tahunan langsung dari database Kurikulum Merdeka</p>
+                    <span class="inline-block mt-3 px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-medium">GRATIS</span>
+                </div>
+                <div class="feature-card glass rounded-2xl p-6">
+                    <div class="w-14 h-14 rounded-xl bg-purple-500/20 flex items-center justify-center text-2xl mb-4">📅</div>
+                    <h3 class="font-bold text-xl mb-2">Kalender Cerdas</h3>
+                    <p class="text-slate-400 text-sm">Kalender Pendidikan dengan deteksi otomatis hari libur nasional dan jadwal mengajar</p>
+                    <span class="inline-block mt-3 px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-medium">GRATIS</span>
+                </div>
+                <div class="feature-card glass rounded-2xl p-6">
+                    <div class="w-14 h-14 rounded-xl bg-pink-500/20 flex items-center justify-center text-2xl mb-4">📚</div>
+                    <h3 class="font-bold text-xl mb-2">Modul Ajar & LKPD</h3>
+                    <p class="text-slate-400 text-sm">Generate modul ajar lengkap dengan langkah pembelajaran dan LKPD siap cetak</p>
+                    <span class="inline-block mt-3 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-medium">PRO</span>
+                </div>
+                <div class="feature-card glass rounded-2xl p-6">
+                    <div class="w-14 h-14 rounded-xl bg-green-500/20 flex items-center justify-center text-2xl mb-4">📝</div>
+                    <h3 class="font-bold text-xl mb-2">Bank Soal Lengkap</h3>
+                    <p class="text-slate-400 text-sm">Buat soal PG, Essay, Menjodohkan dengan randomisasi otomatis berdasarkan TP</p>
+                    <span class="inline-block mt-3 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-medium">PRO</span>
+                </div>
+                <div class="feature-card glass rounded-2xl p-6">
+                    <div class="w-14 h-14 rounded-xl bg-cyan-500/20 flex items-center justify-center text-2xl mb-4">🏫</div>
+                    <h3 class="font-bold text-xl mb-2">Kolaborasi Sekolah</h3>
+                    <p class="text-slate-400 text-sm">Guru dengan NPSN sama dapat berkolaborasi dan melihat jadwal bersama</p>
+                    <span class="inline-block mt-3 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-medium">PRO</span>
+                </div>
+                <div class="feature-card glass rounded-2xl p-6">
+                    <div class="w-14 h-14 rounded-xl bg-red-500/20 flex items-center justify-center text-2xl mb-4">📊</div>
+                    <h3 class="font-bold text-xl mb-2">KKTP & Penilaian</h3>
+                    <p class="text-slate-400 text-sm">Kelola Kriteria Ketercapaian TP dan daftar nilai siswa dengan mudah</p>
+                    <span class="inline-block mt-3 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-medium">PRO</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 px-4 bg-slate-900/50">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">Pilihan Paket</h2>
+            <p class="text-slate-400 text-center mb-12">Pilih paket yang sesuai dengan kebutuhan Anda</p>
+            
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Free Plan -->
+                <div class="glass rounded-2xl p-8">
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold mb-2">Free</h3>
+                        <div class="text-4xl font-extrabold">Rp 0<span class="text-lg font-normal text-slate-400">/selamanya</span></div>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-3"><span class="text-green-400">✓</span> Kalender Pendidikan</li>
+                        <li class="flex items-center gap-3"><span class="text-green-400">✓</span> Jadwal Pelajaran</li>
+                        <li class="flex items-center gap-3"><span class="text-green-400">✓</span> ATP (Alur Tujuan Pembelajaran)</li>
+                        <li class="flex items-center gap-3"><span class="text-green-400">✓</span> Prota (Program Tahunan)</li>
+                        <li class="flex items-center gap-3 text-slate-500"><span>✗</span> Promes</li>
+                        <li class="flex items-center gap-3 text-slate-500"><span>✗</span> Modul Ajar & LKPD</li>
+                        <li class="flex items-center gap-3 text-slate-500"><span>✗</span> Bank Soal</li>
+                    </ul>
+                    <button onclick="showAuthModal('register')" class="w-full py-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold transition">Mulai Gratis</button>
+                </div>
+                
+                <!-- Pro Plan -->
+                <div class="glass rounded-2xl p-8 border-2 border-blue-500 relative glow-blue">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-500 rounded-full text-sm font-bold">POPULER</div>
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold mb-2">Pro</h3>
+                        <div class="text-4xl font-extrabold">Rp 99K<span class="text-lg font-normal text-slate-400">/tahun</span></div>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-3"><span class="text-green-400">✓</span> Semua fitur Free</li>
+                        <li class="flex items-center gap-3"><span class="text-green-400">✓</span> Promes (Program Semester)</li>
+                        <li class="flex items-center gap-3"><span class="text-green-400">✓</span> Modul Ajar Lengkap</li>
+                        <li class="flex items-center gap-3"><span class="text-green-400">✓</span> LKPD Siap Cetak</li>
+                        <li class="flex items-center gap-3"><span class="text-green-400">✓</span> Jurnal & Absensi</li>
+                        <li class="flex items-center gap-3"><span class="text-green-400">✓</span> KKTP & Penilaian</li>
+                        <li class="flex items-center gap-3"><span class="text-green-400">✓</span> Bank Soal Unlimited</li>
+                    </ul>
+                    <button onclick="showUpgradeModal()" class="w-full py-3 rounded-xl btn-gradient font-bold transition">Upgrade Sekarang</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-10 px-4 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto text-center text-slate-500 text-sm">
+            <p>© 2025 Admin Guru Super App. Made with ❤️ for Indonesian Teachers.</p>
+        </div>
+    </footer>
+</div>
+
+<!-- ========== AUTH MODAL ========== -->
+<div id="auth-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div class="glass rounded-2xl p-8 max-w-md w-full relative">
+        <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl">&times;</button>
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">📚</div>
+            <h2 id="auth-title" class="text-2xl font-bold">Masuk ke Akun</h2>
+            <p id="auth-subtitle" class="text-slate-400 text-sm mt-2">Gunakan akun Google untuk melanjutkan</p>
+        </div>
+        
+        <button onclick="AuthSystem.signInWithGoogle()" class="w-full py-3 px-4 rounded-xl bg-white text-slate-800 font-semibold flex items-center justify-center gap-3 hover:bg-slate-100 transition mb-4">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Lanjutkan dengan Google
+        </button>
+        
+        <p class="text-center text-slate-500 text-xs">
+            Dengan melanjutkan, Anda menyetujui<br>
+            <a href="#" class="text-blue-400 hover:underline">Syarat & Ketentuan</a> serta <a href="#" class="text-blue-400 hover:underline">Kebijakan Privasi</a>
+        </p>
+        
+        <div id="auth-error" class="hidden mt-4 p-3 rounded-lg bg-red-500/20 text-red-400 text-sm text-center"></div>
+        <div id="auth-loading" class="hidden mt-4 flex justify-center"><div class="loading-spinner"></div></div>
+    </div>
+</div>
+
+<!-- ========== UPGRADE MODAL ========== -->
+<div id="upgrade-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div class="glass rounded-2xl p-8 max-w-md w-full relative text-center">
+        <button onclick="closeUpgradeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl">&times;</button>
+        <div class="text-5xl mb-4">👑</div>
+        <h2 class="text-2xl font-bold mb-2">Fitur Premium</h2>
+        <p class="text-slate-400 mb-6">Fitur ini tersedia pada versi PRO. Upgrade sekarang untuk akses penuh!</p>
+        <a id="wa-upgrade-link" href="#" target="_blank" class="inline-block w-full py-3 px-6 rounded-xl bg-green-600 hover:bg-green-500 font-bold transition mb-3">
+            💬 Hubungi WhatsApp
+        </a>
+        <p class="text-slate-500 text-sm">Harga spesial Rp 99.000/tahun</p>
+    </div>
+</div>
+
+<!-- ========== MAIN APPLICATION ========== -->
+<div id="main-app" class="hidden min-h-screen">
+    <!-- Mobile Header -->
+    <header class="lg:hidden fixed top-0 left-0 right-0 z-40 glass border-b border-slate-700 px-4 py-3 flex items-center justify-between">
+        <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-slate-700">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
+        <span class="font-bold">Admin Guru Super App</span>
+        <div id="mobile-user-avatar" class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-sm font-bold"></div>
+    </header>
 
-        <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar w-64 min-w-[256px] bg-slate-900 text-white flex flex-col h-full transition-transform duration-300 no-print">
-            <div class="p-5 border-b border-slate-700">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center text-xl">📚</div>
-                    <div>
-                        <span class="font-bold text-lg">AdminGuru</span>
-                        <span id="user-badge" class="ml-2 px-2 py-0.5 rounded text-xs font-semibold bg-slate-700 text-slate-300">FREE</span>
-                    </div>
-                </div>
-                <div class="mt-3 flex items-center gap-2">
-                    <img id="sidebar-user-photo" class="w-8 h-8 rounded-full bg-slate-700 hidden" src="" alt="">
-                    <div class="text-sm text-slate-400 truncate flex-1" id="sidebar-user-info">Mode Offline</div>
-                </div>
-            </div>
-
-            <nav class="flex-1 overflow-y-auto sidebar-scroll p-3 space-y-1">
-                <button onclick="UISystem.switchView('dashboard')" class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 transition">
-                    <span>📊</span> Dashboard
-                </button>
-                <button onclick="UISystem.switchView('profil')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 transition">
-                    <span>👤</span> Profil Guru
-                </button>
-                <button onclick="UISystem.switchView('sekolah')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 transition">
-                    <span>🏫</span> Profil Sekolah
-                </button>
-                <button onclick="UISystem.switchView('kurikulum')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 transition">
-                    <span>📖</span> Kurikulum & Mapel
-                </button>
-                <button onclick="UISystem.switchView('kalender')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 transition">
-                    <span>📅</span> Kalender & Libur
-                </button>
-                <button onclick="UISystem.switchView('banksoal')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 transition">
-                    <span>❓</span> Bank Soal
-                    <span class="premium-badge text-[10px] px-2 py-0.5 rounded ml-auto">PRO</span>
-                </button>
-                <button onclick="UISystem.switchView('generate')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 transition">
-                    <span>📄</span> Generate Dokumen
-                </button>
-                <button onclick="UISystem.switchView('subscription')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 transition">
-                    <span>💳</span> Subscription
-                </button>
-                <button onclick="UISystem.switchView('superadmin')" id="nav-superadmin" class="nav-item hidden w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 transition text-amber-400">
-                    <span>👑</span> Super Admin
-                </button>
-            </nav>
-
-            <div class="p-4 border-t border-slate-700">
-                <button onclick="AuthSystem.logout()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-500 rounded-lg font-semibold transition">
-                    <span>🚪</span> Keluar
-                </button>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col overflow-hidden">
-            <header id="topbar" class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 no-print">
-                <div class="flex items-center gap-4 ml-12 md:ml-0">
-                    <h1 id="page-title" class="text-xl font-bold text-slate-900">Dashboard</h1>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="window.print()" class="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium transition">
-                        🖨️ Cetak
-                    </button>
-                    <img id="user-avatar-img" class="w-10 h-10 rounded-full bg-blue-100 hidden" src="" alt="">
-                    <div id="user-avatar" class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">U</div>
-                </div>
-            </header>
-
-            <div id="main-content" class="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50">
-                <!-- Views loaded here -->
-            </div>
-        </main>
-    </div>
-
-    <!-- Upgrade Modal -->
-    <div id="upgrade-modal" class="modal-overlay">
-        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 relative">
-            <button onclick="document.getElementById('upgrade-modal').style.display='none'" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl">✕</button>
-            <div class="text-center">
-                <div class="w-20 h-20 gradient-primary rounded-full flex items-center justify-center text-4xl mx-auto mb-4">👑</div>
-                <h2 class="text-2xl font-bold text-slate-900 mb-2">Upgrade ke PRO</h2>
-                <p class="text-slate-600 mb-6">Fitur ini tersedia pada versi PRO. Upgrade sekarang untuk akses penuh!</p>
-                <a id="upgrade-wa-link" href="#" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition">
-                    💬 Hubungi WhatsApp
-                </a>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-slate-900 border-r border-slate-700 z-50 transform -translate-x-full lg:translate-x-0 transition-transform no-print">
+        <div class="p-5 border-b border-slate-700 flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-xl">📚</div>
+            <div>
+                <h2 class="font-bold">Super App</h2>
+                <span id="user-role-badge" class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">FREE</span>
             </div>
         </div>
-    </div>
-
-    <!-- Student Modal -->
-    <div id="student-modal" class="modal-overlay">
-        <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-slate-900">📋 Input Data Siswa</h2>
-                <button onclick="document.getElementById('student-modal').style.display='none'" class="text-slate-400 hover:text-slate-600 text-2xl">✕</button>
+        
+        <!-- User Info -->
+        <div class="p-4 border-b border-slate-700">
+            <div class="flex items-center gap-3">
+                <img id="sidebar-user-photo" src="" class="w-10 h-10 rounded-full bg-slate-700">
+                <div class="flex-1 min-w-0">
+                    <p id="sidebar-user-name" class="font-semibold truncate text-sm"></p>
+                    <p id="sidebar-user-email" class="text-xs text-slate-400 truncate"></p>
+                </div>
             </div>
-            <p class="text-sm text-slate-600 mb-4">Paste daftar nama siswa (1 baris = 1 nama)</p>
-            <textarea id="student-input" rows="10" class="w-full border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="1. Ahmad Fulan&#10;2. Siti Fulanah&#10;3. Budi Santoso"></textarea>
-            <button onclick="ProfileSystem.saveStudents()" class="w-full mt-4 py-3 gradient-primary text-white font-bold rounded-xl transition">
-                💾 Simpan Data Siswa
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto sidebar-scroll p-3 space-y-1">
+            <button onclick="UISystem.switchPage('dashboard')" class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left" data-page="dashboard">
+                <span class="text-xl">🏠</span>
+                <span>Dashboard</span>
+            </button>
+            <button onclick="UISystem.switchPage('profil-guru')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left" data-page="profil-guru">
+                <span class="text-xl">👤</span>
+                <span>Profil Guru</span>
+            </button>
+            <button onclick="UISystem.switchPage('profil-sekolah')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left" data-page="profil-sekolah">
+                <span class="text-xl">🏫</span>
+                <span>Profil Sekolah</span>
+            </button>
+            <button onclick="UISystem.switchPage('kurikulum')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left" data-page="kurikulum">
+                <span class="text-xl">📚</span>
+                <span>Kurikulum & Mapel</span>
+            </button>
+            <button onclick="UISystem.switchPage('kalender')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left" data-page="kalender">
+                <span class="text-xl">📅</span>
+                <span>Kalender & Libur</span>
+            </button>
+            <button onclick="UISystem.switchPage('bank-soal')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left" data-page="bank-soal">
+                <span class="text-xl">📝</span>
+                <span>Bank Soal</span>
+                <span class="ml-auto text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-400">PRO</span>
+            </button>
+            <button onclick="UISystem.switchPage('generate')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left" data-page="generate">
+                <span class="text-xl">⚡</span>
+                <span>Generate Dokumen</span>
+            </button>
+            <button onclick="UISystem.switchPage('subscription')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left" data-page="subscription">
+                <span class="text-xl">💎</span>
+                <span>Subscription</span>
+            </button>
+            <button id="nav-superadmin" onclick="UISystem.switchPage('superadmin')" class="nav-item hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left" data-page="superadmin">
+                <span class="text-xl">👑</span>
+                <span>Super Admin</span>
+            </button>
+        </nav>
+        
+        <!-- Logout -->
+        <div class="p-4 border-t border-slate-700">
+            <button onclick="AuthSystem.signOut()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition">
+                <span class="text-xl">🚪</span>
+                <span>Keluar</span>
             </button>
         </div>
+    </aside>
+    
+    <!-- Sidebar Overlay (Mobile) -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"></div>
+
+    <!-- Main Content -->
+    <main class="lg:ml-72 min-h-screen pt-16 lg:pt-0">
+        <!-- PAGE: Dashboard -->
+        <div id="page-dashboard" class="page-content p-4 md:p-6 lg:p-8">
+            <h1 class="text-2xl md:text-3xl font-bold mb-6">Dashboard</h1>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="glass rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-2xl">📋</div>
+                        <span class="text-xs px-2 py-1 rounded bg-green-500/20 text-green-400">Aktif</span>
+                    </div>
+                    <h3 class="text-2xl font-bold" id="stat-tp-count">0</h3>
+                    <p class="text-slate-400 text-sm">Total TP Dimuat</p>
+                </div>
+                <div class="glass rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-2xl">📝</div>
+                    </div>
+                    <h3 class="text-2xl font-bold" id="stat-soal-count">0</h3>
+                    <p class="text-slate-400 text-sm">Soal Tersimpan</p>
+                </div>
+                <div class="glass rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center text-2xl">👥</div>
+                    </div>
+                    <h3 class="text-2xl font-bold" id="stat-siswa-count">0</h3>
+                    <p class="text-slate-400 text-sm">Data Siswa</p>
+                </div>
+                <div class="glass rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-2xl">🏫</div>
+                    </div>
+                    <h3 class="text-2xl font-bold" id="stat-guru-sekolah">0</h3>
+                    <p class="text-slate-400 text-sm">Guru di Sekolah</p>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <h2 class="text-xl font-bold mb-4">Aksi Cepat</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <button onclick="UISystem.switchPage('generate')" class="glass rounded-xl p-6 text-left hover:bg-white/5 transition group">
+                    <div class="text-3xl mb-3 group-hover:scale-110 transition-transform">📄</div>
+                    <h3 class="font-bold mb-1">Generate ATP & Prota</h3>
+                    <p class="text-sm text-slate-400">Buat dokumen ATP dan Prota otomatis</p>
+                </button>
+                <button onclick="UISystem.switchPage('kurikulum')" class="glass rounded-xl p-6 text-left hover:bg-white/5 transition group">
+                    <div class="text-3xl mb-3 group-hover:scale-110 transition-transform">📚</div>
+                    <h3 class="font-bold mb-1">Kelola Kurikulum</h3>
+                    <p class="text-sm text-slate-400">Pilih mapel, kelas, dan semester</p>
+                </button>
+                <button onclick="UISystem.switchPage('kalender')" class="glass rounded-xl p-6 text-left hover:bg-white/5 transition group">
+                    <div class="text-3xl mb-3 group-hover:scale-110 transition-transform">📅</div>
+                    <h3 class="font-bold mb-1">Atur Kalender</h3>
+                    <p class="text-sm text-slate-400">Setting jadwal dan hari libur</p>
+                </button>
+            </div>
+        </div>
+
+        <!-- PAGE: Profil Guru -->
+        <div id="page-profil-guru" class="page-content hidden p-4 md:p-6 lg:p-8">
+            <h1 class="text-2xl md:text-3xl font-bold mb-6">Profil Guru</h1>
+            <div class="glass rounded-2xl p-6 max-w-2xl">
+                <div class="flex flex-col md:flex-row gap-6 items-start mb-6">
+                    <img id="profil-foto" src="" class="w-24 h-24 rounded-2xl bg-slate-700">
+                    <div class="flex-1">
+                        <h2 id="profil-display-name" class="text-xl font-bold"></h2>
+                        <p id="profil-display-email" class="text-slate-400"></p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">Nama Lengkap</label>
+                        <input type="text" id="input-nama-guru" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none" placeholder="Nama Lengkap, S.Pd.">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">NIP</label>
+                        <input type="text" id="input-nip-guru" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none" placeholder="19XXXXXX XXXXXX X XXX">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">Tipe Guru</label>
+                        <select id="input-tipe-guru" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none cursor-pointer">
+                            <option value="mapel">Guru Mata Pelajaran</option>
+                            <option value="kelas">Guru Kelas</option>
+                        </select>
+                    </div>
+                    <button onclick="ProfileSystem.saveProfile()" class="w-full py-3 rounded-xl btn-gradient font-bold">💾 Simpan Profil</button>
+                </div>
+            </div>
+            
+            <!-- Data Siswa -->
+            <h2 class="text-xl font-bold mt-8 mb-4">Data Siswa</h2>
+            <div class="glass rounded-2xl p-6 max-w-2xl">
+                <p class="text-sm text-slate-400 mb-4">Paste daftar nama siswa (1 baris = 1 nama)</p>
+                <textarea id="input-data-siswa" rows="8" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none text-sm" placeholder="Ahmad Fulan&#10;Siti Fulanah&#10;..."></textarea>
+                <button onclick="ProfileSystem.saveSiswa()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold mt-4">📋 Simpan Data Siswa</button>
+            </div>
+        </div>
+
+        <!-- PAGE: Profil Sekolah -->
+        <div id="page-profil-sekolah" class="page-content hidden p-4 md:p-6 lg:p-8">
+            <h1 class="text-2xl md:text-3xl font-bold mb-6">Profil Sekolah</h1>
+            <div class="glass rounded-2xl p-6 max-w-2xl">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">Nama Sekolah</label>
+                        <input type="text" id="input-nama-sekolah" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none" placeholder="SDN Cerdas Bangsa">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">NPSN <span class="text-red-400">*</span></label>
+                        <input type="text" id="input-npsn" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none" placeholder="20XXXXXX" maxlength="8">
+                        <p class="text-xs text-slate-500 mt-1">Guru dengan NPSN sama akan tergabung dalam satu sekolah</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">Alamat Sekolah</label>
+                        <textarea id="input-alamat-sekolah" rows="2" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none" placeholder="Jl. Pendidikan No. 1..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">Nama Kepala Sekolah</label>
+                        <input type="text" id="input-nama-kepsek" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none" placeholder="Budi, S.Pd., M.Pd.">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">NIP Kepala Sekolah</label>
+                        <input type="text" id="input-nip-kepsek" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none" placeholder="19XXXXXX XXXXXX X XXX">
+                    </div>
+                    <button onclick="SchoolSystem.saveSchool()" class="w-full py-3 rounded-xl btn-gradient font-bold">💾 Simpan Data Sekolah</button>
+                </div>
+            </div>
+            
+            <!-- Guru di Sekolah -->
+            <h2 class="text-xl font-bold mt-8 mb-4">Guru di Sekolah Ini</h2>
+            <div id="list-guru-sekolah" class="glass rounded-2xl p-6 max-w-2xl">
+                <p class="text-slate-400 text-center">Belum ada data guru</p>
+            </div>
+        </div>
+
+        <!-- PAGE: Kurikulum & Mapel -->
+        <div id="page-kurikulum" class="page-content hidden p-4 md:p-6 lg:p-8">
+            <h1 class="text-2xl md:text-3xl font-bold mb-6">Kurikulum & Mapel</h1>
+            
+            <div class="grid lg:grid-cols-2 gap-6">
+                <!-- Database Kurikulum -->
+                <div class="glass rounded-2xl p-6">
+                    <h2 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">📚</span> Database Kurikulum
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Jenjang Pendidikan</label>
+                            <select id="select-jenjang" onchange="CurriculumSystem.fetchCP()" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none cursor-pointer">
+                                <option value="SD">SD / MI</option>
+                                <option value="SMP">SMP / MTs</option>
+                                <option value="SMA">SMA / SMK / MA</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="CurriculumSystem.fetchCP()" class="flex-1 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 font-bold transition">☁️ Load dari Cloud</button>
+                            <label class="flex-1 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold transition text-center cursor-pointer">
+                                📁 Upload CSV
+                                <input type="file" accept=".csv" onchange="CurriculumSystem.uploadCSV(this)" class="hidden">
+                            </label>
+                        </div>
+                        <div id="csv-status" class="hidden p-3 rounded-xl text-sm"></div>
+                    </div>
+                </div>
+                
+                <!-- Pilih Mapel & Kelas -->
+                <div class="glass rounded-2xl p-6">
+                    <h2 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">📖</span> Pilih Mapel & Kelas
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Mata Pelajaran</label>
+                            <select id="select-mapel" onchange="CurriculumSystem.updateKelas()" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none cursor-pointer">
+                                <option value="">-- Pilih Mapel --</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-1">Kelas</label>
+                                <select id="select-kelas" onchange="CurriculumSystem.updateSemester()" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none cursor-pointer">
+                                    <option value="">-</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-1">Semester</label>
+                                <select id="select-semester" onchange="CurriculumSystem.updateElemen()" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none cursor-pointer">
+                                    <option value="">-</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Elemen / Bab</label>
+                            <select id="select-elemen" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none cursor-pointer">
+                                <option value="">-</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-1">Rombel</label>
+                                <input type="text" id="input-rombel" value="A" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none text-center">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-1">Tahun Awal</label>
+                                <input type="number" id="input-tahun" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none text-center">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Preview TP -->
+            <div class="glass rounded-2xl p-6 mt-6">
+                <h2 class="font-bold text-lg mb-4">Preview Tujuan Pembelajaran (TP)</h2>
+                <div id="preview-tp" class="space-y-2 max-h-96 overflow-y-auto">
+                    <p class="text-slate-400 text-center">Pilih mapel, kelas, dan semester untuk melihat TP</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: Kalender & Libur -->
+        <div id="page-kalender" class="page-content hidden p-4 md:p-6 lg:p-8">
+            <h1 class="text-2xl md:text-3xl font-bold mb-6">Kalender & Libur Kustom</h1>
+            
+            <div class="grid lg:grid-cols-2 gap-6">
+                <!-- Jadwal Mengajar -->
+                <div class="glass rounded-2xl p-6">
+                    <h2 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">⏰</span> Jadwal Mengajar
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Hari Mengajar</label>
+                            <select id="select-hari" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none cursor-pointer">
+                                <option value="1">Senin</option>
+                                <option value="2">Selasa</option>
+                                <option value="3">Rabu</option>
+                                <option value="4">Kamis</option>
+                                <option value="5">Jum'at</option>
+                                <option value="6">Sabtu</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">JP per Pertemuan</label>
+                            <input type="number" id="input-jp" value="4" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none text-center">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Titik Semester -->
+                <div class="glass rounded-2xl p-6">
+                    <h2 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">📅</span> Titik Penetapan Semester
+                    </h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Awal Masuk (Juli)</label>
+                            <input type="date" id="input-masuk-ganjil" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 focus:border-blue-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Rapor (Desember)</label>
+                            <input type="date" id="input-rapor-ganjil" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 focus:border-blue-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Awal Masuk (Januari)</label>
+                            <input type="date" id="input-masuk-genap" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 focus:border-blue-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Rapor (Juni)</label>
+                            <input type="date" id="input-rapor-genap" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2 focus:border-blue-500 outline-none text-sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Libur Kustom -->
+            <div class="glass rounded-2xl p-6 mt-6">
+                <h2 class="font-bold text-lg mb-4 flex items-center gap-2">
+                    <span class="text-2xl">🎉</span> Agenda & Libur Kustom
+                </h2>
+                <p class="text-sm text-slate-400 mb-3">Format: YYYY-MM-DD = Keterangan Libur (1 baris = 1 agenda)</p>
+                <textarea id="input-libur-kustom" rows="10" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none text-sm font-mono"></textarea>
+                <button onclick="CalendarSystem.save()" class="w-full py-3 rounded-xl btn-gradient font-bold mt-4">💾 Simpan Kalender</button>
+            </div>
+        </div>
+
+        <!-- PAGE: Bank Soal -->
+        <div id="page-bank-soal" class="page-content hidden p-4 md:p-6 lg:p-8">
+            <h1 class="text-2xl md:text-3xl font-bold mb-6">Bank Soal</h1>
+            
+            <div id="banksoal-content">
+                <!-- Filter -->
+                <div class="glass rounded-2xl p-6 mb-6">
+                    <div class="grid md:grid-cols-4 gap-4 mb-4">
+                        <select id="bs-mapel" class="bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 outline-none">
+                            <option value="">Mapel</option>
+                        </select>
+                        <select id="bs-kelas" class="bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 outline-none">
+                            <option value="">Kelas</option>
+                        </select>
+                        <select id="bs-tipe" class="bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 outline-none">
+                            <option value="">Tipe Soal</option>
+                            <option value="pg">Pilihan Ganda</option>
+                            <option value="bs">Benar/Salah</option>
+                            <option value="jodoh">Menjodohkan</option>
+                            <option value="isian">Isian Singkat</option>
+                            <option value="essay">Essay</option>
+                            <option value="campuran">Campuran</option>
+                        </select>
+                        <button onclick="BankSoalSystem.showAddModal()" class="py-3 rounded-xl btn-gradient font-bold">+ Tambah Soal</button>
+                    </div>
+                </div>
+                
+                <!-- List Soal -->
+                <div id="list-soal" class="space-y-4">
+                    <div class="glass rounded-2xl p-6 text-center text-slate-400">
+                        <div class="text-4xl mb-3">📝</div>
+                        <p>Belum ada soal tersimpan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: Generate Dokumen -->
+        <div id="page-generate" class="page-content hidden p-4 md:p-6 lg:p-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 no-print">
+                <h1 class="text-2xl md:text-3xl font-bold">Generate Dokumen</h1>
+                <div class="flex gap-2">
+                    <select id="select-doc-type" onchange="DocumentEngine.switchDoc()" class="bg-slate-800 border border-slate-600 rounded-xl px-4 py-2 outline-none cursor-pointer">
+                        <option value="atp">ATP & Prota (GRATIS)</option>
+                        <option value="promes">Promes (PRO)</option>
+                        <option value="modul">Modul & LKPD (PRO)</option>
+                        <option value="jurnal">Jurnal (PRO)</option>
+                        <option value="absensi">Absensi (PRO)</option>
+                        <option value="kktp">KKTP & Nilai (PRO)</option>
+                    </select>
+                    <button onclick="DocumentEngine.generate()" class="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold">🚀 Generate</button>
+                    <button onclick="window.print()" class="px-6 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 font-bold">🖨️ Cetak</button>
+                </div>
+            </div>
+            
+            <!-- Document Container -->
+            <div id="doc-container" class="bg-slate-200 rounded-2xl p-4 min-h-[600px]">
+                <div class="paper-preview">
+                    <div class="text-center text-slate-500 py-20">
+                        <div class="text-5xl mb-4">📄</div>
+                        <p>Klik tombol <strong>Generate</strong> untuk membuat dokumen</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE: Subscription -->
+        <div id="page-subscription" class="page-content hidden p-4 md:p-6 lg:p-8">
+            <h1 class="text-2xl md:text-3xl font-bold mb-6">Status Langganan</h1>
+            
+            <div class="glass rounded-2xl p-6 max-w-2xl mb-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div id="sub-icon" class="w-16 h-16 rounded-2xl bg-slate-700 flex items-center justify-center text-3xl">🆓</div>
+                    <div>
+                        <h2 id="sub-status" class="text-xl font-bold">Paket Free</h2>
+                        <p id="sub-desc" class="text-slate-400">Akses terbatas ke fitur dasar</p>
+                    </div>
+                </div>
+                <div id="sub-features" class="space-y-2 mb-6">
+                    <div class="flex items-center gap-2"><span class="text-green-400">✓</span> Kalender & Jadwal</div>
+                    <div class="flex items-center gap-2"><span class="text-green-400">✓</span> ATP & Prota</div>
+                    <div class="flex items-center gap-2 text-slate-500"><span>✗</span> Promes, Modul, Bank Soal</div>
+                </div>
+                <button onclick="showUpgradeModal()" class="w-full py-3 rounded-xl btn-gradient font-bold">👑 Upgrade ke PRO</button>
+            </div>
+        </div>
+
+        <!-- PAGE: Super Admin -->
+        <div id="page-superadmin" class="page-content hidden p-4 md:p-6 lg:p-8">
+            <h1 class="text-2xl md:text-3xl font-bold mb-6">👑 Super Admin Panel</h1>
+            
+            <div class="grid lg:grid-cols-2 gap-6">
+                <!-- Settings -->
+                <div class="glass rounded-2xl p-6">
+                    <h2 class="font-bold text-lg mb-4">⚙️ Pengaturan Global</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">Nomor WhatsApp Upgrade</label>
+                            <input type="text" id="admin-wa" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none" placeholder="628xxxxxxxxxx">
+                        </div>
+                        <button onclick="SuperAdminSystem.saveSettings()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold">💾 Simpan</button>
+                    </div>
+                </div>
+                
+                <!-- NPSN Premium -->
+                <div class="glass rounded-2xl p-6">
+                    <h2 class="font-bold text-lg mb-4">🏫 NPSN Premium</h2>
+                    <div class="space-y-4">
+                        <div class="flex gap-2">
+                            <input type="text" id="admin-add-npsn" class="flex-1 bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 focus:border-blue-500 outline-none" placeholder="Masukkan NPSN">
+                            <button onclick="SuperAdminSystem.addPremiumNPSN()" class="px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold">+</button>
+                        </div>
+                        <div id="list-premium-npsn" class="space-y-2 max-h-48 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats -->
+            <div class="glass rounded-2xl p-6 mt-6">
+                <h2 class="font-bold text-lg mb-4">📊 Statistik Platform</h2>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="bg-slate-800 rounded-xl p-4 text-center">
+                        <div class="text-3xl font-bold text-blue-400" id="admin-total-users">0</div>
+                        <div class="text-slate-400 text-sm">Total Pengguna</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl p-4 text-center">
+                        <div class="text-3xl font-bold text-green-400" id="admin-total-schools">0</div>
+                        <div class="text-slate-400 text-sm">Total Sekolah</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl p-4 text-center">
+                        <div class="text-3xl font-bold text-amber-400" id="admin-total-premium">0</div>
+                        <div class="text-slate-400 text-sm">Premium Users</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User List -->
+            <div class="glass rounded-2xl p-6 mt-6">
+                <h2 class="font-bold text-lg mb-4">👥 Daftar Pengguna</h2>
+                <div id="admin-user-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ========== ADD SOAL MODAL ========== -->
+<div id="modal-add-soal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="glass rounded-2xl p-6 max-w-2xl w-full my-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold">➕ Tambah Soal Baru</h2>
+            <button onclick="closeAddSoalModal()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Tipe Soal</label>
+                    <select id="soal-tipe" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 outline-none">
+                        <option value="pg">Pilihan Ganda</option>
+                        <option value="bs">Benar/Salah</option>
+                        <option value="isian">Isian Singkat</option>
+                        <option value="essay">Essay</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">TP Terkait</label>
+                    <select id="soal-tp" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 outline-none">
+                        <option value="">Pilih TP</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm text-slate-400 mb-1">Pertanyaan</label>
+                <textarea id="soal-pertanyaan" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 outline-none"></textarea>
+            </div>
+            <div id="opsi-pg" class="space-y-2">
+                <label class="block text-sm text-slate-400 mb-1">Opsi Jawaban</label>
+                <input type="text" id="opsi-a" placeholder="A. ..." class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2 outline-none">
+                <input type="text" id="opsi-b" placeholder="B. ..." class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2 outline-none">
+                <input type="text" id="opsi-c" placeholder="C. ..." class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2 outline-none">
+                <input type="text" id="opsi-d" placeholder="D. ..." class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm text-slate-400 mb-1">Kunci Jawaban</label>
+                <input type="text" id="soal-jawaban" class="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 outline-none" placeholder="A / Benar / Jawaban...">
+            </div>
+            <button onclick="BankSoalSystem.saveSoal()" class="w-full py-3 rounded-xl btn-gradient font-bold">💾 Simpan Soal</button>
+        </div>
     </div>
+</div>
 
 <script>
-// =====================================================
-// FIREBASE CONFIGURATION
-// =====================================================
+// ========== FIREBASE CONFIGURATION ==========
 const firebaseConfig = {
     apiKey: "AIzaSyDe4ie2wSPEpNbAgWP-q03vTuHyxc9Jj3E",
     authDomain: "agsa-e5b08.firebaseapp.com",
     projectId: "agsa-e5b08",
     storageBucket: "agsa-e5b08.firebasestorage.app",
     messagingSenderId: "916052746331",
-    appId: "1:916052746331:web:357cbadbfd8658f1689f7e",
+    appId: "1:916052746331:web:357cbadbfd8658f1689f7e"
 };
 
-let auth, db, googleProvider;
-let firebaseReady = false;
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-try {
-    firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db = firebase.firestore();
-    googleProvider = new firebase.auth.GoogleAuthProvider();
-    googleProvider.addScope('email');
-    googleProvider.addScope('profile');
-    firebaseReady = true;
-} catch (e) {
-    console.warn('Firebase initialization failed:', e);
-}
-
-// =====================================================
-// CONSTANTS
-// =====================================================
+// ========== CP LINKS (WAJIB DIPERTAHANKAN) ==========
 const CP_LINKS = {
     "SD": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?gid=1925091593&single=true&output=csv",
     "SMP": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQMR0Vbb2xSEbDOQ708qzRPyGG9I0Vp7RijYHp0NTpjUL7w08EMrVwYy9euEyvyq1Y_XaJBcB668dVi/pub?gid=1962203786&single=true&output=csv",
@@ -545,560 +841,1441 @@ const CP_LINKS = {
 const BULAN_IND = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 const HARI_IND = ["Minggu","Senin","Selasa","Rabu","Kamis","Jum'at","Sabtu"];
 const SUPER_ADMIN_EMAIL = "afifaro@gmail.com";
-const FREE_FEATURES = ['atp', 'prota', 'kalender', 'jadwal'];
-const PRO_FEATURES = ['promes', 'modul', 'lkpd', 'jurnal', 'absensi', 'kktp', 'nilai', 'banksoal'];
 
-// =====================================================
-// APP STATE
-// =====================================================
-const AppState = {
-    isOnline: false,
-    currentUser: null,
-    userData: null,
-    pendingGoogleUser: null,
+const DEFAULT_LIBUR = `2025-08-17 = HUT Kemerdekaan RI
+2025-09-05 = Maulid Nabi Muhammad SAW
+2025-12-25 = Hari Raya Natal
+2026-01-01 = Tahun Baru Masehi
+2026-01-16 = Isra Mikraj Nabi Muhammad
+2026-03-19 = Hari Raya Nyepi
+2026-03-20 = Cuti Bersama Idul Fitri
+2026-03-21 = Hari Raya Idul Fitri 1447 H
+2026-04-03 = Wafat Isa Almasih
+2026-05-01 = Hari Buruh Internasional
+2026-05-14 = Kenaikan Yesus Kristus
+2026-05-27 = Hari Raya Idul Adha 1447 H
+2026-06-01 = Hari Lahir Pancasila
+2026-06-16 = Tahun Baru Islam 1448 H`;
 
-    init() {
-        this.isOnline = firebaseReady;
-        this.updateModeBadge();
-    },
+// ========== GLOBAL STATE ==========
+let currentUser = null;
+let userData = null;
+let cpData = {};
+let faseMap = {};
+let calendarEvents = {};
+let promesGrid = [];
 
-    updateModeBadge() {
-        const badge = document.getElementById('mode-badge');
-        const text = document.getElementById('mode-text');
-        if (this.isOnline) {
-            badge.className = 'mode-badge bg-green-500 text-white';
-            text.textContent = '🌐 Online';
-        } else {
-            badge.className = 'mode-badge bg-slate-700 text-white';
-            text.textContent = '🔌 Offline';
-        }
-        badge.classList.remove('hidden');
-    },
-
-    enterOfflineMode() {
-        this.isOnline = false;
-        this.userData = this.getLocalUser() || {
-            id: 'offline-user',
-            nama: 'Guru (Offline)',
-            email: 'offline@local',
-            npsn: '00000000',
-            role: 'guru',
-            isPremium: true
-        };
-        this.currentUser = { uid: 'offline-user' };
-        this.saveLocalUser(this.userData);
-        this.updateModeBadge();
-        
-        document.getElementById('loading-overlay').style.display = 'none';
-        UISystem.showPage('app');
-        Utils.toast('Mode Offline aktif - semua fitur tersedia', 'info');
-    },
-
-    getLocalUser() {
-        try { return JSON.parse(localStorage.getItem('agsa_user')); } 
-        catch { return null; }
-    },
-
-    saveLocalUser(data) {
-        localStorage.setItem('agsa_user', JSON.stringify(data));
-    }
-};
-
-// =====================================================
-// UTILITY FUNCTIONS
-// =====================================================
-const Utils = {
-    toast(message, type = 'info') {
-        const container = document.getElementById('toast-container');
-        const colors = { success: 'bg-green-500', error: 'bg-red-500', info: 'bg-blue-500', warning: 'bg-amber-500' };
-        const toast = document.createElement('div');
-        toast.className = `toast ${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg font-medium max-w-sm`;
-        toast.textContent = message;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 4000);
-    },
-
-    formatDate(dateStr) {
-        if (!dateStr) return "";
-        const [y, m, d] = dateStr.split('-');
-        return `${parseInt(d)} ${BULAN_IND[parseInt(m)-1]} ${y}`;
-    },
-
-    generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
-};
-
-// =====================================================
-// AUTH SYSTEM
-// =====================================================
+// ========== AUTH SYSTEM ==========
 const AuthSystem = {
-    async init() {
-        document.getElementById('loading-status').textContent = 'Memeriksa autentikasi...';
-        
-        if (!firebaseReady) {
-            document.getElementById('loading-status').textContent = 'Firebase tidak tersedia';
-            setTimeout(() => {
-                document.getElementById('loading-overlay').style.display = 'none';
-                UISystem.showPage('landing');
-            }, 1500);
-            return;
-        }
-
+    init() {
         auth.onAuthStateChanged(async (user) => {
-            document.getElementById('loading-overlay').style.display = 'none';
-            
             if (user) {
-                AppState.currentUser = user;
-                AppState.isOnline = true;
-                await this.loadUserData();
-                
-                // Check if user needs to enter NPSN
-                if (!AppState.userData?.npsn || AppState.userData.npsn === '') {
-                    AppState.pendingGoogleUser = user;
-                    UISystem.showPage('app'); // Show app first
-                    document.getElementById('npsn-modal').style.display = 'flex';
-                } else {
-                    UISystem.showPage('app');
+                // Check if email is Gmail
+                if (!user.email.endsWith('@gmail.com')) {
+                    alert('Hanya email Gmail yang diperbolehkan!');
+                    auth.signOut();
+                    return;
                 }
+                currentUser = user;
+                await this.loadUserData();
+                this.showApp();
             } else {
-                AppState.currentUser = null;
-                AppState.userData = null;
-                UISystem.showPage('landing');
+                currentUser = null;
+                userData = null;
+                this.showLanding();
             }
-            AppState.updateModeBadge();
-        });
-
-        // Form handlers
-        document.getElementById('login-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.loginWithEmail();
-        });
-
-        document.getElementById('register-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.registerWithEmail();
-        });
-
-        document.getElementById('npsn-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.completeGoogleSignUp();
         });
     },
 
-    // ==================== GOOGLE LOGIN ====================
-    async loginWithGoogle() {
-        if (!firebaseReady) {
-            Utils.toast('Firebase tidak tersedia. Gunakan mode offline.', 'warning');
-            return;
-        }
-
-        const btn = document.getElementById('google-login-btn');
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<div class="loading-spinner w-5 h-5 mx-auto"></div>';
-        }
-
-        try {
-            const result = await auth.signInWithPopup(googleProvider);
-            const user = result.user;
-            
-            // Check if user exists in Firestore
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            
-            if (!userDoc.exists) {
-                // New user from Google - need to get NPSN
-                AppState.pendingGoogleUser = user;
-                
-                // Create initial user data
-                const userData = {
-                    nama: user.displayName || 'Guru',
-                    email: user.email,
-                    photoURL: user.photoURL || '',
-                    npsn: '', // Will be filled later
-                    role: user.email === SUPER_ADMIN_EMAIL ? 'super_admin' : 'guru',
-                    isPremium: false,
-                    provider: 'google',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                
-                await db.collection('users').doc(user.uid).set(userData);
-                AppState.userData = { id: user.uid, ...userData };
-                
-                Utils.toast('Login berhasil! Silakan lengkapi data.', 'success');
-            } else {
-                Utils.toast('Login dengan Google berhasil!', 'success');
-            }
-        } catch (error) {
-            console.error('Google login error:', error);
-            let msg = 'Login Google gagal';
-            if (error.code === 'auth/popup-closed-by-user') msg = 'Login dibatalkan';
-            else if (error.code === 'auth/popup-blocked') msg = 'Pop-up diblokir browser. Izinkan pop-up dan coba lagi.';
-            else if (error.code === 'auth/network-request-failed') msg = 'Koneksi gagal. Periksa internet Anda.';
-            Utils.toast(msg, 'error');
-        }
-
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = `
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Masuk dengan Google`;
-        }
-    },
-
-    async completeGoogleSignUp() {
-        const npsn = document.getElementById('modal-npsn').value.trim();
+    async signInWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
         
-        if (npsn.length !== 8 || !/^\d+$/.test(npsn)) {
-            Utils.toast('NPSN harus 8 digit angka', 'error');
-            return;
-        }
-
+        document.getElementById('auth-loading').classList.remove('hidden');
+        document.getElementById('auth-error').classList.add('hidden');
+        
         try {
-            const user = AppState.currentUser || AppState.pendingGoogleUser;
-            if (!user) {
-                Utils.toast('Sesi tidak valid, silakan login ulang', 'error');
-                return;
+            const result = await auth.signInWithPopup(provider);
+            if (!result.user.email.endsWith('@gmail.com')) {
+                throw new Error('Hanya email Gmail yang diperbolehkan!');
             }
-
-            // Update user with NPSN
-            await db.collection('users').doc(user.uid).update({ npsn: npsn });
-            
-            // Create school if not exists
-            const schoolRef = db.collection('schools').doc(npsn);
-            const schoolDoc = await schoolRef.get();
-            if (!schoolDoc.exists) {
-                await schoolRef.set({
-                    npsn: npsn,
-                    namaSekolah: '',
-                    alamat: '',
-                    kepsek: '',
-                    nipKepsek: '',
-                    premiumByAdmin: false,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            }
-
-            AppState.userData.npsn = npsn;
-            AppState.saveLocalUser(AppState.userData);
-            AppState.pendingGoogleUser = null;
-            
-            document.getElementById('npsn-modal').style.display = 'none';
-            Utils.toast('Data berhasil dilengkapi!', 'success');
-            
-            // Reload user data
-            await this.loadUserData();
-            this.updateUI();
-            
+            closeAuthModal();
         } catch (error) {
-            console.error('Error completing signup:', error);
-            Utils.toast('Gagal menyimpan data: ' + error.message, 'error');
+            document.getElementById('auth-error').textContent = error.message;
+            document.getElementById('auth-error').classList.remove('hidden');
+            document.getElementById('auth-loading').classList.add('hidden');
         }
-    },
-
-    // ==================== EMAIL LOGIN ====================
-    async loginWithEmail() {
-        if (!firebaseReady) {
-            Utils.toast('Firebase tidak tersedia. Gunakan mode offline.', 'warning');
-            return;
-        }
-
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value;
-        const btn = document.getElementById('login-btn');
-
-        btn.disabled = true;
-        btn.textContent = 'Memproses...';
-
-        try {
-            await auth.signInWithEmailAndPassword(email, password);
-            Utils.toast('Login berhasil!', 'success');
-        } catch (error) {
-            let msg = 'Login gagal';
-            if (error.code === 'auth/user-not-found') msg = 'Email tidak terdaftar';
-            else if (error.code === 'auth/wrong-password') msg = 'Password salah';
-            else if (error.code === 'auth/invalid-email') msg = 'Format email tidak valid';
-            else if (error.code === 'auth/too-many-requests') msg = 'Terlalu banyak percobaan';
-            Utils.toast(msg, 'error');
-        }
-
-        btn.disabled = false;
-        btn.textContent = 'Masuk dengan Email';
-    },
-
-    async registerWithEmail() {
-        if (!firebaseReady) {
-            Utils.toast('Firebase tidak tersedia. Gunakan mode offline.', 'warning');
-            return;
-        }
-
-        const nama = document.getElementById('reg-nama').value.trim();
-        const email = document.getElementById('reg-email').value.trim();
-        const npsn = document.getElementById('reg-npsn').value.trim();
-        const password = document.getElementById('reg-password').value;
-        const btn = document.getElementById('register-btn');
-
-        if (npsn.length !== 8 || !/^\d+$/.test(npsn)) {
-            Utils.toast('NPSN harus 8 digit angka', 'error');
-            return;
-        }
-
-        btn.disabled = true;
-        btn.textContent = 'Memproses...';
-
-        try {
-            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-            
-            const userData = {
-                nama: nama,
-                email: email,
-                npsn: npsn,
-                role: email === SUPER_ADMIN_EMAIL ? 'super_admin' : 'guru',
-                isPremium: false,
-                provider: 'email',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            await db.collection('users').doc(userCredential.user.uid).set(userData);
-
-            // Create school if not exists
-            const schoolRef = db.collection('schools').doc(npsn);
-            const schoolDoc = await schoolRef.get();
-            if (!schoolDoc.exists) {
-                await schoolRef.set({
-                    npsn: npsn,
-                    namaSekolah: '',
-                    alamat: '',
-                    kepsek: '',
-                    nipKepsek: '',
-                    premiumByAdmin: false,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            }
-
-            Utils.toast('Registrasi berhasil!', 'success');
-        } catch (error) {
-            let msg = 'Registrasi gagal';
-            if (error.code === 'auth/email-already-in-use') msg = 'Email sudah terdaftar';
-            else if (error.code === 'auth/weak-password') msg = 'Password minimal 6 karakter';
-            else if (error.code === 'auth/invalid-email') msg = 'Format email tidak valid';
-            Utils.toast(msg, 'error');
-        }
-
-        btn.disabled = false;
-        btn.textContent = 'Daftar dengan Email';
     },
 
     async loadUserData() {
-        if (!AppState.currentUser || !firebaseReady) return;
-
-        try {
-            const doc = await db.collection('users').doc(AppState.currentUser.uid).get();
-            if (doc.exists) {
-                AppState.userData = { id: doc.id, ...doc.data() };
-                AppState.saveLocalUser(AppState.userData);
-                await SubscriptionSystem.checkPremiumStatus();
-                this.updateUI();
-            }
-        } catch (error) {
-            console.error('Error loading user data:', error);
-            const localData = AppState.getLocalUser();
-            if (localData) AppState.userData = localData;
+        const userRef = db.collection('users').doc(currentUser.uid);
+        const doc = await userRef.get();
+        
+        if (doc.exists) {
+            userData = doc.data();
+        } else {
+            // Create new user
+            userData = {
+                id: currentUser.uid,
+                email: currentUser.email,
+                nama: currentUser.displayName || '',
+                photo: currentUser.photoURL || '',
+                nip: '',
+                npsn: '',
+                role: currentUser.email === SUPER_ADMIN_EMAIL ? 'super_admin' : 'guru',
+                isPremium: currentUser.email === SUPER_ADMIN_EMAIL,
+                tipeGuru: 'mapel',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            await userRef.set(userData);
         }
+        
+        // Check premium by NPSN
+        if (userData.npsn) {
+            const settings = await db.collection('settings').doc('subscription').get();
+            if (settings.exists) {
+                const premiumNPSN = settings.data().premiumNPSN || [];
+                if (premiumNPSN.includes(userData.npsn)) {
+                    userData.isPremium = true;
+                }
+            }
+        }
+    },
+
+    async signOut() {
+        await auth.signOut();
+        location.reload();
+    },
+
+    showApp() {
+        document.getElementById('landing-page').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        this.updateUI();
+        CurriculumSystem.fetchCP();
+        ProfileSystem.loadProfile();
+        CalendarSystem.init();
+    },
+
+    showLanding() {
+        document.getElementById('landing-page').classList.remove('hidden');
+        document.getElementById('main-app').classList.add('hidden');
     },
 
     updateUI() {
-        const data = AppState.userData;
-        if (!data) return;
-
-        // Sidebar user info
-        const sidebarInfo = document.getElementById('sidebar-user-info');
-        const sidebarPhoto = document.getElementById('sidebar-user-photo');
+        // Update user info
+        document.getElementById('sidebar-user-photo').src = currentUser.photoURL || '';
+        document.getElementById('sidebar-user-name').textContent = userData.nama || currentUser.displayName || 'User';
+        document.getElementById('sidebar-user-email').textContent = currentUser.email;
+        document.getElementById('mobile-user-avatar').textContent = (userData.nama || 'U')[0].toUpperCase();
         
-        sidebarInfo.textContent = data.nama || data.email || 'User';
-        
-        if (data.photoURL) {
-            sidebarPhoto.src = data.photoURL;
-            sidebarPhoto.classList.remove('hidden');
-        } else {
-            sidebarPhoto.classList.add('hidden');
-        }
-
-        // Top bar avatar
-        const avatarImg = document.getElementById('user-avatar-img');
-        const avatarDiv = document.getElementById('user-avatar');
-        
-        if (data.photoURL) {
-            avatarImg.src = data.photoURL;
-            avatarImg.classList.remove('hidden');
-            avatarDiv.classList.add('hidden');
-        } else {
-            avatarImg.classList.add('hidden');
-            avatarDiv.classList.remove('hidden');
-            avatarDiv.textContent = data.nama?.charAt(0).toUpperCase() || 'U';
-        }
-
-        // Premium badge
-        const isPremium = SubscriptionSystem.isPremium();
-        const badge = document.getElementById('user-badge');
-        badge.textContent = isPremium ? 'PRO' : 'FREE';
-        badge.className = `ml-2 px-2 py-0.5 rounded text-xs font-semibold ${isPremium ? 'bg-amber-500 text-white' : 'bg-slate-700 text-slate-300'}`;
-
-        // Super admin nav
-        if (data.role === 'super_admin') {
+        // Update role badge
+        const roleBadge = document.getElementById('user-role-badge');
+        if (userData.role === 'super_admin') {
+            roleBadge.textContent = 'SUPER ADMIN';
+            roleBadge.className = 'text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400';
             document.getElementById('nav-superadmin').classList.remove('hidden');
+        } else if (userData.isPremium) {
+            roleBadge.textContent = 'PRO';
+            roleBadge.className = 'text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400';
+        } else {
+            roleBadge.textContent = 'FREE';
+            roleBadge.className = 'text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400';
         }
+        
+        // Update profil page
+        document.getElementById('profil-foto').src = currentUser.photoURL || '';
+        document.getElementById('profil-display-name').textContent = userData.nama || currentUser.displayName;
+        document.getElementById('profil-display-email').textContent = currentUser.email;
+        
+        // Load stats
+        this.loadStats();
     },
 
-    logout() {
-        if (AppState.isOnline && firebaseReady) {
-            auth.signOut();
-        } else {
-            localStorage.removeItem('agsa_user');
-            AppState.userData = null;
-            AppState.currentUser = null;
-            UISystem.showPage('landing');
+    async loadStats() {
+        // TP count from cache
+        let tpCount = 0;
+        Object.values(cpData).forEach(m => {
+            Object.values(m).forEach(k => {
+                Object.values(k).forEach(s => {
+                    Object.values(s).forEach(e => {
+                        tpCount += e.tps?.length || 0;
+                    });
+                });
+            });
+        });
+        document.getElementById('stat-tp-count').textContent = tpCount;
+        
+        // Siswa count
+        const siswaData = localStorage.getItem('agsa_siswa_' + currentUser.uid);
+        const siswaCount = siswaData ? JSON.parse(siswaData).length : 0;
+        document.getElementById('stat-siswa-count').textContent = siswaCount;
+        
+        // Soal count
+        if (userData.isPremium || userData.role === 'super_admin') {
+            const soalSnap = await db.collection('bank_soal').where('userId', '==', currentUser.uid).get();
+            document.getElementById('stat-soal-count').textContent = soalSnap.size;
         }
-        Utils.toast('Logout berhasil', 'info');
+        
+        // Guru di sekolah
+        if (userData.npsn) {
+            const guruSnap = await db.collection('users').where('npsn', '==', userData.npsn).get();
+            document.getElementById('stat-guru-sekolah').textContent = guruSnap.size;
+        }
     }
 };
 
-// =====================================================
-// SUBSCRIPTION SYSTEM
-// =====================================================
-const SubscriptionSystem = {
-    settings: { whatsappUpgrade: "6281234567890", premiumNPSN: [] },
+// ========== UI SYSTEM ==========
+const UISystem = {
+    switchPage(page) {
+        // Hide all pages
+        document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+        // Show target page
+        document.getElementById(`page-${page}`).classList.remove('hidden');
+        
+        // Update nav
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+        
+        // Close mobile sidebar
+        closeSidebar();
+        
+        // Load page specific data
+        if (page === 'superadmin' && userData.role === 'super_admin') {
+            SuperAdminSystem.load();
+        }
+        if (page === 'subscription') {
+            SubscriptionSystem.updateUI();
+        }
+        if (page === 'bank-soal') {
+            if (!SubscriptionSystem.checkAccess('bank-soal')) return;
+            BankSoalSystem.load();
+        }
+        if (page === 'profil-sekolah') {
+            SchoolSystem.loadSchool();
+        }
+    }
+};
 
-    async init() {
-        if (AppState.isOnline && firebaseReady) {
-            await this.loadSettings();
+// ========== PROFILE SYSTEM ==========
+const ProfileSystem = {
+    loadProfile() {
+        document.getElementById('input-nama-guru').value = userData.nama || '';
+        document.getElementById('input-nip-guru').value = userData.nip || '';
+        document.getElementById('input-tipe-guru').value = userData.tipeGuru || 'mapel';
+        
+        // Load siswa
+        const siswaData = localStorage.getItem('agsa_siswa_' + currentUser.uid);
+        if (siswaData) {
+            document.getElementById('input-data-siswa').value = JSON.parse(siswaData).join('\n');
         }
     },
 
-    async loadSettings() {
-        try {
-            const doc = await db.collection('settings').doc('subscription').get();
-            if (doc.exists) this.settings = { ...this.settings, ...doc.data() };
-        } catch (e) { console.log('Using default settings'); }
-    },
-
-    async checkPremiumStatus() {
-        const data = AppState.userData;
-        if (!data) return false;
-        if (!AppState.isOnline) { data.isPremium = true; return true; }
-        if (data.role === 'super_admin') { data.isPremium = true; return true; }
-        if (this.settings.premiumNPSN.includes(data.npsn)) { data.isPremium = true; return true; }
+    async saveProfile() {
+        const nama = document.getElementById('input-nama-guru').value;
+        const nip = document.getElementById('input-nip-guru').value;
+        const tipeGuru = document.getElementById('input-tipe-guru').value;
         
-        try {
-            const schoolDoc = await db.collection('schools').doc(data.npsn).get();
-            if (schoolDoc.exists && schoolDoc.data().premiumByAdmin) {
-                data.isPremium = true;
-                return true;
-            }
-        } catch (e) {}
+        await db.collection('users').doc(currentUser.uid).update({
+            nama, nip, tipeGuru
+        });
+        
+        userData.nama = nama;
+        userData.nip = nip;
+        userData.tipeGuru = tipeGuru;
         
         AuthSystem.updateUI();
-        return data.isPremium || false;
+        alert('✅ Profil berhasil disimpan!');
     },
 
-    isPremium() {
-        if (!AppState.isOnline) return true;
-        return AppState.userData?.isPremium || false;
+    saveSiswa() {
+        const text = document.getElementById('input-data-siswa').value;
+        const list = text.split('\n')
+            .map(s => s.replace(/^[0-9]+[\.\)\-]\s*/, '').trim())
+            .filter(s => s.length > 0);
+        
+        localStorage.setItem('agsa_siswa_' + currentUser.uid, JSON.stringify(list));
+        alert(`✅ ${list.length} siswa berhasil disimpan!`);
+        AuthSystem.loadStats();
     },
 
-    guard(feature) {
-        if (FREE_FEATURES.includes(feature)) return true;
-        if (this.isPremium()) return true;
-        this.showUpgradeModal();
+    getSiswa() {
+        const data = localStorage.getItem('agsa_siswa_' + currentUser.uid);
+        return data ? JSON.parse(data) : ['Siswa 1', 'Siswa 2'];
+    }
+};
+
+// ========== SCHOOL SYSTEM ==========
+const SchoolSystem = {
+    async loadSchool() {
+        document.getElementById('input-nama-sekolah').value = userData.sekolah || '';
+        document.getElementById('input-npsn').value = userData.npsn || '';
+        document.getElementById('input-alamat-sekolah').value = userData.alamat || '';
+        document.getElementById('input-nama-kepsek').value = userData.kepsek || '';
+        document.getElementById('input-nip-kepsek').value = userData.nipKepsek || '';
+        
+        // Load guru list
+        if (userData.npsn) {
+            const guruSnap = await db.collection('users').where('npsn', '==', userData.npsn).get();
+            let html = '';
+            guruSnap.forEach(doc => {
+                const g = doc.data();
+                html += `<div class="flex items-center gap-3 p-3 bg-slate-800 rounded-xl">
+                    <img src="${g.photo || ''}" class="w-10 h-10 rounded-full bg-slate-700">
+                    <div class="flex-1">
+                        <p class="font-semibold">${g.nama || 'Tanpa Nama'}</p>
+                        <p class="text-xs text-slate-400">${g.email}</p>
+                    </div>
+                    <span class="text-xs px-2 py-1 rounded ${g.isPremium ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-700 text-slate-400'}">${g.isPremium ? 'PRO' : 'FREE'}</span>
+                </div>`;
+            });
+            document.getElementById('list-guru-sekolah').innerHTML = html || '<p class="text-slate-400 text-center">Belum ada guru terdaftar</p>';
+        }
+    },
+
+    async saveSchool() {
+        const sekolah = document.getElementById('input-nama-sekolah').value;
+        const npsn = document.getElementById('input-npsn').value;
+        const alamat = document.getElementById('input-alamat-sekolah').value;
+        const kepsek = document.getElementById('input-nama-kepsek').value;
+        const nipKepsek = document.getElementById('input-nip-kepsek').value;
+        
+        if (npsn.length !== 8) {
+            alert('NPSN harus 8 digit!');
+            return;
+        }
+        
+        await db.collection('users').doc(currentUser.uid).update({
+            sekolah, npsn, alamat, kepsek, nipKepsek
+        });
+        
+        // Check if NPSN is premium
+        const settings = await db.collection('settings').doc('subscription').get();
+        if (settings.exists) {
+            const premiumNPSN = settings.data().premiumNPSN || [];
+            if (premiumNPSN.includes(npsn)) {
+                await db.collection('users').doc(currentUser.uid).update({ isPremium: true });
+                userData.isPremium = true;
+            }
+        }
+        
+        userData.sekolah = sekolah;
+        userData.npsn = npsn;
+        userData.alamat = alamat;
+        userData.kepsek = kepsek;
+        userData.nipKepsek = nipKepsek;
+        
+        AuthSystem.updateUI();
+        this.loadSchool();
+        alert('✅ Data sekolah berhasil disimpan!');
+    }
+};
+
+// ========== CURRICULUM SYSTEM ==========
+const CurriculumSystem = {
+    async fetchCP() {
+        const jenjang = document.getElementById('select-jenjang').value;
+        const url = CP_LINKS[jenjang];
+        const statusEl = document.getElementById('csv-status');
+        
+        statusEl.className = 'p-3 rounded-xl text-sm bg-blue-500/20 text-blue-400';
+        statusEl.textContent = '⏳ Mengunduh data kurikulum...';
+        statusEl.classList.remove('hidden');
+        
+        try {
+            let response = await fetch(url);
+            if (!response.ok) throw new Error('Fetch failed');
+            this.parseCSV(await response.text());
+        } catch (e) {
+            try {
+                const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+                const response = await fetch(proxyUrl);
+                this.parseCSV(await response.text());
+            } catch (err) {
+                statusEl.className = 'p-3 rounded-xl text-sm bg-red-500/20 text-red-400';
+                statusEl.textContent = '❌ Gagal mengunduh. Coba upload CSV manual.';
+            }
+        }
+    },
+
+    uploadCSV(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => this.parseCSV(e.target.result);
+        reader.readAsText(file);
+        input.value = '';
+    },
+
+    parseCSV(csvText) {
+        const lines = csvText.split('\n');
+        cpData = {};
+        faseMap = {};
+        let count = 0;
+        
+        for (let i = 1; i < lines.length; i++) {
+            const row = lines[i].trim();
+            if (!row) continue;
+            
+            // Parse CSV with quoted fields
+            const cols = [];
+            let match;
+            const regex = /("([^"]*)"|[^",]+)(?=,|$)/g;
+            while ((match = regex.exec(row)) !== null) {
+                cols.push(match[2] !== undefined ? match[2] : match[1]);
+            }
+            
+            if (cols.length < 5) continue;
+            
+            const [mapel, fase, kelas, semester, elemen, cp, tp] = cols.map(c => c?.trim() || '');
+            
+            if (fase && kelas) faseMap[kelas] = fase;
+            
+            if (!cpData[mapel]) cpData[mapel] = {};
+            if (!cpData[mapel][kelas]) cpData[mapel][kelas] = {};
+            if (!cpData[mapel][kelas][semester]) cpData[mapel][kelas][semester] = {};
+            if (!cpData[mapel][kelas][semester][elemen]) {
+                cpData[mapel][kelas][semester][elemen] = { cp: cp || '', tps: [] };
+            }
+            cpData[mapel][kelas][semester][elemen].tps.push({ tp: tp || cp || '' });
+            count++;
+        }
+        
+        // Cache to localStorage
+        localStorage.setItem('agsa_cp_cache', JSON.stringify({ cpData, faseMap }));
+        
+        const statusEl = document.getElementById('csv-status');
+        statusEl.className = 'p-3 rounded-xl text-sm bg-green-500/20 text-green-400';
+        statusEl.textContent = `✅ Berhasil memuat ${count} Tujuan Pembelajaran`;
+        
+        this.initDropdowns();
+        AuthSystem.loadStats();
+    },
+
+    initDropdowns() {
+        const mapelSelect = document.getElementById('select-mapel');
+        mapelSelect.innerHTML = '<option value="">-- Pilih Mapel --</option>';
+        
+        Object.keys(cpData).sort().forEach(m => {
+            mapelSelect.appendChild(new Option(m, m));
+        });
+        
+        this.updateKelas();
+    },
+
+    updateKelas() {
+        const mapel = document.getElementById('select-mapel').value;
+        const kelasSelect = document.getElementById('select-kelas');
+        kelasSelect.innerHTML = '<option value="">-</option>';
+        
+        if (mapel && cpData[mapel]) {
+            Object.keys(cpData[mapel]).sort((a, b) => {
+                const nA = parseInt(a.replace(/\D/g, ''));
+                const nB = parseInt(b.replace(/\D/g, ''));
+                return nA - nB;
+            }).forEach(k => {
+                const fase = faseMap[k] || '-';
+                kelasSelect.appendChild(new Option(`${k} (${fase})`, k));
+            });
+        }
+        
+        this.updateSemester();
+    },
+
+    updateSemester() {
+        const mapel = document.getElementById('select-mapel').value;
+        const kelas = document.getElementById('select-kelas').value;
+        const semesterSelect = document.getElementById('select-semester');
+        semesterSelect.innerHTML = '<option value="">-</option>';
+        
+        if (mapel && kelas && cpData[mapel]?.[kelas]) {
+            Object.keys(cpData[mapel][kelas]).forEach(s => {
+                semesterSelect.appendChild(new Option(s, s));
+            });
+        }
+        
+        this.updateElemen();
+    },
+
+    updateElemen() {
+        const mapel = document.getElementById('select-mapel').value;
+        const kelas = document.getElementById('select-kelas').value;
+        const semester = document.getElementById('select-semester').value;
+        const elemenSelect = document.getElementById('select-elemen');
+        elemenSelect.innerHTML = '<option value="">-</option>';
+        
+        if (mapel && kelas && semester && cpData[mapel]?.[kelas]?.[semester]) {
+            Object.keys(cpData[mapel][kelas][semester]).forEach(e => {
+                elemenSelect.appendChild(new Option(e, e));
+            });
+        }
+        
+        this.updatePreview();
+    },
+
+    updatePreview() {
+        const mapel = document.getElementById('select-mapel').value;
+        const kelas = document.getElementById('select-kelas').value;
+        const semester = document.getElementById('select-semester').value;
+        const previewEl = document.getElementById('preview-tp');
+        
+        if (!mapel || !kelas || !semester || !cpData[mapel]?.[kelas]?.[semester]) {
+            previewEl.innerHTML = '<p class="text-slate-400 text-center">Pilih mapel, kelas, dan semester untuk melihat TP</p>';
+            return;
+        }
+        
+        let html = '';
+        Object.entries(cpData[mapel][kelas][semester]).forEach(([elemen, data]) => {
+            html += `<div class="bg-slate-800 rounded-xl p-4 mb-3">
+                <h4 class="font-bold text-blue-400 mb-2">${elemen}</h4>
+                <p class="text-xs text-slate-400 mb-3">${data.cp}</p>
+                <ul class="space-y-1">`;
+            data.tps.forEach((tp, i) => {
+                html += `<li class="text-sm flex gap-2"><span class="text-emerald-400 font-bold">${i + 1}.</span> ${tp.tp}</li>`;
+            });
+            html += `</ul></div>`;
+        });
+        
+        previewEl.innerHTML = html;
+    },
+
+    getData() {
+        return { cpData, faseMap };
+    }
+};
+
+// ========== CALENDAR SYSTEM ==========
+const CalendarSystem = {
+    init() {
+        const year = new Date().getFullYear();
+        document.getElementById('input-masuk-ganjil').value = `${year}-07-15`;
+        document.getElementById('input-rapor-ganjil').value = `${year}-12-20`;
+        document.getElementById('input-masuk-genap').value = `${year + 1}-01-05`;
+        document.getElementById('input-rapor-genap').value = `${year + 1}-06-20`;
+        document.getElementById('input-libur-kustom').value = DEFAULT_LIBUR;
+        document.getElementById('input-tahun').value = year;
+        
+        // Load saved calendar
+        const saved = localStorage.getItem('agsa_calendar_' + currentUser?.uid);
+        if (saved) {
+            const data = JSON.parse(saved);
+            if (data.masukGanjil) document.getElementById('input-masuk-ganjil').value = data.masukGanjil;
+            if (data.raporGanjil) document.getElementById('input-rapor-ganjil').value = data.raporGanjil;
+            if (data.masukGenap) document.getElementById('input-masuk-genap').value = data.masukGenap;
+            if (data.raporGenap) document.getElementById('input-rapor-genap').value = data.raporGenap;
+            if (data.libur) document.getElementById('input-libur-kustom').value = data.libur;
+            if (data.hari) document.getElementById('select-hari').value = data.hari;
+            if (data.jp) document.getElementById('input-jp').value = data.jp;
+        }
+    },
+
+    save() {
+        const data = {
+            masukGanjil: document.getElementById('input-masuk-ganjil').value,
+            raporGanjil: document.getElementById('input-rapor-ganjil').value,
+            masukGenap: document.getElementById('input-masuk-genap').value,
+            raporGenap: document.getElementById('input-rapor-genap').value,
+            libur: document.getElementById('input-libur-kustom').value,
+            hari: document.getElementById('select-hari').value,
+            jp: document.getElementById('input-jp').value
+        };
+        localStorage.setItem('agsa_calendar_' + currentUser.uid, JSON.stringify(data));
+        alert('✅ Kalender berhasil disimpan!');
+    },
+
+    generateEvents(semester) {
+        calendarEvents = {};
+        const eventList = [];
+        
+        const addEvent = (dt, nm) => {
+            calendarEvents[dt] = nm;
+            eventList.push({ dt, nm });
+        };
+        
+        // Titik semester
+        const triggers = [
+            { id: 'input-masuk-ganjil', nm: 'Awal Masuk Tahun Ajaran', pre: 'Libur Awal Tahun Ajaran', month: 6, before: true },
+            { id: 'input-rapor-ganjil', nm: 'Pembagian Rapor Ganjil', pre: 'Libur Akhir Semester Ganjil', month: 11, before: false },
+            { id: 'input-masuk-genap', nm: 'Awal Masuk Genap', pre: 'Libur Awal Semester Genap', month: 0, before: true },
+            { id: 'input-rapor-genap', nm: 'Pembagian Rapor Kenaikan', pre: 'Libur Akhir Tahun Ajaran', month: 5, before: false }
+        ];
+        
+        triggers.forEach(item => {
+            const val = document.getElementById(item.id)?.value;
+            if (val) {
+                const [y, mo, d] = val.split('-').map(Number);
+                if (mo - 1 === item.month) {
+                    addEvent(val, item.nm);
+                    if (item.before) {
+                        for (let i = 1; i < d; i++) {
+                            addEvent(`${y}-${String(mo).padStart(2, '0')}-${String(i).padStart(2, '0')}`, item.pre);
+                        }
+                    } else {
+                        const lastDay = new Date(y, mo, 0).getDate();
+                        for (let i = d + 1; i <= lastDay; i++) {
+                            addEvent(`${y}-${String(mo).padStart(2, '0')}-${String(i).padStart(2, '0')}`, item.pre);
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Custom holidays
+        const rawLibur = (document.getElementById('input-libur-kustom')?.value || '').split('\n');
+        rawLibur.forEach(line => {
+            const parts = line.split('=');
+            if (parts.length >= 2) {
+                addEvent(parts[0].trim(), parts[1].trim());
+            }
+        });
+        
+        eventList.sort((a, b) => new Date(a.dt) - new Date(b.dt));
+        return { calendarEvents, eventList };
+    },
+
+    generatePromesGrid(semester, tahun, hariTarget) {
+        promesGrid = new Array(30).fill(null);
+        const { calendarEvents: events } = this.generateEvents(semester);
+        const activeDates = [];
+        
+        const bAwal = semester === 'Ganjil' ? 6 : 0;
+        
+        for (let i = 0; i < 6; i++) {
+            let curBln = bAwal + i;
+            let cYr = tahun;
+            
+            if (semester === 'Ganjil' && curBln > 11) { cYr++; curBln -= 12; }
+            if (semester === 'Genap' && curBln > 11) { cYr++; curBln -= 12; }
+            
+            const jHari = new Date(cYr, curBln + 1, 0).getDate();
+            
+            for (let tgl = 1; tgl <= jHari; tgl++) {
+                const dt = new Date(cYr, curBln, tgl);
+                if (dt.getDay() === hariTarget) {
+                    const wIdx = Math.min(Math.ceil(tgl / 7) - 1, 4);
+                    const cIdx = i * 5 + wIdx;
+                    const dStr = `${cYr}-${String(curBln + 1).padStart(2, '0')}-${String(tgl).padStart(2, '0')}`;
+                    
+                    if (events[dStr]) {
+                        let shortTxt = events[dStr];
+                        if (shortTxt.includes('Libur Akhir Tahun')) shortTxt = 'LIBUR';
+                        else if (shortTxt.includes('Libur Akhir Semester')) shortTxt = 'LIBUR';
+                        else if (shortTxt.includes('Libur Awal')) shortTxt = 'LIBUR';
+                        promesGrid[cIdx] = { isHol: true, text: shortTxt };
+                    } else {
+                        activeDates.push(dt);
+                        promesGrid[cIdx] = { isHol: false, date: dt };
+                    }
+                }
+            }
+        }
+        
+        return { promesGrid, activeDates };
+    }
+};
+
+// ========== SUBSCRIPTION SYSTEM ==========
+const SubscriptionSystem = {
+    FREE_FEATURES: ['atp', 'kalender'],
+    PRO_FEATURES: ['promes', 'modul', 'jurnal', 'absensi', 'kktp', 'bank-soal'],
+
+    checkAccess(feature) {
+        if (userData?.isPremium || userData?.role === 'super_admin') return true;
+        if (this.FREE_FEATURES.includes(feature)) return true;
+        
+        showUpgradeModal();
         return false;
     },
 
-    showUpgradeModal() {
-        const waLink = `https://wa.me/${this.settings.whatsappUpgrade}?text=${encodeURIComponent('Halo, saya ingin upgrade ke versi PRO AdminGuruPro')}`;
-        document.getElementById('upgrade-wa-link').href = waLink;
-        document.getElementById('upgrade-modal').style.display = 'flex';
+    updateUI() {
+        const isPremium = userData?.isPremium || userData?.role === 'super_admin';
+        
+        if (isPremium) {
+            document.getElementById('sub-icon').textContent = '👑';
+            document.getElementById('sub-icon').className = 'w-16 h-16 rounded-2xl bg-amber-500/20 flex items-center justify-center text-3xl';
+            document.getElementById('sub-status').textContent = 'Paket PRO';
+            document.getElementById('sub-desc').textContent = 'Akses penuh ke semua fitur';
+            document.getElementById('sub-features').innerHTML = `
+                <div class="flex items-center gap-2"><span class="text-green-400">✓</span> Semua fitur Free</div>
+                <div class="flex items-center gap-2"><span class="text-green-400">✓</span> Promes & Modul Ajar</div>
+                <div class="flex items-center gap-2"><span class="text-green-400">✓</span> Bank Soal Unlimited</div>
+                <div class="flex items-center gap-2"><span class="text-green-400">✓</span> KKTP & Penilaian</div>
+            `;
+        }
     }
 };
 
-// =====================================================
-// UI SYSTEM (Shortened for space - same as before)
-// =====================================================
-const UISystem = {
-    currentView: 'dashboard',
-
-    showPage(page) {
-        ['landing-page', 'login-page', 'register-page', 'app-container'].forEach(p => document.getElementById(p)?.classList.add('hidden'));
+// ========== BANK SOAL SYSTEM ==========
+const BankSoalSystem = {
+    async load() {
+        // Populate TP dropdown
+        const tpSelect = document.getElementById('soal-tp');
+        tpSelect.innerHTML = '<option value="">Pilih TP</option>';
         
-        switch(page) {
-            case 'landing': document.getElementById('landing-page').classList.remove('hidden'); break;
-            case 'login': document.getElementById('login-page').classList.remove('hidden'); break;
-            case 'register': document.getElementById('register-page').classList.remove('hidden'); break;
-            case 'app':
-                document.getElementById('app-container').classList.remove('hidden');
-                AuthSystem.updateUI();
-                this.switchView('dashboard');
-                CurriculumSystem.init();
-                break;
+        const mapel = document.getElementById('select-mapel').value;
+        const kelas = document.getElementById('select-kelas').value;
+        const semester = document.getElementById('select-semester').value;
+        
+        if (mapel && kelas && semester && cpData[mapel]?.[kelas]?.[semester]) {
+            Object.entries(cpData[mapel][kelas][semester]).forEach(([elemen, data]) => {
+                data.tps.forEach((tp, i) => {
+                    tpSelect.appendChild(new Option(`${elemen} - TP ${i + 1}`, tp.tp));
+                });
+            });
+        }
+        
+        // Load saved soal
+        const soalSnap = await db.collection('bank_soal')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('createdAt', 'desc')
+            .limit(50)
+            .get();
+        
+        let html = '';
+        if (soalSnap.empty) {
+            html = `<div class="glass rounded-2xl p-6 text-center text-slate-400">
+                <div class="text-4xl mb-3">📝</div>
+                <p>Belum ada soal tersimpan</p>
+            </div>`;
+        } else {
+            soalSnap.forEach(doc => {
+                const soal = doc.data();
+                html += `<div class="glass rounded-2xl p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-400">${soal.tipe?.toUpperCase()}</span>
+                        <button onclick="BankSoalSystem.deleteSoal('${doc.id}')" class="text-red-400 hover:text-red-300 text-sm">🗑️</button>
+                    </div>
+                    <p class="font-semibold mb-2">${soal.pertanyaan}</p>
+                    <p class="text-sm text-slate-400">Jawaban: <span class="text-emerald-400 font-bold">${soal.jawaban}</span></p>
+                </div>`;
+            });
+        }
+        
+        document.getElementById('list-soal').innerHTML = html;
+    },
+
+    showAddModal() {
+        if (!SubscriptionSystem.checkAccess('bank-soal')) return;
+        document.getElementById('modal-add-soal').classList.remove('hidden');
+        document.getElementById('modal-add-soal').classList.add('flex');
+    },
+
+    async saveSoal() {
+        const tipe = document.getElementById('soal-tipe').value;
+        const tp = document.getElementById('soal-tp').value;
+        const pertanyaan = document.getElementById('soal-pertanyaan').value;
+        const jawaban = document.getElementById('soal-jawaban').value;
+        
+        if (!pertanyaan || !jawaban) {
+            alert('Lengkapi semua field!');
+            return;
+        }
+        
+        const opsi = tipe === 'pg' ? [
+            document.getElementById('opsi-a').value,
+            document.getElementById('opsi-b').value,
+            document.getElementById('opsi-c').value,
+            document.getElementById('opsi-d').value
+        ] : [];
+        
+        await db.collection('bank_soal').add({
+            userId: currentUser.uid,
+            npsn: userData.npsn || '',
+            mapel: document.getElementById('select-mapel').value,
+            kelas: document.getElementById('select-kelas').value,
+            semester: document.getElementById('select-semester').value,
+            tp,
+            tipe,
+            pertanyaan,
+            opsi,
+            jawaban,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        closeAddSoalModal();
+        this.load();
+        alert('✅ Soal berhasil disimpan!');
+    },
+
+    async deleteSoal(id) {
+        if (confirm('Hapus soal ini?')) {
+            await db.collection('bank_soal').doc(id).delete();
+            this.load();
+        }
+    }
+};
+
+// ========== DOCUMENT ENGINE ==========
+const DocumentEngine = {
+    currentDoc: 'atp',
+
+    switchDoc() {
+        this.currentDoc = document.getElementById('select-doc-type').value;
+    },
+
+    generate() {
+        const docType = this.currentDoc;
+        
+        // Check access for PRO features
+        if (['promes', 'modul', 'jurnal', 'absensi', 'kktp'].includes(docType)) {
+            if (!SubscriptionSystem.checkAccess(docType)) return;
+        }
+        
+        const mapel = document.getElementById('select-mapel').value;
+        const kelas = document.getElementById('select-kelas').value;
+        const semester = document.getElementById('select-semester').value;
+        
+        if (!mapel || !kelas || !semester) {
+            alert('Pilih Mapel, Kelas, dan Semester terlebih dahulu di menu Kurikulum!');
+            return;
+        }
+        
+        switch (docType) {
+            case 'atp': this.generateATP(); break;
+            case 'promes': this.generatePromes(); break;
+            case 'modul': this.generateModul(); break;
+            case 'jurnal': this.generateJurnal(); break;
+            case 'absensi': this.generateAbsensi(); break;
+            case 'kktp': this.generateKKTP(); break;
         }
     },
 
-    switchView(viewId) {
-        this.currentView = viewId;
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active', 'bg-blue-600/20'));
-        event?.currentTarget?.classList.add('active', 'bg-blue-600/20');
-        document.getElementById('sidebar').classList.remove('open');
-
-        const titles = { dashboard: 'Dashboard', profil: 'Profil Guru', sekolah: 'Profil Sekolah', kurikulum: 'Kurikulum & Mapel', kalender: 'Kalender & Libur', banksoal: 'Bank Soal', generate: 'Generate Dokumen', subscription: 'Subscription', superadmin: 'Super Admin' };
-        document.getElementById('page-title').textContent = titles[viewId] || 'Dashboard';
-
-        const content = document.getElementById('main-content');
-        content.innerHTML = this.getViewHTML(viewId);
-        this.initView(viewId);
+    getIdentitas() {
+        const mapel = document.getElementById('select-mapel').value;
+        const kelas = document.getElementById('select-kelas').value;
+        const semester = document.getElementById('select-semester').value;
+        const tahun = parseInt(document.getElementById('input-tahun').value) || new Date().getFullYear();
+        const rombel = document.getElementById('input-rombel').value || 'A';
+        const jp = parseInt(document.getElementById('input-jp').value) || 4;
+        const fase = faseMap[kelas] || '-';
+        
+        return {
+            mapel, kelas, semester, tahun, rombel, jp, fase,
+            thn: `${tahun}/${tahun + 1}`,
+            sekolah: userData.sekolah || 'Nama Sekolah',
+            guru: userData.nama || 'Nama Guru',
+            nipGuru: userData.nip || '-',
+            kepsek: userData.kepsek || 'Kepala Sekolah',
+            nipKepsek: userData.nipKepsek || '-',
+            tempat: 'Jakarta'
+        };
     },
 
-    getViewHTML(viewId) {
-        // Return appropriate HTML for each view
-        // (Same implementation as before - simplified here for space)
-        return `<div class="text-center py-20"><p>Loading ${viewId}...</p></div>`;
+    generateATP() {
+        const id = this.getIdentitas();
+        const data = cpData[id.mapel]?.[id.kelas]?.[id.semester] || {};
+        
+        let atpRows = '';
+        let protaRows = '';
+        let no = 1;
+        
+        Object.entries(data).forEach(([elemen, { cp, tps }]) => {
+            const totalJP = tps.length * id.jp;
+            
+            tps.forEach((tp, i) => {
+                atpRows += `<tr>`;
+                if (i === 0) {
+                    atpRows += `<td rowspan="${tps.length}" class="text-center align-middle">${no}</td>
+                        <td rowspan="${tps.length}" class="bg-slate-50 align-middle" contenteditable="true">
+                            <b class="text-blue-900">${elemen}</b><hr class="my-1"><span class="text-[8pt] text-slate-600">${cp}</span>
+                        </td>`;
+                }
+                atpRows += `<td contenteditable="true">${tp.tp}</td>
+                    <td class="text-xs text-blue-700">Beriman, Bernalar Kritis</td>
+                    <td class="font-bold text-amber-600">Memahami</td>`;
+                if (i === 0) {
+                    atpRows += `<td rowspan="${tps.length}" class="text-center align-middle">${tps.length} Minggu<br>${totalJP} JP</td>`;
+                }
+                atpRows += `</tr>`;
+                
+                protaRows += `<tr>`;
+                if (i === 0) {
+                    protaRows += `<td rowspan="${tps.length}" class="font-bold text-center align-middle">${id.semester}</td>
+                        <td rowspan="${tps.length}" class="bg-slate-50 align-middle" contenteditable="true">
+                            <b class="text-blue-900">${elemen}</b><hr class="my-1"><span class="text-[8pt] text-slate-600">${cp}</span>
+                        </td>`;
+                }
+                protaRows += `<td contenteditable="true">${tp.tp}</td>`;
+                if (i === 0) {
+                    protaRows += `<td rowspan="${tps.length}" class="font-bold text-center align-middle">${totalJP} JP</td>`;
+                }
+                protaRows += `</tr>`;
+            });
+            no++;
+        });
+        
+        const signature = `<div class="flex justify-between mt-10" contenteditable="true">
+            <div class="text-center min-w-[250px]">Mengetahui,<br>Kepala Sekolah<div class="mt-20 font-bold underline">${id.kepsek}</div>NIP. ${id.nipKepsek}</div>
+            <div class="text-center min-w-[250px]">${id.tempat}, ......................<br>Guru Mata Pelajaran<div class="mt-20 font-bold underline">${id.guru}</div>NIP. ${id.nipGuru}</div>
+        </div>`;
+        
+        document.getElementById('doc-container').innerHTML = `
+            <div class="paper-preview landscape">
+                <h1 class="text-center text-[14pt] font-bold mb-5 uppercase" contenteditable="true">ALUR TUJUAN PEMBELAJARAN (ATP)<br>TAHUN PELAJARAN ${id.thn}</h1>
+                <div class="flex justify-between mb-4 font-bold text-[11pt]" contenteditable="true">
+                    <table><tr><td width="150">NAMA SEKOLAH</td><td>: ${id.sekolah}</td></tr><tr><td>MATA PELAJARAN</td><td>: ${id.mapel}</td></tr><tr><td>FASE</td><td>: ${id.fase}</td></tr></table>
+                    <table><tr><td width="100">KELAS</td><td>: ${id.kelas}</td></tr><tr><td>SEMESTER</td><td>: ${id.semester}</td></tr></table>
+                </div>
+                <table class="doc-table">
+                    <thead><tr><th width="3%">NO</th><th width="20%">ELEMEN DAN CP</th><th width="22%">TUJUAN PEMBELAJARAN</th><th width="15%">PROFIL LULUSAN</th><th width="10%">KOMPETENSI</th><th width="8%">WAKTU</th></tr></thead>
+                    <tbody>${atpRows || '<tr><td colspan="6" class="text-center">Tidak ada data</td></tr>'}</tbody>
+                </table>
+                ${signature}
+            </div>
+            <div class="paper-preview portrait mt-10">
+                <h1 class="text-center text-[14pt] font-bold mb-5 uppercase" contenteditable="true">PROGRAM TAHUNAN (PROTA)<br>${id.mapel}</h1>
+                <table class="mb-4 font-bold text-[11pt] w-full" contenteditable="true">
+                    <tr><td width="150">Satuan Pendidikan</td><td>: ${id.sekolah}</td></tr>
+                    <tr><td>Fase / Kelas</td><td>: ${id.fase} / ${id.kelas}</td></tr>
+                    <tr><td>Tahun Pelajaran</td><td>: ${id.thn}</td></tr>
+                </table>
+                <table class="doc-table">
+                    <thead><tr><th width="10%">Smt</th><th width="25%">Elemen & CP</th><th width="55%">Tujuan Pembelajaran</th><th width="10%">JP</th></tr></thead>
+                    <tbody>${protaRows}</tbody>
+                </table>
+                ${signature}
+            </div>
+        `;
     },
 
-    initView(viewId) {
-        // Initialize view-specific functionality
+    generatePromes() {
+        const id = this.getIdentitas();
+        const data = cpData[id.mapel]?.[id.kelas]?.[id.semester] || {};
+        const hariTarget = parseInt(document.getElementById('select-hari').value);
+        const { promesGrid, activeDates } = CalendarSystem.generatePromesGrid(id.semester, id.tahun, hariTarget);
+        
+        const nb = id.semester === 'Ganjil' ? ['Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'] : ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'];
+        
+        let thead = `<tr><th rowspan="2" width="10%">Elemen</th><th rowspan="2" width="22%">Tujuan Pembelajaran</th><th rowspan="2" width="3%">JP</th>`;
+        nb.forEach(b => thead += `<th colspan="5">${b}</th>`);
+        thead += `</tr><tr>`;
+        for (let i = 0; i < 6; i++) thead += `<th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>`;
+        thead += `</tr>`;
+        
+        let tbody = '';
+        let tpIndex = 0;
+        
+        Object.entries(data).forEach(([elemen, { tps }]) => {
+            tps.forEach((tp, i) => {
+                tbody += `<tr>`;
+                if (i === 0) {
+                    tbody += `<td rowspan="${tps.length}" class="bg-slate-50 font-bold text-center align-middle text-[8pt]" contenteditable="true">${elemen}</td>`;
+                }
+                tbody += `<td class="text-[8pt]" contenteditable="true">${tp.tp}</td><td class="text-center font-bold">${id.jp}</td>`;
+                
+                for (let c = 0; c < 30; c++) {
+                    const cell = promesGrid[c];
+                    if (!cell) {
+                        tbody += `<td></td>`;
+                    } else if (cell.isHol) {
+                        if (tpIndex === 0) {
+                            const totalTp = Object.values(data).reduce((sum, el) => sum + el.tps.length, 0);
+                            tbody += `<td rowspan="${totalTp}" class="event-cell"><div class="vertical-text">${cell.text}</div></td>`;
+                        }
+                    } else {
+                        if (activeDates[tpIndex] && cell.date && cell.date.getTime() === activeDates[tpIndex].getTime()) {
+                            tbody += `<td class="bg-blue-100 text-center font-bold text-blue-800 text-[8pt]">${cell.date.getDate()}</td>`;
+                        } else {
+                            tbody += `<td></td>`;
+                        }
+                    }
+                }
+                
+                tbody += `</tr>`;
+                tpIndex++;
+            });
+        });
+        
+        document.getElementById('doc-container').innerHTML = `
+            <div class="paper-preview landscape">
+                <h1 class="text-center text-[14pt] font-bold mb-5 uppercase" contenteditable="true">PROGRAM SEMESTER (PROSEM)<br>SEMESTER ${id.semester.toUpperCase()}</h1>
+                <table class="w-1/2 mb-4 font-bold text-[11pt]" contenteditable="true">
+                    <tr><td width="150">Mata Pelajaran</td><td>: ${id.mapel}</td></tr>
+                    <tr><td>Kelas/Rombel</td><td>: ${id.kelas} / ${id.rombel}</td></tr>
+                </table>
+                <table class="doc-table text-[8pt]">
+                    <thead>${thead}</thead>
+                    <tbody>${tbody || '<tr><td colspan="33" class="text-center">Tidak ada data</td></tr>'}</tbody>
+                </table>
+            </div>
+        `;
+    },
+
+    generateModul() {
+        const id = this.getIdentitas();
+        const elemen = document.getElementById('select-elemen').value;
+        const data = cpData[id.mapel]?.[id.kelas]?.[id.semester]?.[elemen];
+        
+        if (!data) {
+            alert('Pilih Elemen/Bab terlebih dahulu!');
+            return;
+        }
+        
+        let tpList = '';
+        let langkah = '';
+        
+        data.tps.forEach((tp, i) => {
+            tpList += `<li><strong>Pertemuan ${i + 1}:</strong> ${tp.tp}</li>`;
+            langkah += `<div class="mb-4 bg-slate-50 p-4 rounded border">
+                <div class="font-bold border-b-2 pb-2 mb-3 text-blue-800 text-lg">Pertemuan ${i + 1} (${id.jp} JP)</div>
+                <div class="mb-3"><span class="font-bold underline">A. Pendahuluan (15 Menit)</span>
+                    <ul class="list-decimal pl-6 mt-1"><li>Guru mengucapkan salam dan mengecek kehadiran.</li><li>Guru memberikan apersepsi terkait materi.</li></ul>
+                </div>
+                <div class="mb-3"><span class="font-bold underline">B. Kegiatan Inti (60 Menit)</span>
+                    <ul class="list-decimal pl-6 mt-1"><li>Siswa mengamati penjelasan guru.</li><li>Siswa mengerjakan LKPD berkelompok.</li><li>Presentasi hasil diskusi.</li></ul>
+                </div>
+                <div><span class="font-bold underline">C. Penutup (15 Menit)</span>
+                    <ul class="list-decimal pl-6 mt-1"><li>Guru dan siswa menyimpulkan materi.</li></ul>
+                </div>
+            </div>`;
+        });
+        
+        document.getElementById('doc-container').innerHTML = `
+            <div class="paper-preview portrait">
+                <h1 class="text-center text-[14pt] font-bold mb-5 uppercase" contenteditable="true">MODUL AJAR KURIKULUM MERDEKA</h1>
+                <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">A. IDENTITAS UMUM</div>
+                <table class="font-bold text-[11pt] w-full" contenteditable="true">
+                    <tr><td width="150">Nama Penyusun</td><td>: ${id.guru} (${id.sekolah})</td></tr>
+                    <tr><td>Mata Pelajaran</td><td>: ${id.mapel}</td></tr>
+                    <tr><td>Kelas / Smt / Rombel</td><td>: ${id.kelas} / ${id.semester} / ${id.rombel}</td></tr>
+                    <tr><td>Topik Materi</td><td>: <span class="text-blue-600">${elemen}</span></td></tr>
+                    <tr><td>Alokasi Waktu</td><td>: ${data.tps.length * id.jp} JP</td></tr>
+                </table>
+                <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">B. CAPAIAN & TUJUAN</div>
+                <div class="pl-4 mb-3" contenteditable="true">
+                    <p class="mb-3 bg-blue-50 p-2 rounded border text-sm">${data.cp}</p>
+                    <ul class="list-disc pl-5 text-sm font-semibold">${tpList}</ul>
+                </div>
+                <div class="font-bold text-[11pt] bg-slate-100 p-1 border-l-4 border-blue-600 mt-4 mb-2">C. LANGKAH PEMBELAJARAN</div>
+                <div class="pl-4 text-sm" contenteditable="true">${langkah}</div>
+            </div>
+            <div class="paper-preview portrait mt-10">
+                <div class="border-2 border-dashed border-blue-600 p-6 rounded-xl bg-slate-50">
+                    <h1 class="text-center text-[16pt] font-bold text-blue-800 mb-4 uppercase" contenteditable="true">LEMBAR KERJA PESERTA DIDIK (LKPD)</h1>
+                    <div class="flex justify-between border-b border-black pb-2 mb-4 font-bold" contenteditable="true">
+                        <span>Nama : .......................</span>
+                        <span>Kelas: ${id.kelas}/${id.rombel}</span>
+                        <span>Nilai : .....</span>
+                    </div>
+                    <p class="font-bold text-blue-700">Mata Pelajaran: ${id.mapel}</p>
+                    <p class="font-bold text-blue-700 mb-4">Materi: ${elemen}</p>
+                    <div contenteditable="true">
+                        <p class="font-bold text-blue-800">A. Tujuan:</p>
+                        <ul class="list-disc pl-5 mb-4 text-sm font-semibold">${tpList}</ul>
+                        <p class="font-bold text-blue-800">B. Petunjuk:</p>
+                        <ol class="list-decimal pl-5 mb-6 text-sm">
+                            <li>Berdoalah terlebih dahulu.</li>
+                            <li>Diskusikan dengan kelompokmu.</li>
+                            <li>Tuliskan hasil diskusi dengan rapi.</li>
+                        </ol>
+                        <p class="font-bold text-blue-800 border-b-2 pb-2">C. Kolom Pengerjaan:</p>
+                        <div class="mt-4 space-y-6">
+                            <div><p class="font-bold text-sm mb-1">1. Jelaskan pemahaman utamamu!</p><div class="border border-slate-400 bg-white p-4 rounded-lg min-h-[100px]"></div></div>
+                            <div><p class="font-bold text-sm mb-1">2. Berikan contoh penerapannya!</p><div class="border border-slate-400 bg-white p-4 rounded-lg min-h-[100px]"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    generateJurnal() {
+        const id = this.getIdentitas();
+        const data = cpData[id.mapel]?.[id.kelas]?.[id.semester] || {};
+        const hariTarget = parseInt(document.getElementById('select-hari').value);
+        const { activeDates } = CalendarSystem.generatePromesGrid(id.semester, id.tahun, hariTarget);
+        
+        let rows = '';
+        let idx = 0;
+        let currentElemen = '';
+        
+        Object.entries(data).forEach(([elemen, { tps }]) => {
+            currentElemen = elemen;
+            tps.forEach((tp, i) => {
+                if (idx < activeDates.length) {
+                    const dt = activeDates[idx];
+                    const tgl = `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth() + 1).padStart(2, '0')}/${dt.getFullYear()}`;
+                    rows += `<tr>
+                        <td class="text-center font-bold">${tgl}</td>
+                        <td class="text-center" contenteditable="true">${id.kelas}/${id.rombel}</td>
+                        <td contenteditable="true">${currentElemen}</td>
+                        <td contenteditable="true">${tp.tp}</td>
+                        <td contenteditable="true" class="text-center text-blue-700 font-bold">Hadir Semua</td>
+                        <td contenteditable="true">Berjalan Lancar</td>
+                    </tr>`;
+                    idx++;
+                }
+            });
+        });
+        
+        document.getElementById('doc-container').innerHTML = `
+            <div class="paper-preview landscape">
+                <h1 class="text-center text-[14pt] font-bold mb-5 uppercase" contenteditable="true">JURNAL PELAKSANAAN PEMBELAJARAN<br>SEMESTER ${id.semester.toUpperCase()} T.A. ${id.thn}</h1>
+                <table class="doc-table text-sm">
+                    <thead><tr><th width="10%">Tanggal</th><th width="10%">Kelas</th><th width="15%">Materi</th><th width="40%">Tujuan Pembelajaran</th><th width="10%">Kehadiran</th><th width="15%">Keterangan</th></tr></thead>
+                    <tbody>${rows || '<tr><td colspan="6" class="text-center">Tidak ada data</td></tr>'}</tbody>
+                </table>
+            </div>
+        `;
+    },
+
+    generateAbsensi() {
+        const id = this.getIdentitas();
+        const siswa = ProfileSystem.getSiswa();
+        const hariTarget = parseInt(document.getElementById('select-hari').value);
+        const { activeDates } = CalendarSystem.generatePromesGrid(id.semester, id.tahun, hariTarget);
+        
+        let thead = '<th width="3%">No</th><th width="25%" class="text-left">Nama Siswa</th>';
+        activeDates.slice(0, 16).forEach(dt => {
+            thead += `<th>${dt.getDate()}</th>`;
+        });
+        thead += '<th class="bg-blue-50">H</th><th class="bg-blue-50">S</th><th class="bg-blue-50">I</th><th class="bg-blue-50">A</th>';
+        
+        let tbody = '';
+        siswa.forEach((nama, i) => {
+            tbody += `<tr><td>${i + 1}</td><td class="text-left">${nama}</td>`;
+            for (let j = 0; j < Math.min(activeDates.length, 16); j++) {
+                tbody += `<td class="text-center font-bold text-blue-600" contenteditable="true">H</td>`;
+            }
+            tbody += `<td class="font-bold bg-slate-50">${Math.min(activeDates.length, 16)}</td><td class="font-bold bg-slate-50">0</td><td class="font-bold bg-slate-50">0</td><td class="font-bold bg-slate-50">0</td></tr>`;
+        });
+        
+        document.getElementById('doc-container').innerHTML = `
+            <div class="paper-preview landscape">
+                <h1 class="text-center text-[14pt] font-bold mb-5 uppercase" contenteditable="true">DAFTAR HADIR PESERTA DIDIK<br>SEMESTER ${id.semester.toUpperCase()}</h1>
+                <table class="doc-table text-[9pt] text-center">
+                    <thead><tr>${thead}</tr></thead>
+                    <tbody>${tbody}</tbody>
+                </table>
+            </div>
+        `;
+    },
+
+    generateKKTP() {
+        const id = this.getIdentitas();
+        const data = cpData[id.mapel]?.[id.kelas]?.[id.semester] || {};
+        const siswa = ProfileSystem.getSiswa();
+        
+        let kktpRows = '';
+        let no = 1;
+        
+        Object.entries(data).forEach(([elemen, { tps }]) => {
+            tps.forEach((tp, i) => {
+                kktpRows += `<tr>`;
+                if (i === 0) kktpRows += `<td rowspan="${tps.length}" class="text-center align-middle">${no}</td>`;
+                kktpRows += `<td contenteditable="true">${tp.tp}</td>
+                    <td class="text-center bg-yellow-50 font-bold" contenteditable="true">75</td>
+                    <td class="text-center bg-yellow-50 font-bold" contenteditable="true">75</td>
+                    <td class="text-center bg-yellow-50 font-bold" contenteditable="true">75</td>
+                    <td class="text-center bg-blue-100 font-bold text-blue-800">75</td>
+                </tr>`;
+            });
+            no++;
+        });
+        
+        let nilaiRows = '';
+        siswa.forEach((nama, i) => {
+            nilaiRows += `<tr>
+                <td>${i + 1}</td>
+                <td class="text-left" contenteditable="true">${nama}</td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+                <td class="bg-slate-50 font-bold" contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td>
+                <td class="font-bold bg-blue-50 text-blue-800" contenteditable="true"></td>
+            </tr>`;
+        });
+        
+        document.getElementById('doc-container').innerHTML = `
+            <div class="paper-preview portrait">
+                <h1 class="text-center text-[14pt] font-bold mb-5 uppercase" contenteditable="true">KRITERIA KETERCAPAIAN TUJUAN PEMBELAJARAN (KKTP)</h1>
+                <table class="mb-4 font-bold text-[11pt] w-full" contenteditable="true">
+                    <tr><td width="150">Mata Pelajaran</td><td>: ${id.mapel}</td></tr>
+                    <tr><td>Kelas/Semester</td><td>: ${id.kelas} / ${id.semester}</td></tr>
+                </table>
+                <table class="doc-table">
+                    <thead>
+                        <tr><th rowspan="2" width="5%">No</th><th rowspan="2" width="45%">Tujuan Pembelajaran</th><th colspan="3">Kriteria</th><th rowspan="2" width="10%">Nilai</th></tr>
+                        <tr><th class="text-[8pt]">Kompleksitas</th><th class="text-[8pt]">Daya Dukung</th><th class="text-[8pt]">Intake</th></tr>
+                    </thead>
+                    <tbody>${kktpRows}</tbody>
+                </table>
+            </div>
+            <div class="paper-preview landscape mt-10">
+                <h1 class="text-center text-[14pt] font-bold mb-5 uppercase" contenteditable="true">DAFTAR NILAI SUMATIF & FORMATIF</h1>
+                <table class="doc-table text-[9pt] text-center">
+                    <thead>
+                        <tr><th width="3%" rowspan="2">No</th><th width="20%" rowspan="2" class="text-left">Nama Siswa</th><th colspan="5">Nilai Sumatif</th><th width="6%" rowspan="2">STS</th><th width="6%" rowspan="2">SAS</th><th width="8%" rowspan="2" class="bg-blue-100">Nilai Rapor</th></tr>
+                        <tr><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>Rata2</th></tr>
+                    </thead>
+                    <tbody>${nilaiRows}</tbody>
+                </table>
+            </div>
+        `;
     }
 };
 
-// =====================================================
-// Placeholder Systems (implement as needed)
-// =====================================================
-const CurriculumSystem = { init() {}, data: {}, faseMap: {} };
-const CalendarSystem = { init() {}, generateEvents() {}, eventList: [] };
-const ProfileSystem = { loadProfile() {}, saveStudents() {} };
-const SchoolSystem = { loadSchool() {}, schoolData: {} };
-const BankSoalSystem = { init() {} };
-const DocumentEngine = { init() {}, generate() {} };
-const DashboardSystem = { init() {} };
-const SuperAdminSystem = { init() {} };
+// ========== SUPER ADMIN SYSTEM ==========
+const SuperAdminSystem = {
+    async load() {
+        if (userData.role !== 'super_admin') return;
+        
+        // Load settings
+        const settingsDoc = await db.collection('settings').doc('subscription').get();
+        if (settingsDoc.exists) {
+            const data = settingsDoc.data();
+            document.getElementById('admin-wa').value = data.whatsappUpgrade || '';
+            
+            // Render premium NPSN list
+            let npsnHtml = '';
+            (data.premiumNPSN || []).forEach(npsn => {
+                npsnHtml += `<div class="flex items-center justify-between bg-slate-800 px-3 py-2 rounded-lg">
+                    <span class="font-mono">${npsn}</span>
+                    <button onclick="SuperAdminSystem.removePremiumNPSN('${npsn}')" class="text-red-400 hover:text-red-300">✕</button>
+                </div>`;
+            });
+            document.getElementById('list-premium-npsn').innerHTML = npsnHtml || '<p class="text-slate-500 text-sm">Belum ada NPSN premium</p>';
+        }
+        
+        // Load stats
+        const usersSnap = await db.collection('users').get();
+        document.getElementById('admin-total-users').textContent = usersSnap.size;
+        
+        const schools = new Set();
+        let premiumCount = 0;
+        let userListHtml = '';
+        
+        usersSnap.forEach(doc => {
+            const u = doc.data();
+            if (u.npsn) schools.add(u.npsn);
+            if (u.isPremium) premiumCount++;
+            
+            userListHtml += `<div class="flex items-center gap-3 p-3 bg-slate-800 rounded-xl">
+                <img src="${u.photo || ''}" class="w-10 h-10 rounded-full bg-slate-700">
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold truncate">${u.nama || 'Tanpa Nama'}</p>
+                    <p class="text-xs text-slate-400 truncate">${u.email} | NPSN: ${u.npsn || '-'}</p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="text-xs px-2 py-1 rounded ${u.isPremium ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-700 text-slate-400'}">${u.isPremium ? 'PRO' : 'FREE'}</span>
+                    <span class="text-xs px-2 py-1 rounded ${u.role === 'super_admin' ? 'bg-purple-500/20 text-purple-400' : 'bg-slate-700 text-slate-400'}">${u.role || 'guru'}</span>
+                </div>
+            </div>`;
+        });
+        
+        document.getElementById('admin-total-schools').textContent = schools.size;
+        document.getElementById('admin-total-premium').textContent = premiumCount;
+        document.getElementById('admin-user-list').innerHTML = userListHtml || '<p class="text-slate-400">Belum ada pengguna</p>';
+    },
 
-// =====================================================
-// INITIALIZATION
-// =====================================================
-document.addEventListener('DOMContentLoaded', () => {
-    AppState.init();
-    AuthSystem.init();
-    SubscriptionSystem.init();
+    async saveSettings() {
+        const wa = document.getElementById('admin-wa').value.trim();
+        
+        await db.collection('settings').doc('subscription').set({
+            whatsappUpgrade: wa
+        }, { merge: true });
+        
+        alert('✅ Pengaturan berhasil disimpan!');
+    },
+
+    async addPremiumNPSN() {
+        const npsn = document.getElementById('admin-add-npsn').value.trim();
+        if (npsn.length !== 8) {
+            alert('NPSN harus 8 digit!');
+            return;
+        }
+        
+        const settingsRef = db.collection('settings').doc('subscription');
+        const doc = await settingsRef.get();
+        const currentList = doc.exists ? (doc.data().premiumNPSN || []) : [];
+        
+        if (!currentList.includes(npsn)) {
+            currentList.push(npsn);
+            await settingsRef.set({ premiumNPSN: currentList }, { merge: true });
+            
+            // Update all users with this NPSN to premium
+            const usersSnap = await db.collection('users').where('npsn', '==', npsn).get();
+            const batch = db.batch();
+            usersSnap.forEach(userDoc => {
+                batch.update(userDoc.ref, { isPremium: true });
+            });
+            await batch.commit();
+        }
+        
+        document.getElementById('admin-add-npsn').value = '';
+        this.load();
+        alert(`✅ NPSN ${npsn} berhasil ditambahkan sebagai premium!`);
+    },
+
+    async removePremiumNPSN(npsn) {
+        if (!confirm(`Hapus NPSN ${npsn} dari daftar premium?`)) return;
+        
+        const settingsRef = db.collection('settings').doc('subscription');
+        const doc = await settingsRef.get();
+        let currentList = doc.exists ? (doc.data().premiumNPSN || []) : [];
+        
+        currentList = currentList.filter(n => n !== npsn);
+        await settingsRef.set({ premiumNPSN: currentList }, { merge: true });
+        
+        // Update all users with this NPSN to non-premium (except super admin)
+        const usersSnap = await db.collection('users').where('npsn', '==', npsn).get();
+        const batch = db.batch();
+        usersSnap.forEach(userDoc => {
+            const u = userDoc.data();
+            if (u.role !== 'super_admin') {
+                batch.update(userDoc.ref, { isPremium: false });
+            }
+        });
+        await batch.commit();
+        
+        this.load();
+    },
+
+    async setUserRole(userId, role) {
+        await db.collection('users').doc(userId).update({ role });
+        this.load();
+        alert('✅ Role berhasil diubah!');
+    },
+
+    async togglePremium(userId, isPremium) {
+        await db.collection('users').doc(userId).update({ isPremium: !isPremium });
+        this.load();
+    }
+};
+
+// ========== HELPER FUNCTIONS ==========
+function showAuthModal(type) {
+    document.getElementById('auth-modal').classList.remove('hidden');
+    document.getElementById('auth-modal').classList.add('flex');
+    document.getElementById('auth-error').classList.add('hidden');
+    document.getElementById('auth-loading').classList.add('hidden');
+    
+    if (type === 'login') {
+        document.getElementById('auth-title').textContent = 'Masuk ke Akun';
+        document.getElementById('auth-subtitle').textContent = 'Gunakan akun Google untuk melanjutkan';
+    } else {
+        document.getElementById('auth-title').textContent = 'Daftar Akun Baru';
+        document.getElementById('auth-subtitle').textContent = 'Daftar gratis menggunakan akun Google';
+    }
+}
+
+function closeAuthModal() {
+    document.getElementById('auth-modal').classList.add('hidden');
+    document.getElementById('auth-modal').classList.remove('flex');
+}
+
+async function showUpgradeModal() {
+    document.getElementById('upgrade-modal').classList.remove('hidden');
+    document.getElementById('upgrade-modal').classList.add('flex');
+    
+    // Get WA number from settings
+    try {
+        const settingsDoc = await db.collection('settings').doc('subscription').get();
+        if (settingsDoc.exists) {
+            const wa = settingsDoc.data().whatsappUpgrade || '628123456789';
+            const message = encodeURIComponent(`Halo, saya ingin upgrade ke paket PRO Admin Guru Super App.\n\nEmail: ${currentUser?.email || '-'}\nNama: ${userData?.nama || '-'}\nNPSN: ${userData?.npsn || '-'}`);
+            document.getElementById('wa-upgrade-link').href = `https://wa.me/${wa}?text=${message}`;
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+function closeUpgradeModal() {
+    document.getElementById('upgrade-modal').classList.add('hidden');
+    document.getElementById('upgrade-modal').classList.remove('flex');
+}
+
+function closeAddSoalModal() {
+    document.getElementById('modal-add-soal').classList.add('hidden');
+    document.getElementById('modal-add-soal').classList.remove('flex');
+    // Clear form
+    document.getElementById('soal-pertanyaan').value = '';
+    document.getElementById('soal-jawaban').value = '';
+    document.getElementById('opsi-a').value = '';
+    document.getElementById('opsi-b').value = '';
+    document.getElementById('opsi-c').value = '';
+    document.getElementById('opsi-d').value = '';
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    
+    if (sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+    } else {
+        closeSidebar();
+    }
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    
+    if (window.innerWidth < 1024) {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+    }
+}
+
+// ========== EVENT LISTENERS ==========
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'auth-modal') closeAuthModal();
+    if (e.target.id === 'upgrade-modal') closeUpgradeModal();
+    if (e.target.id === 'modal-add-soal') closeAddSoalModal();
 });
 
-// Close modals
-document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal-overlay') && e.target.id !== 'npsn-modal') {
-        e.target.style.display = 'none';
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeAuthModal();
+        closeUpgradeModal();
+        closeAddSoalModal();
     }
 });
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    if (window.innerWidth >= 1024) {
+        document.getElementById('sidebar').classList.remove('-translate-x-full');
+        document.getElementById('sidebar-overlay').classList.add('hidden');
+    }
+});
+
+// Soal type change handler
+document.getElementById('soal-tipe')?.addEventListener('change', function() {
+    const opsiPg = document.getElementById('opsi-pg');
+    if (this.value === 'pg') {
+        opsiPg.classList.remove('hidden');
+    } else {
+        opsiPg.classList.add('hidden');
+    }
+});
+
+// ========== INITIALIZATION ==========
+document.addEventListener('DOMContentLoaded', () => {
+    // Try to load cached CP data
+    const cachedCP = localStorage.getItem('agsa_cp_cache');
+    if (cachedCP) {
+        try {
+            const parsed = JSON.parse(cachedCP);
+            cpData = parsed.cpData || {};
+            faseMap = parsed.faseMap || {};
+        } catch (e) {
+            console.error('Failed to parse cached CP:', e);
+        }
+    }
+    
+    // Initialize Auth System
+    AuthSystem.init();
+});
+
+// ========== SERVICE WORKER REGISTRATION (PWA Ready) ==========
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // PWA ready - service worker can be registered here
+    });
+}
 </script>
+
 </body>
 </html>
